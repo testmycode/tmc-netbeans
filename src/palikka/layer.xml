@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
+<filesystem>
+
+<folder name="Menu">
+           <file name="palikka-ui-menu-MainMenu.instance">
+                <attr name="position" intvalue="1301"/>
+            </file>    
+</folder>
+</filesystem>

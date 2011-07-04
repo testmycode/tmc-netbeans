@@ -1,0 +1,26 @@
+<?xml version="1.0"?>
+<Settings>
+    <!-- if you need expand settings file see palikka.settings.Setting.java -->   
+    
+    
+    <studentID value=""/>
+    
+    <!-- 
+    host address must contain filename of course list.    
+    example: http://www.server.com/courses.json 
+    -->
+    <hostAddress value="http://users:44443/courses.json"/> 
+    <defaultFolder value=""/>
+    <selectedCourse value=""/>
+    
+    <!--
+    All timeout tags defines the socket timeout in milliseconds.
+    A timeout value of zero is interpreted as an infinite timeout.        
+    Timeout means a maximum period inactivity between two consecutive data packets. 
+    
+    -->
+    <courseListDownloadTimeout value="20000"/>
+    <exerciseListDownloadTimeout value="20000"/>
+    <exerciseDownloadTimeout value="60000"/>
+    <exerciseUploadTimeout value="120000"/>
+</Settings>
