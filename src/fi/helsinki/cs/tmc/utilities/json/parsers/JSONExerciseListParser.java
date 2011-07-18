@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.utilities.json.parsers;
 
 import com.google.gson.Gson;
@@ -17,17 +13,12 @@ import java.util.Date;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-/**
- *
- * @author jmturpei
- */
+
+
 public class JSONExerciseListParser {
 
     /**
-     * Method parses an ExerciseCollection from json and course parameters 
-     * @param json String 
-     * @param course Course
-     * @return exerciseCollection ExerciseCollection
+     * Parses a collection of exercises and attaches them to a course.
      */
     public static ExerciseCollection parseJson(String json, Course course) {
         if (json == null) {
@@ -45,22 +36,6 @@ public class JSONExerciseListParser {
         }
 
         return exerciseCollection;
-    }
-
-    /**
-     * Method checks if String json parameter is in proper json form 
-     * @param json String
-     * @param course Course
-     * @return true or false boolean
-     */
-    @Deprecated
-    public static boolean isJsonValid(String json, Course course) {
-        try {
-            parseJson(json, course);
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
     }
 
     private static class CustomDateDeserializer implements JsonDeserializer<Date> {

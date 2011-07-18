@@ -24,17 +24,4 @@ public class JSONCourseListParser {
         
         return courseCollection;
     }
-    
-    /**
-     * Method checks if String json parameter is in proper json form 
-     */
-    @Deprecated
-    public static boolean isValidJson(String json) {
-        try {
-            parseJson(json);
-        } catch (Exception ex) {
-            return false;
-        }
-        return true;
-    }
 }
