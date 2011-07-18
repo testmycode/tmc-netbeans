@@ -1,17 +1,16 @@
 package fi.helsinki.cs.tmc.data;
 
 import java.util.ArrayList;
+import java.util.Collection;
 
 /**
- * A collection of Exercises.
- * @author jmturpei
+ * A list of Exercises associated with a course.
  */
 public class ExerciseCollection extends ArrayList<Exercise> {
 
     /**
      * Course that owns this collection of exercises.
      */
-    @Deprecated
     private Course course;
 
     public ExerciseCollection(Course course) {
@@ -20,7 +19,11 @@ public class ExerciseCollection extends ArrayList<Exercise> {
         }
         this.course = course;
     }
-
+    
+    public Course getCourse() {
+        return this.course;
+    }
+    
     /**
      * Returns the exercise with the given name or null if not found.
      */
@@ -40,15 +43,37 @@ public class ExerciseCollection extends ArrayList<Exercise> {
 
     @Override
     public boolean add(Exercise e) {
-        processItem(e); //TODO: get rid of this if possible
+        processNewExercise(e);
         return super.add(e);
     }
+
+    @Override
+    public void add(int index, Exercise element) {
+        processNewExercise(element);
+        super.add(index, element);
+    }
+    
+    @Override
+    public boolean addAll(Collection<? extends Exercise> c) {
+        for (Exercise e : c) {
+            processNewExercise(e);
+        }
+        return super.addAll(c);
+    }
+
+    @Override
+    public boolean addAll(int index, Collection<? extends Exercise> c) {
+        for (Exercise e : c) {
+            processNewExercise(e);
+        }
+        return super.addAll(index, c);
+    }
+    
     /**
      * Changes the given exercise's Course to this collection's course.
      * @param item 
      */
-    @Deprecated
-    protected void processItem(Exercise item) {
+    protected void processNewExercise(Exercise item) {
         if (item == null) {
             throw new NullPointerException("exercise was null at ExerciseCollection.processItem");
         }
@@ -58,10 +83,5 @@ public class ExerciseCollection extends ArrayList<Exercise> {
         }
 
         item.setCourse(course);
-    }
-
-    @Deprecated // TODO: Course to point to this, not the other way around
-    public Course getCourse() {
-        return this.course;
     }
 }

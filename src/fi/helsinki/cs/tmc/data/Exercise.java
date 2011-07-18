@@ -5,26 +5,27 @@ import java.io.Serializable;
 import java.util.Date;
 
 /**
- * A single exercise holds various information concerning an exercise.
- * Such as the download address and name.
- * @author kkaltiai
+ * A single exercise holds various information concerning an exercise,
+ * such as the name and download address.
  */
 public class Exercise implements Serializable {
 
     private String name;
     
     /**
-     * The address from where this exercise can be downloaded from.
+     * The URL this exercise can be downloaded from.
      */
     @SerializedName("exercise_file")
     private String downloadAddress;
     
     /**
-     * The address to where this exercise should be returned for review.
+     * The URL where this exercise should be posted for review.
      */
     @SerializedName("return_address")
     private String returnAddress;
+    
     private Date deadline;
+    
     private Course course;
 
     public Exercise() {
