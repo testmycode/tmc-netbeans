@@ -4,12 +4,10 @@ import javax.swing.JButton;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 
 /**
- * An interface that the plugin's panels use to invoke certain actions.
- * @author jmturpei
+ * An interface that the plugin's UI uses to invoke actions.
  */
 public interface IController {
-
-    void send(JButton source);
+    void sendExerciseForReview(JButton source);
 
     void runTests();
 

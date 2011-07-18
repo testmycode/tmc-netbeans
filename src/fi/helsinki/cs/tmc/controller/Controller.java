@@ -1,90 +1,92 @@
 package fi.helsinki.cs.tmc.controller;
 
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.Settings;
+import fi.helsinki.cs.tmc.ui.swingPanels.PreferencesPanel;
+import fi.helsinki.cs.tmc.utilities.AdvancedDownloadFeature;
+import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
+import fi.helsinki.cs.tmc.utilities.FolderHelper;
+import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ProjectHandler;
+import fi.helsinki.cs.tmc.utilities.exercise.ExerciseDownloader;
+import fi.helsinki.cs.tmc.utilities.exercise.ExerciseFilter;
+import fi.helsinki.cs.tmc.utilities.exercise.ExerciseLoader;
+import fi.helsinki.cs.tmc.utilities.exercise.ExerciseStatus;
+import fi.helsinki.cs.tmc.utilities.exercise.ExerciseUploader;
+import fi.helsinki.cs.tmc.utilities.exercise.IExerciseDownloadListener;
+import fi.helsinki.cs.tmc.utilities.exercise.IExerciseUploadListener;
+import fi.helsinki.cs.tmc.utilities.exercise.ITestResultListener;
+import fi.helsinki.cs.tmc.utilities.exercise.TestResultHandler;
+import fi.helsinki.cs.tmc.utilities.json.updaters.IExerciseListUpdateListener;
+import fi.helsinki.cs.tmc.utilities.json.updaters.JSONExerciseListUpdater;
+import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
+import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
+
 import javax.swing.JButton;
 import javax.swing.JOptionPane;
 
-
-import fi.helsinki.cs.tmc.settings.PluginSettings;
-import org.openide.DialogDescriptor;
-import fi.helsinki.cs.tmc.ui.swingPanels.PreferencesPanel;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ActionProvider;
+import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.LifecycleManager;
 import org.openide.NotifyDescriptor;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.settings.Settings;
-import fi.helsinki.cs.tmc.utilities.AdvancedDownloadFeature;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseFilter;
 
-
-import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
-import fi.helsinki.cs.tmc.utilities.FolderHelper;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseDownloader;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseUploader;
-import fi.helsinki.cs.tmc.utilities.exercise.IExerciseDownloadListener;
-import fi.helsinki.cs.tmc.utilities.json.updaters.IExerciseListUpdateListener;
-import fi.helsinki.cs.tmc.utilities.exercise.IExerciseUploadListener;
-import fi.helsinki.cs.tmc.utilities.json.updaters.JSONExerciseListUpdater;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseLoader;
-import fi.helsinki.cs.tmc.utilities.ProjectHandler;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseStatus;
-import fi.helsinki.cs.tmc.utilities.exercise.ITestResultListener;
-import fi.helsinki.cs.tmc.utilities.exercise.TestResultHandler;
-import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
-import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
-
-/**
- *
- * @author jmturpei
- */
-public class Controller implements IController, IExerciseListUpdateListener, IExerciseDownloadListener, IExerciseUploadListener, ITestResultListener {
+public class Controller implements
+        IController,
+        IExerciseListUpdateListener,
+        IExerciseDownloadListener,
+        IExerciseUploadListener,
+        ITestResultListener {
 
     /**
-     * A reference to the default controller.
+     * The singleton default controller.
      */
     private static Controller defaultController;
+    
     /**
-     * A reference to exerciseDownloader to keep it alive
+     * The active exercise downloader. Null if no download active.
      */
     private ExerciseDownloader exerciseDownloader;
+    
     /**
-     * A reference to exerciseUploader to keep it alive
+     * The active exercise uploader. Null if no upload active.
      */
     private ExerciseUploader uploader;
+    
     /**
-     * A reference to JSONExerciseListUpdater to keep it alive
+     * The active exercise list downloader. Null if no download active.
      */
     private JSONExerciseListUpdater exerciseListDownloader;
+    
+    
     private JButton sendButton;
     private TestResultHandler testHandler;
 
     /**
      * Returns the default instance of the controller.
-     * @return 
      */
     public static IController getInstance() {
         if (defaultController == null) {
             defaultController = new Controller();
-
         }
 
         return defaultController;
     }
 
     /**
-     * This method is invoked by getInstance() when no default controller is available.
+     * Private singleton constructor.
      */
     private Controller() {
         uploader = null;
@@ -96,8 +98,6 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
      */
     @Override
     public void showPreferences() {
-
-
         Settings settings = PluginSettings.getSettings();
 
         PreferencesPanel panel = new PreferencesPanel(settings);
@@ -130,19 +130,15 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
     }
 
     /**
-     * Method dowloads exercises that haven't expired and haven't already been downloaded.
-     * It opens these exercises and the exercises that you have already downloaded that haven't 
-     * expired onto project window.
+     * Downloads exercises that haven't expired and haven't already been downloaded.
+     * It opens as projects newly and previously downloaded exercises that
+     * aren't yet expired.
      */
     @Override
     public void startExerciseOpening() {
-
-
-
         Course course = CourseAndExerciseInfo.getCurrentCourse();
 
         if (course != null) {
-
             try {
                 if (exerciseListDownloader != null) {
                     return;
@@ -159,17 +155,14 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
             ModalDialogDisplayer.getDefault().displayError("No course selected. Please select course from preferences");
 
         }
-
     }
 
     /**
      * Download all the exercises in the given ExerciseCollection regardless
      * of expiration dates and such.
-     * @param collection 
      */
     @Override
     public void advancedDownload(ExerciseCollection collection) {
-
         if (exerciseDownloader != null) {
             ModalDialogDisplayer.getDefault().displayError("Files are still downloading. Try again later.");
             return;
@@ -214,12 +207,10 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
      * are downloaded.
      */
     private void showAllExercises() {
-
         ExerciseCollection exercises = CourseAndExerciseInfo.getCurrentExerciseList();
 
         if (exercises == null) {
             ModalDialogDisplayer.getDefault().displayError("cannot find exercise list. Unable to open any exercise");
-
             return;
         }
 
@@ -229,13 +220,11 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
         ExerciseCollection localExercises = ExerciseFilter.getLocal(nonExpiredExercises);
         ExerciseCollection downloadableExercises = ExerciseFilter.getDownloadable(nonExpiredExercises);
 
-
         try {
             ExerciseLoader.openAll(localExercises);
         } catch (Exception e) {
             ModalDialogDisplayer.getDefault().displayError(e);
         }
-
 
         if (exerciseDownloader != null) {
             return; // one loader is already running. We don't want another.
@@ -249,16 +238,14 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
         }
     }
 
+    
     /* Exercise download */
     /**
      * Called by the ExerciseDownloader when it has finished downloading an
-     * exercise. This method then unzips the exercise and opens it.
-     * @param downloadedExercise
-     * @param fileContent 
+     * exercise. It unzips the exercise and opens it as a project.
      */
     @Override
-    public void ExerciseDownloadCompleted(Exercise downloadedExercise, InputStream fileContent) {
-
+    public void exerciseDownloadCompleted(Exercise downloadedExercise, InputStream fileContent) {
         File oldSources = FolderHelper.searchSrcFolder(downloadedExercise);
 
         if (oldSources != null) {
@@ -271,43 +258,40 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
                 return;
             }
         }
-
-
-
-        Unzipper uz = new Unzipper();
+        
+        Unzipper unzipper = new Unzipper();
 
         try {
-            uz.unZip(fileContent, FolderHelper.generatePath(downloadedExercise).getAbsolutePath());
+            unzipper.unZip(fileContent, FolderHelper.generatePath(downloadedExercise).getAbsolutePath());
             ExerciseLoader.open(downloadedExercise);
         } catch (Exception e) {
             ModalDialogDisplayer.getDefault().displayError(e);
         }
 
-
         ExerciseStatus.resetStatus(downloadedExercise);
     }
 
     @Override
-    public void ExerciseDownloadFailed(String errorMsg) {
+    public void exerciseDownloadFailed(String errorMsg) {
         ModalDialogDisplayer.getDefault().displayError("download failed: " + errorMsg);
     }
 
     @Override
-    public void ExerciseDownloadCancelledByUser(Exercise cancelledExercise) {
+    public void exerciseDownloadCancelledByUser(Exercise cancelledExercise) {
         ModalDialogDisplayer.getDefault().displayError("download cancelled: " + cancelledExercise.getName());
     }
 
     @Override
-    public void ExercisedownloaderCompleted() {
+    public void exerciseDownloadCompleted() {
         exerciseDownloader = null;
     }
 
+    
     /**
-     * This method is invoked to send an exercise set back to the server for review.
+     * Sends the current main project exercise back to the server for review.
      */
     @Override
-    public void send(final JButton source) {
-
+    public void sendExerciseForReview(final JButton source) {
         String mainProjectPath = ProjectHandler.getMainProjectPath();
         if (!ProjectHandler.isExercise(mainProjectPath)) {
             ModalDialogDisplayer.getDefault().displayError("Main project isn't set or it isn't any known exercise. Please set exercise as main project and try again.");
@@ -335,19 +319,16 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
     }
 
     /**
-     * This method is used to run all tests in the current main project.
+     * Runs all tests in the current main project.
      */
     @Override
     public void runTests() {
-
         Project project = OpenProjects.getDefault().getMainProject();
-
 
         if (project != null) {
             ActionProvider a = project.getLookup().lookup(ActionProvider.class);
 
             a.invokeAction(ActionProvider.COMMAND_TEST, project.getLookup());
-
         } else {
             ModalDialogDisplayer.getDefault().displayError("Main project isn't set. Please set exercise as main project and try again.");
 
@@ -355,16 +336,15 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
 
     }
 
+    
     /* Exercise upload */
     /**
      * Called by the ExerciseUploader when an exercise has been uploaded.
-     * This method then extracts the link to the testresults and gives it to
+     * This method then extracts the link to the test results and gives it to
      * testResultHandler.
-     * @param exercise
-     * @param response 
      */
     @Override
-    public void ExerciseUploadCompleted(Exercise exercise, InputStream response) {
+    public void exerciseUploadCompleted(Exercise exercise, InputStream response) {
         this.sendButton.setEnabled(true);
         this.sendButton = null;
         this.uploader = null;
@@ -389,7 +369,7 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
     }
 
     @Override
-    public void ExerciseUploadFailed(String errorMessage) {
+    public void exerciseUploadFailed(String errorMessage) {
         this.sendButton.setEnabled(true);
         this.sendButton = null;
         this.uploader = null;
@@ -397,11 +377,10 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
         ModalDialogDisplayer.getDefault().displayError(errorMessage);
     }
 
+    
     /* Test results */
     @Override
     public void runComplete(TestResultHandler handler) {
-
-
         if (handler.getNumberOfFailures() == 0) {
             ModalDialogDisplayer.getDefault().displayHappyNotification("File upload complete and all tests passed!", "Well done!");
 
@@ -410,8 +389,6 @@ public class Controller implements IController, IExerciseListUpdateListener, IEx
         }
 
         this.testHandler = null;
-
-
     }
 
     @Override

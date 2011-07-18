@@ -9,9 +9,9 @@ import fi.helsinki.cs.tmc.data.Exercise;
  */
 public interface IExerciseDownloadListener {
     
-    public void ExerciseDownloadCompleted(Exercise downloadedExercise, InputStream fileContent);
-    public void ExerciseDownloadFailed(String errorMsg);
-    public void ExerciseDownloadCancelledByUser(Exercise cancelledExercise);     
-    public void ExercisedownloaderCompleted();
+    public void exerciseDownloadCompleted(Exercise downloadedExercise, InputStream fileContent);
+    public void exerciseDownloadFailed(String errorMsg);
+    public void exerciseDownloadCancelledByUser(Exercise cancelledExercise);     
+    public void exerciseDownloadCompleted();
     
 }

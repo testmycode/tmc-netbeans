@@ -22,7 +22,7 @@ public class TestAndSendPanel extends javax.swing.JPanel {
 
             @Override
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                controller.send(jButton1);
+                controller.sendExerciseForReview(jButton1);
             }
         });
 

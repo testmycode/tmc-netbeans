@@ -75,7 +75,7 @@ public class ExerciseDownloader implements IDownloadListener {
      */
     private void scheduleNextdownload() {
         if (exerciseCollection.isEmpty() || cancelAll) {
-            listener.ExercisedownloaderCompleted();
+            listener.exerciseDownloadCompleted();
             return;
         }
 
@@ -90,7 +90,7 @@ public class ExerciseDownloader implements IDownloadListener {
             currentDownloader.download("Downloading exercise " + currentExercise.getName());
 
         } catch (Exception e) {
-            listener.ExerciseDownloadFailed("internal error. Failed to create FileDownloaderAsync " + e.getMessage());
+            listener.exerciseDownloadFailed("internal error. Failed to create FileDownloaderAsync " + e.getMessage());
         }
 
 
@@ -106,7 +106,7 @@ public class ExerciseDownloader implements IDownloadListener {
 
         Exercise downloadedExercise = currentExercise;
 
-        listener.ExerciseDownloadCompleted(downloadedExercise, source.getFileContent());
+        listener.exerciseDownloadCompleted(downloadedExercise, source.getFileContent());
 
         scheduleNextdownload();
     }
@@ -120,7 +120,7 @@ public class ExerciseDownloader implements IDownloadListener {
     public void downloadFailed(FileDownloaderAsync source) {
 
 
-        listener.ExerciseDownloadFailed(source.getErrorMsg());
+        listener.exerciseDownloadFailed(source.getErrorMsg());
 
         scheduleNextdownload();
 
@@ -136,7 +136,7 @@ public class ExerciseDownloader implements IDownloadListener {
 
         Exercise cancelledExercise = currentExercise;
 
-        listener.ExerciseDownloadCancelledByUser(cancelledExercise);
+        listener.exerciseDownloadCancelledByUser(cancelledExercise);
 
         scheduleNextdownload();
     }

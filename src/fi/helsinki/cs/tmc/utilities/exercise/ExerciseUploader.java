@@ -43,7 +43,7 @@ public class ExerciseUploader implements IUploadListener {
         Settings settings = PluginSettings.getSettings();
 
         if (!settings.isValid()) {
-            listener.ExerciseUploadFailed("Student id not set. Check preferences before sending.");
+            listener.exerciseUploadFailed("Student id not set. Check preferences before sending.");
             return;
         }
 
@@ -51,7 +51,7 @@ public class ExerciseUploader implements IUploadListener {
             File path = FolderHelper.searchSrcFolder(exercise);
 
             if (path == null) {
-                listener.ExerciseUploadFailed("Couldn't locate source folder. Unable to send exercise");
+                listener.exerciseUploadFailed("Couldn't locate source folder. Unable to send exercise");
                 return;
             }
 
@@ -64,7 +64,7 @@ public class ExerciseUploader implements IUploadListener {
 
             uploader.send("Sending exercise " + exercise.getName());
         } catch (IOException ioex) {  //Return the occurring IOException instead
-            listener.ExerciseUploadFailed(ioex.getMessage());
+            listener.exerciseUploadFailed(ioex.getMessage());
         }
     }
 
@@ -74,7 +74,7 @@ public class ExerciseUploader implements IUploadListener {
      */
     @Override
     public void uploadCompleted(FileUploaderAsync source) {
-        listener.ExerciseUploadCompleted(this.exercise, source.getResponse());
+        listener.exerciseUploadCompleted(this.exercise, source.getResponse());
     }
 
     /**
@@ -83,6 +83,6 @@ public class ExerciseUploader implements IUploadListener {
      */
     @Override
     public void uploadFailed(FileUploaderAsync source) {
-        listener.ExerciseUploadFailed(this.uploader.getErrorMsg());
+        listener.exerciseUploadFailed(this.uploader.getErrorMsg());
     }
 }

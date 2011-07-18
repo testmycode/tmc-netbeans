@@ -9,7 +9,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
  */
 public interface IExerciseUploadListener {
 
-    public void ExerciseUploadCompleted(Exercise exercise, InputStream response);
+    public void exerciseUploadCompleted(Exercise exercise, InputStream response);
 
-    public void ExerciseUploadFailed(String errorMessage);
+    public void exerciseUploadFailed(String errorMessage);
 }
