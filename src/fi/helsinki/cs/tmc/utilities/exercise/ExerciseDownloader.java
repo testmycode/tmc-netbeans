@@ -74,14 +74,13 @@ public class ExerciseDownloader implements IDownloadListener {
      * if there are no more downloadable exercises, stops the downloading.
      */
     private void scheduleNextdownload() {
-        if (exerciseCollection.size() == 0 || cancelAll) {
+        if (exerciseCollection.isEmpty() || cancelAll) {
             listener.ExercisedownloaderCompleted();
             return;
         }
 
 
-        currentExercise = exerciseCollection.getItem(0);
-        exerciseCollection.remove(currentExercise);
+        currentExercise = exerciseCollection.remove(0);
 
         try {
 

@@ -1,19 +1,18 @@
 package fi.helsinki.cs.tmc.data;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 
 /**
  * A collection of Exercises.
  * @author jmturpei
  */
-public class ExerciseCollection implements Iterable<Exercise> {
+public class ExerciseCollection extends ArrayList<Exercise> {
 
     /**
      * Course that owns this collection of exercises.
      */
+    @Deprecated
     private Course course;
-    private ArrayList<Exercise> items;
 
     public ExerciseCollection(Course course) {
         if (course == null) {
@@ -39,6 +38,11 @@ public class ExerciseCollection implements Iterable<Exercise> {
         return null;
     }
 
+    @Override
+    public boolean add(Exercise e) {
+        processItem(e); //TODO: get rid of this if possible
+        return super.add(e);
+    }
     /**
      * Changes the given exercise's Course to this collection's course.
      * @param item 
@@ -56,47 +60,8 @@ public class ExerciseCollection implements Iterable<Exercise> {
         item.setCourse(course);
     }
 
-    /**
-     * 
-     * @return The course that owns this collection of exercises.
-     */
-    @Deprecated // TODO: merge this class into Course
+    @Deprecated // TODO: Course to point to this, not the other way around
     public Course getCourse() {
         return this.course;
-    }
-
-    //TODO: rename to addExercise
-    public void add(Exercise item) {
-        if (item == null) {
-            throw new NullPointerException("item was null at CollectionBase.add");
-        }
-        processItem(item);
-        items.add(item);
-    }
-
-    @Deprecated
-    public void remove(Exercise item) {
-        if (item == null) {
-            throw new NullPointerException("item was null at CollectionBase.remove");
-        }
-        items.remove(item);
-    }
-
-    @Deprecated
-    public int size() {
-        return items.size();
-    }
-
-    @Deprecated
-    public Exercise getItem(int index) {
-        if (index < 0 || index >= items.size()) {
-            throw new IndexOutOfBoundsException("index was invalid at CollectionBase.getItem");
-        }
-        return items.get(index);
-    }
-
-    @Override
-    public Iterator<Exercise> iterator() {
-        return items.iterator();
     }
 }
