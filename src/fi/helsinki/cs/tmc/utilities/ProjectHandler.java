@@ -17,7 +17,6 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
 
 /**
  *
@@ -65,9 +64,7 @@ public class ProjectHandler {
             } else {
                 return true;
             }
-        } catch (IOException ex) {
-            return false;
-        } catch (JSONException ex) {
+        } catch (Exception ex) {
             return false;
         }
     }
@@ -83,7 +80,7 @@ public class ProjectHandler {
      * @throws IOException
      * @throws JSONException
      */
-    public static Exercise getExercise(String projectPath) throws IOException, JSONException {
+    public static Exercise getExercise(String projectPath) throws IOException {
 
         if (projectPath == null) {
             return null;

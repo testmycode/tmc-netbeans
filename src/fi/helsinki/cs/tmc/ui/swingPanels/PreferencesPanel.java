@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.ui.swingPanels;
 
 import java.awt.event.KeyEvent;
-import java.io.IOException;
 
 import java.io.File;
 import javax.swing.JFileChooser;
@@ -11,7 +10,6 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.settings.Settings;
 import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
 import fi.helsinki.cs.tmc.utilities.json.updaters.ICourseListUpdateListener;
 import fi.helsinki.cs.tmc.utilities.json.updaters.JSONCourseListUpdater;
 
@@ -61,8 +59,8 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
         CourseCollection courses = null;
         try {
             courses = CourseAndExerciseInfo.getCourses();
-        } catch (IOException ex) {
-        } catch (JSONException ex) {
+        } catch (Exception ex) {
+            //FIXME!
         }
 
         if (courses != null) {
@@ -370,9 +368,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
         CourseCollection courses = null;
         try {
             courses = CourseAndExerciseInfo.getCourses();
-        } catch (IOException ex) {
-            ModalDialogDisplayer.getDefault().displayError(ex);
-        } catch (JSONException ex) {
+        } catch (Exception ex) {
             ModalDialogDisplayer.getDefault().displayError(ex);
         }
 

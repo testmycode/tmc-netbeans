@@ -1,9 +1,9 @@
 package fi.helsinki.cs.tmc.utilities.json.parsers;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
 import java.util.ArrayList;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONArray;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONObject;
 
 /**
  * A prototype for parsing test results. At the time of creation hidden tests
@@ -15,26 +15,19 @@ public class JSONTestResultsParser {
     /**
      * Method parses the exercise's tests failure results from json String and returns 
      * them in a failures ArrayList 
-     * @param json String
-     * @return failure ArrayList<String> 
-     * @throws JSONException
-     * @throws NullPointerException 
      */
-    public static ArrayList<String> parseJson(String json) throws JSONException, NullPointerException {
+    public static ArrayList<String> parseJson(String json) {
         ArrayList<String> failures = new ArrayList<String>();
 
-        try {
-            JSONArray jsonResults = new JSONArray(json);
+        Gson gson = new Gson();
+        JsonArray jsonResults = gson.fromJson(json, JsonArray.class);
 
-            for (int i = 0; i < jsonResults.length(); i++) {
+        for (int i = 0; i < jsonResults.size(); i++) {
 
-                JSONObject jsonResult = jsonResults.getJSONObject(i).getJSONObject("test_case_run");
-                if (!jsonResult.getBoolean("success")) {
-                    failures.add(createFailMessage(jsonResult));
-                }
+            JsonObject jsonResult = jsonResults.get(i).getAsJsonObject().getAsJsonObject("test_case_run");
+            if (!jsonResult.get("success").getAsBoolean()) {
+                failures.add(createFailMessage(jsonResult));
             }
-        } catch (JSONException e) {
-            throw new JSONException("invalid JSON String!");
         }
         return failures;
     }
@@ -44,12 +37,11 @@ public class JSONTestResultsParser {
      * @param json
      * @return true or false
      */
+    @Deprecated
     public static boolean isValidJson(String json) {
         try {
             parseJson(json);
-        } catch (JSONException ex) {
-            return false;
-        } catch (NullPointerException ex) {
+        } catch (Exception ex) {
             return false;
         }
         return true;
@@ -58,12 +50,10 @@ public class JSONTestResultsParser {
     /**
      * Method creates a message which tells user how exercise's tests has failed
      * @param result
-     * @return message 
-     * @throws JSONException
-     * @throws NullPointerException 
+     * @return message
      */
-    private static String createFailMessage(JSONObject result) throws JSONException, NullPointerException {
-        String message = "Test failed for exercise " + result.getString("exercise") + ". Cause: " + result.getString("message");
+    private static String createFailMessage(JsonObject result) {
+        String message = "Test failed for exercise " + result.get("exercise").getAsString() + ". Cause: " + result.get("message").getAsString();
 
         return message;
     }

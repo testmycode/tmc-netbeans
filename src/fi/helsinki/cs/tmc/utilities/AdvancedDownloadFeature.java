@@ -9,7 +9,6 @@ import org.openide.DialogDisplayer;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.ui.swingPanels.AdvancedExerciseDownloadPanel;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
 
 /**
  * For the future: Currently the advanced download doesn't allow for the
@@ -39,7 +38,7 @@ public class AdvancedDownloadFeature {
      * @throws IOException If CourseAndExerciseInfo throws one
      * @throws JSONException If CourseAndExerciseInfo throws one
      */
-    private static boolean courseListExists() throws IOException, JSONException {
+    private static boolean courseListExists() throws IOException {
         CourseCollection courses = null;
         courses = CourseAndExerciseInfo.getCourses();
 

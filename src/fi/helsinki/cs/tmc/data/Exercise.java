@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -15,11 +16,13 @@ public class Exercise implements Serializable {
     /**
      * The address from where this exercise can be downloaded from.
      */
+    @SerializedName("exercise_file")
     private String downloadAddress;
     
     /**
      * The address to where this exercise should be returned for review.
      */
+    @SerializedName("return_address")
     private String returnAddress;
     private Date deadline;
     private Course course;

@@ -13,7 +13,6 @@ import fi.helsinki.cs.tmc.settings.PluginSettings;
 import fi.helsinki.cs.tmc.settings.Settings;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
 
 /**
  * 
@@ -25,7 +24,7 @@ public class CourseAndExerciseInfo {
      * Used to get a CourseCollection of current courses from local JSON file.
      * @return CourseCollection with current courses or null if there is no JSON file available at the default folder.
      */
-    public static CourseCollection getCourses() throws IOException, JSONException {
+    public static CourseCollection getCourses() throws IOException {
         ReadFromFile rff = new ReadFromFile();
         String jsonString = rff.readFromFile("CourseList.json");
 
@@ -80,7 +79,7 @@ public class CourseAndExerciseInfo {
      * @throws IOException
      * @throws JSONException
      */
-    public static ExerciseCollection getExercises(Course course) throws IOException, JSONException {
+    public static ExerciseCollection getExercises(Course course) throws IOException {
         if (course == null) {
             throw new NullPointerException("course was null at CourseAndExerciseInfo.getExercises");
         }

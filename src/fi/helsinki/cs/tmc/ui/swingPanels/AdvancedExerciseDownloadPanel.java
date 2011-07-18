@@ -24,7 +24,6 @@ import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
 import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
-import fi.helsinki.cs.tmc.utilities.json.parsers.jsonorg.JSONException;
 import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
 
 /**
@@ -146,7 +145,7 @@ public class AdvancedExerciseDownloadPanel extends JPanel implements IDownloadLi
      * @throws IOException
      * @throws JSONException 
      */
-    private void initCombo() throws IOException, JSONException {
+    private void initCombo() throws IOException {
         courseBox.removeAllItems();
 
         CourseCollection courses = CourseAndExerciseInfo.getCourses();
