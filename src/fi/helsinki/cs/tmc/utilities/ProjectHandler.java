@@ -113,13 +113,13 @@ public class ProjectHandler {
             return null;
         }
 
-        Course course = cc.searchCourse(courseName);
+        Course course = cc.getCourseByName(courseName);
 
         if (course != null) {
             ExerciseCollection exerciseCollection = CourseAndExerciseInfo.getExercises(course);
 
             if (exerciseCollection != null) {
-                return exerciseCollection.searchExercise(exerciseName);
+                return exerciseCollection.getExerciseByName(exerciseName);
             }
         }
 

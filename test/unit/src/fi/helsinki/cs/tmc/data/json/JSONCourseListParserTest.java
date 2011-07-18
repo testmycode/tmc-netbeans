@@ -12,7 +12,7 @@ public class JSONCourseListParserTest {
         String json = "[{\"name\": \"test\",\"exercises_json\": \"./test.json\"}]";
         CourseCollection result = JSONCourseListParser.parseJson(json);
         
-        Course expResult = result.searchCourse("test");
+        Course expResult = result.getCourseByName("test");
         assertEquals("test", expResult.getName());
         assertEquals("./test.json", expResult.getExerciseListDownloadAddress());
     }

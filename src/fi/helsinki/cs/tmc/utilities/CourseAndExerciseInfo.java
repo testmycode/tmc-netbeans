@@ -49,7 +49,7 @@ public class CourseAndExerciseInfo {
         }
 
         if (courses != null) {
-            return courses.searchCourse(settings.getSelectedCourse());
+            return courses.getCourseByName(settings.getSelectedCourse());
 
         }
         return null;

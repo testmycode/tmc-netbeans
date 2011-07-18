@@ -14,12 +14,9 @@ public class CourseCollection implements Iterable<Course> {
     }
 
     /**
-     * Searches if it can found an Course object by given coursename
-     * @param courseName
-     * @return null if it cannot find Course by given courseName or if 
-     * given courseName parameter is null. Otherwise it returns a reference to course
+     * Returns the course with the given name or null if not found.
      */
-    public Course searchCourse(String courseName) { //TODO: rename to findCourse
+    public Course getCourseByName(String courseName) {
         if (courseName == null) {
             return null;
         }
@@ -44,7 +41,7 @@ public class CourseCollection implements Iterable<Course> {
             throw new NullPointerException("course was null at CourseCollection.processItem");
         }
 
-        if (searchCourse(item.getName()) != null) {
+        if (getCourseByName(item.getName()) != null) {
             throw new IllegalArgumentException("duplicate course: " + item.getName());
         }
     }

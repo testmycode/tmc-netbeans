@@ -23,12 +23,9 @@ public class ExerciseCollection implements Iterable<Exercise> {
     }
 
     /**
-     * Searches if it can find an Exercise object by given name
-     * @param exerciseName
-     * @return null if it cannot find the Exercise by given exerciseName or if 
-     * given exerciseName parameter is null. Otherwise it returns a reference to the exercise.
+     * Returns the exercise with the given name or null if not found.
      */
-    public Exercise searchExercise(String exerciseName) { // TODO: rename to findExercise
+    public Exercise getExerciseByName(String exerciseName) {
         if (exerciseName == null) {
             return null;
         }
@@ -52,7 +49,7 @@ public class ExerciseCollection implements Iterable<Exercise> {
             throw new NullPointerException("exercise was null at ExerciseCollection.processItem");
         }
 
-        if (searchExercise(item.getName()) != null) {
+        if (getExerciseByName(item.getName()) != null) {
             throw new IllegalArgumentException("duplicate exercise: " + item.getName() + " course:" + course.getName());
         }
 

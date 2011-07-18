@@ -156,7 +156,7 @@ public class AdvancedExerciseDownloadPanel extends JPanel implements IDownloadLi
         }
 
 
-        Course selectedCourse = courses.searchCourse(PluginSettings.getSettings().getSelectedCourse());
+        Course selectedCourse = courses.getCourseByName(PluginSettings.getSettings().getSelectedCourse());
         int i = -1;
         int selectedCourseIndex = -1;
 
@@ -335,7 +335,7 @@ public class AdvancedExerciseDownloadPanel extends JPanel implements IDownloadLi
         }
 
         for (String str : exerciseNames) {
-            Exercise next = allExercises.searchExercise(str);
+            Exercise next = allExercises.getExerciseByName(str);
             if (next != null) {
                 ec.add(next);
             }

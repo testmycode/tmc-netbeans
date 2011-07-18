@@ -57,27 +57,27 @@ public class CourseCollectionTest {
     public void testSearchCourse() {
         System.out.println("searchCourse");
         Course result;
-        result = courses.searchCourse(null);
+        result = courses.getCourseByName(null);
         assertNull(result);
-        result = courses.searchCourse("Course 100");
+        result = courses.getCourseByName("Course 100");
         assertEquals("Course 100", result.getName());
-        result = courses.searchCourse("Course 200");
+        result = courses.getCourseByName("Course 200");
         assertEquals("Course 200", result.getName());
-        result = courses.searchCourse("Course 300");
+        result = courses.getCourseByName("Course 300");
         assertEquals("Course 300", result.getName());
-        result = courses.searchCourse("Course 400");
+        result = courses.getCourseByName("Course 400");
         assertEquals("Course 400", result.getName());
-        result = courses.searchCourse("Course 500");
+        result = courses.getCourseByName("Course 500");
         assertEquals("Course 500", result.getName());
-        result = courses.searchCourse("Course 600");
+        result = courses.getCourseByName("Course 600");
         assertEquals("Course 600", result.getName());
-        result = courses.searchCourse("Course 700");
+        result = courses.getCourseByName("Course 700");
         assertEquals("Course 700", result.getName());
-        result = courses.searchCourse("Course 800");
+        result = courses.getCourseByName("Course 800");
         assertEquals("Course 800", result.getName());
-        result = courses.searchCourse("Course 900");
+        result = courses.getCourseByName("Course 900");
         assertEquals("Course 900", result.getName());
-        result = courses.searchCourse("Course 1000");
+        result = courses.getCourseByName("Course 1000");
         assertNull(result);
     }
 }

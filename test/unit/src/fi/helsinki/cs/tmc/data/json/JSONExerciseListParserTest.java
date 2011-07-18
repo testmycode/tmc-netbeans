@@ -19,7 +19,7 @@ public class JSONExerciseListParserTest {
         Course course = new Course();
         ExerciseCollection result = JSONExerciseListParser.parseJson(json, course);
         
-        Exercise exercise = result.searchExercise("test");
+        Exercise exercise = result.getExerciseByName("test");
         assertSame(course, exercise.getCourse());
         
         GregorianCalendar cal = new GregorianCalendar();

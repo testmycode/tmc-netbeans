@@ -64,7 +64,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
         }
 
         if (courses != null) {
-            Course selectedCourse = courses.searchCourse(settings.getSelectedCourse());
+            Course selectedCourse = courses.getCourseByName(settings.getSelectedCourse());
 
 
             int i = -1;
