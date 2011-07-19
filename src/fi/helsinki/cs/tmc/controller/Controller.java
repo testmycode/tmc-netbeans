@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.utilities.AdvancedDownloadFeature;
-import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
+import fi.helsinki.cs.tmc.utilities.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.ProjectHandler;
@@ -92,7 +92,7 @@ public class Controller implements
      */
     @Override
     public void startExerciseOpening() {
-        Course course = CourseAndExerciseInfo.getCurrentCourse();
+        Course course = LocalCourseCache.getInstance().getCurrentCourse();
 
         if (course != null) {
             try {
@@ -163,7 +163,7 @@ public class Controller implements
      * are downloaded.
      */
     private void showAllExercises() {
-        ExerciseCollection exercises = CourseAndExerciseInfo.getCurrentExerciseList();
+        ExerciseCollection exercises = LocalCourseCache.getInstance().getCurrentExerciseList();
 
         if (exercises == null) {
             ModalDialogDisplayer.getDefault().displayError("cannot find exercise list. Unable to open any exercise");

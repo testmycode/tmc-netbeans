@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.utilities;
 
 import java.io.IOException;
@@ -15,16 +11,21 @@ import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
 
 /**
- * 
- * @author knordman
+ * The local course and exercise cache.
  */
-public class CourseAndExerciseInfo {
-
+public class LocalCourseCache {
+    
+    private static LocalCourseCache defaultInstance = new LocalCourseCache();
+    
+    public static LocalCourseCache getInstance() {
+        return defaultInstance;
+    }
+    
     /**
      * Used to get a CourseCollection of current courses from local JSON file.
      * @return CourseCollection with current courses or null if there is no JSON file available at the default folder.
      */
-    public static CourseCollection getCourses() throws IOException {
+    public CourseCollection getCourses() throws IOException {
         ReadFromFile rff = new ReadFromFile();
         String jsonString = rff.readFromFile("CourseList.json");
 
@@ -38,12 +39,12 @@ public class CourseAndExerciseInfo {
      * Find currently selected course.
      * @return Course Current course if available, otherwise null.
      */
-    public static Course getCurrentCourse() {
+    public Course getCurrentCourse() {
         Settings settings = PluginSettings.getSettings();
 
         CourseCollection courses;
         try {
-            courses = CourseAndExerciseInfo.getCourses();
+            courses = getCourses();
         } catch (Exception e) {
             return null;
         }
@@ -59,7 +60,7 @@ public class CourseAndExerciseInfo {
      * Find exercises from currently selected course.
      * @return ExerciseCollection Current exercise list if available, otherwise null.
      */
-    public static ExerciseCollection getCurrentExerciseList() {
+    public ExerciseCollection getCurrentExerciseList() {
         Course currentCourse = getCurrentCourse();
         if (currentCourse == null) {
             return null;
@@ -75,11 +76,9 @@ public class CourseAndExerciseInfo {
     /**
      * Used to get an ExerciseCollection of current course from local JSON file.
      * @param course Current course
-     * @return ExerciseCollection Exercises of current course or null if there is no JSON file available at the default folder.
-     * @throws IOException
-     * @throws JSONException
+     * @return ExerciseCollection Exercises of current course or null if no current course.
      */
-    public static ExerciseCollection getExercises(Course course) throws IOException {
+    public ExerciseCollection getExercises(Course course) throws IOException {
         if (course == null) {
             throw new NullPointerException("course was null at CourseAndExerciseInfo.getExercises");
         }
@@ -88,11 +87,9 @@ public class CourseAndExerciseInfo {
         String jsonString = rff.readFromFile(course.getName() + ".json");
 
         if (jsonString != null) {
-
             ExerciseCollection exerciseCollection = JSONExerciseListParser.parseJson(jsonString, course);
 
             return exerciseCollection;
-
         }
         return null;
     }

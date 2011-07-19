@@ -8,7 +8,7 @@ import javax.swing.KeyStroke;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.settings.Settings;
-import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
+import fi.helsinki.cs.tmc.utilities.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.json.updaters.ICourseListUpdateListener;
 import fi.helsinki.cs.tmc.utilities.json.updaters.JSONCourseListUpdater;
@@ -58,7 +58,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
 
         CourseCollection courses = null;
         try {
-            courses = CourseAndExerciseInfo.getCourses();
+            courses = LocalCourseCache.getInstance().getCourses();
         } catch (Exception ex) {
             //FIXME!
         }
@@ -367,7 +367,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
         /* If we fail to get the courses, we should display a reason for this madness. */
         CourseCollection courses = null;
         try {
-            courses = CourseAndExerciseInfo.getCourses();
+            courses = LocalCourseCache.getInstance().getCourses();
         } catch (Exception ex) {
             ModalDialogDisplayer.getDefault().displayError(ex);
         }

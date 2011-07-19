@@ -108,7 +108,7 @@ public class ProjectHandler {
         String exerciseName = folders[2];
 
 
-        CourseCollection cc = CourseAndExerciseInfo.getCourses();
+        CourseCollection cc = LocalCourseCache.getInstance().getCourses();
         if (cc == null) {
             return null;
         }
@@ -116,7 +116,7 @@ public class ProjectHandler {
         Course course = cc.getCourseByName(courseName);
 
         if (course != null) {
-            ExerciseCollection exerciseCollection = CourseAndExerciseInfo.getExercises(course);
+            ExerciseCollection exerciseCollection = LocalCourseCache.getInstance().getExercises(course);
 
             if (exerciseCollection != null) {
                 return exerciseCollection.getExerciseByName(exerciseName);

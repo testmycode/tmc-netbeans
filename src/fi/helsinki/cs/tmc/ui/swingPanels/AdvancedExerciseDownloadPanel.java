@@ -20,7 +20,7 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
+import fi.helsinki.cs.tmc.utilities.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
@@ -148,7 +148,7 @@ public class AdvancedExerciseDownloadPanel extends JPanel implements IDownloadLi
     private void initCombo() throws IOException {
         courseBox.removeAllItems();
 
-        CourseCollection courses = CourseAndExerciseInfo.getCourses();
+        CourseCollection courses = LocalCourseCache.getInstance().getCourses();
 
         if (courses == null) {
             throw new IOException("Could not load courses from file. \n"
@@ -268,7 +268,7 @@ public class AdvancedExerciseDownloadPanel extends JPanel implements IDownloadLi
         } else {
             ExerciseCollection ec = null;
             try {
-                ec = CourseAndExerciseInfo.getExercises(course);
+                ec = LocalCourseCache.getInstance().getExercises(course);
             } catch (Exception ex) {
                 downloadExerciseList(course);
                 return;

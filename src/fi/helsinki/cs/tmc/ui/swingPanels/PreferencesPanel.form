@@ -26,8 +26,8 @@
               </Group>
               <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="hostAddressTextField" alignment="0" pref="431" max="32767" attributes="1"/>
-                  <Component id="studentNumberTextField" alignment="0" pref="431" max="32767" attributes="1"/>
+                  <Component id="hostAddressTextField" alignment="0" pref="460" max="32767" attributes="1"/>
+                  <Component id="studentNumberTextField" alignment="0" pref="460" max="32767" attributes="1"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="1" attributes="0">
                           <Component id="projectFolderTextField" pref="361" max="32767" attributes="1"/>

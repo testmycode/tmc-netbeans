@@ -40,7 +40,7 @@ public class AdvancedDownloadFeature {
      */
     private static boolean courseListExists() throws IOException {
         CourseCollection courses = null;
-        courses = CourseAndExerciseInfo.getCourses();
+        courses = LocalCourseCache.getInstance().getCourses();
 
         if (courses == null) {
             return false;
