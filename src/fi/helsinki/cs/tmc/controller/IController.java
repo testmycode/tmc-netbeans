@@ -11,8 +11,6 @@ public interface IController {
 
     void runTests();
 
-    void showPreferences();
-
     void startExerciseOpening();
 
     void showAdvancedDownload();

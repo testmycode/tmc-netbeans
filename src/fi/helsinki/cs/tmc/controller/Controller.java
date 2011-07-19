@@ -3,9 +3,6 @@ package fi.helsinki.cs.tmc.controller;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.settings.Settings;
-import fi.helsinki.cs.tmc.ui.swingPanels.PreferencesPanel;
 import fi.helsinki.cs.tmc.utilities.AdvancedDownloadFeature;
 import fi.helsinki.cs.tmc.utilities.CourseAndExerciseInfo;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
@@ -24,9 +21,6 @@ import fi.helsinki.cs.tmc.utilities.json.updaters.IExerciseListUpdateListener;
 import fi.helsinki.cs.tmc.utilities.json.updaters.JSONExerciseListUpdater;
 import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
 import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
-import java.awt.Dialog;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
@@ -38,11 +32,9 @@ import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ActionProvider;
-import org.openide.DialogDescriptor;
-import org.openide.DialogDisplayer;
 import org.openide.LifecycleManager;
-import org.openide.NotifyDescriptor;
 
+@Deprecated
 public class Controller implements
         IController,
         IExerciseListUpdateListener,
@@ -91,42 +83,6 @@ public class Controller implements
     private Controller() {
         uploader = null;
         sendButton = null;
-    }
-
-    /**
-     * Creates and displays the preferences window.
-     */
-    @Override
-    public void showPreferences() {
-        Settings settings = PluginSettings.getSettings();
-
-        PreferencesPanel panel = new PreferencesPanel(settings);
-
-        ActionListener listener = new ActionListener() {
-
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                try {
-                    if (event.getSource() == DialogDescriptor.OK_OPTION) {
-                        PluginSettings.saveSettings();
-                    } else {
-                        PluginSettings.loadFromFile(); //this erases all changes which user didn't want to save.
-                    }
-                } catch (Exception e) {
-                    ModalDialogDisplayer.getDefault().displayError(e);
-                }
-            }
-        };
-
-        DialogDescriptor descriptor = new DialogDescriptor(panel,
-                "Preferences", true, NotifyDescriptor.OK_CANCEL_OPTION, NotifyDescriptor.PLAIN_MESSAGE, listener);
-
-        Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
-        dialog.setResizable(false);
-        dialog.setVisible(true);
-        panel.interruptCourseListUpdate();
-
-
     }
 
     /**
