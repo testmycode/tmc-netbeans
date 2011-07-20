@@ -1,29 +1,35 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
 import java.io.InputStream;
-import fi.helsinki.cs.tmc.utilities.threading.BackgroundWorker;
+import fi.helsinki.cs.tmc.utilities.threading.LegacyBackgroundWorker;
 import fi.helsinki.cs.tmc.utilities.threading.ITaskListener;
-import fi.helsinki.cs.tmc.utilities.threading.TaskWithProgressIndicator;
+import fi.helsinki.cs.tmc.utilities.threading.LegacyTaskWithProgressIndicator;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 
 /**
  * This class is used to download files from a server.
  * @author jmturpei
  */
+@Deprecated
 public class FileDownloaderAsync implements ITaskListener {
 
-    /**
-     * The downloader that actually does all the work
-     */
-    private volatile FileDownloader downloader;
+    
+    private String downloadAddress;
+    
+    private int timeout;
+    
+    private byte[] result;
+    
     /**
      * The worker can run tasks in dedicated threads.
      */
-    private BackgroundWorker worker;
+    private LegacyBackgroundWorker worker;
     /**
      * This provides the task and a progress indicator (courtesy of NetBeans)
-     * to the BackgroundWorker.
+     * to the LegacyBackgroundWorker.
      */
-    private TaskWithProgressIndicator task;
+    private LegacyTaskWithProgressIndicator task;
     /*
      * A few booleans to indicate the status of the download task.
      */
@@ -56,7 +62,7 @@ public class FileDownloaderAsync implements ITaskListener {
             throw new NullPointerException("listener is null");
         }
 
-        downloader = new FileDownloader(downloadAddress);
+        this.downloadAddress = downloadAddress;
         this.listener = listener;
     }
 
@@ -71,12 +77,14 @@ public class FileDownloaderAsync implements ITaskListener {
         }
         taskStarted = true;
 
-        worker = new BackgroundWorker();
-        task = new TaskWithProgressIndicator(this) {
+        worker = new LegacyBackgroundWorker();
+        task = new LegacyTaskWithProgressIndicator(this) {
 
             @Override
-            public void executeTask() throws Exception {
-                downloader.download();
+            public void executeTask() throws IOException {
+                FileDownloader downloader = new FileDownloader();
+                downloader.setTimeout(timeout);
+                result = downloader.downloadFile(downloadAddress);
             }
         };
 
@@ -88,7 +96,7 @@ public class FileDownloaderAsync implements ITaskListener {
      * @param timeout 
      */
     public void setTimeout(int timeout) {
-        downloader.setTimeout(timeout);
+        this.timeout = timeout;
     }
 
     /**
@@ -111,7 +119,7 @@ public class FileDownloaderAsync implements ITaskListener {
             throw new IllegalStateException("download hasn't completed yet");
         }
 
-        return downloader.getFileContent();
+        return new ByteArrayInputStream(result);
     }
 
     /**

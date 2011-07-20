@@ -1,7 +1,8 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
+import fi.helsinki.cs.tmc.Refactored;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import org.apache.http.HttpEntity;
@@ -13,98 +14,64 @@ import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
 
 /**
- * Used to download files from an address. Other classes should never use this
- * but FileDownloaderAsync instead.
- * @author jmturpei
+ * Synchronously downloads files over HTTP.
+ * 
+ * <p>
+ * The download methods are thread-safe as long as settings are not changed
+ * while they are running.
+ * 
+ * <p>
+ * TODO: test and ensure cancellability if necessary.
  */
+@Refactored
 public class FileDownloader {
-
-    private final URI downloadUri;
+    private static final int DEFAULT_TIMEOUT = 3 * 60 * 1000;
+    
+    private int timeout = DEFAULT_TIMEOUT;
+    
     /**
-     * A reference to the downloaded file is stored here.
+     * Sets the timeout of future downloads.
      */
-    private InputStream fileContent;
-    private boolean downloadStarted;
-    private int timeout;
-
-    /**
-     * Constructor
-     * @param downloadAddress 
-     * @throws NullPointerException If no server address was given
-     * @throws Exception If the server address was invalid
-     */
-    public FileDownloader(String downloadAddress) throws NullPointerException, Exception {
-        if (downloadAddress == null) {
-            throw new NullPointerException("server address is null");
-        }
-
-        try {
-            downloadUri = new URI(downloadAddress);
-        } catch (URISyntaxException e) {
-            throw new Exception("Server address is invalid");
-        }
-
-        this.timeout = 180000;
-
-
-        downloadStarted = false;
-    }
-
-    /**
-     * Method sets timeout to FileDownloader object
-     * @param timeout 
-     */
-    public synchronized void setTimeout(int timeout) {
+    public void setTimeout(int timeout) {
         this.timeout = timeout;
     }
 
     /**
-     * 
-     * @return The downloaded file's InputStream
+     * Downloads a file over HTTP.
      */
-    public synchronized InputStream getFileContent() {
-        return fileContent;
+    public byte[] downloadFile(String url) throws IOException {
+        ByteArrayOutputStream buf = new ByteArrayOutputStream();
+        download(url).writeTo(buf);
+        return buf.toByteArray();
     }
-
-    /**
-     * 
-     * @param address server address
-     * @return inputStream to downloaded file. Returns null when no file was found or an error occured.
-     * @throws Exception
-     */
-    public synchronized void download() throws Exception {
-
-        if (downloadStarted) {
-            return;
-        }
-        downloadStarted = true;
-
-
-        DefaultHttpClient httpClient;
-        HttpResponse response;
-
-
-
+    
+    public String downloadTextFile(String url) throws IOException {
+        return new String(downloadFile(url), "UTF-8");
+    }
+    
+    private HttpEntity download(String url) throws IOException {
+        URI uri;
         try {
-            HttpParams p = new BasicHttpParams();
-            p.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
-            httpClient = new DefaultHttpClient(p);
-            response = httpClient.execute(new HttpGet(downloadUri)); // may throw IOException    
-            int responseCode = response.getStatusLine().getStatusCode();
-            if (responseCode <= 299 && responseCode >= 200) {
+            uri = new URI(url);
+        } catch (URISyntaxException ex) {
+            throw new IOException("Invalid URL: '" + url + "'", ex);
+        }
+        
+        HttpParams p = new BasicHttpParams();
+        p.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
+        DefaultHttpClient httpClient = new DefaultHttpClient(p);
+        HttpResponse response = httpClient.execute(new HttpGet(uri));
 
-                HttpEntity entity = response.getEntity();
-                if (entity != null) {
-
-
-                    fileContent = entity.getContent();
-                } else {
-                    throw new Exception("Unable to deliver file");
-                }
+        int responseCode = response.getStatusLine().getStatusCode();
+        if (responseCode <= 299 && responseCode >= 200) {
+            HttpEntity entity = response.getEntity();
+            if (entity != null) {
+                return entity;
+            } else {
+                throw new IOException("No content in HTTP response");
             }
-
-        } catch (IOException e) {
-            throw new Exception("Unable to connect to server.");
+        } else {
+            throw new IOException("Download failed: " + responseCode);
         }
     }
 }

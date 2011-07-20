@@ -25,7 +25,7 @@ import org.apache.http.params.HttpParams;
  * and fields with String values in it.
  * @author jmturpei
  */
-public class FileUploader {
+public class LegacyFileUploader {
 
     /**
      * This is where we save the response we get.
@@ -58,7 +58,7 @@ public class FileUploader {
      * Constructor
      * @param serverAddress The target server
      */
-    public FileUploader(String serverAddress) {
+    public LegacyFileUploader(String serverAddress) {
         if (serverAddress == null) {
             throw new NullPointerException("server address or student id is null");
         }

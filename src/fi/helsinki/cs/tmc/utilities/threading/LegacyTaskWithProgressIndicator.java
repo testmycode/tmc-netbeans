@@ -8,7 +8,7 @@ import org.netbeans.api.progress.ProgressHandle;
  * to BackGroundWorker for execution.
  * @author jmturpei
  */
-public abstract class TaskWithProgressIndicator implements Runnable {
+public abstract class LegacyTaskWithProgressIndicator implements Runnable {
 
     /**
      * Allows the user to monitor the progress of this task.
@@ -31,7 +31,7 @@ public abstract class TaskWithProgressIndicator implements Runnable {
      * @param listener Becomes the interface that listens to this task.
      * Upon completion or failure this task calls a method in the listener.
      */
-    public TaskWithProgressIndicator(ITaskListener listener) {
+    public LegacyTaskWithProgressIndicator(ITaskListener listener) {
         if (listener == null) {
             throw new NullPointerException("listener is null");
         }

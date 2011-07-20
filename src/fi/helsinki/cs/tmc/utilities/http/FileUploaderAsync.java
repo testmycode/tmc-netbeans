@@ -1,9 +1,9 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
 import java.io.InputStream;
-import fi.helsinki.cs.tmc.utilities.threading.BackgroundWorker;
+import fi.helsinki.cs.tmc.utilities.threading.LegacyBackgroundWorker;
 import fi.helsinki.cs.tmc.utilities.threading.ITaskListener;
-import fi.helsinki.cs.tmc.utilities.threading.TaskWithProgressIndicator;
+import fi.helsinki.cs.tmc.utilities.threading.LegacyTaskWithProgressIndicator;
 
 /**
  * This class is used to upload a file using the HTML POST method.
@@ -14,18 +14,18 @@ public class FileUploaderAsync implements ITaskListener {
     /**
      * The uploader that does the actual work. It operates in its own thread.
      */
-    private volatile FileUploader uploader;
+    private volatile LegacyFileUploader uploader;
     
     /**
      * The worker can run tasks in dedicated threads.
      */
-    private BackgroundWorker worker;
+    private LegacyBackgroundWorker worker;
     
     /**
      * This provides the task and a progress indicator (courtesy of NetBeans)
-     * to the BackgroundWorker.
+     * to the LegacyBackgroundWorker.
      */
-    private TaskWithProgressIndicator task;
+    private LegacyTaskWithProgressIndicator task;
     
     /*
      * A few booleans to indicate the status of the upload task.
@@ -46,7 +46,7 @@ public class FileUploaderAsync implements ITaskListener {
     private IUploadListener listener;
     
     /**
-     * Used to store the error message that comes from the FileUploader.
+     * Used to store the error message that comes from the LegacyFileUploader.
      */
     private String errorMsg = "";
 
@@ -64,7 +64,7 @@ public class FileUploaderAsync implements ITaskListener {
             throw new NullPointerException("listener is null");
         }
 
-        uploader = new FileUploader(serverAddress);
+        uploader = new LegacyFileUploader(serverAddress);
         this.listener = listener;
 
     }
@@ -81,8 +81,8 @@ public class FileUploaderAsync implements ITaskListener {
         }
         taskStarted = true;
 
-        worker = new BackgroundWorker();
-        task = new TaskWithProgressIndicator(this) {
+        worker = new LegacyBackgroundWorker();
+        task = new LegacyTaskWithProgressIndicator(this) {
 
             @Override
             public void executeTask() throws Exception {
@@ -141,7 +141,7 @@ public class FileUploaderAsync implements ITaskListener {
     }
 
     /**
-     * Used to route the jsonLink from FileUploader
+     * Used to route the jsonLink from LegacyFileUploader
      * @return 
      */
     public InputStream getResponse() {

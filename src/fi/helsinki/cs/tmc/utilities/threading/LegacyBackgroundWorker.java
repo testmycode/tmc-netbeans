@@ -16,7 +16,8 @@ import org.openide.util.TaskListener;
  * 
  * @author jmturpei
  */
-public class BackgroundWorker {
+@Deprecated
+public class LegacyBackgroundWorker {
 
     /**
      * Used to execute tasks in their own thread.
@@ -30,7 +31,7 @@ public class BackgroundWorker {
      * @param displayMsg The message to display in the progress indicator.
      * @param cancellable true if this task can be cancelled and false if not.
      */
-    public void startTask(final TaskWithProgressIndicator task, String displayMsg, boolean cancellable) {
+    public void startTask(final LegacyTaskWithProgressIndicator task, String displayMsg, boolean cancellable) {
         if (task == null) {
             throw new NullPointerException("Task cannot be null");
         }
