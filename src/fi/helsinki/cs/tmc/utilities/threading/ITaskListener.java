@@ -9,7 +9,7 @@ public interface ITaskListener {
 
     public void taskFinished();
 
-    public void taskCancelledByUser();
+    public void taskCancelled();
 
     public void taskFailed(String errorMsg);
 }

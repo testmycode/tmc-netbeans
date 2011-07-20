@@ -135,7 +135,7 @@ public abstract class TaskWithProgressIndicator implements Runnable {
 
                 @Override
                 public void run() {
-                    listener.taskCancelledByUser();
+                    listener.taskCancelled();
                 }
             });
         }

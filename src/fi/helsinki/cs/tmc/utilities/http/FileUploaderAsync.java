@@ -180,6 +180,6 @@ public class FileUploaderAsync implements ITaskListener {
      * Called by the uploader if the user aborts the upload.
      */
     @Override
-    public void taskCancelledByUser() {
+    public void taskCancelled() {
     }
 }

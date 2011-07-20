@@ -142,7 +142,7 @@ public class FileDownloaderAsync implements ITaskListener {
      * Called by the downloader if the user aborts the download
      */
     @Override
-    public void taskCancelledByUser() {
+    public void taskCancelled() {
         taskEnded = true;
         cancelDownload = true;
 
