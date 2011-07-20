@@ -20,7 +20,7 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.utilities.LocalCourseCache;
+import fi.helsinki.cs.tmc.data.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;

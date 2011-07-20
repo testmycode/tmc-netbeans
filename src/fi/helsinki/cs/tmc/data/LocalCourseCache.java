@@ -1,10 +1,8 @@
-package fi.helsinki.cs.tmc.utilities;
+package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.Refactored;
 import java.io.IOException;
 import fi.helsinki.cs.tmc.utilities.textio.ReadFromFile;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.settings.PluginSettings;
 import fi.helsinki.cs.tmc.settings.Settings;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
@@ -13,6 +11,7 @@ import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
 /**
  * The local course and exercise cache.
  */
+@Refactored
 public class LocalCourseCache {
     
     private static LocalCourseCache defaultInstance = new LocalCourseCache();

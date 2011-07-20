@@ -8,7 +8,7 @@ import javax.swing.KeyStroke;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.settings.Settings;
-import fi.helsinki.cs.tmc.utilities.LocalCourseCache;
+import fi.helsinki.cs.tmc.data.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.json.updaters.ICourseListUpdateListener;
 import fi.helsinki.cs.tmc.utilities.json.updaters.JSONCourseListUpdater;

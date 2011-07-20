@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.utilities;
 
+import fi.helsinki.cs.tmc.data.LocalCourseCache;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.io.IOException;

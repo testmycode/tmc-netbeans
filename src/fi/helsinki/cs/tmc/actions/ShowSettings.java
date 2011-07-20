@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.Refactored;
 import fi.helsinki.cs.tmc.settings.PluginSettings;
 import fi.helsinki.cs.tmc.settings.Settings;
 import fi.helsinki.cs.tmc.ui.swingPanels.PreferencesPanel;
@@ -24,6 +25,7 @@ id = "fi.helsinki.cs.tmc.actions.ShowSettings")
     @ActionReference(path = "Menu/TMC", position = -100, separatorAfter = -90)
 })
 @Messages("CTL_ShowSettings=Show settings")
+@Refactored("UNTESTED!")
 public final class ShowSettings extends AbstractAction {
 
     @Override
