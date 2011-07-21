@@ -12,19 +12,11 @@ public class Course {
     
     public Course() {
     }
-    
-    /**
-     * Returns name of Course object
-     * @return this.name
-     */
+
     public String getName() {
         return this.name;
     }
-    
-    /**
-     * Sets Course objects name
-     * @param name 
-     */
+
     public void setName(String name) {
         if(name == null) throw new NullPointerException("name was null at Course.setName");
         if(name.isEmpty()) throw new IllegalArgumentException("Name cannot be empty at Course.setName");
@@ -37,10 +29,11 @@ public class Course {
         return name;
     }
     
-    /**
-     * @return the exerciseListDownloadAddress
-     */
     public String getExerciseListDownloadAddress() {
         return exerciseListDownloadAddress;
+    }
+
+    public void setExerciseListDownloadAddress(String exerciseListDownloadAddress) {
+        this.exerciseListDownloadAddress = exerciseListDownloadAddress;
     }
 }

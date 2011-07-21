@@ -15,7 +15,14 @@ public class JSONExerciseListParserTest {
      */
     @Test
     public void testParseJson() throws Exception {
-        String json = "[{\"name\": \"test\",\"exercise_file\": \"null\",\"deadline\": \"2011-06-14T01:30:19+03:00\",\"return_address\": \"null\"}]";
+        String json =
+                "[{" +
+                "name: \"test\"," +
+                "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
+                "deadline: \"2011-06-14T01:30:19+03:00\"," +
+                "publish_date: null," +
+                "exercise_file: \"http://example.com/courses/123/exercises/1.zip\"" +
+                "}]";
         Course course = new Course();
         ExerciseCollection result = JSONExerciseListParser.parseJson(json, course);
         
@@ -27,6 +34,9 @@ public class JSONExerciseListParserTest {
         assertEquals(2011, cal.get(GregorianCalendar.YEAR));
         assertEquals(1, cal.get(GregorianCalendar.HOUR_OF_DAY));
         assertEquals(30, cal.get(GregorianCalendar.MINUTE));
+        
+        assertEquals("http://example.com/courses/123/exercises/1.zip", exercise.getDownloadAddress());
+        assertEquals("http://example.com/courses/123/exercises/1/submissions", exercise.getReturnAddress());
     }
 
     @Test
