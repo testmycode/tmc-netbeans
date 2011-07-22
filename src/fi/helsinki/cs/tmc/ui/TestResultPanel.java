@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.ui.swingPanels;
+package fi.helsinki.cs.tmc.ui;
 
 import java.util.ArrayList;
 import java.util.Iterator;

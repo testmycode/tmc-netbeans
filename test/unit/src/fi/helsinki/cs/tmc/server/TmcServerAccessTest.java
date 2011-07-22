@@ -29,7 +29,12 @@ public class TmcServerAccessTest {
         prefs = NbPreferences.forModule(TmcServerAccess.class);
         
         MockitoAnnotations.initMocks(this);
-        server = new TmcServerAccess("http://example.com", downloader);
+        server = newServer();
+        server.setBaseUrl("http://example.com");
+    }
+    
+    private TmcServerAccess newServer() {
+        return new TmcServerAccess(downloader);
     }
     
     @After
@@ -84,8 +89,15 @@ public class TmcServerAccessTest {
     
     @Test
     public void itStoresTheBaseUrlInPreferences() {
-        server.setBaseUrl("http://another.example.com");
-        
-        assertEquals("http://another.example.com", prefs.get("baseUrl", null));
+        String url = "http://another.example.com";
+        server.setBaseUrl(url);
+        assertEquals(url, newServer().getBaseUrl());
+    }
+    
+    @Test
+    public void itStoresTheUsernameInPreferences() {
+        String name = "JohnShepard";
+        server.setUsername(name);
+        assertEquals(name, newServer().getUsername());
     }
 }

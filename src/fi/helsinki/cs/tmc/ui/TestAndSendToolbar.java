@@ -1,6 +1,5 @@
-package fi.helsinki.cs.tmc.ui.toolbars;
+package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.ui.swingPanels.TestAndSendPanel;
 import java.awt.Component;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;

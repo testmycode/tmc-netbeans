@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.ui.swingPanels;
+package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.controller.Controller;
 import fi.helsinki.cs.tmc.controller.IController;

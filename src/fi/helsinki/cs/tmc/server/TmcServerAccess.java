@@ -20,14 +20,13 @@ import org.openide.util.NbPreferences;
 @Refactored
 public class TmcServerAccess {
     private static final String PREF_BASE_URL = "baseUrl";
+    private static final String PREF_USERNAME = "username";
     
     private static TmcServerAccess defaultInstance;
     
     public static TmcServerAccess getDefault() {
         if (defaultInstance == null) {
-            Preferences prefs = getPreferences();
-            String baseUrl = prefs.get(PREF_BASE_URL, "");
-            defaultInstance = new TmcServerAccess(baseUrl, new FileDownloader());
+            defaultInstance = new TmcServerAccess(new FileDownloader());
         }
         return defaultInstance;
     }
@@ -36,17 +35,38 @@ public class TmcServerAccess {
         return NbPreferences.forModule(TmcServerAccess.class);
     }
     
-    private String baseUrl;
     private FileDownloader fileDownloader;
+    private String baseUrl;
+    private String username;
+
     
-    public TmcServerAccess(String baseUrl, FileDownloader fileDownloader) {
-        this.setBaseUrl(baseUrl);
+    public TmcServerAccess(FileDownloader fileDownloader) {
         this.fileDownloader = fileDownloader;
+        loadPreferences();
+    }
+    
+    private void loadPreferences() {
+        Preferences prefs = getPreferences();
+        this.baseUrl = prefs.get(PREF_BASE_URL, "");
+        this.username = prefs.get(PREF_USERNAME, "");
+    }
+
+    public String getBaseUrl() {
+        return baseUrl;
     }
     
     public final void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         getPreferences().put(PREF_BASE_URL, baseUrl);
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+        getPreferences().put(PREF_USERNAME, username);
     }
     
     public Future<CourseCollection> startDownloadingCourseList(BgTaskListener<CourseCollection> listener) {

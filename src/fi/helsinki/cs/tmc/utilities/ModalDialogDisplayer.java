@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
-import fi.helsinki.cs.tmc.ui.swingPanels.TestResultPanel;
+import fi.helsinki.cs.tmc.ui.TestResultPanel;
 
 /**
  *
