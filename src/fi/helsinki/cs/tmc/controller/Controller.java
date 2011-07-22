@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.controller;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.utilities.AdvancedDownloadFeature;
 import fi.helsinki.cs.tmc.data.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
@@ -132,18 +131,6 @@ public class Controller implements
         }
     }
 
-    /**
-     * Show the advanced download dialog
-     */
-    @Override
-    public void showAdvancedDownload() {
-        try {
-            AdvancedDownloadFeature.show();
-        } catch (Exception ex) {
-            ModalDialogDisplayer.getDefault().displayError(ex);
-        }
-    }
-
     /* Exercise list download */
     @Override
     public void exerciseListUpdateComplete() {
@@ -163,7 +150,7 @@ public class Controller implements
      * are downloaded.
      */
     private void showAllExercises() {
-        ExerciseCollection exercises = LocalCourseCache.getInstance().getCurrentExerciseList();
+        ExerciseCollection exercises = LocalCourseCache.getInstance().getAvailableExercises();
 
         if (exercises == null) {
             ModalDialogDisplayer.getDefault().displayError("cannot find exercise list. Unable to open any exercise");

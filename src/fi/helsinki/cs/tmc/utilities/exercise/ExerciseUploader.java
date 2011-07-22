@@ -5,8 +5,8 @@ import fi.helsinki.cs.tmc.utilities.http.FileUploaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IUploadListener;
 import java.io.IOException;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.settings.Settings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacySettings;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
 import fi.helsinki.cs.tmc.utilities.zip.Zipper;
 
@@ -29,7 +29,7 @@ public class ExerciseUploader implements IUploadListener {
     public ExerciseUploader(Exercise exercise, IExerciseUploadListener uploadListener) throws NullPointerException {
 
         this.uploader = new FileUploaderAsync(exercise.getReturnAddress(), this);
-        this.uploader.setTimeout(PluginSettings.getSettings().getExerciseUploadTimeout());
+        this.uploader.setTimeout(LegacyPluginSettings.getSettings().getExerciseUploadTimeout());
         this.listener = uploadListener;
         this.exercise = exercise;
 
@@ -40,7 +40,7 @@ public class ExerciseUploader implements IUploadListener {
      * was contructed.
      */
     public void sendExercise() {
-        Settings settings = PluginSettings.getSettings();
+        LegacySettings settings = LegacyPluginSettings.getSettings();
 
         if (!settings.isValid()) {
             listener.exerciseUploadFailed("Student id not set. Check preferences before sending.");

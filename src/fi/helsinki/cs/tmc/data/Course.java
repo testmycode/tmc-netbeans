@@ -1,7 +1,9 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
+import fi.helsinki.cs.tmc.Refactored;
 
+@Refactored
 public class Course {
 
     private String name;
@@ -11,6 +13,10 @@ public class Course {
     
     
     public Course() {
+    }
+
+    public Course(String name) {
+        this.name = name;
     }
 
     public String getName() {

@@ -29,7 +29,7 @@ public class ExerciseFilter {
      * @return A new filtered ExerciseCollection
      */
     public static ExerciseCollection getNonExpired(ExerciseCollection e, Date currentTime) {
-        ExerciseCollection collection = new ExerciseCollection(e.getCourse());
+        ExerciseCollection collection = new ExerciseCollection();
 
         for (Exercise exercise : e) {
             if (!exercise.isDeadlineEnded(currentTime)) {
@@ -47,8 +47,7 @@ public class ExerciseFilter {
      * @return A new filtered ExerciseCollection
      */
     public static ExerciseCollection getLocal(ExerciseCollection e) {
-        ExerciseCollection collection = new ExerciseCollection(e.getCourse());
-        Course course = e.getCourse();
+        ExerciseCollection collection = new ExerciseCollection();
 
         for (Exercise exercise : e) {
             if (isExerciseLocal(exercise)) {
@@ -66,7 +65,7 @@ public class ExerciseFilter {
      * @return A new filtered ExerciseCollection
      */
     public static ExerciseCollection getDownloadable(ExerciseCollection e) {
-        ExerciseCollection collection = new ExerciseCollection(e.getCourse());
+        ExerciseCollection collection = new ExerciseCollection();
 
         for (Exercise exercise : e) {
             if (!isExerciseLocal(exercise)) {

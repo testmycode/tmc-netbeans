@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 
 /**
  * This class is used to download exercises given as a single Exercise object or
@@ -85,7 +85,7 @@ public class ExerciseDownloader implements IDownloadListener {
         try {
 
             currentDownloader = new FileDownloaderAsync(currentExercise.getDownloadAddress(), this);
-            currentDownloader.setTimeout(PluginSettings.getSettings().getExerciseDownloadTimeout());
+            currentDownloader.setTimeout(LegacyPluginSettings.getSettings().getExerciseDownloadTimeout());
 
             currentDownloader.download("Downloading exercise " + currentExercise.getName());
 

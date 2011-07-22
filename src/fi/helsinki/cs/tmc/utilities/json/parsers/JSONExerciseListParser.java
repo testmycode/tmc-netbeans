@@ -20,7 +20,7 @@ public class JSONExerciseListParser {
     /**
      * Parses a collection of exercises and attaches them to a course.
      */
-    public static ExerciseCollection parseJson(String json, Course course) {
+    public static ExerciseCollection parseJson(String json) {
         if (json == null) {
             throw new NullPointerException("Json string is null");
         }
@@ -30,7 +30,7 @@ public class JSONExerciseListParser {
                 .create();
         Exercise[] exercises = gson.fromJson(json, Exercise[].class);
 
-        ExerciseCollection exerciseCollection = new ExerciseCollection(course);
+        ExerciseCollection exerciseCollection = new ExerciseCollection();
         for (Exercise exercise : exercises) {
             exerciseCollection.add(exercise);
         }

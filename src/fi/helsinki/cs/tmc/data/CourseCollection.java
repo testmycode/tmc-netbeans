@@ -1,10 +1,12 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.Refactored;
 import java.util.ArrayList;
 
 /**
  * A list of Courses.
  */
+@Refactored
 public class CourseCollection extends ArrayList<Course> {
     /**
      * Returns the course with the given name or null if not found.

@@ -17,7 +17,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 
 /**
  *
@@ -87,7 +87,7 @@ public class ProjectHandler {
             return null;
         }
 
-        String defaultPath = PluginSettings.getSettings().getDefaultFolder();
+        String defaultPath = LegacyPluginSettings.getSettings().getDefaultFolder();
         if (defaultPath == null) {
             return null;
         }
@@ -109,7 +109,7 @@ public class ProjectHandler {
         String exerciseName = folders[2];
 
 
-        CourseCollection cc = LocalCourseCache.getInstance().getCourses();
+        CourseCollection cc = LocalCourseCache.getInstance().getAvailableCourses();
         if (cc == null) {
             return null;
         }
@@ -117,7 +117,7 @@ public class ProjectHandler {
         Course course = cc.getCourseByName(courseName);
 
         if (course != null) {
-            ExerciseCollection exerciseCollection = LocalCourseCache.getInstance().getExercises(course);
+            ExerciseCollection exerciseCollection = LocalCourseCache.getInstance().getExercisesForCourse(course);
 
             if (exerciseCollection != null) {
                 return exerciseCollection.getExerciseByName(exerciseName);

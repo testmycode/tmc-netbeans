@@ -7,7 +7,7 @@ import javax.swing.JFileChooser;
 import javax.swing.KeyStroke;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
-import fi.helsinki.cs.tmc.settings.Settings;
+import fi.helsinki.cs.tmc.settings.LegacySettings;
 import fi.helsinki.cs.tmc.data.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.json.updaters.ICourseListUpdateListener;
@@ -23,14 +23,14 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
     /**
      * This object holds the setting information.
      */
-    private Settings settings;
+    private LegacySettings settings;
     /**
      * This is used to update the course list.
      */
     private JSONCourseListUpdater jsonCourseListUpdater;
 
     /** Creates new form PreferencesPanel */
-    public PreferencesPanel(Settings settings) {
+    public PreferencesPanel(LegacySettings settings) {
         initComponents();
 
         if (settings == null) {
@@ -58,7 +58,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
 
         CourseCollection courses = null;
         try {
-            courses = LocalCourseCache.getInstance().getCourses();
+            courses = LocalCourseCache.getInstance().getAvailableCourses();
         } catch (Exception ex) {
             //FIXME!
         }
@@ -367,7 +367,7 @@ public class PreferencesPanel extends javax.swing.JPanel implements ICourseListU
         /* If we fail to get the courses, we should display a reason for this madness. */
         CourseCollection courses = null;
         try {
-            courses = LocalCourseCache.getInstance().getCourses();
+            courses = LocalCourseCache.getInstance().getAvailableCourses();
         } catch (Exception ex) {
             ModalDialogDisplayer.getDefault().displayError(ex);
         }

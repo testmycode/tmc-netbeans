@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.server;
 
+import java.util.prefs.BackingStoreException;
+import org.junit.After;
+import java.util.prefs.Preferences;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.data.Course;
@@ -11,19 +14,27 @@ import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.openide.util.NbPreferences;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
 public class TmcServerAccessTest {
     
     @Mock private FileDownloader downloader;
-    
+    private Preferences prefs;
     private TmcServerAccess server;
     
     @Before
     public void setUp() {
+        prefs = NbPreferences.forModule(TmcServerAccess.class);
+        
         MockitoAnnotations.initMocks(this);
         server = new TmcServerAccess("http://example.com", downloader);
+    }
+    
+    @After
+    public void tearDown() throws BackingStoreException {
+        prefs.removeNode();
     }
     
     @Test
@@ -69,5 +80,12 @@ public class TmcServerAccessTest {
         assertNotNull(ex);
         assertEquals("http://example.com/courses/123/exercises/1/submissions", ex.getReturnAddress());
         assertEquals("http://example.com/courses/123/exercises/1.zip", ex.getDownloadAddress());
+    }
+    
+    @Test
+    public void itStoresTheBaseUrlInPreferences() {
+        server.setBaseUrl("http://another.example.com");
+        
+        assertEquals("http://another.example.com", prefs.get("baseUrl", null));
     }
 }

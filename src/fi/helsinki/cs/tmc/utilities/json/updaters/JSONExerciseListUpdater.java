@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import java.io.InputStream;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
 import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
 import fi.helsinki.cs.tmc.utilities.textio.WriteToFile;
@@ -17,6 +17,7 @@ import fi.helsinki.cs.tmc.utilities.textio.WriteToFile;
  * This class is used to download a list of exercises in JSON format.
  * @author knordman
  */
+@Deprecated
 public class JSONExerciseListUpdater implements IDownloadListener {
 
     private String filename;
@@ -31,7 +32,7 @@ public class JSONExerciseListUpdater implements IDownloadListener {
 
         this.listener = listener;
         downloader = new FileDownloaderAsync(downloadAddress, this);
-        downloader.setTimeout(PluginSettings.getSettings().getExerciseListDownloadTimeout());
+        downloader.setTimeout(LegacyPluginSettings.getSettings().getExerciseListDownloadTimeout());
     }
 
     /**
@@ -54,7 +55,7 @@ public class JSONExerciseListUpdater implements IDownloadListener {
 
         String json = StreamToString.inputStreamToString(in);
 
-        JSONExerciseListParser.parseJson(json, course); //parseJson method is used here to check 
+        JSONExerciseListParser.parseJson(json); //parseJson method is used here to check 
         //that created json parameter is usable
         WriteToFile writer = new WriteToFile();
         writer.writeToFile(json, filename);

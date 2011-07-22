@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
+import fi.helsinki.cs.tmc.Refactored;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -8,9 +9,12 @@ import java.util.Date;
  * A single exercise holds various information concerning an exercise,
  * such as the name and download address.
  */
+@Refactored
 public class Exercise implements Serializable {
 
     private String name;
+    
+    private String courseName;
     
     /**
      * The URL this exercise can be downloaded from.
@@ -25,15 +29,23 @@ public class Exercise implements Serializable {
     private String returnAddress;
     
     private Date deadline;
-    
-    private Course course;
 
     public Exercise() {
+    }
+
+    public Exercise(String name) {
+        this(name, "unknown-course");
+    }
+
+    public Exercise(String name, String courseName) {
+        this.name = name;
+        this.courseName = courseName;
     }
 
     /**
      * Exercise copy constructor.
      */
+    @Deprecated
     public Exercise(Exercise exercise) {
         if (exercise == null) {
             throw new NullPointerException("exercise was null at Exercise.Constructor");
@@ -43,13 +55,10 @@ public class Exercise implements Serializable {
         downloadAddress = exercise.downloadAddress;
         returnAddress = exercise.returnAddress;
         deadline = new Date(exercise.deadline.getTime());
-        course = exercise.course;
     }
 
     /**
-     * Checks wether this exercise is expired or not.
-     * @param currentTime
-     * @return true if we have passed the deadline and false if not.
+     * Checks wether this exercise has expired or not.
      */
     public boolean isDeadlineEnded(Date currentTime) {
         if (currentTime == null) {
@@ -59,18 +68,10 @@ public class Exercise implements Serializable {
 
     }
 
-    /**
-     * Method returns the name of the Exercise
-     * @return this.name
-     */
     public String getName() {
         return this.name;
     }
 
-    /**
-     * Method sets the name of the Exercise
-     * @param name 
-     */
     public void setName(String name) {
         if (name == null) {
             throw new NullPointerException("name was null at Exercise.setName");
@@ -81,18 +82,18 @@ public class Exercise implements Serializable {
         this.name = name;
     }
 
-    /**
-     * Method returns Exercise's download address
-     * @return this.downloadAddress
-     */
+    public String getCourseName() {
+        return courseName;
+    }
+
+    public void setCourseName(String courseName) {
+        this.courseName = courseName;
+    }
+    
     public String getDownloadAddress() {
         return this.downloadAddress;
     }
 
-    /**
-     * Method sets Exercise's download address
-     * @param downloadAddress 
-     */
     public void setDownloadAddress(String downloadAddress) {
         if (downloadAddress == null) {
             throw new NullPointerException("downloadAddress was null at Exercise.setDownloadAddress");
@@ -104,18 +105,10 @@ public class Exercise implements Serializable {
         this.downloadAddress = downloadAddress;
     }
 
-    /**
-     * Method returns Exercise's return address
-     * @return this.returnAddress
-     */
     public String getReturnAddress() {
         return this.returnAddress;
     }
 
-    /**
-     * Method sets Exercise's return address
-     * @param returnAddress 
-     */
     public void setReturnAddress(String returnAddress) {
         if (returnAddress == null) {
             throw new NullPointerException("returnAddress was null at Exercise.setReturnAddress");
@@ -137,9 +130,6 @@ public class Exercise implements Serializable {
         return name;
     }
 
-    /**
-     * @return the deadline
-     */
     public Date getDeadline() {
         if (deadline == null) {
             throw new IllegalStateException("Deadline not set");
@@ -147,32 +137,11 @@ public class Exercise implements Serializable {
         return deadline;
     }
 
-    /**
-     * @param deadline the deadline to set
-     */
     public void setDeadline(Date deadline) {
         if (deadline == null) {
             throw new NullPointerException("dealine was null at Exercise.setDeadline");
         }
 
         this.deadline = deadline;
-    }
-
-    /**
-     * @return the course
-     */
-    public Course getCourse() {
-        return course;
-    }
-
-    /**
-     * @param course the course to set
-     */
-    public void setCourse(Course course) {
-        if (course == null) {
-            throw new NullPointerException("course was null at Exercise.setCourse");
-        }
-
-        this.course = course;
     }
 }

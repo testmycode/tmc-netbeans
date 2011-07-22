@@ -8,6 +8,7 @@ package fi.helsinki.cs.tmc.utilities.json.updaters;
  *
  * @author knordman
  */
+@Deprecated
 public interface IExerciseListUpdateListener {
     void exerciseListUpdateComplete();
     void exerciseListUpdateFailed(String errorMessage);

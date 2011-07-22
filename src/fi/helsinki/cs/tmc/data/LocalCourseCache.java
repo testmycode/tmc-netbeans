@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.Refactored;
+import fi.helsinki.cs.tmc.settings.ConfigFile;
 import java.io.IOException;
-import fi.helsinki.cs.tmc.utilities.textio.ReadFromFile;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.settings.Settings;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
+import java.io.Reader;
+import java.io.Writer;
+import java.util.ArrayList;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  * The local course and exercise cache.
@@ -14,82 +17,128 @@ import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
 @Refactored
 public class LocalCourseCache {
     
-    private static LocalCourseCache defaultInstance = new LocalCourseCache();
+    public static final Logger logger = Logger.getLogger(LocalCourseCache.class.getName());
+    private static LocalCourseCache defaultInstance;
     
     public static LocalCourseCache getInstance() {
+        if (defaultInstance == null) {
+            defaultInstance = new LocalCourseCache();
+        }
         return defaultInstance;
     }
+
+    private ConfigFile configFile;
+    private CourseCollection availableCourses;
+    private Course currentCourse;
+    private ExerciseCollection availableExercises; // (for the current course)
+
+    public LocalCourseCache() {
+        this(new ConfigFile("LocalCourseCache.json"));
+    }
     
-    /**
-     * Used to get a CourseCollection of current courses from local JSON file.
-     * @return CourseCollection with current courses or null if there is no JSON file available at the default folder.
-     */
-    public CourseCollection getCourses() throws IOException {
-        ReadFromFile rff = new ReadFromFile();
-        String jsonString = rff.readFromFile("CourseList.json");
-
-        if (jsonString != null) {
-            return JSONCourseListParser.parseJson(jsonString);
+    public LocalCourseCache(ConfigFile configFile) {
+        this.configFile = configFile;
+        this.availableCourses = new CourseCollection();
+        this.availableExercises = null;
+        try {
+            loadFromFile();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to load local course cache", e);
         }
-        return null;
+    }
+    
+    public CourseCollection getAvailableCourses() {
+        return availableCourses;
     }
 
-    /**
-     * Find currently selected course.
-     * @return Course Current course if available, otherwise null.
-     */
+    public void setAvailableCourses(CourseCollection availableCourses) {
+        this.availableCourses = availableCourses;
+        trySaveToFile();
+    }
+    
+    public boolean hasCurrentCourse() {
+        return availableExercises != null;
+    }
+
     public Course getCurrentCourse() {
-        Settings settings = PluginSettings.getSettings();
+        return currentCourse;
+    }
 
-        CourseCollection courses;
-        try {
-            courses = getCourses();
-        } catch (Exception e) {
-            return null;
-        }
-
-        if (courses != null) {
-            return courses.getCourseByName(settings.getSelectedCourse());
-
-        }
-        return null;
+    public void setCurrentCourse(Course currentCourse) {
+        this.currentCourse = currentCourse;
+        trySaveToFile();
     }
 
     /**
-     * Find exercises from currently selected course.
-     * @return ExerciseCollection Current exercise list if available, otherwise null.
+     * Find exercises from currently selected course, or null if no current course.
      */
-    public ExerciseCollection getCurrentExerciseList() {
-        Course currentCourse = getCurrentCourse();
-        if (currentCourse == null) {
-            return null;
-        }
-
-        try {
-            return getExercises(currentCourse);
-        } catch (Exception e) {
-            return null;
-        }
+    public ExerciseCollection getAvailableExercises() {
+        return availableExercises;
     }
 
-    /**
-     * Used to get an ExerciseCollection of current course from local JSON file.
-     * @param course Current course
-     * @return ExerciseCollection Exercises of current course or null if no current course.
-     */
-    public ExerciseCollection getExercises(Course course) throws IOException {
-        if (course == null) {
-            throw new NullPointerException("course was null at CourseAndExerciseInfo.getExercises");
-        }
+    public void setAvailableExercises(ExerciseCollection availableExercises) {
+        this.availableExercises = availableExercises;
+        trySaveToFile();
+    }
 
-        ReadFromFile rff = new ReadFromFile();
-        String jsonString = rff.readFromFile(course.getName() + ".json");
-
-        if (jsonString != null) {
-            ExerciseCollection exerciseCollection = JSONExerciseListParser.parseJson(jsonString, course);
-
-            return exerciseCollection;
-        }
+    @Deprecated
+    public ExerciseCollection getExercisesForCourse(Course course) {
+        //TODO
         return null;
+    }
+
+    private void loadFromFile() throws IOException {
+        Gson gson = new Gson();
+        Reader reader = configFile.getReader();
+        StoredStuff stuff;
+        try {
+            stuff = gson.fromJson(reader, StoredStuff.class);
+        } finally {
+            reader.close();
+        }
+        if (stuff != null) {
+            this.availableCourses = new CourseCollection();
+            if (stuff.availableCourses != null) {
+                this.availableCourses.addAll(stuff.availableCourses);
+            }
+            
+            this.currentCourse = stuff.currentCourse;
+            
+            this.availableExercises = new ExerciseCollection();
+            if (stuff.availableExercises != null) {
+                this.availableExercises.addAll(stuff.availableExercises);
+            }
+        }
+    }
+    
+    private void trySaveToFile() {
+        try {
+            saveToFile();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to save local course cache", e);
+        }
+    }
+    
+    private void saveToFile() throws IOException {
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setPrettyPrinting()
+                .create();
+        StoredStuff stuff = new StoredStuff();
+        stuff.availableCourses = this.availableCourses;
+        stuff.currentCourse = this.getCurrentCourse();
+        stuff.availableExercises = this.availableExercises;
+        Writer w = configFile.getWriter();
+        try {
+            gson.toJson(stuff, w);
+        } finally {
+            w.close();
+        }
+    }
+    
+    private static class StoredStuff {
+        public ArrayList<Course> availableCourses;
+        public Course currentCourse;
+        public ArrayList<Exercise> availableExercises;
     }
 }

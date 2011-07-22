@@ -4,13 +4,14 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 
 /**
  * This class is used to read files from disk to String objects.
  * More specifically JSON files.
  * @author kkaltiai
  */
+@Deprecated
 public class ReadFromFile {
 
     /**
@@ -26,7 +27,7 @@ public class ReadFromFile {
      * @throws IOException
      */
     public String readFromFile(String filename) throws IOException {
-        String path = PluginSettings.getSettings().getDefaultFolder() + "/" + filename;
+        String path = LegacyPluginSettings.getSettings().getDefaultFolder() + "/" + filename;
 
         File jsonFile = new File(path);
 

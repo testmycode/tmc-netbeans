@@ -25,7 +25,7 @@ import org.w3c.dom.NodeList;
  * NOTE: only String and Integer types are allowed field types because of serialization/deserialization
  * @author jmturpei
  */
-public class Settings {
+public class LegacySettings {
 
     private String studentID;
     private String hostAddress;
@@ -42,7 +42,7 @@ public class Settings {
      * @param out
      * @throws Exception 
      */
-    public static void Serialize(Settings settings, OutputStream out) throws Exception {
+    public static void Serialize(LegacySettings settings, OutputStream out) throws Exception {
         if (settings == null) {
             throw new NullPointerException("settings was null at Settings.Serialize");
         }
@@ -113,13 +113,13 @@ public class Settings {
      * @return The created Settings instance
      * @throws Exception 
      */
-    public static Settings Deserialize(InputStream xmlFile) throws Exception {
+    public static LegacySettings Deserialize(InputStream xmlFile) throws Exception {
         if (xmlFile == null) {
             throw new NullPointerException("xml file inputstream was null at Settings.Deserialize");
         }
 
 
-        Settings settings = new Settings();
+        LegacySettings settings = new LegacySettings();
 
         DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
         DocumentBuilder db = dbf.newDocumentBuilder();

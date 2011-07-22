@@ -4,10 +4,11 @@
  */
 package fi.helsinki.cs.tmc.utilities;
 
+import fi.helsinki.cs.tmc.data.Course;
 import java.io.File;
 import java.io.FileFilter;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 
 /**
  *
@@ -125,12 +126,12 @@ public class FolderHelper {
             throw new NullPointerException("exercise was null at FolderHelper.generatePath");
         }
 
-        String path = PluginSettings.getSettings().getDefaultFolder();
+        String path = LegacyPluginSettings.getSettings().getDefaultFolder();
         if (path == null) {
             return null;
         }
 
-        path += PalikkaConstants.fileSeparator + exercise.getCourse().getName();
+        path += PalikkaConstants.fileSeparator + exercise.getCourseName();
         path += PalikkaConstants.fileSeparator + exercise.getName();
 
         return new File(path);

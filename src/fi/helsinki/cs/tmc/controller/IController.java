@@ -13,7 +13,5 @@ public interface IController {
 
     void startExerciseOpening();
 
-    void showAdvancedDownload();
-
     void advancedDownload(ExerciseCollection collection);
 }

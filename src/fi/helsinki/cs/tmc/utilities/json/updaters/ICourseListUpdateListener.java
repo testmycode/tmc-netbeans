@@ -8,6 +8,7 @@ package fi.helsinki.cs.tmc.utilities.json.updaters;
  *
  * @author knordman
  */
+@Deprecated
 public interface ICourseListUpdateListener {
     public void courseListDownloadComplete();
     public void courseListDownloadFailed(String errorMessage);

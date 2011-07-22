@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.utilities.textio;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 import fi.helsinki.cs.tmc.utilities.PalikkaConstants;
 
 /**
@@ -27,7 +27,7 @@ public class WriteToFile {
      * @throws Exception When the method fails to write the file to disk.
      */
     public void writeToFile(String json, String filename) throws Exception {
-        String defaultFolder = PluginSettings.getSettings().getDefaultFolder();
+        String defaultFolder = LegacyPluginSettings.getSettings().getDefaultFolder();
         if (defaultFolder == null) {
             return;
         }

@@ -23,11 +23,9 @@ public class JSONExerciseListParserTest {
                 "publish_date: null," +
                 "exercise_file: \"http://example.com/courses/123/exercises/1.zip\"" +
                 "}]";
-        Course course = new Course();
-        ExerciseCollection result = JSONExerciseListParser.parseJson(json, course);
+        ExerciseCollection result = JSONExerciseListParser.parseJson(json);
         
         Exercise exercise = result.getExerciseByName("test");
-        assertSame(course, exercise.getCourse());
         
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTime(exercise.getDeadline());
@@ -41,7 +39,7 @@ public class JSONExerciseListParserTest {
 
     @Test
     public void emptyJson() {
-        ExerciseCollection empty = JSONExerciseListParser.parseJson("[]", new Course());
+        ExerciseCollection empty = JSONExerciseListParser.parseJson("[]");
         assertFalse(empty.iterator().hasNext());
     }
 

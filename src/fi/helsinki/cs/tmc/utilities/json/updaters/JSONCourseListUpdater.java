@@ -7,7 +7,7 @@ package fi.helsinki.cs.tmc.utilities.json.updaters;
 import fi.helsinki.cs.tmc.utilities.http.FileDownloaderAsync;
 import fi.helsinki.cs.tmc.utilities.http.IDownloadListener;
 import java.io.InputStream;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
 import fi.helsinki.cs.tmc.utilities.textio.WriteToFile;
@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.utilities.textio.WriteToFile;
  * This class is used to download a list of courses in JSON format.
  * @author knordman
  */
+@Deprecated
 public class JSONCourseListUpdater implements IDownloadListener {
 
     private ICourseListUpdateListener listener;
@@ -27,7 +28,7 @@ public class JSONCourseListUpdater implements IDownloadListener {
     public JSONCourseListUpdater(String downloadAddress, ICourseListUpdateListener listener) throws Exception {
         this.listener = listener;
         downloader = new FileDownloaderAsync(downloadAddress, this);
-        downloader.setTimeout(PluginSettings.getSettings().getCourseListDownloadTimeout());
+        downloader.setTimeout(LegacyPluginSettings.getSettings().getCourseListDownloadTimeout());
     }
 
     /**

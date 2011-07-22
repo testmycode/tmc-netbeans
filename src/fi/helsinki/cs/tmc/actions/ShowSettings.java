@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.Refactored;
-import fi.helsinki.cs.tmc.settings.PluginSettings;
-import fi.helsinki.cs.tmc.settings.Settings;
+import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
+import fi.helsinki.cs.tmc.settings.LegacySettings;
 import fi.helsinki.cs.tmc.ui.swingPanels.PreferencesPanel;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import java.awt.Dialog;
@@ -30,7 +30,7 @@ public final class ShowSettings extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        Settings settings = PluginSettings.getSettings();
+        LegacySettings settings = LegacyPluginSettings.getSettings();
 
         PreferencesPanel panel = new PreferencesPanel(settings);
 
@@ -40,9 +40,9 @@ public final class ShowSettings extends AbstractAction {
             public void actionPerformed(ActionEvent event) {
                 try {
                     if (event.getSource() == DialogDescriptor.OK_OPTION) {
-                        PluginSettings.saveSettings();
+                        LegacyPluginSettings.saveSettings();
                     } else {
-                        PluginSettings.loadFromFile(); //this erases all changes which user didn't want to save.
+                        LegacyPluginSettings.loadFromFile(); //this erases all changes which user didn't want to save.
                     }
                 } catch (Exception e) {
                     ModalDialogDisplayer.getDefault().displayError(e);

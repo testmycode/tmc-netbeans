@@ -12,14 +12,14 @@ import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
  * Settings object.
  * @author jmturpei
  */
-public class PluginSettings {
+public class LegacyPluginSettings {
 
-    private static Settings settings;
+    private static LegacySettings settings;
 
     /**
      * Constructor
      */
-    private PluginSettings() {
+    private LegacyPluginSettings() {
     }
 
     static {
@@ -30,7 +30,7 @@ public class PluginSettings {
         }
     }
 
-    public static Settings getSettings() {
+    public static LegacySettings getSettings() {
         return settings;
     }
 
@@ -58,7 +58,7 @@ public class PluginSettings {
             }
         }
 
-        Settings.Serialize(settings, file.getOutputStream());
+        LegacySettings.Serialize(settings, file.getOutputStream());
     }
 
     /**
@@ -68,7 +68,7 @@ public class PluginSettings {
 
         InputStream xml = getXmlSettingFile();
 
-        settings = Settings.Deserialize(xml);
+        settings = LegacySettings.Deserialize(xml);
     }
 
     /**
