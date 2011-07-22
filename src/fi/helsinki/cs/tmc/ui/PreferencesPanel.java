@@ -13,37 +13,43 @@ import javax.swing.JPanel;
  * This is missing the "OK" and "Cancel" buttons because it is placed in
  * a dialog that provides these.
  */
-public class PreferencesPanel extends JPanel {
+/*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
     
-    /** Creates new form PreferencesPanel */
-    public PreferencesPanel() {
+    /*package*/ PreferencesPanel() {
         initComponents();
     }
     
+    @Override
     public String getUsername() {
         return usernameTextField.getText();
     }
     
+    @Override
     public void setUsername(String username) {
         usernameTextField.setText(username);
     }
     
+    @Override
     public String getServerBaseUrl() {
         return serverAddressTextField.getText();
     }
     
+    @Override
     public void setServerBaseUrl(String baseUrl) {
         serverAddressTextField.setText(baseUrl);
     }
     
+    @Override
     public String getProjectDir() {
         return projectFolderTextField.getText();
     }
     
+    @Override
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
     }
     
+    @Override
     public void setAvailableCourses(CourseCollection courses) {
         coursesComboBox.removeAllItems();
         for (Course course : courses) {
@@ -52,14 +58,12 @@ public class PreferencesPanel extends JPanel {
         coursesComboBox.setSelectedIndex(-1);
     }
     
-    public int getAvailableCourseCount() {
-        return coursesComboBox.getItemCount();
-    }
-    
+    @Override
     public void setSelectedCourse(Course course) {
         coursesComboBox.setSelectedItem(course);
     }
     
+    @Override
     public Course getSelectedCourse() {
         return (Course)coursesComboBox.getSelectedItem();
     }
