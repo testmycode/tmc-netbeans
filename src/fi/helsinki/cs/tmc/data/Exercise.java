@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
-import fi.helsinki.cs.tmc.Refactored;
 import java.io.Serializable;
 import java.util.Date;
 
@@ -9,7 +8,6 @@ import java.util.Date;
  * A single exercise holds various information concerning an exercise,
  * such as the name and download address.
  */
-@Refactored
 public class Exercise implements Serializable {
 
     private String name;

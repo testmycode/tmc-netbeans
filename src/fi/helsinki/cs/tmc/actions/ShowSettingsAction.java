@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.Refactored;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.TmcServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -23,7 +22,6 @@ id = "fi.helsinki.cs.tmc.actions.ShowSettings")
     @ActionReference(path = "Menu/TMC", position = -100, separatorAfter = -90)
 })
 @Messages("CTL_ShowSettings=Show settings")
-@Refactored
 public final class ShowSettingsAction extends AbstractAction {
 
     private PreferencesUIFactory prefUiFactory;

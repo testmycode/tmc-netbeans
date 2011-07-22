@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.Refactored;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
@@ -17,7 +16,6 @@ import org.openide.util.NbPreferences;
 /**
  * A frontend for the server.
  */
-@Refactored
 public class TmcServerAccess {
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";

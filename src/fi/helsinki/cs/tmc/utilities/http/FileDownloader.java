@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
-import fi.helsinki.cs.tmc.Refactored;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.net.URI;
@@ -23,7 +22,6 @@ import org.apache.http.params.HttpParams;
  * <p>
  * TODO: test and ensure cancellability if necessary.
  */
-@Refactored
 public class FileDownloader {
     private static final int DEFAULT_TIMEOUT = 3 * 60 * 1000;
     

@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.Refactored;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
@@ -17,7 +16,6 @@ import java.util.logging.Logger;
 /**
  * The local course and exercise cache.
  */
-@Refactored
 public class LocalCourseCache {
     
     public static final Logger logger = Logger.getLogger(LocalCourseCache.class.getName());

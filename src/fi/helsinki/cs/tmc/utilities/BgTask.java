@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.utilities;
 
-import fi.helsinki.cs.tmc.Refactored;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
@@ -15,7 +14,6 @@ import org.openide.util.RequestProcessor;
  * sending a thread interrupt unless the given {@link Callable} is
  * also {@link Cancellable}.
  */
-@Refactored
 public class BgTask<V> implements Callable<V>, Cancellable {
     
     private static RequestProcessor defaultRequestProcessor =

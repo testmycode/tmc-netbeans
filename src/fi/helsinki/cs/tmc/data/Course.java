@@ -1,9 +1,7 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
-import fi.helsinki.cs.tmc.Refactored;
 
-@Refactored
 public class Course {
 
     private String name;
