@@ -101,4 +101,19 @@ public class TmcServerAccessTest {
         server.setUsername(name);
         assertEquals(name, newServer().getUsername());
     }
+    
+    @Test
+    public void itStripsTrailingSlashesOffTheBaseUrl() {
+        server.setBaseUrl("http://example.com");
+        assertEquals("http://example.com", server.getBaseUrl());
+        
+        server.setBaseUrl("http://example.com/");
+        assertEquals("http://example.com", server.getBaseUrl());
+        
+        server.setBaseUrl("http://example.com///////");
+        assertEquals("http://example.com", server.getBaseUrl());
+        
+        server.setBaseUrl("http://example.com///////");
+        assertEquals("http://example.com", newServer().getBaseUrl());
+    }
 }

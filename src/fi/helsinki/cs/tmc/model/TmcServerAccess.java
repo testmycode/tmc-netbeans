@@ -56,8 +56,16 @@ public class TmcServerAccess {
     }
     
     public void setBaseUrl(String baseUrl) {
+        baseUrl = stripTrailingSlashes(baseUrl);
         this.baseUrl = baseUrl;
         getPreferences().put(PREF_BASE_URL, baseUrl);
+    }
+    
+    private String stripTrailingSlashes(String s) {
+        while (s.endsWith("/")) {
+            s = s.substring(0, s.length() - 1);
+        }
+        return s;
     }
 
     public String getUsername() {
