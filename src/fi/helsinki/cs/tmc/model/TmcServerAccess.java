@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.server;
+package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.Refactored;
 import fi.helsinki.cs.tmc.data.Course;
@@ -55,7 +55,7 @@ public class TmcServerAccess {
         return baseUrl;
     }
     
-    public final void setBaseUrl(String baseUrl) {
+    public void setBaseUrl(String baseUrl) {
         this.baseUrl = baseUrl;
         getPreferences().put(PREF_BASE_URL, baseUrl);
     }

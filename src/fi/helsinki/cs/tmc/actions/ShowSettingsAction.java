@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.Refactored;
+import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.TmcServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesPanel;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.model.ProjectMediator;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -28,21 +30,43 @@ public final class ShowSettingsAction extends AbstractAction {
 
     private DialogDisplayer displayer;
     private SaveSettingsAction saveAction;
+    private TmcServerAccess serverAccess;
+    private LocalCourseCache localCourseCache;
+    private ProjectMediator projectMediator;
 
     public ShowSettingsAction() {
-        this(DialogDisplayer.getDefault(), new SaveSettingsAction());
+        this(DialogDisplayer.getDefault(),
+                new SaveSettingsAction(),
+                TmcServerAccess.getDefault(),
+                LocalCourseCache.getInstance(),
+                ProjectMediator.getInstance());
     }
 
-    public ShowSettingsAction(DialogDisplayer displayer, SaveSettingsAction saveAction) {
+    public ShowSettingsAction(
+            DialogDisplayer displayer,
+            SaveSettingsAction saveAction,
+            TmcServerAccess serverAccess,
+            LocalCourseCache localCourseCache,
+            ProjectMediator projectMediator) {
         this.displayer = displayer;
         this.saveAction = saveAction;
+        this.serverAccess = serverAccess;
+        this.localCourseCache = localCourseCache;
+        this.projectMediator = projectMediator;
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         final PreferencesPanel prefPanel = new PreferencesPanel();
-        
+
+        prefPanel.setUsername(serverAccess.getUsername());
+        prefPanel.setServerBaseUrl(serverAccess.getBaseUrl());
+        prefPanel.setProjectDir(projectMediator.getProjectDir());
+        prefPanel.setAvailableCourses(localCourseCache.getAvailableCourses());
+        prefPanel.setSelectedCourse(localCourseCache.getCurrentCourse());
+
         ActionListener listener = new ActionListener() {
+
             @Override
             public void actionPerformed(ActionEvent event) {
                 if (event.getSource() == DialogDescriptor.OK_OPTION) {
@@ -51,7 +75,7 @@ public final class ShowSettingsAction extends AbstractAction {
                 }
             }
         };
-        
+
         DialogDescriptor descriptor = new DialogDescriptor(
                 prefPanel,
                 "Preferences",

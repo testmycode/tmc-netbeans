@@ -1,5 +1,6 @@
-package fi.helsinki.cs.tmc.server;
+package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.model.TmcServerAccess;
 import java.util.prefs.BackingStoreException;
 import org.junit.After;
 import java.util.prefs.Preferences;

@@ -1,8 +1,13 @@
-package fi.helsinki.cs.tmc.data;
+package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import java.io.IOException;
 import org.junit.After;
-import fi.helsinki.cs.tmc.settings.ConfigFile;
+import fi.helsinki.cs.tmc.model.ConfigFile;
 import java.util.logging.Level;
 import org.junit.Before;
 import org.junit.Test;

@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
 
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
 import java.io.File;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
@@ -12,92 +14,56 @@ import javax.swing.JPanel;
  * a dialog that provides these.
  */
 public class PreferencesPanel extends JPanel {
-
+    
     /** Creates new form PreferencesPanel */
     public PreferencesPanel() {
         initComponents();
-/*
-        if (settings == null) {
-            throw new NullPointerException("settings was null at PreferencesPanel.Constructor");
-        }
-
-        this.settings = settings;
-
-        studentNumberTextField.setText(settings.getStudentID());
-        hostAddressTextField.setText(settings.getHostAddress());
-        projectFolderTextField.setText(settings.getDefaultFolder());
-        projectFolderTextField.setToolTipText(settings.getDefaultFolder());
-
-
-        coursesComboBox.removeAllItems();
-        
-        //disable paste:
-        studentNumberTextField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_V, KeyEvent.CTRL_MASK), "none");
-        studentNumberTextField.getInputMap().put(KeyStroke.getKeyStroke(KeyEvent.VK_INSERT, KeyEvent.SHIFT_MASK), "none");
-        
-
-        CourseCollection courses = null;
-        try {
-            courses = LocalCourseCache.getInstance().getAvailableCourses();
-        } catch (Exception ex) {
-            //FIXME!
-        }
-
-        if (courses != null) {
-            Course selectedCourse = courses.getCourseByName(settings.getSelectedCourse());
-
-
-            int i = -1;
-            int selectedCourseIndex = -1;
-
-            if (selectedCourse != null) {
-                for (Course course : courses) {
-                    i++;
-                    coursesComboBox.addItem(course);
-
-                    if (course.getName().equals(selectedCourse.getName())) {
-                        selectedCourseIndex = i;
-                    }
-                }
-
-            }
-            coursesComboBox.setSelectedIndex(selectedCourseIndex);
-        }
-         */
     }
     
-    /*
-    @Override
-    public void courseListDownloadComplete() {
-
-        CourseCollection courses = null;
-        try {
-            courses = LocalCourseCache.getInstance().getAvailableCourses();
-        } catch (Exception ex) {
-            ModalDialogDisplayer.getDefault().displayError(ex);
-        }
-
-        if (courses != null) {
-            for (Course course : courses) {
-                coursesComboBox.addItem(course);
-            }
-            refreshCoursesBtn.setEnabled(true);
-            coursesComboBox.setEnabled(true);
-        }
-
-        jsonCourseListUpdater = null;
+    public String getUsername() {
+        return usernameTextField.getText();
     }
-    */
-
-    /*
-    @Override
-    public void courseListDownloadFailed(String errorMessage) {
-        ModalDialogDisplayer.getDefault().displayError("Failed to download course list. Check server address.");
-        refreshCoursesBtn.setEnabled(true);
-        coursesComboBox.setEnabled(true);
-        jsonCourseListUpdater = null;
+    
+    public void setUsername(String username) {
+        usernameTextField.setText(username);
     }
-     */
+    
+    public String getServerBaseUrl() {
+        return serverAddressTextField.getText();
+    }
+    
+    public void setServerBaseUrl(String baseUrl) {
+        serverAddressTextField.setText(baseUrl);
+    }
+    
+    public String getProjectDir() {
+        return projectFolderTextField.getText();
+    }
+    
+    public void setProjectDir(String projectDir) {
+        projectFolderTextField.setText(projectDir);
+    }
+    
+    public void setAvailableCourses(CourseCollection courses) {
+        coursesComboBox.removeAllItems();
+        for (Course course : courses) {
+            coursesComboBox.addItem(course);
+        }
+        coursesComboBox.setSelectedIndex(-1);
+    }
+    
+    public int getAvailableCourseCount() {
+        return coursesComboBox.getItemCount();
+    }
+    
+    public void setSelectedCourse(Course course) {
+        coursesComboBox.setSelectedItem(course);
+    }
+    
+    public Course getSelectedCourse() {
+        return (Course)coursesComboBox.getSelectedItem();
+    }
+    
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -108,28 +74,28 @@ public class PreferencesPanel extends JPanel {
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
 
-        studentNumberLabel = new javax.swing.JLabel();
-        studentNumberTextField = new javax.swing.JTextField();
-        hostAddressLabel = new javax.swing.JLabel();
-        hostAddressTextField = new javax.swing.JTextField();
+        usernameLabel = new javax.swing.JLabel();
+        usernameTextField = new javax.swing.JTextField();
+        serverAddressLabel = new javax.swing.JLabel();
+        serverAddressTextField = new javax.swing.JTextField();
         defaultProjectFolderLabel = new javax.swing.JLabel();
         projectFolderTextField = new javax.swing.JTextField();
         folderChooserBtn = new javax.swing.JButton();
         refreshCoursesBtn = new javax.swing.JButton();
-        jLabel1 = new javax.swing.JLabel();
+        coursesLabel = new javax.swing.JLabel();
         coursesComboBox = new javax.swing.JComboBox();
 
-        studentNumberLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.studentNumberLabel.text")); // NOI18N
+        usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
-        studentNumberTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.studentNumberTextField.text")); // NOI18N
-        studentNumberTextField.setMinimumSize(new java.awt.Dimension(150, 27));
-        studentNumberTextField.setPreferredSize(new java.awt.Dimension(150, 27));
+        usernameTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameTextField.text")); // NOI18N
+        usernameTextField.setMinimumSize(new java.awt.Dimension(150, 27));
+        usernameTextField.setPreferredSize(new java.awt.Dimension(150, 27));
 
-        hostAddressLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.hostAddressLabel.text")); // NOI18N
+        serverAddressLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressLabel.text")); // NOI18N
 
-        hostAddressTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.hostAddressTextField.text")); // NOI18N
-        hostAddressTextField.setMinimumSize(new java.awt.Dimension(250, 27));
-        hostAddressTextField.setPreferredSize(new java.awt.Dimension(250, 27));
+        serverAddressTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressTextField.text")); // NOI18N
+        serverAddressTextField.setMinimumSize(new java.awt.Dimension(250, 27));
+        serverAddressTextField.setPreferredSize(new java.awt.Dimension(250, 27));
 
         defaultProjectFolderLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.defaultProjectFolderLabel.text")); // NOI18N
 
@@ -152,7 +118,7 @@ public class PreferencesPanel extends JPanel {
             }
         });
 
-        jLabel1.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.jLabel1.text")); // NOI18N
+        coursesLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.coursesLabel.text")); // NOI18N
 
         coursesComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
@@ -163,14 +129,14 @@ public class PreferencesPanel extends JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(studentNumberLabel)
-                    .addComponent(hostAddressLabel)
+                    .addComponent(usernameLabel)
+                    .addComponent(serverAddressLabel)
                     .addComponent(defaultProjectFolderLabel)
-                    .addComponent(jLabel1))
+                    .addComponent(coursesLabel))
                 .addGap(55, 55, 55)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(hostAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
-                    .addComponent(studentNumberTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
+                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
+                    .addComponent(usernameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                             .addComponent(projectFolderTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE)
@@ -186,12 +152,12 @@ public class PreferencesPanel extends JPanel {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(studentNumberLabel)
-                    .addComponent(studentNumberTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(usernameLabel)
+                    .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(hostAddressLabel)
-                    .addComponent(hostAddressTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(serverAddressLabel)
+                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(defaultProjectFolderLabel)
@@ -201,7 +167,7 @@ public class PreferencesPanel extends JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(refreshCoursesBtn)
                     .addComponent(coursesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(jLabel1))
+                    .addComponent(coursesLabel))
                 .addContainerGap())
         );
     }// </editor-fold>//GEN-END:initComponents
@@ -222,7 +188,6 @@ public class PreferencesPanel extends JPanel {
         File projectDefaultFolder = folderChooser.getSelectedFile();
 
         projectFolderTextField.setText(projectDefaultFolder.getAbsolutePath());
-        projectFolderTextField.setToolTipText(projectDefaultFolder.getAbsolutePath());
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     
@@ -246,15 +211,15 @@ public class PreferencesPanel extends JPanel {
      */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox coursesComboBox;
+    private javax.swing.JLabel coursesLabel;
     private javax.swing.JLabel defaultProjectFolderLabel;
     private javax.swing.JButton folderChooserBtn;
-    private javax.swing.JLabel hostAddressLabel;
-    private javax.swing.JTextField hostAddressTextField;
-    private javax.swing.JLabel jLabel1;
     private javax.swing.JTextField projectFolderTextField;
     private javax.swing.JButton refreshCoursesBtn;
-    private javax.swing.JLabel studentNumberLabel;
-    private javax.swing.JTextField studentNumberTextField;
+    private javax.swing.JLabel serverAddressLabel;
+    private javax.swing.JTextField serverAddressTextField;
+    private javax.swing.JLabel usernameLabel;
+    private javax.swing.JTextField usernameTextField;
     // End of variables declaration//GEN-END:variables
 
     

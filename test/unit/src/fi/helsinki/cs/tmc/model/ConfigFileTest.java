@@ -1,5 +1,6 @@
-package fi.helsinki.cs.tmc.settings;
+package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.model.ConfigFile;
 import java.io.IOException;
 import org.junit.After;
 import org.junit.Before;

@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.settings;
+package fi.helsinki.cs.tmc.model;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;

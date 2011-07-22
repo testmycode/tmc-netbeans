@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.controller;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.data.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.ProjectHandler;

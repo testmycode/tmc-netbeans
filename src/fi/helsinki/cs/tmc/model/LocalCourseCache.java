@@ -1,9 +1,12 @@
-package fi.helsinki.cs.tmc.data;
+package fi.helsinki.cs.tmc.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.Refactored;
-import fi.helsinki.cs.tmc.settings.ConfigFile;
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;

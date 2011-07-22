@@ -4,7 +4,7 @@
  */
 package fi.helsinki.cs.tmc.utilities;
 
-import fi.helsinki.cs.tmc.data.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
