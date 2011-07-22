@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 
+import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import java.io.File;
@@ -14,6 +15,8 @@ import javax.swing.JPanel;
  * a dialog that provides these.
  */
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
+    
+    private RefreshCoursesAction refreshAction = new RefreshCoursesAction();
     
     /*package*/ PreferencesPanel() {
         initComponents();
@@ -194,25 +197,10 @@ import javax.swing.JPanel;
         projectFolderTextField.setText(projectDefaultFolder.getAbsolutePath());
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
-    
-    /**
-     * Method reads course objects to coursesComboBox e.g in a situation where user changes hostAddress or 
-     * writes it for the first time.
-     * @param evt 
-     */
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        
+        refreshAction.actionPerformed(evt);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
-    /**
-     * This method is called whenever the user chooses something from the
-     * combobox. It takes the chosen course and sets it as the selected course.
-     * @param evt 
-     */
-    /**
-     * The method sends the selected course from coursesComboBox to the settings-object for saving.
-     * @param evt 
-     */
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox coursesComboBox;
     private javax.swing.JLabel coursesLabel;
