@@ -1,10 +1,19 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import java.io.File;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.util.NbPreferences;
 
 /**
@@ -13,6 +22,8 @@ import org.openide.util.NbPreferences;
 public class ProjectMediator {
     // This is a difficult thing to test because the NetBeans Project API
     // is so very unmockable.
+    
+    private static final Logger logger = Logger.getLogger(ProjectMediator.class.getName());
     
     private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
     
@@ -31,9 +42,11 @@ public class ProjectMediator {
 
     
     private OpenProjects openProjects;
+    private ProjectManager projectManager;
     
     public ProjectMediator() {
         this.openProjects = OpenProjects.getDefault();
+        this.projectManager = ProjectManager.getDefault();
     }
     
     public String getProjectRootDir() {
@@ -73,4 +86,73 @@ public class ProjectMediator {
     public void setProjectRootDir(String projectDir) {
         getPreferences().put(PREF_PROJECT_ROOT_DIR, projectDir);
     }
+    
+    /**
+     * Returns the directory of the main project, or null if no main project selected.
+     */
+    public TmcProjectInfo getMainProject() {
+        Project project = openProjects.getMainProject();
+        if (project != null) {
+            return wrapProject(project);
+        } else {
+            return null;
+        }
+    }
+    
+    /**
+     * Returns the list of projects that are open right now.
+     */
+    public List<TmcProjectInfo> getOpenProjects() {
+        // todo: should this use openProjects().get() instead?
+        Project[] projects = openProjects.getOpenProjects();
+        TmcProjectInfo[] infos = new TmcProjectInfo[projects.length];
+        for (int i = 0; i < projects.length; ++i) {
+            infos[i] = wrapProject(projects[i]);
+        }
+        return Arrays.asList(infos);
+    }
+    
+    /**
+     * Returns the intended project directory of an exercise.
+     * 
+     * <p>
+     * The exercise must have a course name set.
+     */
+    public File getProjectDirForExercise(Exercise ex) {
+        String path = 
+                getProjectRootDir() + File.separator +
+                ex.getCourseName() + File.separator +
+                ex.getName().replaceAll("/", File.separator);
+        return new File(path);
+    }
+    
+    /**
+     * Returns the project for the exercise, or null if not yet created.
+     * 
+     * <p>
+     * The exercise must have a course name set.
+     */
+    public TmcProjectInfo tryGetProjectForExercise(Exercise exercise) {
+        File path = getProjectDirForExercise(exercise);
+        FileObject fo = FileUtil.toFileObject(path);
+        if (fo != null) {
+            try {
+                return wrapProject(projectManager.findProject(fo));
+            } catch (IOException ioe) {
+                logger.log(
+                        Level.WARNING,
+                        "Finding project for exercise {0} failed",
+                        new Object[] { exercise.toString(), ioe }
+                        );
+                return null;
+            }
+        } else {
+            return null;
+        }
+    }
+    
+    private TmcProjectInfo wrapProject(Project p) {
+        return new TmcProjectInfo(openProjects, p);
+    }
+    
 }
