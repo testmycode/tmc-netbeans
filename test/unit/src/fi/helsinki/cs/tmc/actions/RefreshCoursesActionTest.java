@@ -94,4 +94,12 @@ public class RefreshCoursesActionTest {
         getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
         dialogs.displayError("Course refresh failed.\nWhoops");
     }
+    
+    @Test
+    public void whenThePreferencesUIIsVisibleItShouldUseTheBaseUrlInTheEditor() {
+        when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
+        when(prefUi.getServerBaseUrl()).thenReturn("http://another.example.com");
+        performAction();
+        verify(serverAccess).setBaseUrl("http://another.example.com");
+    }
 }

@@ -36,6 +36,8 @@ public class RefreshCoursesAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        ensureLatestBaseUrlSaved(); // not ideal
+        
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseCollection>() {
             @Override
             public void backgroundTaskReady(CourseCollection result) {
@@ -55,6 +57,13 @@ public class RefreshCoursesAction extends AbstractAction {
                 dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
             }
         });
+    }
+
+    private void ensureLatestBaseUrlSaved() {
+        PreferencesUI prefUi = prefUIFactory.getCurrentUI();
+        if (prefUi != null) {
+            serverAccess.setBaseUrl(prefUi.getServerBaseUrl());
+        }
     }
     
 }
