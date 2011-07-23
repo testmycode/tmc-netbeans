@@ -26,7 +26,7 @@ public class ProjectMediator {
     }
     
     private static Preferences getPreferences() {
-        return NbPreferences.forModule(TmcServerAccess.class);
+        return NbPreferences.forModule(ServerAccess.class);
     }
 
     

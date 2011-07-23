@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
-import fi.helsinki.cs.tmc.model.TmcServerAccess;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import java.awt.event.ActionEvent;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import org.junit.Before;
@@ -21,7 +21,7 @@ import static org.mockito.Mockito.*;
 
 public class ShowSettingsActionTest {
     
-    @Mock private TmcServerAccess serverAccess;
+    @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache localCourseCache;
     @Mock private ProjectMediator projectMediator;
     @Mock private PreferencesUIFactory prefUiFactory;

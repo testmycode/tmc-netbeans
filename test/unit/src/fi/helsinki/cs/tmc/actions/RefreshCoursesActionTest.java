@@ -6,7 +6,7 @@ import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
-import fi.helsinki.cs.tmc.model.TmcServerAccess;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -19,7 +19,7 @@ import static org.mockito.Mockito.*;
 
 public class RefreshCoursesActionTest {
     
-    @Mock private TmcServerAccess serverAccess;
+    @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache localCourseCache;
     @Mock private PreferencesUIFactory prefUiFactory;
     @Mock private PreferencesUI prefUi;

@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
-import fi.helsinki.cs.tmc.model.TmcServerAccess;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import java.awt.event.ActionEvent;
 import org.junit.Before;
@@ -13,7 +13,7 @@ import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
 
 public class SaveSettingsActionTest {
-    @Mock private TmcServerAccess serverAccess;
+    @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache localCourseCache;
     @Mock private ProjectMediator projectMediator;
     

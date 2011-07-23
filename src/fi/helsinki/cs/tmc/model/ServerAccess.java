@@ -17,21 +17,21 @@ import org.openide.util.NbPreferences;
 /**
  * A frontend for the server.
  */
-public class TmcServerAccess {
+public class ServerAccess {
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";
     
-    private static TmcServerAccess defaultInstance;
+    private static ServerAccess defaultInstance;
     
-    public static TmcServerAccess getDefault() {
+    public static ServerAccess getDefault() {
         if (defaultInstance == null) {
-            defaultInstance = new TmcServerAccess(new NetworkTasks());
+            defaultInstance = new ServerAccess(new NetworkTasks());
         }
         return defaultInstance;
     }
     
     private static Preferences getPreferences() {
-        return NbPreferences.forModule(TmcServerAccess.class);
+        return NbPreferences.forModule(ServerAccess.class);
     }
     
     private NetworkTasks networkTasks;
@@ -39,7 +39,7 @@ public class TmcServerAccess {
     private String username;
 
     
-    public TmcServerAccess(NetworkTasks networkTasks) {
+    public ServerAccess(NetworkTasks networkTasks) {
         this.networkTasks = networkTasks;
         loadPreferences();
     }

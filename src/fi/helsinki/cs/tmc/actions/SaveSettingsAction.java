@@ -2,25 +2,25 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.TmcServerAccess;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 public class SaveSettingsAction extends AbstractAction {
 
-    private TmcServerAccess serverAccess;
+    private ServerAccess serverAccess;
     private LocalCourseCache localCourseCache;
     private ProjectMediator projectMediator;
     
     public SaveSettingsAction() {
-        this(TmcServerAccess.getDefault(),
+        this(ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 ProjectMediator.getInstance());
     }
 
     public SaveSettingsAction(
-            TmcServerAccess serverAccess,
+            ServerAccess serverAccess,
             LocalCourseCache localCourseCache,
             ProjectMediator projectMediator) {
         this.serverAccess = serverAccess;

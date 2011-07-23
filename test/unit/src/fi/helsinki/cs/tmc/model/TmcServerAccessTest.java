@@ -25,11 +25,11 @@ public class TmcServerAccessTest {
     @Mock private CancellableCallable<String> mockDownload;
     
     private Preferences prefs;
-    private TmcServerAccess serverAccess;
+    private ServerAccess serverAccess;
     
     @Before
     public void setUp() {
-        prefs = NbPreferences.forModule(TmcServerAccess.class);
+        prefs = NbPreferences.forModule(ServerAccess.class);
         
         MockitoAnnotations.initMocks(this);
         
@@ -42,8 +42,8 @@ public class TmcServerAccessTest {
         prefs.removeNode();
     }
     
-    private TmcServerAccess newServer() {
-        return new TmcServerAccess(networkTasks);
+    private ServerAccess newServer() {
+        return new ServerAccess(networkTasks);
     }
     
     private void nextDownloadReturns(String s) {
