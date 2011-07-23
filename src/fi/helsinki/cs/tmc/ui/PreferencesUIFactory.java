@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import java.awt.Dialog;
+import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
@@ -21,6 +22,7 @@ public class PreferencesUIFactory {
     }
     
     private PreferencesPanel panel;
+    private Dialog dialog;
     
     /*package*/ PreferencesUIFactory() {
     }
@@ -45,7 +47,8 @@ public class PreferencesUIFactory {
      * 
      * <p>
      * This must be called after
-     * {@link #createCurrentPreferencesUI()}.
+     * {@link #createCurrentPreferencesUI()} but not twice without
+     * creating a new preferences UI in between.
      * 
      * <p>
      * The <code>dialogListener</code> shall receive an event with either
@@ -54,15 +57,31 @@ public class PreferencesUIFactory {
      * panel is forgotten and {@link #getCurrentPanel()} shall return null
      * again.
      */
-    public void showPreferencesDialog(ActionListener dialogListener) {
+    public void showPreferencesDialog(final ActionListener dialogListener) {
+        if (panel == null) {
+            throw new IllegalStateException("Preferences UI not created yet");
+        }
+        if (dialog != null) {
+            throw new IllegalStateException("Preferences UI already visible");
+        }
+        
+        ActionListener closeListener = new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                panel = null;
+                dialog = null;
+                dialogListener.actionPerformed(e);
+            }
+        };
+        
         DialogDescriptor descriptor = new DialogDescriptor(
                 panel,
                 "Settings",
-                true,
+                false,
                 NotifyDescriptor.OK_CANCEL_OPTION,
                 NotifyDescriptor.PLAIN_MESSAGE,
-                dialogListener);
-        Dialog dialog = DialogDisplayer.getDefault().createDialog(descriptor);
+                closeListener);
+        dialog = DialogDisplayer.getDefault().createDialog(descriptor);
         dialog.setVisible(true);
     }
 }
