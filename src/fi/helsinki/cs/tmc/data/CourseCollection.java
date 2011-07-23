@@ -22,4 +22,8 @@ public class CourseCollection extends ArrayList<Course> {
 
         return null;
     }
+    
+    public boolean hasCourseByName(String courseName) {
+        return getCourseByName(courseName) != null;
+    }
 }

@@ -53,10 +53,17 @@ public class SaveSettingsActionTest {
     
     @Test
     public void itShouldSaveTheSelectedCourse() {
-        Course course = mock(Course.class);
+        Course course = new Course("xoo");
         when(prefUi.getSelectedCourse()).thenReturn(course);
         performTheAction();
-        verify(localCourseCache).setCurrentCourse(course);
+        verify(localCourseCache).setCurrentCourseName("xoo");
+    }
+    
+    @Test
+    public void itShouldSaveTheFactThatNoCourseIsSelected() {
+        when(prefUi.getSelectedCourse()).thenReturn(null);
+        performTheAction();
+        verify(localCourseCache).setCurrentCourseName(null);
     }
     
 }

@@ -4,10 +4,8 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import java.io.IOException;
 import org.junit.After;
-import fi.helsinki.cs.tmc.model.ConfigFile;
 import java.util.logging.Level;
 import org.junit.Before;
 import org.junit.Test;
@@ -15,20 +13,25 @@ import static org.junit.Assert.*;
 
 public class LocalCourseCacheTest {
     
+    private Level oldLogLevel;
     private ConfigFile file;
     
     @Before
     public void setUp() {
+        oldLogLevel = LocalCourseCache.logger.getLevel();
+        LocalCourseCache.logger.setLevel(Level.OFF);
+        
         file = new ConfigFile("LocalCourseCacheTest.json");
     }
     
     @After
     public void tearDown() throws IOException {
         file.getFileObject().delete();
+        LocalCourseCache.logger.setLevel(oldLogLevel);
     }
     
     @Test
-    public void itShouldPersistItsData() throws IOException {
+    public void itShouldPersitItsData() throws IOException {
         LocalCourseCache cache = new LocalCourseCache(file);
         CourseCollection courses = new CourseCollection();
         courses.add(new Course("one"));
@@ -37,9 +40,10 @@ public class LocalCourseCacheTest {
         cache = new LocalCourseCache(file);
         assertEquals("one", cache.getAvailableCourses().get(0).getName());
         
-        cache.setCurrentCourse(courses.get(0));
+        cache.setCurrentCourseName("one");
         cache = new LocalCourseCache(file);
         assertEquals("one", cache.getCurrentCourse().getName());
+        assertSame(cache.getAvailableCourses().get(0), cache.getCurrentCourse());
         
         ExerciseCollection exercises = new ExerciseCollection();
         exercises.add(new Exercise("Hello"));
@@ -61,13 +65,20 @@ public class LocalCourseCacheTest {
         
         file.writeContents("oops!");
         
-        Level oldLevel = LocalCourseCache.logger.getLevel();
-        LocalCourseCache.logger.setLevel(Level.OFF);
-        try {
-            cache = new LocalCourseCache(file);
-            assertTrue(cache.getAvailableCourses().isEmpty());
-        } finally {
-            LocalCourseCache.logger.setLevel(oldLevel);
-        }
+        cache = new LocalCourseCache(file);
+        assertTrue(cache.getAvailableCourses().isEmpty());
+    }
+    
+    @Test
+    public void theCurrentCourseShouldHaveAnIdentityOfOneOfTheAvailableCourses() throws IOException {
+        LocalCourseCache cache = new LocalCourseCache(file);
+        CourseCollection courses = new CourseCollection();
+        courses.add(new Course("one"));
+        courses.add(new Course("two"));
+        cache.setAvailableCourses(courses);
+        cache.setCurrentCourseName("two");
+        
+        cache = new LocalCourseCache(file);
+        assertSame("current course has the wrong object identity", cache.getAvailableCourses().get(1), cache.getCurrentCourse());
     }
 }

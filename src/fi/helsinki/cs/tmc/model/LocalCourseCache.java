@@ -30,7 +30,7 @@ public class LocalCourseCache {
 
     private ConfigFile configFile;
     private CourseCollection availableCourses;
-    private Course currentCourse;
+    private String currentCourseName;
     private ExerciseCollection availableExercises; // (for the current course)
 
     public LocalCourseCache() {
@@ -62,12 +62,20 @@ public class LocalCourseCache {
     }
 
     public Course getCurrentCourse() {
-        return currentCourse;
+        return availableCourses.getCourseByName(currentCourseName);
     }
 
-    public void setCurrentCourse(Course currentCourse) {
-        this.currentCourse = currentCourse;
-        trySaveToFile();
+    public String getCurrentCourseName() {
+        return currentCourseName;
+    }
+
+    public void setCurrentCourseName(String currentCourseName) {
+        if (availableCourses.hasCourseByName(currentCourseName)) {
+            this.currentCourseName = currentCourseName;
+            trySaveToFile();
+        } else {
+            logger.warning("Tried to set current course set to one not in available courses");
+        }
     }
 
     /**
@@ -103,7 +111,7 @@ public class LocalCourseCache {
                 this.availableCourses.addAll(stuff.availableCourses);
             }
             
-            this.currentCourse = stuff.currentCourse;
+            this.currentCourseName = stuff.currentCourseName;
             
             this.availableExercises = new ExerciseCollection();
             if (stuff.availableExercises != null) {
@@ -127,7 +135,7 @@ public class LocalCourseCache {
                 .create();
         StoredStuff stuff = new StoredStuff();
         stuff.availableCourses = this.availableCourses;
-        stuff.currentCourse = this.getCurrentCourse();
+        stuff.currentCourseName = this.currentCourseName;
         stuff.availableExercises = this.availableExercises;
         Writer w = configFile.getWriter();
         try {
@@ -139,7 +147,7 @@ public class LocalCourseCache {
     
     private static class StoredStuff {
         public ArrayList<Course> availableCourses;
-        public Course currentCourse;
+        public String currentCourseName;
         public ArrayList<Exercise> availableExercises;
     }
 }
