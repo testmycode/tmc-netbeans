@@ -50,11 +50,13 @@ public class RefreshCoursesAction extends AbstractAction {
 
             @Override
             public void backgroundTaskCancelled() {
+                notifyPrefUiThatCourseRefreshFailed();
             }
 
             @Override
             public void backgroundTaskFailed(Throwable ex) {
                 dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
+                notifyPrefUiThatCourseRefreshFailed();
             }
         });
     }
@@ -63,6 +65,13 @@ public class RefreshCoursesAction extends AbstractAction {
         PreferencesUI prefUi = prefUIFactory.getCurrentUI();
         if (prefUi != null) {
             serverAccess.setBaseUrl(prefUi.getServerBaseUrl());
+        }
+    }
+    
+    private void notifyPrefUiThatCourseRefreshFailed() {
+        PreferencesUI prefUi = prefUIFactory.getCurrentUI();
+        if (prefUi != null) {
+            prefUi.courseRefreshFailedOrCanceled();
         }
     }
     

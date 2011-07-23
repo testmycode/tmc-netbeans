@@ -15,6 +15,8 @@ public interface PreferencesUI {
 
     void setAvailableCourses(CourseCollection courses);
 
+    void courseRefreshFailedOrCanceled();
+    
     void setProjectDir(String projectDir);
 
     void setSelectedCourse(Course course);

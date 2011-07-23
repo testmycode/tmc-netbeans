@@ -53,6 +53,11 @@ public final class ShowSettingsAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        if (prefUiFactory.isPreferencesUiVisible()) {
+            prefUiFactory.activateVisiblePreferencesUi();
+            return;
+        }
+        
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
         prefUI.setUsername(serverAccess.getUsername());

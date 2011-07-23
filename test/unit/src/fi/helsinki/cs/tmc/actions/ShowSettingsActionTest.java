@@ -43,30 +43,43 @@ public class ShowSettingsActionTest {
         action = new ShowSettingsAction(prefUiFactory, saveAction, serverAccess, localCourseCache, projectMediator);
     }
     
+    private void performAction() {
+        action.actionPerformed(null);
+    }
+    
+    
     @Test
     public void itShouldShowThePreferencesDialog() {
-        action.actionPerformed(null);
+        performAction();
         verify(prefUiFactory).showPreferencesDialog(any(ActionListener.class));
+    }
+    
+    @Test
+    public void whenThePreferencesDialogIsAlreadyVisibleItShouldActivateTheDialogIt() {
+        when(prefUiFactory.isPreferencesUiVisible()).thenReturn(true);
+        performAction();
+        verify(prefUiFactory).activateVisiblePreferencesUi();
+        verify(prefUiFactory, never()).createCurrentPreferencesUI();
     }
     
     @Test
     public void itShouldSetTheUsernameInThePreferencesPanel() {
         when(serverAccess.getUsername()).thenReturn("JohnShepard");
-        action.actionPerformed(null);
+        performAction();
         verify(prefUi).setUsername("JohnShepard");
     }
     
     @Test
     public void itShouldSetTheServerBaseUrlInThePreferencesPanel() {
         when(serverAccess.getBaseUrl()).thenReturn("http://www.example.com");
-        action.actionPerformed(null);
+        performAction();
         verify(prefUi).setServerBaseUrl("http://www.example.com");
     }
     
     @Test
     public void itShouldSetTheDefaultProjectDirectoryInThePreferencesPanel() {
         when(projectMediator.getProjectDir()).thenReturn("/foo/bar");
-        action.actionPerformed(null);
+        performAction();
         verify(prefUi).setProjectDir("/foo/bar");
     }
     
@@ -78,7 +91,7 @@ public class ShowSettingsActionTest {
         courses.add(new Course("three"));
         when(localCourseCache.getAvailableCourses()).thenReturn(courses);
         
-        action.actionPerformed(null);
+        performAction();
         
         verify(prefUi).setAvailableCourses(courses);
     }
@@ -92,14 +105,14 @@ public class ShowSettingsActionTest {
         when(localCourseCache.getAvailableCourses()).thenReturn(courses);
         when(localCourseCache.getCurrentCourse()).thenReturn(courses.get(1));
         
-        action.actionPerformed(null);
+        performAction();
         
         verify(prefUi).setSelectedCourse(courses.get(1));
     }
 
     @Test
     public void itShouldCallTheSaveSettingsActionIfTheUserPressesOK() {
-        action.actionPerformed(null);
+        performAction();
         prefListenerCaptor.getValue().actionPerformed(
                 new ActionEvent(DialogDescriptor.OK_OPTION, 0, null)
                 );
@@ -111,7 +124,7 @@ public class ShowSettingsActionTest {
     
     @Test
     public void itShouldNotCallTheSaveSettingsActionIfTheUserPressesOK() {
-        action.actionPerformed(null);
+        performAction();
         prefListenerCaptor.getValue().actionPerformed(
                 new ActionEvent(DialogDescriptor.CANCEL_OPTION, 0, null)
                 );

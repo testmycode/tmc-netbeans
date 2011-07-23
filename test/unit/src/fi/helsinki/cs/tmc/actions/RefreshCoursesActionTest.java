@@ -82,10 +82,18 @@ public class RefreshCoursesActionTest {
     }
     
     @Test
-    public void whenDownloadIsCancelledItShouldDoNothing() {
+    public void whenDownloadIsCancelledItShouldNotChangeTheCourseCache() {
         performAction();
         getDownloadListener().backgroundTaskCancelled();
-        verifyZeroInteractions(localCourseCache, prefUi);
+        verifyZeroInteractions(localCourseCache);
+    }
+    
+    @Test
+    public void whenDownloadIsCancelledItShouldInformThePreferencesUiIfActive() {
+        when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
+        performAction();
+        getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
+        verify(prefUi).courseRefreshFailedOrCanceled();
     }
     
     @Test
@@ -93,6 +101,14 @@ public class RefreshCoursesActionTest {
         performAction();
         getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
         dialogs.displayError("Course refresh failed.\nWhoops");
+    }
+    
+    @Test
+    public void whenDownloadFailsItShouldInformThePreferencesUiIfActive() {
+        when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
+        performAction();
+        getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
+        verify(prefUi).courseRefreshFailedOrCanceled();
     }
     
     @Test

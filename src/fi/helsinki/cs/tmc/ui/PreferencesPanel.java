@@ -59,6 +59,12 @@ import javax.swing.JPanel;
             coursesComboBox.addItem(course);
         }
         coursesComboBox.setSelectedIndex(-1);
+        refreshCoursesBtn.setEnabled(true);
+    }
+    
+    @Override
+    public void courseRefreshFailedOrCanceled() {
+        refreshCoursesBtn.setEnabled(true);
     }
     
     @Override
@@ -199,6 +205,7 @@ import javax.swing.JPanel;
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
         refreshAction.actionPerformed(evt);
+        refreshCoursesBtn.setEnabled(false);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

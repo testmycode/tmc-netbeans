@@ -42,6 +42,17 @@ public class PreferencesUIFactory {
         return this.panel;
     }
     
+    public boolean isPreferencesUiVisible() {
+        return dialog != null;
+    }
+    
+    public void activateVisiblePreferencesUi() {
+        if (dialog == null) {
+            throw new IllegalStateException("Preferences UI not visible");
+        }
+        dialog.requestFocus();
+    }
+    
     /**
      * Shows the preferences dialog.
      * 
