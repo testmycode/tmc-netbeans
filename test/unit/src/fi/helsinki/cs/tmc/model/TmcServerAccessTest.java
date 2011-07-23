@@ -82,7 +82,7 @@ public class TmcServerAccessTest {
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: null," +
                 "publish_date: null," +
-                "exercise_file: \"http://example.com/courses/123/exercises/1.zip\"" +
+                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"" +
                 "}]");
         
         MockBgTaskListener<ExerciseCollection> listener = new MockBgTaskListener<ExerciseCollection>();

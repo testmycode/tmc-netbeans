@@ -10,7 +10,6 @@ import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 

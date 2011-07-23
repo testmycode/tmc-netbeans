@@ -21,7 +21,7 @@ public class JSONExerciseListParserTest {
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: \"2011-06-14T01:30:19+03:00\"," +
                 "publish_date: null," +
-                "exercise_file: \"http://example.com/courses/123/exercises/1.zip\"" +
+                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"" +
                 "}]";
         ExerciseCollection result = JSONExerciseListParser.parseJson(json);
         

@@ -17,7 +17,7 @@ public class Exercise implements Serializable {
     /**
      * The URL this exercise can be downloaded from.
      */
-    @SerializedName("exercise_file")
+    @SerializedName("zip_url")
     private String downloadAddress;
     
     /**
