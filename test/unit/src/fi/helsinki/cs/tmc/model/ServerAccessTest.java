@@ -19,7 +19,7 @@ import org.openide.util.NbPreferences;
 import static org.mockito.Mockito.*;
 import static org.junit.Assert.*;
 
-public class TmcServerAccessTest {
+public class ServerAccessTest {
     
     @Mock private NetworkTasks networkTasks;
     @Mock private CancellableCallable<String> mockDownload;
@@ -73,7 +73,7 @@ public class TmcServerAccessTest {
     @Test
     public void itCanDownloadTheListOfExercisesForACourseFromARemoteJSONFile() throws IOException {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
-        Course course = new Course();
+        Course course = new Course("MyCourse");
         course.setExerciseListDownloadAddress(exerciseUrl);
         when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockDownload);
         nextDownloadReturns(
@@ -95,6 +95,7 @@ public class TmcServerAccessTest {
         assertNotNull(ex);
         assertEquals("http://example.com/courses/123/exercises/1/submissions", ex.getReturnAddress());
         assertEquals("http://example.com/courses/123/exercises/1.zip", ex.getDownloadAddress());
+        assertEquals("MyCourse", ex.getCourseName());
     }
     
     @Test

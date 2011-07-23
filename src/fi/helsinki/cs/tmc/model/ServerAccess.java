@@ -106,7 +106,9 @@ public class ServerAccess {
             @Override
             public ExerciseCollection call() throws Exception {
                 String json = download.call();
-                return JSONExerciseListParser.parseJson(json);
+                ExerciseCollection exercises = JSONExerciseListParser.parseJson(json);
+                exercises.setCourseNameForEach(course.getName());
+                return exercises;
             }
         };
         

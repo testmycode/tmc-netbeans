@@ -23,4 +23,10 @@ public class ExerciseCollection extends ArrayList<Exercise> {
 
         return null;
     }
+
+    public void setCourseNameForEach(String courseName) {
+        for (Exercise ex : this) {
+            ex.setCourseName(courseName);
+        }
+    }
 }
