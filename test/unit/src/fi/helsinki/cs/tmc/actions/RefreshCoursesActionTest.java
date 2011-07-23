@@ -34,6 +34,7 @@ public class RefreshCoursesActionTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        when(serverAccess.getBaseUrl()).thenReturn("http://default.example.com");
         
         this.action = new RefreshCoursesAction(serverAccess, localCourseCache, prefUiFactory, dialogs);
     }
@@ -100,7 +101,7 @@ public class RefreshCoursesActionTest {
     public void whenDownloadFailsItShouldDisplayAnError() {
         performAction();
         getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
-        dialogs.displayError("Course refresh failed.\nWhoops");
+        verify(dialogs).displayError("Course refresh failed.\nWhoops");
     }
     
     @Test
@@ -117,5 +118,33 @@ public class RefreshCoursesActionTest {
         when(prefUi.getServerBaseUrl()).thenReturn("http://another.example.com");
         performAction();
         verify(serverAccess).setBaseUrl("http://another.example.com");
+    }
+    
+    @Test
+    public void whenTheBaseUrlIsNullItShouldDisplayAHelpfulError() {
+        when(serverAccess.getBaseUrl()).thenReturn(null);
+        performAction();
+        verify(dialogs).displayError("Please set the server address first.");
+        verify(serverAccess, never()).startDownloadingCourseList(any(BgTaskListener.class));
+    }
+    
+    @Test
+    public void whenTheBaseUrlIsEmptyItShouldDisplayAHelpfulError() {
+        when(serverAccess.getBaseUrl()).thenReturn("   ");
+        performAction();
+        verify(dialogs).displayError("Please set the server address first.");
+        verify(serverAccess, never()).startDownloadingCourseList(any(BgTaskListener.class));
+    }
+    
+    @Test
+    public void whenTheBaseUrlIsNullOrEmptyItShouldInformThePreferencesUiIfActive() {
+        when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
+        
+        when(serverAccess.getBaseUrl()).thenReturn(null);
+        performAction();
+        when(serverAccess.getBaseUrl()).thenReturn("   ");
+        performAction();
+        
+        verify(prefUi, times(2)).courseRefreshFailedOrCanceled();
     }
 }

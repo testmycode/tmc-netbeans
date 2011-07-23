@@ -204,8 +204,8 @@ import javax.swing.JPanel;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        refreshAction.actionPerformed(evt);
         refreshCoursesBtn.setEnabled(false);
+        refreshAction.actionPerformed(evt);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

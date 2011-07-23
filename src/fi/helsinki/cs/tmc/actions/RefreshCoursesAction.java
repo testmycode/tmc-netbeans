@@ -38,6 +38,12 @@ public class RefreshCoursesAction extends AbstractAction {
     public void actionPerformed(ActionEvent e) {
         ensureLatestBaseUrlSaved(); // not ideal
         
+        if (serverAccess.getBaseUrl() == null || serverAccess.getBaseUrl().trim().isEmpty()) {
+            dialogs.displayError("Please set the server address first.");
+            notifyPrefUiThatCourseRefreshFailed();
+            return;
+        }
+        
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseCollection>() {
             @Override
             public void backgroundTaskReady(CourseCollection result) {

@@ -14,7 +14,10 @@ import static org.junit.Assert.*;
 public class LocalCourseCacheTest {
     
     private Level oldLogLevel;
+    
     private ConfigFile file;
+    
+    private LocalCourseCache cache;
     
     @Before
     public void setUp() {
@@ -22,6 +25,7 @@ public class LocalCourseCacheTest {
         LocalCourseCache.logger.setLevel(Level.OFF);
         
         file = new ConfigFile("LocalCourseCacheTest.json");
+        cache = new LocalCourseCache(file);
     }
     
     @After
@@ -32,7 +36,6 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itShouldPersitItsData() throws IOException {
-        LocalCourseCache cache = new LocalCourseCache(file);
         CourseCollection courses = new CourseCollection();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
@@ -57,7 +60,6 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itShouldBeEmptyWhenFailingToLoadTheLocalCacheFile() throws IOException {
-        LocalCourseCache cache = new LocalCourseCache(file);
         CourseCollection courses = new CourseCollection();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
@@ -71,7 +73,6 @@ public class LocalCourseCacheTest {
     
     @Test
     public void theCurrentCourseShouldHaveAnIdentityOfOneOfTheAvailableCourses() throws IOException {
-        LocalCourseCache cache = new LocalCourseCache(file);
         CourseCollection courses = new CourseCollection();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
@@ -80,5 +81,20 @@ public class LocalCourseCacheTest {
         
         cache = new LocalCourseCache(file);
         assertSame("current course has the wrong object identity", cache.getAvailableCourses().get(1), cache.getCurrentCourse());
+    }
+    
+    @Test
+    public void whenTheCurrentCourseIsChangedTheListOfAvailableExercisesShouldBeCleared() {
+        CourseCollection courses = new CourseCollection();
+        courses.add(new Course("CourseOne"));
+        courses.add(new Course("CourseTwo"));
+        cache.setAvailableCourses(courses);
+        
+        ExerciseCollection oldExercises = new ExerciseCollection();
+        oldExercises.add(new Exercise("ExOne"));
+        cache.setAvailableExercises(oldExercises);
+        cache.setCurrentCourseName("CourseTwo");
+        
+        assertTrue(cache.getAvailableExercises().isEmpty());
     }
 }

@@ -14,7 +14,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * The local course and exercise cache.
+ * Stores list of available courses, the current course and its exercise list.
  */
 public class LocalCourseCache {
     
@@ -40,7 +40,7 @@ public class LocalCourseCache {
     public LocalCourseCache(ConfigFile configFile) {
         this.configFile = configFile;
         this.availableCourses = new CourseCollection();
-        this.availableExercises = null;
+        this.availableExercises = new ExerciseCollection();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -72,6 +72,7 @@ public class LocalCourseCache {
     public void setCurrentCourseName(String currentCourseName) {
         if (availableCourses.hasCourseByName(currentCourseName)) {
             this.currentCourseName = currentCourseName;
+            this.availableExercises.clear();
             trySaveToFile();
         } else {
             logger.warning("Tried to set current course set to one not in available courses");
@@ -79,7 +80,10 @@ public class LocalCourseCache {
     }
 
     /**
-     * Find exercises from currently selected course, or null if no current course.
+     * Find exercises from currently selected course.
+     * 
+     * <p>
+     * If no course is currently selected then returns the empty collection.
      */
     public ExerciseCollection getAvailableExercises() {
         return availableExercises;

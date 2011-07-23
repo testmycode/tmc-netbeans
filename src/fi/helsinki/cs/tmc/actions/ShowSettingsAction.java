@@ -21,7 +21,7 @@ id = "fi.helsinki.cs.tmc.actions.ShowSettings")
 @ActionReferences({
     @ActionReference(path = "Menu/TMC", position = -100, separatorAfter = -90)
 })
-@Messages("CTL_ShowSettings=Show settings")
+@Messages("CTL_ShowSettings=Settings")
 public final class ShowSettingsAction extends AbstractAction {
 
     private PreferencesUIFactory prefUiFactory;
