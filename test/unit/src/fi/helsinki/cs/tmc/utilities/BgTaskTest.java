@@ -25,7 +25,7 @@ public class BgTaskTest {
             }
         };
         
-        BgTask.start("My succeeding task", listener, callable);
+        new BgTask("My succeeding task", listener, callable).start();
         
         listener.waitForCall();
         assertEquals("yay!", listener.result);
@@ -41,7 +41,7 @@ public class BgTaskTest {
             }
         };
         
-        BgTask.start("My failing task", listener, callable);
+        new BgTask("My failing task", listener, callable).start();
         
         listener.waitForCall();
         assertSame(ex, listener.taskException);
@@ -58,7 +58,7 @@ public class BgTaskTest {
             }
         };
         
-        Future<?> future = BgTask.start("My failing task", listener, callable);
+        Future<?> future = new BgTask("My failing task", listener, callable).start();
         future.cancel(true);
         
         listener.waitForCall();

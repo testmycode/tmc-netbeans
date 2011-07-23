@@ -14,29 +14,35 @@ import org.openide.util.RequestProcessor;
  * sending a thread interrupt unless the given {@link Callable} is
  * also {@link Cancellable}.
  */
-public class BgTask<V> implements Callable<V>, Cancellable {
+public class BgTask<V> implements CancellableCallable<V> {
     
     private static RequestProcessor defaultRequestProcessor =
             new RequestProcessor("BgTask processor", 5, true);
-    
-    public static <V> Future<V> start(String label, BgTaskListener<V> listener, Callable<V> callable) {
-        BgTask<V> task = new BgTask<V>(label, listener, callable);
-        return defaultRequestProcessor.submit(task);
-    }
     
     
     private String label;
     private BgTaskListener listener;
     private Callable<V> callable;
+    private ProgressHandle progressHandle;
     
     private final Object cancelLock = new Object();
     private boolean cancelled;
     private Thread executingThread;
     
-    private BgTask(String label, BgTaskListener<V> listener, Callable<V> callable) {
+    public BgTask(String label, BgTaskListener<V> listener, Callable<V> callable) {
         this.label = label;
         this.listener = listener;
         this.callable = callable;
+        this.progressHandle = null;
+    }
+
+    public BgTask<V> withProgressHandle(ProgressHandle handle) {
+        this.progressHandle = handle;
+        return this;
+    }
+    
+    public Future<V> start() {
+        return defaultRequestProcessor.submit(this);
     }
     
     @Override
@@ -55,7 +61,10 @@ public class BgTask<V> implements Callable<V>, Cancellable {
             }
         }
         
-        ProgressHandle progressHandle = ProgressHandleFactory.createSystemHandle(label, this);
+        if (progressHandle == null) {
+            progressHandle = ProgressHandleFactory.createSystemHandle(label, this);
+        }
+        
         progressHandle.start();
         try {
             final V result = callable.call();

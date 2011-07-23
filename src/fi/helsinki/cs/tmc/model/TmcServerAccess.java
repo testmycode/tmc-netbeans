@@ -91,7 +91,7 @@ public class TmcServerAccess {
             }
         };
         
-        return BgTask.start("Download " + getCourseListUrl(), listener, task);
+        return new BgTask("Download " + getCourseListUrl(), listener, task).start();
     }
     
     private String getCourseListUrl() {
@@ -110,7 +110,7 @@ public class TmcServerAccess {
             }
         };
         
-        return BgTask.start("Download " + listUrl, listener, task);
+        return new BgTask("Download " + listUrl, listener, task).start();
     }
     
 }
