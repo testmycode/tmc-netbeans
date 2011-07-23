@@ -17,8 +17,6 @@ public class FileDownloaderAsync implements ITaskListener {
     
     private String downloadAddress;
     
-    private int timeout;
-    
     private byte[] result;
     
     /**
@@ -81,10 +79,9 @@ public class FileDownloaderAsync implements ITaskListener {
         task = new LegacyTaskWithProgressIndicator(this) {
 
             @Override
-            public void executeTask() throws IOException {
-                FileDownloader downloader = new FileDownloader();
-                downloader.setTimeout(timeout);
-                result = downloader.downloadFile(downloadAddress);
+            public void executeTask() throws IOException, InterruptedException {
+                FileDownload download = new FileDownload(downloadAddress);
+                result = download.call();
             }
         };
 
@@ -95,8 +92,8 @@ public class FileDownloaderAsync implements ITaskListener {
      * Set the timeout for the downloader
      * @param timeout 
      */
+    @Deprecated
     public void setTimeout(int timeout) {
-        this.timeout = timeout;
     }
 
     /**

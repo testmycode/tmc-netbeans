@@ -3,10 +3,11 @@ package fi.helsinki.cs.tmc.model;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.utilities.http.FileDownloader;
+import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -24,7 +25,7 @@ public class TmcServerAccess {
     
     public static TmcServerAccess getDefault() {
         if (defaultInstance == null) {
-            defaultInstance = new TmcServerAccess(new FileDownloader());
+            defaultInstance = new TmcServerAccess(new NetworkTasks());
         }
         return defaultInstance;
     }
@@ -33,13 +34,13 @@ public class TmcServerAccess {
         return NbPreferences.forModule(TmcServerAccess.class);
     }
     
-    private FileDownloader fileDownloader;
+    private NetworkTasks networkTasks;
     private String baseUrl;
     private String username;
 
     
-    public TmcServerAccess(FileDownloader fileDownloader) {
-        this.fileDownloader = fileDownloader;
+    public TmcServerAccess(NetworkTasks networkTasks) {
+        this.networkTasks = networkTasks;
         loadPreferences();
     }
     
@@ -76,13 +77,20 @@ public class TmcServerAccess {
     }
     
     public Future<CourseCollection> startDownloadingCourseList(BgTaskListener<CourseCollection> listener) {
-        Callable<CourseCollection> task = new Callable<CourseCollection>() {
+        final CancellableCallable<String> download = networkTasks.downloadTextFile(getCourseListUrl());
+        CancellableCallable<CourseCollection> task = new CancellableCallable<CourseCollection>() {
             @Override
             public CourseCollection call() throws Exception {
-                String json = fileDownloader.downloadTextFile(getCourseListUrl());
+                String json = download.call();
                 return JSONCourseListParser.parseJson(json);
             }
+
+            @Override
+            public boolean cancel() {
+                return download.cancel();
+            }
         };
+        
         return BgTask.start("Download " + getCourseListUrl(), listener, task);
     }
     
@@ -92,13 +100,16 @@ public class TmcServerAccess {
 
     public Future<ExerciseCollection> startDownloadingExerciseList(final Course course, BgTaskListener<ExerciseCollection> listener) {
         final String listUrl = course.getExerciseListDownloadAddress();
+        
+        final CancellableCallable<String> download = networkTasks.downloadTextFile(getCourseListUrl());
         Callable<ExerciseCollection> task = new Callable<ExerciseCollection>() {
             @Override
             public ExerciseCollection call() throws Exception {
-                String json = fileDownloader.downloadTextFile(listUrl);
+                String json = download.call();
                 return JSONExerciseListParser.parseJson(json);
             }
         };
+        
         return BgTask.start("Download " + listUrl, listener, task);
     }
     

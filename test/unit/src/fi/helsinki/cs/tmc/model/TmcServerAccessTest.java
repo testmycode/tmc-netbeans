@@ -1,16 +1,16 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.model.TmcServerAccess;
+import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 import org.junit.After;
 import java.util.prefs.Preferences;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
-import java.io.IOException;
 import fi.helsinki.cs.tmc.testing.MockBgTaskListener;
-import fi.helsinki.cs.tmc.utilities.http.FileDownloader;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -21,21 +21,20 @@ import static org.junit.Assert.*;
 
 public class TmcServerAccessTest {
     
-    @Mock private FileDownloader downloader;
+    @Mock private NetworkTasks networkTasks;
+    @Mock private CancellableCallable<String> mockDownload;
+    
     private Preferences prefs;
-    private TmcServerAccess server;
+    private TmcServerAccess serverAccess;
     
     @Before
     public void setUp() {
         prefs = NbPreferences.forModule(TmcServerAccess.class);
         
         MockitoAnnotations.initMocks(this);
-        server = newServer();
-        server.setBaseUrl("http://example.com");
-    }
-    
-    private TmcServerAccess newServer() {
-        return new TmcServerAccess(downloader);
+        
+        serverAccess = newServer();
+        serverAccess.setBaseUrl("http://example.com");
     }
     
     @After
@@ -43,15 +42,26 @@ public class TmcServerAccessTest {
         prefs.removeNode();
     }
     
+    private TmcServerAccess newServer() {
+        return new TmcServerAccess(networkTasks);
+    }
+    
+    private void nextDownloadReturns(String s) {
+        try {
+            when(mockDownload.call()).thenReturn(s);
+        } catch (Exception e) {
+            fail("should never happen");
+        }
+    }
+    
     @Test
     public void itCanDownloadACourseListFromARemoteJSONFile() throws IOException {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
-        MockBgTaskListener<CourseCollection> listener = new MockBgTaskListener<CourseCollection>();
-        when(downloader.downloadTextFile("http://example.com/courses.json")).thenReturn(
-                "[{name: \"MyCourse\", exercises_json: \"" + exerciseUrl + "\"}]"
-                );
+        when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockDownload);
+        nextDownloadReturns("[{name: \"MyCourse\", exercises_json: \"" + exerciseUrl + "\"}]");
         
-        server.startDownloadingCourseList(listener);
+        MockBgTaskListener<CourseCollection> listener = new MockBgTaskListener<CourseCollection>();
+        serverAccess.startDownloadingCourseList(listener);
         
         listener.waitForCall();
         listener.assertGotSuccess();
@@ -65,19 +75,18 @@ public class TmcServerAccessTest {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
         Course course = new Course();
         course.setExerciseListDownloadAddress(exerciseUrl);
-        
-        MockBgTaskListener<ExerciseCollection> listener = new MockBgTaskListener<ExerciseCollection>();
-        when(downloader.downloadTextFile(exerciseUrl)).thenReturn(
+        when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockDownload);
+        nextDownloadReturns(
                 "[{" +
                 "name: \"MyExercise\"," +
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: null," +
                 "publish_date: null," +
                 "exercise_file: \"http://example.com/courses/123/exercises/1.zip\"" +
-                "}]"
-                );
+                "}]");
         
-        server.startDownloadingExerciseList(course, listener);
+        MockBgTaskListener<ExerciseCollection> listener = new MockBgTaskListener<ExerciseCollection>();
+        serverAccess.startDownloadingExerciseList(course, listener);
         
         listener.waitForCall();
         listener.assertGotSuccess();
@@ -91,29 +100,29 @@ public class TmcServerAccessTest {
     @Test
     public void itStoresTheBaseUrlInPreferences() {
         String url = "http://another.example.com";
-        server.setBaseUrl(url);
+        serverAccess.setBaseUrl(url);
         assertEquals(url, newServer().getBaseUrl());
     }
     
     @Test
     public void itStoresTheUsernameInPreferences() {
         String name = "JohnShepard";
-        server.setUsername(name);
+        serverAccess.setUsername(name);
         assertEquals(name, newServer().getUsername());
     }
     
     @Test
     public void itStripsTrailingSlashesOffTheBaseUrl() {
-        server.setBaseUrl("http://example.com");
-        assertEquals("http://example.com", server.getBaseUrl());
+        serverAccess.setBaseUrl("http://example.com");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
         
-        server.setBaseUrl("http://example.com/");
-        assertEquals("http://example.com", server.getBaseUrl());
+        serverAccess.setBaseUrl("http://example.com/");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
         
-        server.setBaseUrl("http://example.com///////");
-        assertEquals("http://example.com", server.getBaseUrl());
+        serverAccess.setBaseUrl("http://example.com///////");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
         
-        server.setBaseUrl("http://example.com///////");
+        serverAccess.setBaseUrl("http://example.com///////");
         assertEquals("http://example.com", newServer().getBaseUrl());
     }
 }
