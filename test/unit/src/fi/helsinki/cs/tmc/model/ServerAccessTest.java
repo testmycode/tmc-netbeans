@@ -104,7 +104,7 @@ public class ServerAccessTest {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
         Course course = new Course("MyCourse");
         course.setExerciseListDownloadAddress(exerciseUrl);
-        when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockDownload);
+        when(networkTasks.downloadTextFile(exerciseUrl)).thenReturn(mockDownload);
         nextDownloadReturns(
                 "[{" +
                 "name: \"MyExercise\"," +

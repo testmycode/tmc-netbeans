@@ -60,6 +60,10 @@ public class ServerAccess {
         getPreferences().put(PREF_BASE_URL, baseUrl);
     }
     
+    private String getCourseListUrl() {
+        return baseUrl + "/courses.json";
+    }
+    
     private String stripTrailingSlashes(String s) {
         while (s.endsWith("/")) {
             s = s.substring(0, s.length() - 1);
@@ -93,15 +97,11 @@ public class ServerAccess {
         
         return new BgTask("Download " + getCourseListUrl(), listener, task).start();
     }
-    
-    private String getCourseListUrl() {
-        return baseUrl + "/courses.json";
-    }
 
     public Future<ExerciseCollection> startDownloadingExerciseList(final Course course, BgTaskListener<ExerciseCollection> listener) {
         final String listUrl = course.getExerciseListDownloadAddress();
         
-        final CancellableCallable<String> download = networkTasks.downloadTextFile(getCourseListUrl());
+        final CancellableCallable<String> download = networkTasks.downloadTextFile(listUrl);
         Callable<ExerciseCollection> task = new Callable<ExerciseCollection>() {
             @Override
             public ExerciseCollection call() throws Exception {
