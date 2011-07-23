@@ -78,7 +78,7 @@ public class ShowSettingsActionTest {
     
     @Test
     public void itShouldSetTheDefaultProjectDirectoryInThePreferencesPanel() {
-        when(projectMediator.getProjectDir()).thenReturn("/foo/bar");
+        when(projectMediator.getProjectRootDir()).thenReturn("/foo/bar");
         performAction();
         verify(prefUi).setProjectDir("/foo/bar");
     }

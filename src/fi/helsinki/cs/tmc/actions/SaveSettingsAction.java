@@ -41,7 +41,7 @@ public class SaveSettingsAction extends AbstractAction {
 
         serverAccess.setUsername(prefUi.getUsername());
         serverAccess.setBaseUrl(prefUi.getServerBaseUrl());
-        projectMediator.setProjectDir(prefUi.getProjectDir());
+        projectMediator.setProjectRootDir(prefUi.getProjectDir());
         if (prefUi.getSelectedCourse() != null) {
             localCourseCache.setCurrentCourseName(prefUi.getSelectedCourse().getName());
         } else {

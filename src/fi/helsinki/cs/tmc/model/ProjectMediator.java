@@ -14,7 +14,7 @@ public class ProjectMediator {
     // This is a difficult thing to test because the NetBeans Project API
     // is so very unmockable.
     
-    private static final String PREF_PROJECT_DIR = "projectDir";
+    private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
     
     private static ProjectMediator instance;
 
@@ -36,16 +36,16 @@ public class ProjectMediator {
         this.openProjects = OpenProjects.getDefault();
     }
     
-    public String getProjectDir() {
-        String dir = getPreferences().get(PREF_PROJECT_DIR, null);
+    public String getProjectRootDir() {
+        String dir = getPreferences().get(PREF_PROJECT_ROOT_DIR, null);
         if (dir != null) {
             return dir;
         } else {
-            return getDefaultProjectDir();
+            return getDefaultProjectRootDir();
         }
     }
     
-    private String getDefaultProjectDir() {
+    private String getDefaultProjectRootDir() {
         File candidate;
         
         candidate = ProjectChooser.getProjectsFolder();
@@ -70,7 +70,7 @@ public class ProjectMediator {
         }
     }
 
-    public void setProjectDir(String projectDir) {
-        getPreferences().put(PREF_PROJECT_DIR, projectDir);
+    public void setProjectRootDir(String projectDir) {
+        getPreferences().put(PREF_PROJECT_ROOT_DIR, projectDir);
     }
 }

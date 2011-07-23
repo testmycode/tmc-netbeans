@@ -48,7 +48,7 @@ public class SaveSettingsActionTest {
     public void itShouldSaveTheProjectDirectory() {
         when(prefUi.getProjectDir()).thenReturn("/foo/bar");
         performTheAction();
-        verify(projectMediator).setProjectDir("/foo/bar");
+        verify(projectMediator).setProjectRootDir("/foo/bar");
     }
     
     @Test

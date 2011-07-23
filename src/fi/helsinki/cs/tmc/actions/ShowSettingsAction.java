@@ -62,7 +62,7 @@ public final class ShowSettingsAction extends AbstractAction {
 
         prefUI.setUsername(serverAccess.getUsername());
         prefUI.setServerBaseUrl(serverAccess.getBaseUrl());
-        prefUI.setProjectDir(projectMediator.getProjectDir());
+        prefUI.setProjectDir(projectMediator.getProjectRootDir());
         prefUI.setAvailableCourses(localCourseCache.getAvailableCourses());
         prefUI.setSelectedCourse(localCourseCache.getCurrentCourse());
 
