@@ -55,6 +55,35 @@ public class ServerAccessTest {
     }
     
     @Test
+    public void itStoresTheBaseUrlInPreferences() {
+        String url = "http://another.example.com";
+        serverAccess.setBaseUrl(url);
+        assertEquals(url, newServer().getBaseUrl());
+    }
+    
+    @Test
+    public void itStoresTheUsernameInPreferences() {
+        String name = "JohnShepard";
+        serverAccess.setUsername(name);
+        assertEquals(name, newServer().getUsername());
+    }
+    
+    @Test
+    public void itStripsTrailingSlashesOffTheBaseUrl() {
+        serverAccess.setBaseUrl("http://example.com");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
+        
+        serverAccess.setBaseUrl("http://example.com/");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
+        
+        serverAccess.setBaseUrl("http://example.com///////");
+        assertEquals("http://example.com", serverAccess.getBaseUrl());
+        
+        serverAccess.setBaseUrl("http://example.com///////");
+        assertEquals("http://example.com", newServer().getBaseUrl());
+    }
+    
+    @Test
     public void itCanDownloadACourseListFromARemoteJSONFile() throws IOException {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
         when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockDownload);
@@ -96,34 +125,5 @@ public class ServerAccessTest {
         assertEquals("http://example.com/courses/123/exercises/1/submissions", ex.getReturnAddress());
         assertEquals("http://example.com/courses/123/exercises/1.zip", ex.getDownloadAddress());
         assertEquals("MyCourse", ex.getCourseName());
-    }
-    
-    @Test
-    public void itStoresTheBaseUrlInPreferences() {
-        String url = "http://another.example.com";
-        serverAccess.setBaseUrl(url);
-        assertEquals(url, newServer().getBaseUrl());
-    }
-    
-    @Test
-    public void itStoresTheUsernameInPreferences() {
-        String name = "JohnShepard";
-        serverAccess.setUsername(name);
-        assertEquals(name, newServer().getUsername());
-    }
-    
-    @Test
-    public void itStripsTrailingSlashesOffTheBaseUrl() {
-        serverAccess.setBaseUrl("http://example.com");
-        assertEquals("http://example.com", serverAccess.getBaseUrl());
-        
-        serverAccess.setBaseUrl("http://example.com/");
-        assertEquals("http://example.com", serverAccess.getBaseUrl());
-        
-        serverAccess.setBaseUrl("http://example.com///////");
-        assertEquals("http://example.com", serverAccess.getBaseUrl());
-        
-        serverAccess.setBaseUrl("http://example.com///////");
-        assertEquals("http://example.com", newServer().getBaseUrl());
     }
 }
