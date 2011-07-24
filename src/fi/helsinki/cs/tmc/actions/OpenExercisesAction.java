@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ProjectSynchronizer;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -34,14 +33,12 @@ public class OpenExercisesAction extends AbstractAction {
     private ServerAccess serverAccess;
     private LocalCourseCache courseCache;
     private ProjectMediator projectMediator;
-    private ProjectSynchronizer projectSync;
     private ModalDialogDisplayer dialogs;
 
     public OpenExercisesAction() {
         this(ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 ProjectMediator.getInstance(),
-                ProjectSynchronizer.getInstance(),
                 ModalDialogDisplayer.getDefault());
     }
 
@@ -49,12 +46,10 @@ public class OpenExercisesAction extends AbstractAction {
             ServerAccess serverAccess,
             LocalCourseCache courseCache,
             ProjectMediator projectMediator,
-            ProjectSynchronizer projectSync,
             ModalDialogDisplayer dialogs) {
         this.serverAccess = serverAccess;
         this.courseCache = courseCache;
         this.projectMediator = projectMediator;
-        this.projectSync = projectSync;
         this.dialogs = dialogs;
     }
     
@@ -102,7 +97,7 @@ public class OpenExercisesAction extends AbstractAction {
         for (final Exercise exercise : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
             if (proj == null) {
-                projectSync.startDownloadingExercise(exercise, new BgTaskListener<TmcProjectInfo>() {
+                serverAccess.startDownloadingExerciseProject(exercise, new BgTaskListener<TmcProjectInfo>() {
                     @Override
                     public void backgroundTaskReady(TmcProjectInfo result) {
                         result.open();

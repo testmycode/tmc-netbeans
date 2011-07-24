@@ -8,7 +8,6 @@ import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
-import fi.helsinki.cs.tmc.utilities.PalikkaConstants;
 
 /**
  * Used to store, write and read the status of a single exercise from disk.
@@ -64,7 +63,7 @@ public class ExerciseStatus implements Serializable {
             return null;
         }
 
-        String statusFilePath = projectFolder.getAbsolutePath() + PalikkaConstants.fileSeparator + "exerciseStatus.bin";
+        String statusFilePath = projectFolder.getAbsolutePath() + File.separator + "exerciseStatus.bin";
 
         return new File(statusFilePath);
     }

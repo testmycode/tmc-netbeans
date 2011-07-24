@@ -98,7 +98,7 @@ public class ProjectHandler {
 
         projectPath = projectPath.substring(defaultPath.length());
 
-        String[] folders = projectPath.split(PalikkaConstants.fileSeparator);
+        String[] folders = projectPath.split(File.separator);
 
         if (folders.length < 3) {
             return null;

@@ -3,9 +3,7 @@ package fi.helsinki.cs.tmc.utilities.http;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
 public class NetworkTasks {
-    private static final int DEFAULT_TIMEOUT = 3 * 60 * 1000;
-    
-    public CancellableCallable<byte[]> downloadFile(String url) {
+    public CancellableCallable<byte[]> downloadBinaryFile(String url) {
         return new FileDownload(url);
     }
     

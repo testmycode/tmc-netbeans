@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
@@ -9,6 +10,8 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
+import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
+import fi.helsinki.cs.tmc.utilities.zip.Zipper;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.prefs.Preferences;
@@ -25,7 +28,12 @@ public class ServerAccess {
     
     public static ServerAccess getDefault() {
         if (defaultInstance == null) {
-            defaultInstance = new ServerAccess(new NetworkTasks());
+            defaultInstance = new ServerAccess(
+                    new NetworkTasks(),
+                    ProjectMediator.getInstance(),
+                    Unzipper.getDefault(),
+                    Zipper.getDefault()
+                    );
         }
         return defaultInstance;
     }
@@ -35,14 +43,25 @@ public class ServerAccess {
     }
     
     private NetworkTasks networkTasks;
+    private ProjectMediator projectMediator;
+    private Unzipper unzipper;
+    private Zipper zipper;
     private String baseUrl;
     private String username;
 
-    
-    public ServerAccess(NetworkTasks networkTasks) {
+    public ServerAccess(
+            NetworkTasks networkTasks,
+            ProjectMediator projectMediator,
+            Unzipper unzipper,
+            Zipper zipper) {
         this.networkTasks = networkTasks;
+        this.projectMediator = projectMediator;
+        this.unzipper = unzipper;
+        this.zipper = zipper;
         loadPreferences();
     }
+    
+    
     
     private void loadPreferences() {
         Preferences prefs = getPreferences();
@@ -58,6 +77,10 @@ public class ServerAccess {
         baseUrl = stripTrailingSlashes(baseUrl);
         this.baseUrl = baseUrl;
         getPreferences().put(PREF_BASE_URL, baseUrl);
+    }
+
+    public NetworkTasks getNetworkTasks() {
+        return networkTasks;
     }
     
     private String getCourseListUrl() {
@@ -113,6 +136,27 @@ public class ServerAccess {
         };
         
         return new BgTask("Download " + listUrl, listener, task).start();
+    }
+
+    
+    public Future<TmcProjectInfo> startDownloadingExerciseProject(final Exercise exercise, BgTaskListener<TmcProjectInfo> listener) {
+        final String zipUrl = exercise.getDownloadAddress();
+        
+        final CancellableCallable<byte[]> download = networkTasks.downloadBinaryFile(zipUrl);
+        Callable<TmcProjectInfo> task = new Callable<TmcProjectInfo>() {
+            @Override
+            public TmcProjectInfo call() throws Exception {
+                byte[] data = download.call();
+                unzipper.unZip(data, projectMediator.getProjectRootDir());
+                TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
+                if (project == null) {
+                    throw new Exception("Failed to open the downloaded project");
+                }
+                return project;
+            }
+        };
+        
+        return new BgTask("Download " + zipUrl, listener, task).start();
     }
     
 }

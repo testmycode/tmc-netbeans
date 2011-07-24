@@ -4,7 +4,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
-import fi.helsinki.cs.tmc.utilities.PalikkaConstants;
+import java.io.File;
 
 /**
  * This class is used to read Strings to files.
@@ -34,7 +34,7 @@ public class WriteToFile {
 
         try {
 
-            FileWriter outFile = new FileWriter(defaultFolder + PalikkaConstants.fileSeparator + filename);
+            FileWriter outFile = new FileWriter(defaultFolder + File.separator + filename);
             PrintWriter out = new PrintWriter(outFile);
 
             out.print(json);
@@ -43,7 +43,7 @@ public class WriteToFile {
             outFile.close();
 
         } catch (Exception e) {
-            throw new IOException("Unable to write file " + defaultFolder + PalikkaConstants.fileSeparator + filename);
+            throw new IOException("Unable to write file " + defaultFolder + File.separator + filename);
         }
     }
 }

@@ -131,8 +131,8 @@ public class FolderHelper {
             return null;
         }
 
-        path += PalikkaConstants.fileSeparator + exercise.getCourseName();
-        path += PalikkaConstants.fileSeparator + exercise.getName();
+        path += File.separator + exercise.getCourseName();
+        path += File.separator + exercise.getName();
 
         return new File(path);
     }

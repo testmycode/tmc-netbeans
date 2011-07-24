@@ -11,7 +11,6 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import fi.helsinki.cs.tmc.utilities.PalikkaConstants;
 
 /**
  *
@@ -19,6 +18,15 @@ import fi.helsinki.cs.tmc.utilities.PalikkaConstants;
  */
 public class Zipper {
 
+    private static Zipper instance;
+    
+    public static Zipper getDefault() {
+        if (instance == null) {
+            instance = new Zipper();
+        }
+        return instance;
+    }
+    
     /**
      * Constructor
      */
@@ -34,7 +42,7 @@ public class Zipper {
      */
     private void writeEntry(File file, ZipOutputStream out, String path) throws IOException {
         byte[] buffer = new byte[1024];
-        out.putNextEntry(new ZipEntry(path + PalikkaConstants.fileSeparator + file.getName()));
+        out.putNextEntry(new ZipEntry(path + File.separator + file.getName()));
 
         FileInputStream in = new FileInputStream(file);
 
@@ -58,12 +66,12 @@ public class Zipper {
     private void zipFileRecur(File file, ZipOutputStream out, String path) throws IOException, NullPointerException {
         String currentPath;
         if (!path.equals("")) {
-            currentPath = path + PalikkaConstants.fileSeparator + file.getName();
+            currentPath = path + File.separator + file.getName();
         } else {
             currentPath = file.getName();
         }
 
-        out.putNextEntry(new ZipEntry(currentPath + PalikkaConstants.fileSeparator));  //Add the folder to the zip file
+        out.putNextEntry(new ZipEntry(currentPath + File.separator));  //Add the folder to the zip file
         out.closeEntry();
 
         File[] files = file.listFiles();

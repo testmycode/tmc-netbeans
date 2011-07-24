@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.actions;
 import org.junit.After;
 import java.io.IOException;
 import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
-import fi.helsinki.cs.tmc.model.ProjectSynchronizer;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
@@ -27,7 +26,6 @@ public class OpenExercisesActionTest {
     @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache courseCache;
     @Mock private ProjectMediator projectMediator;
-    @Mock private ProjectSynchronizer projectSync;
     @Mock private ModalDialogDisplayer dialogs;
     
     private Course currentCourse;
@@ -58,7 +56,6 @@ public class OpenExercisesActionTest {
                 serverAccess,
                 courseCache,
                 projectMediator,
-                projectSync,
                 dialogs
                 );
     }
@@ -97,7 +94,7 @@ public class OpenExercisesActionTest {
         respondWithThreeExercises();
         
         verifyStartedProjDownload(threeExercises.get(2));
-        verifyNoMoreInteractions(projectSync);
+        verifyNoMoreInteractions(serverAccess);
         
         verify(proj1).open();
         verify(proj2).open();
@@ -168,7 +165,7 @@ public class OpenExercisesActionTest {
         verify(proj1).open();
         
         verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
-        verify(projectSync, never()).startDownloadingExercise(any(Exercise.class), any(BgTaskListener.class));
+        verify(serverAccess, never()).startDownloadingExerciseProject(any(Exercise.class), any(BgTaskListener.class));
     }
     
     @Test
@@ -178,7 +175,7 @@ public class OpenExercisesActionTest {
         
         verify(dialogs, never()).displayWarning(any(String.class));
         verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
-        verify(projectSync, never()).startDownloadingExercise(any(Exercise.class), any(BgTaskListener.class));
+        verify(serverAccess, never()).startDownloadingExerciseProject(any(Exercise.class), any(BgTaskListener.class));
     }
     
     private void respondWithThreeExercises() {
@@ -192,7 +189,7 @@ public class OpenExercisesActionTest {
     }
     
     private BgTaskListener<TmcProjectInfo> verifyStartedProjDownload(Exercise exercise) {
-        verify(projectSync).startDownloadingExercise(same(exercise), projListenerCaptor.capture());
+        verify(serverAccess).startDownloadingExerciseProject(same(exercise), projListenerCaptor.capture());
         return projListenerCaptor.getValue();
     }
 }
