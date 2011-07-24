@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.utilities.zip;
 
 import java.io.ByteArrayOutputStream;
@@ -12,17 +8,13 @@ import java.io.FileNotFoundException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
-/**
- *
- * @author knordman
- */
-public class Zipper {
+public class NbProjectZipper {
 
-    private static Zipper instance;
+    private static NbProjectZipper instance;
     
-    public static Zipper getDefault() {
+    public static NbProjectZipper getDefault() {
         if (instance == null) {
-            instance = new Zipper();
+            instance = new NbProjectZipper();
         }
         return instance;
     }
@@ -30,7 +22,7 @@ public class Zipper {
     /**
      * Constructor
      */
-    public Zipper() {
+    public NbProjectZipper() {
     }
 
     /**

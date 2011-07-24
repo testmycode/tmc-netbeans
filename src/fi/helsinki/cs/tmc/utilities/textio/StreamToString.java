@@ -11,6 +11,7 @@ import java.io.StringWriter;
  * This class is used to read InputStreams to String objects.
  * @author kkaltiai
  */
+@Deprecated // use commons IO instead
 public class StreamToString {
 
     /**

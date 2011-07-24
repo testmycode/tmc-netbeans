@@ -113,6 +113,13 @@ public class ProjectMediator {
     }
     
     /**
+     * Returns the directory to which exercises are to be downloaded.
+     */
+    public File getCourseRootDir(String courseName) {
+        return new File(getProjectRootDir() + File.separator + courseName);
+    }
+    
+    /**
      * Returns the intended project directory of an exercise.
      * 
      * <p>
@@ -122,7 +129,7 @@ public class ProjectMediator {
         String path = 
                 getProjectRootDir() + File.separator +
                 ex.getCourseName() + File.separator +
-                ex.getName().replaceAll("/", File.separator);
+                ex.getName().replaceAll("/", "-");
         return new File(path);
     }
     
@@ -137,7 +144,12 @@ public class ProjectMediator {
         FileObject fo = FileUtil.toFileObject(path);
         if (fo != null) {
             try {
-                return wrapProject(projectManager.findProject(fo));
+                Project project = projectManager.findProject(fo);
+                if (project != null) {
+                    return wrapProject(project);
+                } else {
+                    return null;
+                }
             } catch (IOException ioe) {
                 logger.log(
                         Level.WARNING,

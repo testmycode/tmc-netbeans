@@ -1,7 +1,8 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
-import fi.helsinki.cs.tmc.utilities.zip.Zipper;
+import java.io.File;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
@@ -25,8 +26,8 @@ public class ServerAccessTest {
     
     @Mock private NetworkTasks networkTasks;
     @Mock private ProjectMediator projectMediator;
-    @Mock private Unzipper unzipper;
-    @Mock private Zipper zipper;
+    @Mock private NbProjectUnzipper unzipper;
+    @Mock private NbProjectZipper zipper;
     @Mock private CancellableCallable<String> mockTextDownload;
     @Mock private CancellableCallable<byte[]> mockBinaryDownload;
     
@@ -147,10 +148,10 @@ public class ServerAccessTest {
     
     @Test
     public void itCanDownloadAnExerciseFromTheServerAndUnzipItAsAProject() throws IOException {
-        Exercise exercise = makeDownloadableExercise("Dir1/Dir2/MyEx");
+        Exercise exercise = makeDownloadableExercise("Dir1-Dir2-MyEx");
         
         TmcProjectInfo project = mock(TmcProjectInfo.class);
-        when(projectMediator.getProjectRootDir()).thenReturn("/foo");
+        when(projectMediator.getCourseRootDir("MyCourse")).thenReturn(new File("/foo/MyCourse"));
         when(projectMediator.tryGetProjectForExercise(exercise)).thenReturn(project);
         
         MockBgTaskListener<TmcProjectInfo> listener = new MockBgTaskListener<TmcProjectInfo>();
@@ -160,14 +161,14 @@ public class ServerAccessTest {
         listener.assertGotSuccess();
         
         assertSame(project, listener.result);
-        verify(unzipper).unZip(fakeBinaryData, "/foo");
+        verify(unzipper).unzipProject(fakeBinaryData, new File("/foo/MyCourse"), "Dir1-Dir2-MyEx");
     }
     
     @Test
     public void whenNetBeansCannotOpenADownloadedExerciseItShouldThrowAnExceptionInTheDownloadThread() throws IOException {
-        Exercise exercise = makeDownloadableExercise("Dir1/Dir2/MyEx");
+        Exercise exercise = makeDownloadableExercise("Dir1-Dir2-MyEx");
         
-        when(projectMediator.getProjectRootDir()).thenReturn("/foo");
+        when(projectMediator.getCourseRootDir("MyCourse")).thenReturn(new File("/foo/MyCourse"));
         when(projectMediator.tryGetProjectForExercise(exercise)).thenReturn(null);
         
         MockBgTaskListener<TmcProjectInfo> listener = new MockBgTaskListener<TmcProjectInfo>();
@@ -176,12 +177,13 @@ public class ServerAccessTest {
         listener.waitForCall();
         
         assertNotNull(listener.taskException);
-        verify(unzipper).unZip(fakeBinaryData, "/foo");
+        verify(unzipper).unzipProject(fakeBinaryData, new File("/foo/MyCourse"), "Dir1-Dir2-MyEx");
     }
     
     private Exercise makeDownloadableExercise(String exerciseName) {
         String zipUrl = "http://example.com/courses/123/exercises/456.zip";
         Exercise exercise = new Exercise(exerciseName);
+        exercise.setCourseName("MyCourse");
         exercise.setDownloadAddress(zipUrl);
         when(networkTasks.downloadBinaryFile(zipUrl)).thenReturn(mockBinaryDownload);
         nextBinaryDownloadReturns(fakeBinaryData);

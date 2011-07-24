@@ -19,7 +19,7 @@ import fi.helsinki.cs.tmc.utilities.exercise.TestResultHandler;
 import fi.helsinki.cs.tmc.utilities.json.updaters.IExerciseListUpdateListener;
 import fi.helsinki.cs.tmc.utilities.json.updaters.JSONExerciseListUpdater;
 import fi.helsinki.cs.tmc.utilities.textio.StreamToString;
-import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import java.io.File;
 import java.io.InputStream;
 import java.util.Date;
@@ -202,7 +202,7 @@ public class Controller implements
             }
         }
         
-        Unzipper unzipper = new Unzipper();
+        NbProjectUnzipper unzipper = new NbProjectUnzipper();
 
         try {
             unzipper.unZip(fileContent, FolderHelper.generatePath(downloadedExercise).getAbsolutePath());

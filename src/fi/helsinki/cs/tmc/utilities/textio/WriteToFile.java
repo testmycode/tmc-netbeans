@@ -11,6 +11,7 @@ import java.io.File;
  * Palikka uses it only for JSON files.
  * @author kkaltiai
  */
+@Deprecated // use commons IO instead
 public class WriteToFile {
 
     /**

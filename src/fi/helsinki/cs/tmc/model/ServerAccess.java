@@ -10,8 +10,9 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
-import fi.helsinki.cs.tmc.utilities.zip.Unzipper;
-import fi.helsinki.cs.tmc.utilities.zip.Zipper;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
+import java.io.File;
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import java.util.prefs.Preferences;
@@ -31,8 +32,8 @@ public class ServerAccess {
             defaultInstance = new ServerAccess(
                     new NetworkTasks(),
                     ProjectMediator.getInstance(),
-                    Unzipper.getDefault(),
-                    Zipper.getDefault()
+                    NbProjectUnzipper.getDefault(),
+                    NbProjectZipper.getDefault()
                     );
         }
         return defaultInstance;
@@ -44,16 +45,16 @@ public class ServerAccess {
     
     private NetworkTasks networkTasks;
     private ProjectMediator projectMediator;
-    private Unzipper unzipper;
-    private Zipper zipper;
+    private NbProjectUnzipper unzipper;
+    private NbProjectZipper zipper;
     private String baseUrl;
     private String username;
 
     public ServerAccess(
             NetworkTasks networkTasks,
             ProjectMediator projectMediator,
-            Unzipper unzipper,
-            Zipper zipper) {
+            NbProjectUnzipper unzipper,
+            NbProjectZipper zipper) {
         this.networkTasks = networkTasks;
         this.projectMediator = projectMediator;
         this.unzipper = unzipper;
@@ -147,7 +148,8 @@ public class ServerAccess {
             @Override
             public TmcProjectInfo call() throws Exception {
                 byte[] data = download.call();
-                unzipper.unZip(data, projectMediator.getProjectRootDir());
+                File courseDir = projectMediator.getCourseRootDir(exercise.getCourseName());
+                unzipper.unzipProject(data, courseDir, exercise.getName());
                 TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
                 if (project == null) {
                     throw new Exception("Failed to open the downloaded project");

@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.settings.LegacyPluginSettings;
 import fi.helsinki.cs.tmc.settings.LegacySettings;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
-import fi.helsinki.cs.tmc.utilities.zip.Zipper;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 
 /**
  * This class is used to send a single exercise to the server for review.
@@ -55,7 +55,7 @@ public class ExerciseUploader implements IUploadListener {
                 return;
             }
 
-            Zipper zipper = new Zipper();
+            NbProjectZipper zipper = new NbProjectZipper();
             byte[] fileContent = zipper.zip(path);
 
             uploader.AddFile(fileContent, "exercise.zip", "exercise_return[tmp_file]");
