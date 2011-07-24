@@ -40,7 +40,7 @@ public class NbProjectUnzipper {
                 String newPath = projectName + "/" + restOfPath;
                 File destFile = new File(
                         projectRoot.getAbsolutePath() + File.separator +
-                        newPath.replaceAll("/", File.separator)
+                        newPath.replace("/", File.separator)
                         );
                 
                 if (zent.isDirectory()) {

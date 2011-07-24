@@ -15,7 +15,7 @@ import static org.junit.Assert.*;
 
 public class NbProjectUnzipperTest {
     
-    private final File tempRoot = new File("tmp/test");
+    private final File tempRoot = new File("tmp" + File.separator + "test");
     private ByteArrayOutputStream zipBuffer;
     private ZipOutputStream zipOut;
     
