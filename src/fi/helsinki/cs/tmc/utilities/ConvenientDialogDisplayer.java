@@ -11,6 +11,7 @@ import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
 import fi.helsinki.cs.tmc.ui.LongTextDisplayPanel;
 import java.awt.Component;
+import org.openide.DialogDescriptor;
 
 public class ConvenientDialogDisplayer {
     private static ConvenientDialogDisplayer defaultDisplayer;
@@ -66,23 +67,20 @@ public class ConvenientDialogDisplayer {
     
     private void displayLongMessage(String text, int notifyType) {
         LongTextDisplayPanel panel = new LongTextDisplayPanel(text);
-        showDialog(panel, notifyType);
+        showDialog(panel, notifyType, "", false);
     }
 
-    private void showDialog(Component dialog, int notifyType) {
-        showDialog(dialog, notifyType, "");
+    private void showDialog(Component content, int notifyType) {
+        showDialog(content, notifyType, "", true);
     }
     
-    private void showDialog(Component dialog, int notifyType, String title) {
-        NotifyDescriptor descriptor = new NotifyDescriptor(
-                dialog,
-                title,
-                NotifyDescriptor.OK_CANCEL_OPTION,
-                notifyType,
-                new Object[]{NotifyDescriptor.OK_OPTION},
-                NotifyDescriptor.OK_OPTION
-                );
-        DialogDisplayer.getDefault().notify(descriptor);
+    private void showDialog(Component content, int notifyType, String title, boolean modal) {
+        DialogDescriptor desc = new DialogDescriptor(content,title);
+        desc.setModal(modal);
+        desc.setOptions(new Object[] { NotifyDescriptor.OK_OPTION });
+        desc.setValue(NotifyDescriptor.OK_OPTION);
+        desc.setMessageType(notifyType);
+        DialogDisplayer.getDefault().notify(desc);
     }
     
     
@@ -97,6 +95,6 @@ public class ConvenientDialogDisplayer {
         label.setIcon(new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/smile.gif")));
         dialog.add(label);
 
-        showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, title);
+        showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, title, true);
     }
 }
