@@ -1,11 +1,13 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseProgress;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
@@ -23,6 +25,11 @@ public class SubmitExerciseActionTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private SubmissionResultDisplayer resultDisplayer;
     @Mock private ConvenientDialogDisplayer dialogDisplayer;
+    @Mock private ExerciseIconAnnotator iconAnnotator;
+    
+    @Mock private TmcProjectInfo project;
+    @Mock private Exercise exercise;
+    @Mock private SubmissionResult result;
     
     @Captor private ArgumentCaptor<BgTaskListener<SubmissionResult>> listenerCaptor;
     
@@ -32,12 +39,15 @@ public class SubmitExerciseActionTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         
+        when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
+        
         action = new SubmitExerciseAction(
                 serverAccess,
                 courseCache,
                 projectMediator,
                 resultDisplayer,
-                dialogDisplayer);
+                dialogDisplayer,
+                iconAnnotator);
     }
     
     private void performAction() {
@@ -47,8 +57,6 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void itShouldSaveAllFilesAndSubmitTheMainProject() {
-        TmcProjectInfo project = mock(TmcProjectInfo.class);
-        Exercise exercise = mock(Exercise.class);
         when(projectMediator.getMainProject()).thenReturn(project);
         when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(exercise);
         
@@ -70,7 +78,6 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void whenNoExerciseMatchesTheMainProjectItShouldDoNothing() {
-        TmcProjectInfo project = mock(TmcProjectInfo.class);
         when(projectMediator.getMainProject()).thenReturn(null);
         when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(null);
         
@@ -81,8 +88,6 @@ public class SubmitExerciseActionTest {
     }
     
     private void performActionAndCaptureListener() {
-        TmcProjectInfo project = mock(TmcProjectInfo.class);
-        Exercise exercise = mock(Exercise.class);
         when(projectMediator.getMainProject()).thenReturn(project);
         when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(exercise);
         
@@ -94,10 +99,43 @@ public class SubmitExerciseActionTest {
     @Test
     public void whenTheServerReturnsAResultItShouldDisplayIt() {
         performActionAndCaptureListener();
-        SubmissionResult result = mock(SubmissionResult.class);
+        
         listenerCaptor.getValue().backgroundTaskReady(result);
         
         verify(resultDisplayer).showResult(result);
+    }
+    
+    @Test
+    public void whenTheServerReturnsASuccessfulResultItShouldSetTheExerciseStatusToDone() {
+        performActionAndCaptureListener();
+        when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
+        listenerCaptor.getValue().backgroundTaskReady(result);
+        
+        verify(exercise).setProgress(ExerciseProgress.DONE);
+        verify(iconAnnotator).updateAllIcons();
+        verify(courseCache).save();
+    }
+    
+    @Test
+    public void whenTheServerReturnsTestFailuresResultItShouldSetTheExerciseStatusToPartiallyDone() {
+        performActionAndCaptureListener();
+        when(result.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
+        listenerCaptor.getValue().backgroundTaskReady(result);
+        
+        verify(exercise).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        verify(iconAnnotator).updateAllIcons();
+        verify(courseCache).save();
+    }
+    
+    @Test
+    public void whenTheServerReturnsAnErrorResultItShouldSetTheExerciseStatusToPartiallyDone() {
+        performActionAndCaptureListener();
+        when(result.getStatus()).thenReturn(SubmissionResult.Status.ERROR);
+        listenerCaptor.getValue().backgroundTaskReady(result);
+        
+        verify(exercise).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        verify(iconAnnotator).updateAllIcons();
+        verify(courseCache).save();
     }
     
     @Test
@@ -105,7 +143,7 @@ public class SubmitExerciseActionTest {
         performActionAndCaptureListener();
         listenerCaptor.getValue().backgroundTaskCancelled();
         
-        verifyZeroInteractions(resultDisplayer);
+        verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
     }
     
     @Test
@@ -115,7 +153,7 @@ public class SubmitExerciseActionTest {
         listenerCaptor.getValue().backgroundTaskFailed(exception);
         
         verify(dialogDisplayer).displayError(exception);
-        verifyZeroInteractions(resultDisplayer);
+        verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
     }
     
 }

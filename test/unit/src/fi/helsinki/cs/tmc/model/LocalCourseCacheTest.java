@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.data.ExerciseProgress;
 import java.io.IOException;
 import org.junit.After;
 import java.util.logging.Level;
@@ -35,25 +36,43 @@ public class LocalCourseCacheTest {
     }
     
     @Test
-    public void itShouldPersitItsData() throws IOException {
+    public void itShouldPersitItsCourseList() throws IOException {
         CourseCollection courses = new CourseCollection();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
+        
         cache.setAvailableCourses(courses);
         cache = new LocalCourseCache(file);
-        assertEquals("one", cache.getAvailableCourses().get(0).getName());
         
+        assertEquals("one", cache.getAvailableCourses().get(0).getName());
+    }
+    
+    @Test
+    public void itShouldPersistTheCurrentCourse() throws IOException {
+        CourseCollection courses = new CourseCollection();
+        courses.add(new Course("one"));
+        courses.add(new Course("two"));
+        
+        cache.setAvailableCourses(courses);
         cache.setCurrentCourseName("one");
         cache = new LocalCourseCache(file);
+        
         assertEquals("one", cache.getCurrentCourse().getName());
         assertSame(cache.getAvailableCourses().get(0), cache.getCurrentCourse());
-        
+    }
+    
+    @Test
+    public void itShouldPersistTheAvailableExerciseList() throws IOException {
         ExerciseCollection exercises = new ExerciseCollection();
         exercises.add(new Exercise("Hello"));
         exercises.add(new Exercise("Hello2"));
+        exercises.get(0).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        
         cache.setAvailableExercises(exercises);
         cache = new LocalCourseCache(file);
+        
         assertEquals("Hello2", cache.getAvailableExercises().get(1).getName());
+        assertEquals(ExerciseProgress.PARTIALLY_DONE, cache.getAvailableExercises().get(0).getProgress());
         
         assertFalse(file.readContents().isEmpty());
     }

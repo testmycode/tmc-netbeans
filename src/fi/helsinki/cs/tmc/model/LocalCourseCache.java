@@ -54,7 +54,7 @@ public class LocalCourseCache {
 
     public void setAvailableCourses(CourseCollection availableCourses) {
         this.availableCourses = availableCourses;
-        trySaveToFile();
+        save();
     }
     
     public boolean hasCurrentCourse() {
@@ -73,7 +73,7 @@ public class LocalCourseCache {
         if (availableCourses.hasCourseByName(currentCourseName)) {
             this.currentCourseName = currentCourseName;
             this.availableExercises.clear();
-            trySaveToFile();
+            save();
         } else {
             logger.warning("Tried to set current course set to one not in available courses");
         }
@@ -91,13 +91,38 @@ public class LocalCourseCache {
 
     public void setAvailableExercises(ExerciseCollection availableExercises) {
         this.availableExercises = availableExercises;
-        trySaveToFile();
+        save();
     }
-
-    @Deprecated
-    public ExerciseCollection getExercisesForCourse(Course course) {
-        //TODO
-        return null;
+    
+    public void save() {
+        try {
+            saveToFile();
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Failed to save local course cache", e);
+        }
+    }
+    
+    private static class StoredStuff {
+        public ArrayList<Course> availableCourses;
+        public String currentCourseName;
+        public ArrayList<Exercise> availableExercises;
+    }
+    
+    private void saveToFile() throws IOException {
+        Gson gson = new GsonBuilder()
+                .serializeNulls()
+                .setPrettyPrinting()
+                .create();
+        StoredStuff stuff = new StoredStuff();
+        stuff.availableCourses = this.availableCourses;
+        stuff.currentCourseName = this.currentCourseName;
+        stuff.availableExercises = this.availableExercises;
+        Writer w = configFile.getWriter();
+        try {
+            gson.toJson(stuff, w);
+        } finally {
+            w.close();
+        }
     }
 
     private void loadFromFile() throws IOException {
@@ -122,36 +147,5 @@ public class LocalCourseCache {
                 this.availableExercises.addAll(stuff.availableExercises);
             }
         }
-    }
-    
-    private void trySaveToFile() {
-        try {
-            saveToFile();
-        } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to save local course cache", e);
-        }
-    }
-    
-    private void saveToFile() throws IOException {
-        Gson gson = new GsonBuilder()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .create();
-        StoredStuff stuff = new StoredStuff();
-        stuff.availableCourses = this.availableCourses;
-        stuff.currentCourseName = this.currentCourseName;
-        stuff.availableExercises = this.availableExercises;
-        Writer w = configFile.getWriter();
-        try {
-            gson.toJson(stuff, w);
-        } finally {
-            w.close();
-        }
-    }
-    
-    private static class StoredStuff {
-        public ArrayList<Course> availableCourses;
-        public String currentCourseName;
-        public ArrayList<Exercise> availableExercises;
     }
 }

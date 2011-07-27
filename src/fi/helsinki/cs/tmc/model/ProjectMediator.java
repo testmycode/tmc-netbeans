@@ -184,7 +184,7 @@ public class ProjectMediator {
         }
     }
     
-    private TmcProjectInfo wrapProject(Project p) {
+    public TmcProjectInfo wrapProject(Project p) {
         return new TmcProjectInfo(openProjects, p);
     }
     

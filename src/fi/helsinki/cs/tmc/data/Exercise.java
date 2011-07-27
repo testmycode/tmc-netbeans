@@ -27,6 +27,8 @@ public class Exercise implements Serializable {
     private String returnAddress;
     
     private Date deadline;
+    
+    private ExerciseProgress progress = ExerciseProgress.NOT_DONE;
 
     public Exercise() {
     }
@@ -38,21 +40,6 @@ public class Exercise implements Serializable {
     public Exercise(String name, String courseName) {
         this.name = name;
         this.courseName = courseName;
-    }
-
-    /**
-     * Exercise copy constructor.
-     */
-    @Deprecated
-    public Exercise(Exercise exercise) {
-        if (exercise == null) {
-            throw new NullPointerException("exercise was null at Exercise.Constructor");
-        }
-
-        name = exercise.name;
-        downloadAddress = exercise.downloadAddress;
-        returnAddress = exercise.returnAddress;
-        deadline = new Date(exercise.deadline.getTime());
     }
 
     /**
@@ -114,18 +101,15 @@ public class Exercise implements Serializable {
         if (returnAddress.isEmpty()) {
             throw new IllegalArgumentException("downloadAddress cannot be empty at Exercise.setReturnAddress");
         }
-
-
         this.returnAddress = returnAddress;
     }
 
-    /**
-     * Overrides the inherited toString to return the name of this exercise instead.
-     * @return The name of the exercise
-     */
-    @Override
-    public String toString() {
-        return name;
+    public ExerciseProgress getProgress() {
+        return progress;
+    }
+
+    public void setProgress(ExerciseProgress progress) {
+        this.progress = progress;
     }
 
     public Date getDeadline() {
@@ -139,7 +123,11 @@ public class Exercise implements Serializable {
         if (deadline == null) {
             throw new NullPointerException("dealine was null at Exercise.setDeadline");
         }
-
         this.deadline = deadline;
+    }
+    
+    @Override
+    public String toString() {
+        return name;
     }
 }
