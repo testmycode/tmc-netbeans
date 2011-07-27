@@ -59,12 +59,17 @@ import javax.swing.JPanel;
             coursesComboBox.addItem(course);
         }
         coursesComboBox.setSelectedIndex(-1);
-        refreshCoursesBtn.setEnabled(true);
+        setCourseSelectionEnabled(true);
     }
     
     @Override
     public void courseRefreshFailedOrCanceled() {
-        refreshCoursesBtn.setEnabled(true);
+        setCourseSelectionEnabled(true);
+    }
+    
+    private void setCourseSelectionEnabled(boolean enabled) {
+        refreshCoursesBtn.setEnabled(enabled);
+        coursesComboBox.setEnabled(enabled);
     }
     
     @Override
@@ -204,7 +209,7 @@ import javax.swing.JPanel;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        refreshCoursesBtn.setEnabled(false);
+        setCourseSelectionEnabled(false);
         refreshAction.actionPerformed(evt);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
