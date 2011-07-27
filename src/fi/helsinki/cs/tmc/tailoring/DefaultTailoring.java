@@ -10,4 +10,16 @@ public class DefaultTailoring implements Tailoring {
     public String getDefaultUsername() {
         return "";
     }
+    
+    
+    protected String getSystemUsername() {
+        String user = System.getenv("USER"); // Unix
+        if (user == null) {
+            user = System.getenv("USERNAME"); // Windows
+        }
+        if (user == null) {
+            user = "";
+        }
+        return user;
+    }
 }
