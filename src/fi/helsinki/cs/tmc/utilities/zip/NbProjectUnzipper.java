@@ -26,7 +26,12 @@ public class NbProjectUnzipper {
     }
 
     
-    public void unzipProject(byte[] data, File projectRoot, String projectName) throws IOException {
+    public void unzipProject(byte[] data, File projectsRootDir, String projectName) throws IOException {
+        String projectDirPath = projectsRootDir.getAbsolutePath() + File.separator + projectName;
+        if (new File(projectDirPath).exists()) {
+            throw new IllegalStateException("The project directory '" + projectName + "' already exists.");
+        }
+        
         String projectDirInZip = findProjectDirInZip(data);
         if (projectDirInZip == null) {
             throw new IllegalArgumentException("No project directory in zip");
@@ -37,10 +42,9 @@ public class NbProjectUnzipper {
         while ((zent = zis.getNextEntry()) != null) {
             if (zent.getName().startsWith(projectDirInZip)) {
                 String restOfPath = zent.getName().substring(projectDirInZip.length());
-                String newPath = projectName + "/" + restOfPath;
                 File destFile = new File(
-                        projectRoot.getAbsolutePath() + File.separator +
-                        newPath.replace("/", File.separator)
+                        projectDirPath + File.separator +
+                        restOfPath.replace("/", File.separator)
                         );
                 
                 if (zent.isDirectory()) {

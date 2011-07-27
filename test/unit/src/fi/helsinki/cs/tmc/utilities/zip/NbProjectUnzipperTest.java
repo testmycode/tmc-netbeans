@@ -84,4 +84,24 @@ public class NbProjectUnzipperTest {
         
         unzipper.unzipProject(zipBuffer.toByteArray(), tempRoot, "my-project");
     }
+    
+    @Test
+    public void itShouldNeverNeverNeverEverOverwriteExistingFiles() throws IOException {
+        addFakeProjectToZip("dir1/dir12/project1", "P1");
+        zipOut.close();
+        
+        new File(tempRoot.getAbsolutePath() + "/my-project/src").mkdirs();
+        File existingFile = new File(tempRoot.getAbsolutePath() + "/my-project/src/Hello.java");
+        FileUtils.write(existingFile, "This should remain");
+        
+        boolean caughtException = false;
+        try {
+            unzipper.unzipProject(zipBuffer.toByteArray(), tempRoot, "my-project");
+        } catch (IllegalStateException e) {
+            caughtException = true;
+        }
+        assertTrue(caughtException);
+        
+        assertEquals("This should remain", FileUtils.readFileToString(existingFile));
+    }
 }
