@@ -80,13 +80,18 @@ public class ServerAccessTest {
     }
     
     @Test
-    public void itUsesTheBaseUrlFromTheTailoringByDefault() throws BackingStoreException {
+    public void itUsesTheBaseUrlAndUsernameFromTheTailoringByDefault() throws BackingStoreException {
         String url = "http://default.example.com";
+        String user = "JaneShepard";
         when(tailoring.getDefaultServerUrl()).thenReturn(url);
+        when(tailoring.getDefaultUsername()).thenReturn(user);
+        
         prefs.removeNode();
         prefs = null; // (to avoid error in tearDown())
         serverAccess = newServer();
+        
         assertEquals(url, newServer().getBaseUrl());
+        assertEquals(user, newServer().getUsername());
     }
     
     @Test

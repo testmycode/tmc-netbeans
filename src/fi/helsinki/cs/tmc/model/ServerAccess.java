@@ -76,7 +76,7 @@ public class ServerAccess {
     private void loadPreferences() {
         Preferences prefs = getPreferences();
         this.baseUrl = prefs.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
-        this.username = prefs.get(PREF_USERNAME, "");
+        this.username = prefs.get(PREF_USERNAME, tailoring.getDefaultUsername());
     }
 
     public String getBaseUrl() {

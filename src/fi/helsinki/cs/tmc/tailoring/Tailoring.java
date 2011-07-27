@@ -8,4 +8,5 @@ package fi.helsinki.cs.tmc.tailoring;
  */
 public interface Tailoring {
     public String getDefaultServerUrl();
+    public String getDefaultUsername();
 }

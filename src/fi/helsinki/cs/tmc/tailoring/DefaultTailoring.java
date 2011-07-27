@@ -5,4 +5,9 @@ public class DefaultTailoring implements Tailoring {
     public String getDefaultServerUrl() {
         return "";
     }
+    
+    @Override
+    public String getDefaultUsername() {
+        return "";
+    }
 }
