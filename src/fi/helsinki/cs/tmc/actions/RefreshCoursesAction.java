@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
@@ -14,20 +14,20 @@ public class RefreshCoursesAction extends AbstractAction {
     private ServerAccess serverAccess;
     private LocalCourseCache localCourseCache;
     private PreferencesUIFactory prefUIFactory;
-    private ModalDialogDisplayer dialogs;
+    private ConvenientDialogDisplayer dialogs;
 
     public RefreshCoursesAction() {
         this(ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 PreferencesUIFactory.getInstance(),
-                ModalDialogDisplayer.getDefault());
+                ConvenientDialogDisplayer.getDefault());
     }
 
     public RefreshCoursesAction(
             ServerAccess serverAccess,
             LocalCourseCache localCourseCache,
             PreferencesUIFactory prefUiFactory,
-            ModalDialogDisplayer dialogs) {
+            ConvenientDialogDisplayer dialogs) {
         this.serverAccess = serverAccess;
         this.localCourseCache = localCourseCache;
         this.prefUIFactory = prefUiFactory;

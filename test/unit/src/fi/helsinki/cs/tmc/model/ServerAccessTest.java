@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
+import org.mockito.ArgumentMatcher;
+import java.util.Map;
 import java.io.File;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
@@ -11,6 +13,7 @@ import java.util.prefs.Preferences;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.testing.MockBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
@@ -31,14 +34,15 @@ public class ServerAccessTest {
     @Mock private CancellableCallable<String> mockTextDownload;
     @Mock private CancellableCallable<byte[]> mockBinaryDownload;
     
-    private byte[] fakeBinaryData = {1, 2, 3, 4, 5};
-    
+    private byte[] fakeBinaryData;
     private Preferences prefs;
+    
     private ServerAccess serverAccess;
     
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
+        fakeBinaryData = new byte[] {1, 2, 3, 4, 5};
         prefs = NbPreferences.forModule(ServerAccess.class);
         
         serverAccess = newServer();
@@ -188,5 +192,41 @@ public class ServerAccessTest {
         when(networkTasks.downloadBinaryFile(zipUrl)).thenReturn(mockBinaryDownload);
         nextBinaryDownloadReturns(fakeBinaryData);
         return exercise;
+    }
+    
+    
+    @Test
+    public void itCanSubmitAndExerciseToTheServer() throws IOException {
+        String submitUrl = "http://example.com/courses/123/exercises/456/submissions";
+        Exercise exercise = new Exercise("MyExercise");
+        exercise.setReturnAddress(submitUrl);
+        
+        when(projectMediator.getProjectDirForExercise(exercise)).thenReturn(new File("/foo/MyExercise"));
+        when(zipper.zip("/foo/MyExercise")).thenReturn(fakeBinaryData);
+        when(networkTasks.uploadFileForTextResponse(
+                eq(submitUrl),
+                (Map<String, String>)any(Map.class),
+                any(String.class),
+                any(byte[].class)
+                )).thenReturn(mockTextDownload);
+        nextTextDownloadReturns("{status: \"ok\"}");
+        
+        MockBgTaskListener<SubmissionResult> listener = new MockBgTaskListener<SubmissionResult>();
+        serverAccess.setUsername("JohnShepard");
+        serverAccess.startSubmittingExercise(exercise, listener);
+        
+        listener.waitForCall();
+        assertTrue(listener.success);
+        assertEquals(SubmissionResult.Status.OK, listener.result.getStatus());
+        
+        ArgumentMatcher<Map<String, String>> givesUsernameParam = new ArgumentMatcher<Map<String, String>>() {
+            @Override
+            public boolean matches(Object argument) {
+                Map<String, String> map = (Map<String, String>)argument;
+                String key = "submission[username]";
+                return map.containsKey(key) && map.get(key).equals("JohnShepard");
+            }
+        };
+        verify(networkTasks).uploadFileForTextResponse(eq(submitUrl), argThat(givesUsernameParam), eq("submission[file]"), eq(fakeBinaryData));
     }
 }

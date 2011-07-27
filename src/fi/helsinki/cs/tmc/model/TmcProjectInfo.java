@@ -22,10 +22,6 @@ public class TmcProjectInfo {
         return project;
     }
     
-    /*package*/ AuxiliaryConfiguration getAuxConf() {
-        return ProjectUtils.getAuxiliaryConfiguration(project);
-    }
-    
     public FileObject getProjectDir() {
         return project.getProjectDirectory();
     }

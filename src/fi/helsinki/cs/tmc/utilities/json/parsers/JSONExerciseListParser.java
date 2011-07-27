@@ -20,21 +20,25 @@ public class JSONExerciseListParser {
      * Parses a collection of exercises and attaches them to a course.
      */
     public static ExerciseCollection parseJson(String json) {
-        if (json == null) {
-            throw new NullPointerException("Json string is null");
+        try {
+            if (json == null) {
+                throw new NullPointerException("Json string is null");
+            }
+
+            Gson gson = new GsonBuilder()
+                    .registerTypeAdapter(Date.class, new CustomDateDeserializer())
+                    .create();
+            Exercise[] exercises = gson.fromJson(json, Exercise[].class);
+
+            ExerciseCollection exerciseCollection = new ExerciseCollection();
+            for (Exercise exercise : exercises) {
+                exerciseCollection.add(exercise);
+            }
+
+            return exerciseCollection;
+        } catch (RuntimeException e) {
+            throw new RuntimeException("Failed to parse exercise list: " + e.getMessage(), e);
         }
-
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(Date.class, new CustomDateDeserializer())
-                .create();
-        Exercise[] exercises = gson.fromJson(json, Exercise[].class);
-
-        ExerciseCollection exerciseCollection = new ExerciseCollection();
-        for (Exercise exercise : exercises) {
-            exerciseCollection.add(exercise);
-        }
-
-        return exerciseCollection;
     }
 
     private static class CustomDateDeserializer implements JsonDeserializer<Date> {

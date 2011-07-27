@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -23,7 +23,7 @@ import org.openide.util.NbBundle.Messages;
 id = "fi.helsinki.cs.tmc.actions.OpenExercises")
 @ActionRegistration(displayName = "#CTL_OpenExercises")
 @ActionReferences({
-    @ActionReference(path = "Menu/TMC", position = -50)
+    @ActionReference(path = "Menu/TMC", position = -50, separatorAfter = -40)
 })
 @Messages("CTL_OpenExercises=Open exercises")
 public class OpenExercisesAction extends AbstractAction {
@@ -33,20 +33,20 @@ public class OpenExercisesAction extends AbstractAction {
     private ServerAccess serverAccess;
     private LocalCourseCache courseCache;
     private ProjectMediator projectMediator;
-    private ModalDialogDisplayer dialogs;
+    private ConvenientDialogDisplayer dialogs;
 
     public OpenExercisesAction() {
         this(ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 ProjectMediator.getInstance(),
-                ModalDialogDisplayer.getDefault());
+                ConvenientDialogDisplayer.getDefault());
     }
 
     public OpenExercisesAction(
             ServerAccess serverAccess,
             LocalCourseCache courseCache,
             ProjectMediator projectMediator,
-            ModalDialogDisplayer dialogs) {
+            ConvenientDialogDisplayer dialogs) {
         this.serverAccess = serverAccess;
         this.courseCache = courseCache;
         this.projectMediator = projectMediator;

@@ -1,16 +1,23 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
-<folder name="Actions">
+    <folder name="Menu">
         <folder name="TMC">
-            <file name="fi-helsinki-cs-tmc-actions-ShowSettingsAction.instance" url="fi-helsinki-cs-tmc-actions-ShowSettingsAction.instance">
-                <attr name="noIconInMenu" boolvalue="false"/>
+            <attr name="position" intvalue="1100"/>
+            
+            <file name="org-netbeans-modules-project-ui-TestProject.instance">
+                <attr name="position" intvalue="10"/>
+                <attr name="instanceCreate" methodvalue="org.netbeans.modules.project.ui.actions.Actions.testProject"/>
             </file>
         </folder>
     </folder>
-    <folder name="Menu">
-    <folder name="TMC">
-        <attr name="position" intvalue="1100"/>
+    <folder name="Toolbars">
+        <folder name="TMC">
+            <attr name="position" intvalue="1100"/>
+            <file name="org-netbeans-modules-project-ui-TestProject.instance">
+                <attr name="position" intvalue="100"/>
+                <attr name="instanceCreate" methodvalue="org.netbeans.modules.project.ui.actions.Actions.testProject"/>
+            </file>
+        </folder>
     </folder>
-</folder>
 </filesystem>

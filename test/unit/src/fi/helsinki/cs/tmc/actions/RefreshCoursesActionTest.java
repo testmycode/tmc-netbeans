@@ -10,7 +10,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -23,7 +23,7 @@ public class RefreshCoursesActionTest {
     @Mock private LocalCourseCache localCourseCache;
     @Mock private PreferencesUIFactory prefUiFactory;
     @Mock private PreferencesUI prefUi;
-    @Mock private ModalDialogDisplayer dialogs;
+    @Mock private ConvenientDialogDisplayer dialogs;
     
     private CourseCollection courses;
     

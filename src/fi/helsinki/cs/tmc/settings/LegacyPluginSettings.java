@@ -5,7 +5,7 @@ import java.io.InputStream;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.Lookup;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 
 /**
  * This class is used to load and save settings. The actual work is done in
@@ -26,7 +26,7 @@ public class LegacyPluginSettings {
         try {
             loadFromFile();
         } catch (Exception e) {
-            ModalDialogDisplayer.getDefault().displayError("Error in Class:PluginSettings.java Method:loadFromFile Message: " + e);
+            ConvenientDialogDisplayer.getDefault().displayError("Error in Class:PluginSettings.java Method:loadFromFile Message: " + e);
         }
     }
 

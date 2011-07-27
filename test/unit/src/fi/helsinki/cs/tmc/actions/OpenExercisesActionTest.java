@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import org.junit.After;
 import java.io.IOException;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
@@ -26,7 +26,7 @@ public class OpenExercisesActionTest {
     @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache courseCache;
     @Mock private ProjectMediator projectMediator;
-    @Mock private ModalDialogDisplayer dialogs;
+    @Mock private ConvenientDialogDisplayer dialogs;
     
     private Course currentCourse;
     private ExerciseCollection threeExercises;

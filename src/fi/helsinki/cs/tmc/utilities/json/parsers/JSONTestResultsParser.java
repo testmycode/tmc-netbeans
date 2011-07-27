@@ -10,6 +10,7 @@ import java.util.ArrayList;
  * were not implemented.
  * @author knordman
  */
+@Deprecated
 public class JSONTestResultsParser {
 
     /**

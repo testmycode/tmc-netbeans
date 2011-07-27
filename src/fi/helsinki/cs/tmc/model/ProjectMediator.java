@@ -12,6 +12,7 @@ import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
+import org.openide.LifecycleManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.util.NbPreferences;
@@ -113,6 +114,13 @@ public class ProjectMediator {
     }
     
     /**
+     * Saves all unsaved files.
+     */
+    public void saveAllFiles() {
+        LifecycleManager.getDefault().saveAll();
+    }
+    
+    /**
      * Returns the directory to which exercises are to be downloaded.
      */
     public File getCourseRootDir(String courseName) {
@@ -131,6 +139,19 @@ public class ProjectMediator {
                 ex.getCourseName() + File.separator +
                 ex.getName().replaceAll("/", "-");
         return new File(path);
+    }
+    
+    /**
+     * Returns the exercise associated with the given project, or null if none.
+     */
+    public Exercise tryGetExerciseForProject(TmcProjectInfo project, LocalCourseCache courseCache) {
+        File projectDir = FileUtil.toFile(project.getProjectDir());
+        for (Exercise ex : courseCache.getAvailableExercises()) {
+            if (getProjectDirForExercise(ex).equals(projectDir)) {
+                return ex;
+            }
+        }
+        return null;
     }
     
     /**

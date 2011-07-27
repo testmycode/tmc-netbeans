@@ -80,7 +80,7 @@ public class FileDownloaderAsync implements ITaskListener {
 
             @Override
             public void executeTask() throws IOException, InterruptedException {
-                FileDownload download = new FileDownload(downloadAddress);
+                HttpRequestExecutor download = new HttpRequestExecutor(downloadAddress);
                 result = download.call();
             }
         };

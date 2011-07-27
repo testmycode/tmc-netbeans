@@ -5,7 +5,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.utilities.FolderHelper;
-import fi.helsinki.cs.tmc.utilities.ModalDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.ProjectHandler;
 import fi.helsinki.cs.tmc.utilities.exercise.ExerciseDownloader;
 import fi.helsinki.cs.tmc.utilities.exercise.ExerciseFilter;
@@ -101,13 +101,13 @@ public class Controller implements
                 exerciseListDownloader = new JSONExerciseListUpdater(course.getExerciseListDownloadAddress(), this);
 
             } catch (Exception e) {
-                ModalDialogDisplayer.getDefault().displayError(e);
+                ConvenientDialogDisplayer.getDefault().displayError(e);
                 return;
             }
 
             exerciseListDownloader.downloadAndWriteToFile(course);
         } else {
-            ModalDialogDisplayer.getDefault().displayError("No course selected. Please select course from preferences");
+            ConvenientDialogDisplayer.getDefault().displayError("No course selected. Please select course from preferences");
 
         }
     }
@@ -119,14 +119,14 @@ public class Controller implements
     @Override
     public void advancedDownload(ExerciseCollection collection) {
         if (exerciseDownloader != null) {
-            ModalDialogDisplayer.getDefault().displayError("Files are still downloading. Try again later.");
+            ConvenientDialogDisplayer.getDefault().displayError("Files are still downloading. Try again later.");
             return;
         } else {
             exerciseDownloader = new ExerciseDownloader(collection, this);
             try {
                 exerciseDownloader.downloadExercises();
             } catch (Exception ex) {
-                ModalDialogDisplayer.getDefault().displayError(ex);
+                ConvenientDialogDisplayer.getDefault().displayError(ex);
             }
         }
     }
@@ -141,7 +141,7 @@ public class Controller implements
     @Override
     public void exerciseListUpdateFailed(String errorMessage) {
         exerciseListDownloader = null;
-        ModalDialogDisplayer.getDefault().displayError("exercise list update failed. Unable to download new exercises from server.\r\n Detailed error msg: " + errorMessage);
+        ConvenientDialogDisplayer.getDefault().displayError("exercise list update failed. Unable to download new exercises from server.\r\n Detailed error msg: " + errorMessage);
         showAllExercises();
     }
 
@@ -153,7 +153,7 @@ public class Controller implements
         ExerciseCollection exercises = LocalCourseCache.getInstance().getAvailableExercises();
 
         if (exercises == null) {
-            ModalDialogDisplayer.getDefault().displayError("cannot find exercise list. Unable to open any exercise");
+            ConvenientDialogDisplayer.getDefault().displayError("cannot find exercise list. Unable to open any exercise");
             return;
         }
 
@@ -166,7 +166,7 @@ public class Controller implements
         try {
             ExerciseLoader.openAll(localExercises);
         } catch (Exception e) {
-            ModalDialogDisplayer.getDefault().displayError(e);
+            ConvenientDialogDisplayer.getDefault().displayError(e);
         }
 
         if (exerciseDownloader != null) {
@@ -177,7 +177,7 @@ public class Controller implements
         try {
             exerciseDownloader.downloadExercises();
         } catch (Exception ex) {
-            ModalDialogDisplayer.getDefault().displayError(ex);
+            ConvenientDialogDisplayer.getDefault().displayError(ex);
         }
     }
 
@@ -208,7 +208,7 @@ public class Controller implements
             unzipper.unZip(fileContent, FolderHelper.generatePath(downloadedExercise).getAbsolutePath());
             ExerciseLoader.open(downloadedExercise);
         } catch (Exception e) {
-            ModalDialogDisplayer.getDefault().displayError(e);
+            ConvenientDialogDisplayer.getDefault().displayError(e);
         }
 
         ExerciseStatus.resetStatus(downloadedExercise);
@@ -216,12 +216,12 @@ public class Controller implements
 
     @Override
     public void exerciseDownloadFailed(String errorMsg) {
-        ModalDialogDisplayer.getDefault().displayError("download failed: " + errorMsg);
+        ConvenientDialogDisplayer.getDefault().displayError("download failed: " + errorMsg);
     }
 
     @Override
     public void exerciseDownloadCancelledByUser(Exercise cancelledExercise) {
-        ModalDialogDisplayer.getDefault().displayError("download cancelled: " + cancelledExercise.getName());
+        ConvenientDialogDisplayer.getDefault().displayError("download cancelled: " + cancelledExercise.getName());
     }
 
     @Override
@@ -237,7 +237,7 @@ public class Controller implements
     public void sendExerciseForReview(final JButton source) {
         String mainProjectPath = ProjectHandler.getMainProjectPath();
         if (!ProjectHandler.isExercise(mainProjectPath)) {
-            ModalDialogDisplayer.getDefault().displayError("Main project isn't set or it isn't any known exercise. Please set exercise as main project and try again.");
+            ConvenientDialogDisplayer.getDefault().displayError("Main project isn't set or it isn't any known exercise. Please set exercise as main project and try again.");
 
             return;
         }
@@ -256,7 +256,7 @@ public class Controller implements
         } catch (Exception e) {
             source.setEnabled(true);
             this.uploader = null;
-            ModalDialogDisplayer.getDefault().displayError(e);
+            ConvenientDialogDisplayer.getDefault().displayError(e);
         }
 
     }
@@ -273,7 +273,7 @@ public class Controller implements
 
             a.invokeAction(ActionProvider.COMMAND_TEST, project.getLookup());
         } else {
-            ModalDialogDisplayer.getDefault().displayError("Main project isn't set. Please set exercise as main project and try again.");
+            ConvenientDialogDisplayer.getDefault().displayError("Main project isn't set. Please set exercise as main project and try again.");
 
         }
 
@@ -307,7 +307,7 @@ public class Controller implements
             this.testHandler = new TestResultHandler(jsonLink, this);
             this.testHandler.execute(exercise);
         } catch (Exception e) {
-            ModalDialogDisplayer.getDefault().displayError(e);
+            ConvenientDialogDisplayer.getDefault().displayError(e);
         }
     }
 
@@ -317,7 +317,7 @@ public class Controller implements
         this.sendButton = null;
         this.uploader = null;
 
-        ModalDialogDisplayer.getDefault().displayError(errorMessage);
+        ConvenientDialogDisplayer.getDefault().displayError(errorMessage);
     }
 
     
@@ -325,10 +325,10 @@ public class Controller implements
     @Override
     public void runComplete(TestResultHandler handler) {
         if (handler.getNumberOfFailures() == 0) {
-            ModalDialogDisplayer.getDefault().displayHappyNotification("File upload complete and all tests passed!", "Well done!");
+            ConvenientDialogDisplayer.getDefault().displayHappyMessage("File upload complete and all tests passed!", "Well done!");
 
         } else {
-            ModalDialogDisplayer.getDefault().showTestResultDialog(handler.getFailures());
+            ConvenientDialogDisplayer.getDefault().displayLongMessage(handler.getFailures().toString());
         }
 
         this.testHandler = null;
@@ -337,6 +337,6 @@ public class Controller implements
     @Override
     public void runFailed(String errorMessage) {
         this.testHandler = null;
-        ModalDialogDisplayer.getDefault().displayError(errorMessage);
+        ConvenientDialogDisplayer.getDefault().displayError(errorMessage);
     }
 }
