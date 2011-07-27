@@ -54,11 +54,24 @@ import javax.swing.JPanel;
     
     @Override
     public void setAvailableCourses(CourseCollection courses) {
-        coursesComboBox.removeAllItems();
-        for (Course course : courses) {
-            coursesComboBox.addItem(course);
+        String previousSelectedCourseName = null;
+        if (getSelectedCourse() != null) {
+            previousSelectedCourseName = getSelectedCourse().getName();
         }
-        coursesComboBox.setSelectedIndex(-1);
+        
+        coursesComboBox.removeAllItems();
+        int newSelectedIndex = -1;
+        for (int i = 0; i < courses.size(); ++i) {
+            Course course = courses.get(i);
+            coursesComboBox.addItem(courses.get(i));
+            
+            if (course.getName().equals(previousSelectedCourseName)) {
+                newSelectedIndex = i;
+            }
+        }
+        
+        coursesComboBox.setSelectedIndex(newSelectedIndex);
+        
         setCourseSelectionEnabled(true);
     }
     
@@ -79,7 +92,12 @@ import javax.swing.JPanel;
     
     @Override
     public Course getSelectedCourse() {
-        return (Course)coursesComboBox.getSelectedItem();
+        Object item = coursesComboBox.getSelectedItem();
+        if (item instanceof Course) {
+            return (Course)item;
+        } else { // because the combobox isn't populated yet
+            return null;
+        }
     }
     
 
@@ -114,6 +132,11 @@ import javax.swing.JPanel;
         serverAddressTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressTextField.text")); // NOI18N
         serverAddressTextField.setMinimumSize(new java.awt.Dimension(250, 27));
         serverAddressTextField.setPreferredSize(new java.awt.Dimension(250, 27));
+        serverAddressTextField.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                serverAddressTextFieldActionPerformed(evt);
+            }
+        });
 
         defaultProjectFolderLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.defaultProjectFolderLabel.text")); // NOI18N
 
@@ -212,6 +235,11 @@ import javax.swing.JPanel;
         setCourseSelectionEnabled(false);
         refreshAction.actionPerformed(evt);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
+
+    private void serverAddressTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressTextFieldActionPerformed
+        // Pressing return in the server address field presses the refresh button
+        refreshCoursesBtn.doClick();
+    }//GEN-LAST:event_serverAddressTextFieldActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JComboBox coursesComboBox;
