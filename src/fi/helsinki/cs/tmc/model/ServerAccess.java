@@ -5,6 +5,8 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
+import fi.helsinki.cs.tmc.tailoring.Tailoring;
+import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
 import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -36,7 +38,8 @@ public class ServerAccess {
                     new NetworkTasks(),
                     ProjectMediator.getInstance(),
                     NbProjectUnzipper.getDefault(),
-                    NbProjectZipper.getDefault()
+                    NbProjectZipper.getDefault(),
+                    SelectedTailoring.get()
                     );
         }
         return defaultInstance;
@@ -50,6 +53,7 @@ public class ServerAccess {
     private ProjectMediator projectMediator;
     private NbProjectUnzipper unzipper;
     private NbProjectZipper zipper;
+    private Tailoring tailoring;
     private String baseUrl;
     private String username;
 
@@ -57,11 +61,13 @@ public class ServerAccess {
             NetworkTasks networkTasks,
             ProjectMediator projectMediator,
             NbProjectUnzipper unzipper,
-            NbProjectZipper zipper) {
+            NbProjectZipper zipper,
+            Tailoring tailoring) {
         this.networkTasks = networkTasks;
         this.projectMediator = projectMediator;
         this.unzipper = unzipper;
         this.zipper = zipper;
+        this.tailoring = tailoring;
         loadPreferences();
     }
     
@@ -69,7 +75,7 @@ public class ServerAccess {
     
     private void loadPreferences() {
         Preferences prefs = getPreferences();
-        this.baseUrl = prefs.get(PREF_BASE_URL, "");
+        this.baseUrl = prefs.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
         this.username = prefs.get(PREF_USERNAME, "");
     }
 

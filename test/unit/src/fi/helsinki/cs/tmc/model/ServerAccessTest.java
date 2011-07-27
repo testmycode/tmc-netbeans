@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import org.mockito.ArgumentMatcher;
 import java.util.Map;
 import java.io.File;
@@ -31,6 +32,8 @@ public class ServerAccessTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private NbProjectUnzipper unzipper;
     @Mock private NbProjectZipper zipper;
+    @Mock private Tailoring tailoring;
+    
     @Mock private CancellableCallable<String> mockTextDownload;
     @Mock private CancellableCallable<byte[]> mockBinaryDownload;
     
@@ -51,11 +54,13 @@ public class ServerAccessTest {
     
     @After
     public void tearDown() throws BackingStoreException {
-        prefs.removeNode();
+        if (prefs != null) {
+            prefs.removeNode();
+        }
     }
 
     private ServerAccess newServer() {
-        return new ServerAccess(networkTasks, projectMediator, unzipper, zipper);
+        return new ServerAccess(networkTasks, projectMediator, unzipper, zipper, tailoring);
     }
     
     private void nextTextDownloadReturns(String s) {
@@ -72,6 +77,16 @@ public class ServerAccessTest {
         } catch (Exception e) {
             fail("should never happen");
         }
+    }
+    
+    @Test
+    public void itUsesTheBaseUrlFromTheTailoringByDefault() throws BackingStoreException {
+        String url = "http://default.example.com";
+        when(tailoring.getDefaultServerUrl()).thenReturn(url);
+        prefs.removeNode();
+        prefs = null; // (to avoid error in tearDown())
+        serverAccess = newServer();
+        assertEquals(url, newServer().getBaseUrl());
     }
     
     @Test
