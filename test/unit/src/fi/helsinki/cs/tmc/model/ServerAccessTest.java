@@ -201,8 +201,9 @@ public class ServerAccessTest {
         Exercise exercise = new Exercise("MyExercise");
         exercise.setReturnAddress(submitUrl);
         
-        when(projectMediator.getProjectDirForExercise(exercise)).thenReturn(new File("/foo/MyExercise"));
-        when(zipper.zipProjectSources("/foo/MyExercise")).thenReturn(fakeBinaryData);
+        File exerciseDir = new File("/foo/MyExercise");
+        when(projectMediator.getProjectDirForExercise(exercise)).thenReturn(exerciseDir);
+        when(zipper.zipProjectSources(exerciseDir)).thenReturn(fakeBinaryData);
         when(networkTasks.uploadFileForTextResponse(
                 eq(submitUrl),
                 (Map<String, String>)any(Map.class),

@@ -6,14 +6,11 @@ import fi.helsinki.cs.tmc.testing.TempTestDir;
 import java.io.ByteArrayInputStream;
 import java.io.File;
 import java.io.IOException;
-import java.util.Collections;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.AdditionalMatchers;
-import org.mockito.Matchers;
 import static org.junit.Assert.*;
 
 public class NbProjectZipperTest {
@@ -43,7 +40,7 @@ public class NbProjectZipperTest {
         new File(mainDir + SLASH + "test").mkdir();
         new File(mainDir + SLASH + "test" + SLASH + "Excluded.txt").createNewFile();
         
-        byte[] zipData = zipper.zipProjectSources(mainDir);
+        byte[] zipData = zipper.zipProjectSources(new File(mainDir));
         List<String> entries = zipEntryNames(zipData);
         
         if (!entries.contains("MyExercise/src/Included1.txt")) {

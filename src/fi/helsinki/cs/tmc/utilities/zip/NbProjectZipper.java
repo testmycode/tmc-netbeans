@@ -26,12 +26,7 @@ public class NbProjectZipper {
     /**
      * Zip up a project directory, only including the "src" subdirectory.
      */
-    public byte[] zipProjectSources(String path) throws IOException {
-        return zipProjectSources(new File(path));
-    }
-
-
-    private byte[] zipProjectSources(File directory) throws IOException {
+    public byte[] zipProjectSources(File directory) throws IOException {
         if (!directory.exists() || !directory.isDirectory()) {
             throw new FileNotFoundException("Project directory not found for zipping!");
         }
