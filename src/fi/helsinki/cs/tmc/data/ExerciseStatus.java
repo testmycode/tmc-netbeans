@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.utilities.exercise;
+package fi.helsinki.cs.tmc.data;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,7 +7,6 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.io.Serializable;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.utilities.FolderHelper;
 
 /**
  * Used to store, write and read the status of a single exercise from disk.
@@ -54,6 +53,8 @@ public class ExerciseStatus implements Serializable {
      * @return The status file
      */
     private static File getStatusFilePath(Exercise exercise) {
+        throw new UnsupportedOperationException("TODO: refactor");
+        /*
         if (exercise == null) {
             throw new NullPointerException("exercise is null");
         }
@@ -66,6 +67,7 @@ public class ExerciseStatus implements Serializable {
         String statusFilePath = projectFolder.getAbsolutePath() + File.separator + "exerciseStatus.bin";
 
         return new File(statusFilePath);
+         */
     }
 
     /**

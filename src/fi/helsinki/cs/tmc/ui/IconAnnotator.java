@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.utilities;
+package fi.helsinki.cs.tmc.ui;
 
 import java.awt.Image;
 import java.text.DateFormat;
@@ -13,7 +13,7 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.Lookup;
 import org.openide.util.lookup.ServiceProvider;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.utilities.exercise.ExerciseStatus;
+import fi.helsinki.cs.tmc.data.ExerciseStatus;
 
 /**
  * This class is registered into the Netbeans' lookup and it changes the projects' default icon if it is an exercise project.
@@ -33,7 +33,8 @@ public class IconAnnotator implements ProjectIconAnnotator {
      */
     @Override
     public Image annotateIcon(Project p, Image orig, boolean openedNode) {
-
+        throw new UnsupportedOperationException("TODO: refactor");
+/*
         ClassLoader syscl = getClass().getClassLoader();
 
         Image image;
@@ -82,7 +83,7 @@ public class IconAnnotator implements ProjectIconAnnotator {
             return orig;
         }
 
-
+*/
     }
 
     /**
