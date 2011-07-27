@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
+import org.apache.commons.io.IOUtils;
 
 public class NbProjectZipper {
 
@@ -19,103 +20,74 @@ public class NbProjectZipper {
         return instance;
     }
     
-    /**
-     * Constructor
-     */
     public NbProjectZipper() {
     }
-
+    
     /**
-     * Used to write a single entry into the given ZipOutputStream.
-     * @param file File to read.
-     * @param out Stream to write to.
-     * @param path Folder in which the file resides in.
-     * @throws IOException 
+     * Zip up a project directory, only including the "src" subdirectory.
      */
-    private void writeEntry(File file, ZipOutputStream out, String path) throws IOException {
-        byte[] buffer = new byte[1024];
-        out.putNextEntry(new ZipEntry(path + File.separator + file.getName()));
+    public byte[] zipProjectSources(String path) throws IOException {
+        return zipProjectSources(new File(path));
+    }
 
-        FileInputStream in = new FileInputStream(file);
 
-        int len;
-        while ((len = in.read(buffer)) > 0) {  //write the entry (file) to the zipfile
-            out.write(buffer, 0, len);
+    private byte[] zipProjectSources(File directory) throws IOException {
+        if (!directory.exists() || !directory.isDirectory()) {
+            throw new FileNotFoundException("Project directory not found for zipping!");
         }
 
+        String rootDirName = directory.getName();
+        
+        ByteArrayOutputStream zipBuffer = new ByteArrayOutputStream();
+        ZipOutputStream zos = new ZipOutputStream(zipBuffer);
+        
+        try {
+            zos.putNextEntry(new ZipEntry(rootDirName + "/"));
+            zipRecursively(new File(directory + File.separator + "src"), zos, rootDirName);
+        } finally {
+            zos.close();
+        }
+
+        return zipBuffer.toByteArray();
+    }
+
+    private void writeEntry(File file, ZipOutputStream zos, String zipPath) throws IOException {
+        zos.putNextEntry(new ZipEntry(zipPath + "/" + file.getName()));
+
+        FileInputStream in = new FileInputStream(file);
+        IOUtils.copy(in, zos);
         in.close();
-        out.closeEntry();
+        zos.closeEntry();
     }
 
     /**
-     * Used to create a zip file recursively.
-     * @param file Directory to be zipped.
-     * @param out Stream to write to.
-     * @param path Directory path, can be an empty string.
-     * @throws IOException 
-     * @throws NullPointerException
+     * Zips a directory recursively.
      */
-    private void zipFileRecur(File file, ZipOutputStream out, String path) throws IOException, NullPointerException {
-        String currentPath;
-        if (!path.equals("")) {
-            currentPath = path + File.separator + file.getName();
+    private void zipRecursively(File dir, ZipOutputStream zos, String parentZipPath) throws IOException {
+        String thisDirZipPath;
+        if (parentZipPath.isEmpty()) {
+            thisDirZipPath = dir.getName();
         } else {
-            currentPath = file.getName();
+            thisDirZipPath = parentZipPath + "/" + dir.getName();
         }
 
-        out.putNextEntry(new ZipEntry(currentPath + File.separator));  //Add the folder to the zip file
-        out.closeEntry();
+        // Create an entry for the directory
+        zos.putNextEntry(new ZipEntry(thisDirZipPath + "/"));
+        zos.closeEntry();
 
-        File[] files = file.listFiles();
-        for (File singleFile : files) {
-            if (singleFile.isDirectory()) {
-                zipFileRecur(singleFile, out, currentPath);
+        File[] files = dir.listFiles();
+        for (File file : files) {
+            if (file.isDirectory()) {
+                zipRecursively(file, zos, thisDirZipPath);
             } else {
-                writeEntry(singleFile, out, currentPath);
+                if (shouldIncludeFile(thisDirZipPath + "/" + file.getName())) {
+                    writeEntry(file, zos, thisDirZipPath);
+                }
             }
         }
     }
 
-    /**
-     * Creates a zip file.
-     * @param path Must point to a project folder.
-     * @return byte[] Zip file data in byte array.
-     * @throws IOException 
-     * @throws NullPointerException
-     * @throws FileNotFoundException
-     */
-    public byte[] zip(String path) throws IOException, NullPointerException, FileNotFoundException {
-        if (path == null) {
-            throw new NullPointerException("path cannot be null");
-        }
-
-        return zip(new File(path));
-    }
-
-    /**
-     * Create a zipfile containing the project folder and only the "src" folder inside.
-     * @param file Should be a project folder.
-     * @return byte[] Containing the zipped file.
-     * @throws IOException If file doesn't exist or is unreadable.
-     * @throws FileNotFoundException
-     * @throws NullPointerException
-     */
-    public byte[] zip(File file) throws IOException, FileNotFoundException, NullPointerException {
-        if (file == null) {
-            throw new NullPointerException("file cannot be null");
-        }
-
-        if (!file.exists()) {
-            throw new FileNotFoundException("File not found!");
-        }
-
-        ByteArrayOutputStream zipContent = new ByteArrayOutputStream();
-
-        ZipOutputStream out = new ZipOutputStream(zipContent);
-
-        zipFileRecur(file, out, "");
-        out.close();
-
-        return zipContent.toByteArray();
+    private boolean shouldIncludeFile(String zipPath) {
+        return zipPath.contains("/src/");
     }
 }

@@ -202,7 +202,7 @@ public class ServerAccessTest {
         exercise.setReturnAddress(submitUrl);
         
         when(projectMediator.getProjectDirForExercise(exercise)).thenReturn(new File("/foo/MyExercise"));
-        when(zipper.zip("/foo/MyExercise")).thenReturn(fakeBinaryData);
+        when(zipper.zipProjectSources("/foo/MyExercise")).thenReturn(fakeBinaryData);
         when(networkTasks.uploadFileForTextResponse(
                 eq(submitUrl),
                 (Map<String, String>)any(Map.class),

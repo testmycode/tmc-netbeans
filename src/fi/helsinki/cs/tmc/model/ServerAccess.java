@@ -181,7 +181,7 @@ public class ServerAccess {
         
         final byte[] file;
         try {
-            file = zipper.zip(projectDir.getAbsolutePath());
+            file = zipper.zipProjectSources(projectDir.getAbsolutePath());
         } catch (IOException e) {
             throw new RuntimeException("Failed to zip up exercise", e);
         }

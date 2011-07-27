@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.utilities.zip;
 
+import fi.helsinki.cs.tmc.testing.TempTestDir;
 import java.io.ByteArrayOutputStream;
 import java.io.Writer;
 import java.io.File;
@@ -15,7 +16,7 @@ import static org.junit.Assert.*;
 
 public class NbProjectUnzipperTest {
     
-    private final File tempRoot = new File("tmp" + File.separator + "test");
+    private TempTestDir tempDir;
     private ByteArrayOutputStream zipBuffer;
     private ZipOutputStream zipOut;
     
@@ -23,9 +24,7 @@ public class NbProjectUnzipperTest {
     
     @Before
     public void setUp() throws IOException {
-        FileUtils.forceMkdir(tempRoot);
-        FileUtils.forceDelete(tempRoot);
-        FileUtils.forceMkdir(tempRoot);
+        tempDir = new TempTestDir();
         
         zipBuffer = new ByteArrayOutputStream();
         zipOut = new ZipOutputStream(zipBuffer);
@@ -35,7 +34,7 @@ public class NbProjectUnzipperTest {
     
     @After
     public void tearDown() throws IOException {
-        FileUtils.forceDelete(tempRoot);
+        tempDir.destroy();
     }
     
     private void addFakeProjectToZip(String path, String name) throws IOException {
@@ -66,12 +65,12 @@ public class NbProjectUnzipperTest {
         addFakeProjectToZip("project3", "P3");
         zipOut.close();
         
-        unzipper.unzipProject(zipBuffer.toByteArray(), tempRoot, "my-project");
+        unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
         
-        assertEquals(1, tempRoot.listFiles().length);
-        String contents = FileUtils.readFileToString(new File(tempRoot.getAbsolutePath() + File.separator + "my-project/nbproject/project.xml"));
+        assertEquals(1, tempDir.get().listFiles().length);
+        String contents = FileUtils.readFileToString(new File(tempDir.getPath() + File.separator + "my-project/nbproject/project.xml"));
         assertEquals("Fake project.xml of P1", contents);
-        contents = FileUtils.readFileToString(new File(tempRoot.getAbsolutePath() + File.separator + "my-project/src/Hello.java"));
+        contents = FileUtils.readFileToString(new File(tempDir.getPath() + File.separator + "my-project/src/Hello.java"));
         assertEquals("Fake Java file of P1", contents);
     }
     
@@ -82,7 +81,7 @@ public class NbProjectUnzipperTest {
         writeFileToZip("dir1/dir2/oops.txt", "oops");
         zipOut.close();
         
-        unzipper.unzipProject(zipBuffer.toByteArray(), tempRoot, "my-project");
+        unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
     }
     
     @Test
@@ -90,13 +89,13 @@ public class NbProjectUnzipperTest {
         addFakeProjectToZip("dir1/dir12/project1", "P1");
         zipOut.close();
         
-        new File(tempRoot.getAbsolutePath() + "/my-project/src").mkdirs();
-        File existingFile = new File(tempRoot.getAbsolutePath() + "/my-project/src/Hello.java");
+        new File(tempDir.getPath() + "/my-project/src").mkdirs();
+        File existingFile = new File(tempDir.getPath() + "/my-project/src/Hello.java");
         FileUtils.write(existingFile, "This should remain");
         
         boolean caughtException = false;
         try {
-            unzipper.unzipProject(zipBuffer.toByteArray(), tempRoot, "my-project");
+            unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
         } catch (IllegalStateException e) {
             caughtException = true;
         }
