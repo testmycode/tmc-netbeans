@@ -16,27 +16,32 @@
   <Layout>
     <DimensionLayout dim="0">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" attributes="0">
+          <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="usernameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="serverAddressLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="defaultProjectFolderLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="coursesLabel" alignment="0" min="-2" max="-2" attributes="0"/>
-              </Group>
-              <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
-              <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="serverAddressTextField" alignment="0" pref="460" max="32767" attributes="1"/>
-                  <Component id="usernameTextField" alignment="0" pref="460" max="32767" attributes="1"/>
+                  <Component id="adviceLabel" alignment="1" pref="667" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="projectFolderTextField" pref="361" max="32767" attributes="1"/>
-                          <Component id="coursesComboBox" alignment="1" pref="361" max="32767" attributes="1"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="usernameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="serverAddressLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="projectFolderLabel" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="coursesLabel" alignment="0" min="-2" max="-2" attributes="0"/>
                       </Group>
-                      <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
-                      <Group type="103" groupAlignment="1" attributes="0">
-                          <Component id="refreshCoursesBtn" min="-2" max="-2" attributes="0"/>
-                          <Component id="folderChooserBtn" alignment="1" min="-2" max="-2" attributes="0"/>
+                      <EmptySpace min="-2" pref="55" max="-2" attributes="0"/>
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="serverAddressTextField" alignment="0" pref="481" max="32767" attributes="1"/>
+                          <Component id="usernameTextField" alignment="0" pref="481" max="32767" attributes="1"/>
+                          <Group type="102" alignment="0" attributes="0">
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="projectFolderTextField" pref="382" max="32767" attributes="1"/>
+                                  <Component id="coursesComboBox" alignment="1" pref="382" max="32767" attributes="1"/>
+                              </Group>
+                              <EmptySpace min="-2" pref="10" max="-2" attributes="0"/>
+                              <Group type="103" groupAlignment="1" attributes="0">
+                                  <Component id="refreshCoursesBtn" min="-2" max="-2" attributes="0"/>
+                                  <Component id="folderChooserBtn" alignment="1" min="-2" max="-2" attributes="0"/>
+                              </Group>
+                          </Group>
                       </Group>
                   </Group>
               </Group>
@@ -46,8 +51,10 @@
     </DimensionLayout>
     <DimensionLayout dim="1">
       <Group type="103" groupAlignment="0" attributes="0">
-          <Group type="102" alignment="0" attributes="0">
+          <Group type="102" alignment="1" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
+              <Component id="adviceLabel" pref="12" max="32767" attributes="0"/>
+              <EmptySpace type="unrelated" max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
                   <Component id="usernameLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="usernameTextField" alignment="3" min="-2" max="-2" attributes="0"/>
@@ -59,7 +66,7 @@
               </Group>
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="3" attributes="0">
-                  <Component id="defaultProjectFolderLabel" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="projectFolderLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="projectFolderTextField" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="folderChooserBtn" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
@@ -69,7 +76,7 @@
                   <Component id="coursesComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="coursesLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
-              <EmptySpace max="-2" attributes="0"/>
+              <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
       </Group>
     </DimensionLayout>
@@ -118,10 +125,10 @@
         <EventHandler event="actionPerformed" listener="java.awt.event.ActionListener" parameters="java.awt.event.ActionEvent" handler="serverAddressTextFieldActionPerformed"/>
       </Events>
     </Component>
-    <Component class="javax.swing.JLabel" name="defaultProjectFolderLabel">
+    <Component class="javax.swing.JLabel" name="projectFolderLabel">
       <Properties>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
-          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.defaultProjectFolderLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.projectFolderLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>
@@ -173,6 +180,16 @@
             <StringItem index="2" value="Item 3"/>
             <StringItem index="3" value="Item 4"/>
           </StringArray>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="adviceLabel">
+      <Properties>
+        <Property name="foreground" type="java.awt.Color" editor="org.netbeans.beaninfo.editors.ColorEditor">
+          <Color blue="0" green="66" red="ff" type="rgb"/>
+        </Property>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.adviceLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

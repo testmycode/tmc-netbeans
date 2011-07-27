@@ -4,9 +4,15 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.io.File;
+import java.util.ArrayList;
+import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.event.DocumentEvent;
+import javax.swing.event.DocumentListener;
 
 /**
  * The settings panel.
@@ -20,6 +26,8 @@ import javax.swing.JPanel;
     
     /*package*/ PreferencesPanel() {
         initComponents();
+        
+        setUpAdviceUpdating();
     }
     
     @Override
@@ -100,6 +108,73 @@ import javax.swing.JPanel;
         }
     }
     
+    private void setUpAdviceUpdating() {
+        DocumentListener docListener = new DocumentListener() {
+            @Override
+            public void insertUpdate(DocumentEvent e) {
+                updateAdvice();
+            }
+            @Override
+            public void removeUpdate(DocumentEvent e) {
+                updateAdvice();
+            }
+            @Override
+            public void changedUpdate(DocumentEvent e) {
+                updateAdvice();
+            }
+        };
+        usernameTextField.getDocument().addDocumentListener(docListener);
+        serverAddressTextField.getDocument().addDocumentListener(docListener);
+        projectFolderTextField.getDocument().addDocumentListener(docListener);
+        
+        coursesComboBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                updateAdvice();
+            }
+        });
+    }
+    
+    private void updateAdvice() {
+        ArrayList<String> fields = new ArrayList<String>();
+        if (usernameTextField.getText().isEmpty()) {
+            fields.add("username");
+        }
+        if (serverAddressTextField.getText().isEmpty()) {
+            fields.add("server address");
+        }
+        if (projectFolderTextField.getText().isEmpty()) {
+            fields.add("folder for projects");
+        }
+        if (coursesComboBox.getSelectedIndex() == -1) {
+            fields.add("course");
+        }
+        
+        if (!fields.isEmpty()) {
+            String advice = "Please set " + joinWithCommasAndAnd(fields) + ".";
+            adviceLabel.setText(advice);
+        } else {
+            adviceLabel.setText("");
+        }
+    }
+    
+    private String joinWithCommasAndAnd(List<String> strings) {
+        if (strings.isEmpty()) {
+            return "";
+        } else if (strings.size() == 1) {
+            return strings.get(0);
+        } else {
+            String s = "";
+            for (int i = 0; i < strings.size() - 2; ++i) {
+                s += strings.get(i) + ", ";
+            }
+            s += strings.get(strings.size() - 2);
+            s += " and ";
+            s += strings.get(strings.size() - 1);
+            return s;
+        }
+    }
+    
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -114,12 +189,13 @@ import javax.swing.JPanel;
         usernameTextField = new javax.swing.JTextField();
         serverAddressLabel = new javax.swing.JLabel();
         serverAddressTextField = new javax.swing.JTextField();
-        defaultProjectFolderLabel = new javax.swing.JLabel();
+        projectFolderLabel = new javax.swing.JLabel();
         projectFolderTextField = new javax.swing.JTextField();
         folderChooserBtn = new javax.swing.JButton();
         refreshCoursesBtn = new javax.swing.JButton();
         coursesLabel = new javax.swing.JLabel();
         coursesComboBox = new javax.swing.JComboBox();
+        adviceLabel = new javax.swing.JLabel();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -138,7 +214,7 @@ import javax.swing.JPanel;
             }
         });
 
-        defaultProjectFolderLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.defaultProjectFolderLabel.text")); // NOI18N
+        projectFolderLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.projectFolderLabel.text")); // NOI18N
 
         projectFolderTextField.setEditable(false);
         projectFolderTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.projectFolderTextField.text")); // NOI18N
@@ -163,6 +239,9 @@ import javax.swing.JPanel;
 
         coursesComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
 
+        adviceLabel.setForeground(new java.awt.Color(255, 102, 0));
+        adviceLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.adviceLabel.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -170,28 +249,33 @@ import javax.swing.JPanel;
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(usernameLabel)
-                    .addComponent(serverAddressLabel)
-                    .addComponent(defaultProjectFolderLabel)
-                    .addComponent(coursesLabel))
-                .addGap(55, 55, 55)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
-                    .addComponent(usernameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 460, Short.MAX_VALUE)
+                    .addComponent(adviceLabel, javax.swing.GroupLayout.Alignment.TRAILING, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(projectFolderTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 361, Short.MAX_VALUE)
-                            .addComponent(coursesComboBox, 0, 361, Short.MAX_VALUE))
-                        .addGap(10, 10, 10)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(refreshCoursesBtn)
-                            .addComponent(folderChooserBtn))))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(usernameLabel)
+                            .addComponent(serverAddressLabel)
+                            .addComponent(projectFolderLabel)
+                            .addComponent(coursesLabel))
+                        .addGap(55, 55, 55)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+                            .addComponent(usernameTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(projectFolderTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 382, Short.MAX_VALUE)
+                                    .addComponent(coursesComboBox, 0, 382, Short.MAX_VALUE))
+                                .addGap(10, 10, 10)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                    .addComponent(refreshCoursesBtn)
+                                    .addComponent(folderChooserBtn))))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
+                .addComponent(adviceLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 12, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(usernameLabel)
                     .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
@@ -201,7 +285,7 @@ import javax.swing.JPanel;
                     .addComponent(serverAddressTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(defaultProjectFolderLabel)
+                    .addComponent(projectFolderLabel)
                     .addComponent(projectFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(folderChooserBtn))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
@@ -242,10 +326,11 @@ import javax.swing.JPanel;
     }//GEN-LAST:event_serverAddressTextFieldActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JLabel adviceLabel;
     private javax.swing.JComboBox coursesComboBox;
     private javax.swing.JLabel coursesLabel;
-    private javax.swing.JLabel defaultProjectFolderLabel;
     private javax.swing.JButton folderChooserBtn;
+    private javax.swing.JLabel projectFolderLabel;
     private javax.swing.JTextField projectFolderTextField;
     private javax.swing.JButton refreshCoursesBtn;
     private javax.swing.JLabel serverAddressLabel;
