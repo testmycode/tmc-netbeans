@@ -1,7 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
+import javax.swing.SwingUtilities;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.modules.ModuleInstall;
@@ -35,7 +38,26 @@ public class TmcModuleInstall extends ModuleInstall {
         dd.setModal(true);
         dd.setMessageType(DialogDescriptor.INFORMATION_MESSAGE);
         dd.setOptions(new Object[] { DialogDescriptor.OK_OPTION });
-        dd.setButtonListener(new ShowSettingsAction());
+        
+        /*
+         * We need to wrap the showing of the settings window in invokeLater.
+         * Otherwise the settings window may get the welcome dialog as its
+         * parent, which leads to funky window focus problems such as
+         * the settings window dropping behind the NetBeans window after
+         * an error dialog from it is closed.
+         */
+        dd.setButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        new ShowSettingsAction().actionPerformed(null);
+                    }
+                });
+            }
+        });
+        
         DialogDisplayer.getDefault().notifyLater(dd);
     }
 }
