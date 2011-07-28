@@ -82,7 +82,7 @@ public class SaveSettingsActionTest {
         
         performTheAction();
         
-        verify(openExercisesAction).actionPerformed(any(ActionEvent.class));
+        verify(openExercisesAction, timeout(5000)).actionPerformed(any(ActionEvent.class));
     }
     
     @Test
