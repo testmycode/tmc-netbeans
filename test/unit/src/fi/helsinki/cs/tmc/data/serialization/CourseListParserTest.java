@@ -1,17 +1,27 @@
-package fi.helsinki.cs.tmc.data.json;
+package fi.helsinki.cs.tmc.data.serialization;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.util.GregorianCalendar;
+import org.junit.Before;
 
-public class JSONExerciseListParserTest {
+public class CourseListParserTest {
+    
+    private CourseListParser parser;
+    
+    @Before
+    public void setUp() {
+        parser = new CourseListParser();
+    }
+    
     @Test
-    public void testParseJson() throws Exception {
-        String json =
+    public void testParseJson() {
+        String exercisesJson =
                 "[{" +
-                "name: \"test\"," +
+                "name: \"TheExercise\"," +
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: \"2011-06-14T01:30:19+03:00\"," +
                 "publish_date: null," +
@@ -19,9 +29,15 @@ public class JSONExerciseListParserTest {
                 "attempted: true," +
                 "completed: false" +
                 "}]";
-        ExerciseCollection result = JSONExerciseListParser.parseJson(json);
+        String json = "[{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]";
+        CourseCollection result = parser.parseFromJson(json);
         
-        Exercise exercise = result.getExerciseByName("test");
+        Course course = result.getCourseByName("TheCourse");
+        assertEquals("TheCourse", course.getName());
+        
+        Exercise exercise = course.getExercises().getExerciseByName("TheExercise");
+        
+        assertEquals("TheCourse", exercise.getCourseName());
         
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTime(exercise.getDeadline());
@@ -34,15 +50,15 @@ public class JSONExerciseListParserTest {
         assertTrue(exercise.isAttempted());
         assertFalse(exercise.isCompleted());
     }
-
+    
     @Test
     public void emptyJson() {
-        ExerciseCollection empty = JSONExerciseListParser.parseJson("[]");
+        CourseCollection empty = parser.parseFromJson("[]");
         assertFalse(empty.iterator().hasNext());
     }
 
-    @Test(expected = Exception.class)
+    @Test(expected = NullPointerException.class)
     public void nullThrow() throws Exception {
-        JSONCourseListParser.parseJson(null);
+        parser.parseFromJson(null);
     }
 }

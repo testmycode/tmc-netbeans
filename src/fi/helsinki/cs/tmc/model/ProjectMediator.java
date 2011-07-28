@@ -146,7 +146,7 @@ public class ProjectMediator {
      */
     public Exercise tryGetExerciseForProject(TmcProjectInfo project, LocalCourseCache courseCache) {
         File projectDir = FileUtil.toFile(project.getProjectDir());
-        for (Exercise ex : courseCache.getAvailableExercises()) {
+        for (Exercise ex : courseCache.getAllExercises()) {
             if (getProjectDirForExercise(ex).equals(projectDir)) {
                 return ex;
             }

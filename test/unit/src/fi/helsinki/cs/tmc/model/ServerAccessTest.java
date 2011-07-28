@@ -1,19 +1,19 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
+import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import org.mockito.ArgumentMatcher;
 import java.util.Map;
 import java.io.File;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.io.IOException;
 import java.util.prefs.BackingStoreException;
 import org.junit.After;
 import java.util.prefs.Preferences;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.testing.MockBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -33,6 +33,8 @@ public class ServerAccessTest {
     @Mock private NbProjectUnzipper unzipper;
     @Mock private NbProjectZipper zipper;
     @Mock private Tailoring tailoring;
+    @Mock private CourseListParser courseListParser;
+    @Mock private SubmissionResultParser submissionResultParser;
     
     @Mock private CancellableCallable<String> mockTextDownload;
     @Mock private CancellableCallable<byte[]> mockBinaryDownload;
@@ -60,7 +62,14 @@ public class ServerAccessTest {
     }
 
     private ServerAccess newServer() {
-        return new ServerAccess(networkTasks, projectMediator, unzipper, zipper, tailoring);
+        return new ServerAccess(
+                networkTasks,
+                projectMediator,
+                unzipper,
+                zipper,
+                tailoring,
+                courseListParser,
+                submissionResultParser);
     }
     
     private void nextTextDownloadReturns(String s) {
@@ -126,52 +135,18 @@ public class ServerAccessTest {
     
     @Test
     public void itCanDownloadACourseListFromARemoteJSONFile() throws IOException {
-        String exerciseUrl = "http://example.com/courses/123/exercises.json";
-        when(networkTasks.downloadTextFile("http://example.com/courses.json")).thenReturn(mockTextDownload);
-        nextTextDownloadReturns("[{name: \"MyCourse\", exercises_json: \"" + exerciseUrl + "\"}]");
+        when(networkTasks.downloadTextFile("http://example.com/courses.json?username=JohnShepard")).thenReturn(mockTextDownload);
+        CourseCollection courses = mock(CourseCollection.class);
+        when(courseListParser.parseFromJson("some json")).thenReturn(courses);
+        nextTextDownloadReturns("some json");
         
         MockBgTaskListener<CourseCollection> listener = new MockBgTaskListener<CourseCollection>();
+        serverAccess.setUsername("JohnShepard");
         serverAccess.startDownloadingCourseList(listener);
         
         listener.waitForCall();
         listener.assertGotSuccess();
-        Course course = listener.result.getCourseByName("MyCourse");
-        assertEquals("MyCourse", course.getName());
-        assertEquals(exerciseUrl, course.getExerciseListDownloadAddress());
-    }
-    
-    
-    @Test
-    public void itCanDownloadTheListOfExercisesForACourseFromARemoteJSONFile() throws IOException {
-        String exerciseUrl = "http://example.com/courses/123/exercises.json";
-        Course course = new Course("MyCourse");
-        course.setExerciseListDownloadAddress(exerciseUrl);
-        when(networkTasks.downloadTextFile(exerciseUrl + "?username=JohnShepard")).thenReturn(mockTextDownload);
-        nextTextDownloadReturns(
-                "[{" +
-                "name: \"MyExercise\"," +
-                "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
-                "deadline: null," +
-                "publish_date: null," +
-                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
-                "attempted: true," +
-                "completed: false" +
-                "}]");
-        
-        MockBgTaskListener<ExerciseCollection> listener = new MockBgTaskListener<ExerciseCollection>();
-        serverAccess.setUsername("JohnShepard");
-        serverAccess.startDownloadingExerciseList(course, listener);
-        
-        listener.waitForCall();
-        listener.assertGotSuccess();
-        
-        Exercise ex = listener.result.getExerciseByName("MyExercise");
-        assertNotNull(ex);
-        assertEquals("http://example.com/courses/123/exercises/1/submissions", ex.getReturnAddress());
-        assertEquals("http://example.com/courses/123/exercises/1.zip", ex.getDownloadAddress());
-        assertEquals("MyCourse", ex.getCourseName());
-        assertTrue(ex.isAttempted());
-        assertFalse(ex.isCompleted());
+        assertSame(courses, listener.result);
     }
     
     
@@ -235,7 +210,9 @@ public class ServerAccessTest {
                 any(String.class),
                 any(byte[].class)
                 )).thenReturn(mockTextDownload);
-        nextTextDownloadReturns("{status: \"ok\"}");
+        SubmissionResult subResult = mock(SubmissionResult.class);
+        when(submissionResultParser.parseFromJson("some json")).thenReturn(subResult);
+        nextTextDownloadReturns("some json");
         
         MockBgTaskListener<SubmissionResult> listener = new MockBgTaskListener<SubmissionResult>();
         serverAccess.setUsername("JohnShepard");
@@ -243,7 +220,7 @@ public class ServerAccessTest {
         
         listener.waitForCall();
         assertTrue(listener.success);
-        assertEquals(SubmissionResult.Status.OK, listener.result.getStatus());
+        assertSame(subResult, listener.result);
         
         ArgumentMatcher<Map<String, String>> givesUsernameParam = new ArgumentMatcher<Map<String, String>>() {
             @Override

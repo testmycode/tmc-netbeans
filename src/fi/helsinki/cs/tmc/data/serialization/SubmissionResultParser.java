@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.data.json;
+package fi.helsinki.cs.tmc.data.serialization;
 
 import com.google.gson.FieldNamingPolicy;
 import com.google.gson.Gson;
@@ -10,9 +10,9 @@ import com.google.gson.JsonParseException;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import java.lang.reflect.Type;
 
-public class JSONSubmissionResultParser {
+public class SubmissionResultParser {
     
-    public static SubmissionResult parseJson(String json) {
+    public SubmissionResult parseFromJson(String json) {
         try {
             Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)

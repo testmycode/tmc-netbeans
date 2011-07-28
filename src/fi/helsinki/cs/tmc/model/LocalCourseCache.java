@@ -4,7 +4,6 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.io.IOException;
 import java.io.Reader;
@@ -31,7 +30,6 @@ public class LocalCourseCache {
     private ConfigFile configFile;
     private CourseCollection availableCourses;
     private String currentCourseName;
-    private ExerciseCollection availableExercises; // (for the current course)
 
     public LocalCourseCache() {
         this(new ConfigFile("LocalCourseCache.json"));
@@ -40,7 +38,6 @@ public class LocalCourseCache {
     public LocalCourseCache(ConfigFile configFile) {
         this.configFile = configFile;
         this.availableCourses = new CourseCollection();
-        this.availableExercises = new ExerciseCollection();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -56,10 +53,6 @@ public class LocalCourseCache {
         this.availableCourses = availableCourses;
         save();
     }
-    
-    public boolean hasCurrentCourse() {
-        return availableExercises != null;
-    }
 
     public Course getCurrentCourse() {
         return availableCourses.getCourseByName(currentCourseName);
@@ -72,7 +65,6 @@ public class LocalCourseCache {
     public void setCurrentCourseName(String currentCourseName) {
         if (availableCourses.hasCourseByName(currentCourseName)) {
             this.currentCourseName = currentCourseName;
-            this.availableExercises.clear();
             save();
         } else {
             logger.warning("Tried to set current course set to one not in available courses");
@@ -80,18 +72,29 @@ public class LocalCourseCache {
     }
 
     /**
-     * Find exercises from currently selected course.
+     * Returns the exercises from currently selected course.
      * 
      * <p>
      * If no course is currently selected then returns the empty collection.
      */
-    public ExerciseCollection getAvailableExercises() {
-        return availableExercises;
+    public ExerciseCollection getCurrentCourseExercises() {
+        Course course = getCurrentCourse();
+        if (course != null) {
+            return course.getExercises();
+        } else {
+            return new ExerciseCollection();
+        }
     }
-
-    public void setAvailableExercises(ExerciseCollection availableExercises) {
-        this.availableExercises = availableExercises;
-        save();
+    
+    /**
+     * Returns all exercises from all courses.
+     */
+    public ExerciseCollection getAllExercises() {
+        ExerciseCollection result = new ExerciseCollection();
+        for (Course course : availableCourses) {
+            result.addAll(course.getExercises());
+        }
+        return result;
     }
     
     public void save() {
@@ -105,7 +108,6 @@ public class LocalCourseCache {
     private static class StoredStuff {
         public ArrayList<Course> availableCourses;
         public String currentCourseName;
-        public ArrayList<Exercise> availableExercises;
     }
     
     private void saveToFile() throws IOException {
@@ -116,7 +118,6 @@ public class LocalCourseCache {
         StoredStuff stuff = new StoredStuff();
         stuff.availableCourses = this.availableCourses;
         stuff.currentCourseName = this.currentCourseName;
-        stuff.availableExercises = this.availableExercises;
         Writer w = configFile.getWriter();
         try {
             gson.toJson(stuff, w);
@@ -141,11 +142,6 @@ public class LocalCourseCache {
             }
             
             this.currentCourseName = stuff.currentCourseName;
-            
-            this.availableExercises = new ExerciseCollection();
-            if (stuff.availableExercises != null) {
-                this.availableExercises.addAll(stuff.availableExercises);
-            }
         }
     }
 }

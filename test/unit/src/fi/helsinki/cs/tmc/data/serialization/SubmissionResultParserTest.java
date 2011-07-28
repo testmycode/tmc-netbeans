@@ -1,14 +1,14 @@
-package fi.helsinki.cs.tmc.data.json;
+package fi.helsinki.cs.tmc.data.serialization;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import static fi.helsinki.cs.tmc.data.SubmissionResult.Status.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class JSONSubmissionResultParserTest {
+public class SubmissionResultParserTest {
     
     private SubmissionResult parse(String json) {
-        return JSONSubmissionResultParser.parseJson(json);
+        return new SubmissionResultParser().parseFromJson(json);
     }
     
     @Test

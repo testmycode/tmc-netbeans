@@ -1,20 +1,19 @@
 package fi.helsinki.cs.tmc.data;
 
-import com.google.gson.annotations.SerializedName;
-
 public class Course {
 
     private String name;
     
-    @SerializedName("exercises_json")
-    private String exerciseListDownloadAddress;
+    private ExerciseCollection exercises;
     
     
     public Course() {
+        this(null);
     }
 
     public Course(String name) {
         this.name = name;
+        this.exercises = new ExerciseCollection();
     }
 
     public String getName() {
@@ -27,17 +26,17 @@ public class Course {
         
         this.name = name;
     }
+
+    public ExerciseCollection getExercises() {
+        return exercises;
+    }
+
+    public void setExercises(ExerciseCollection exercises) {
+        this.exercises = exercises;
+    }
     
     @Override
     public String toString() {
         return name;
-    }
-    
-    public String getExerciseListDownloadAddress() {
-        return exerciseListDownloadAddress;
-    }
-
-    public void setExerciseListDownloadAddress(String exerciseListDownloadAddress) {
-        this.exerciseListDownloadAddress = exerciseListDownloadAddress;
     }
 }

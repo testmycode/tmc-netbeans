@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.data.json;
+package fi.helsinki.cs.tmc.data.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -6,38 +6,40 @@ import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.Exercise;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 
-
-public class JSONExerciseListParser {
-
+public class CourseListParser {
+    
     /**
-     * Parses a collection of exercises and attaches them to a course.
+     * Creates a CourseCollection object from text.
      */
-    public static ExerciseCollection parseJson(String json) {
+    public CourseCollection parseFromJson(String json) {
+        if (json == null) {
+            throw new NullPointerException("Json string is null");
+        }
         try {
-            if (json == null) {
-                throw new NullPointerException("Json string is null");
-            }
-
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Date.class, new CustomDateDeserializer())
                     .create();
-            Exercise[] exercises = gson.fromJson(json, Exercise[].class);
+            Course[] courses = gson.fromJson(json, Course[].class);
 
-            ExerciseCollection exerciseCollection = new ExerciseCollection();
-            for (Exercise exercise : exercises) {
-                exerciseCollection.add(exercise);
+            CourseCollection courseCollection = new CourseCollection();
+            for (Course course : courses) {
+                courseCollection.add(course);
+                for (Exercise ex : course.getExercises()) {
+                    ex.setCourseName(course.getName());
+                }
             }
 
-            return exerciseCollection;
+            return courseCollection;
         } catch (RuntimeException e) {
-            throw new RuntimeException("Failed to parse exercise list: " + e.getMessage(), e);
+            throw new RuntimeException("Failed to parse course list: " + e.getMessage(), e);
         }
     }
 

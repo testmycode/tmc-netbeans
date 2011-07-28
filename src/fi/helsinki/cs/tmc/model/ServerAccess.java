@@ -1,19 +1,16 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
-import fi.helsinki.cs.tmc.data.json.JSONCourseListParser;
+import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.data.json.JSONExerciseListParser;
-import fi.helsinki.cs.tmc.data.json.JSONSubmissionResultParser;
+import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import java.io.File;
@@ -39,7 +36,9 @@ public class ServerAccess {
                     ProjectMediator.getInstance(),
                     NbProjectUnzipper.getDefault(),
                     NbProjectZipper.getDefault(),
-                    SelectedTailoring.get()
+                    SelectedTailoring.get(),
+                    new CourseListParser(),
+                    new SubmissionResultParser()
                     );
         }
         return defaultInstance;
@@ -54,6 +53,8 @@ public class ServerAccess {
     private NbProjectUnzipper unzipper;
     private NbProjectZipper zipper;
     private Tailoring tailoring;
+    private CourseListParser courseListParser;
+    private SubmissionResultParser submissionResultParser;
     
     private Preferences prefs;
 
@@ -62,12 +63,16 @@ public class ServerAccess {
             ProjectMediator projectMediator,
             NbProjectUnzipper unzipper,
             NbProjectZipper zipper,
-            Tailoring tailoring) {
+            Tailoring tailoring,
+            CourseListParser courseListParser,
+            SubmissionResultParser submissionResultParser) {
         this.networkTasks = networkTasks;
         this.projectMediator = projectMediator;
         this.unzipper = unzipper;
         this.zipper = zipper;
         this.tailoring = tailoring;
+        this.courseListParser = courseListParser;
+        this.submissionResultParser = submissionResultParser;
         loadPreferences();
     }
     
@@ -91,7 +96,7 @@ public class ServerAccess {
     }
     
     private String getCourseListUrl() {
-        return getBaseUrl() + "/courses.json";
+        return getBaseUrl() + "/courses.json?username=" + getUsername();
     }
     
     private String stripTrailingSlashes(String s) {
@@ -114,8 +119,8 @@ public class ServerAccess {
         CancellableCallable<CourseCollection> task = new CancellableCallable<CourseCollection>() {
             @Override
             public CourseCollection call() throws Exception {
-                String json = download.call();
-                return JSONCourseListParser.parseJson(json);
+                String text = download.call();
+                return courseListParser.parseFromJson(text);
             }
 
             @Override
@@ -125,28 +130,6 @@ public class ServerAccess {
         };
         
         return new BgTask("Download " + getCourseListUrl(), listener, task).start();
-    }
-
-    public Future<ExerciseCollection> startDownloadingExerciseList(final Course course, BgTaskListener<ExerciseCollection> listener) {
-        final String listUrl = course.getExerciseListDownloadAddress() + "?username=" + getUsername();
-        
-        final CancellableCallable<String> download = networkTasks.downloadTextFile(listUrl);
-        CancellableCallable<ExerciseCollection> task = new CancellableCallable<ExerciseCollection>() {
-            @Override
-            public ExerciseCollection call() throws Exception {
-                String json = download.call();
-                ExerciseCollection exercises = JSONExerciseListParser.parseJson(json);
-                exercises.setCourseNameForEach(course.getName());
-                return exercises;
-            }
-            
-            @Override
-            public boolean cancel() {
-                return download.cancel();
-            }
-        };
-        
-        return new BgTask("Download " + listUrl, listener, task).start();
     }
 
     
@@ -197,8 +180,8 @@ public class ServerAccess {
         CancellableCallable<SubmissionResult> task = new CancellableCallable<SubmissionResult>() {
             @Override
             public SubmissionResult call() throws Exception {
-                String json = upload.call();
-                return JSONSubmissionResultParser.parseJson(json);
+                String text = upload.call();
+                return submissionResultParser.parseFromJson(text);
             }
 
             @Override

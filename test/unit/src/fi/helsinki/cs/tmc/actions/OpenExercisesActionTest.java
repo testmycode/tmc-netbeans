@@ -32,7 +32,6 @@ public class OpenExercisesActionTest {
     private Course currentCourse;
     private ExerciseCollection threeExercises;
     
-    @Captor private ArgumentCaptor<BgTaskListener<ExerciseCollection>> exListListenerCaptor;
     @Captor private ArgumentCaptor<BgTaskListener<TmcProjectInfo>> projListenerCaptor;
     
     private OpenExercisesAction action;
@@ -52,6 +51,7 @@ public class OpenExercisesActionTest {
         threeExercises.add(new Exercise("one"));
         threeExercises.add(new Exercise("two"));
         threeExercises.add(new Exercise("three"));
+        when(courseCache.getCurrentCourseExercises()).thenReturn(threeExercises);
         
         action = new OpenExercisesAction(
                 serverAccess,
@@ -74,15 +74,6 @@ public class OpenExercisesActionTest {
         action.actionPerformed(null);
     }
     
-    
-    @Test
-    public void itShouldRefreshAvailableExercises() {
-        performAction();
-        respondWithThreeExercises();
-        
-        verify(courseCache).setAvailableExercises(threeExercises);
-    }
-    
     @Test
     public void itShouldDownloadExercisesNotYetDownloaded() {
         TmcProjectInfo proj1 = mock(TmcProjectInfo.class);
@@ -92,7 +83,6 @@ public class OpenExercisesActionTest {
         when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(null);
         
         performAction();
-        respondWithThreeExercises();
         
         verifyStartedProjDownload(threeExercises.get(2));
         verifyNoMoreInteractions(serverAccess);
@@ -107,7 +97,6 @@ public class OpenExercisesActionTest {
         when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(null);
         
         performAction();
-        respondWithThreeExercises();
         
         verify(projectMediator).openProjects(Arrays.asList(proj1, proj2));
     }
@@ -115,7 +104,6 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseIsDownloadedItShouldOpenIt() {
         performAction();
-        respondWithThreeExercises();
         
         TmcProjectInfo proj = mock(TmcProjectInfo.class);
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskReady(proj);
@@ -126,7 +114,6 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseDownloadFailsItShouldDisplayAnError() {
         performAction();
-        respondWithThreeExercises();
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskFailed(new IOException("oops"));
         verify(dialogs).displayError("Failed to download exercise 'two': oops");
     }
@@ -134,7 +121,6 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseDownloadIsCancelledItShouldDoNothing() {
         performAction();
-        respondWithThreeExercises();
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskCancelled();
     }
     
@@ -145,44 +131,7 @@ public class OpenExercisesActionTest {
         performAction();
         
         verify(dialogs).displayError(contains("No course selected"));
-        verify(serverAccess, never()).startDownloadingExerciseList(any(Course.class), any(BgTaskListener.class));
-        verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
-    }
-    
-    @Test
-    public void whenTheCourseListDownloadFailsItShouldShowAWarningAndOpenAllLocalExercises() {
-        when(courseCache.getAvailableExercises()).thenReturn(threeExercises);
-        TmcProjectInfo proj1 = mock(TmcProjectInfo.class);
-        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1);
-        
-        performAction();
-        verifyStartedExListDownload().backgroundTaskFailed(new IOException("oops"));
-        
-        verify(dialogs).displayWarning(any(String.class));
-        verify(projectMediator).openProjects(Arrays.asList(proj1));
-        
-        verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
-        verify(serverAccess, never()).startDownloadingExerciseProject(any(Exercise.class), any(BgTaskListener.class));
-    }
-    
-    @Test
-    public void whenTheCourseListDownloadIsCancelledItShouldDoNothing() {
-        performAction();
-        verifyStartedExListDownload().backgroundTaskCancelled();
-        
-        verify(dialogs, never()).displayWarning(any(String.class));
-        verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
-        verify(serverAccess, never()).startDownloadingExerciseProject(any(Exercise.class), any(BgTaskListener.class));
-    }
-    
-    private void respondWithThreeExercises() {
-        BgTaskListener<ExerciseCollection> listener = verifyStartedExListDownload();
-        listener.backgroundTaskReady(threeExercises);
-    }
-    
-    private BgTaskListener<ExerciseCollection> verifyStartedExListDownload() {
-        verify(serverAccess).startDownloadingExerciseList(same(currentCourse), exListListenerCaptor.capture());
-        return exListListenerCaptor.getValue();
+        verifyZeroInteractions(projectMediator);
     }
     
     private BgTaskListener<TmcProjectInfo> verifyStartedProjDownload(Exercise exercise) {

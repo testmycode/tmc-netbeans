@@ -63,26 +63,9 @@ public class OpenExercisesAction extends AbstractAction {
             return;
         }
         
-        serverAccess.startDownloadingExerciseList(course, new BgTaskListener<ExerciseCollection>() {
-            @Override
-            public void backgroundTaskReady(ExerciseCollection result) {
-                courseCache.setAvailableExercises(result);
-                openLocalProjects(result);
-                downloadNewProjects(result);
-            }
-
-            @Override
-            public void backgroundTaskCancelled() {
-                // Do nothing
-            }
-
-            @Override
-            public void backgroundTaskFailed(Throwable exception) {
-                logger.log(Level.WARNING, "Failed to download exercise list.", exception);
-                dialogs.displayWarning("Failed to download exercise list. Opened previously downloaded exercises.");
-                openLocalProjects(courseCache.getAvailableExercises());
-            }
-        });
+        ExerciseCollection exercises = courseCache.getCurrentCourseExercises();
+        openLocalProjects(exercises);
+        downloadNewProjects(exercises);
     }
     
     private void openLocalProjects(ExerciseCollection exercises) {
