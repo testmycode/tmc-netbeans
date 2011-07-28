@@ -3,9 +3,11 @@ package fi.helsinki.cs.tmc.ui;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import javax.swing.SwingUtilities;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.windows.WindowManager;
 
 /**
  * Wraps PreferencesUI and shows it in a dialog on request.
@@ -87,12 +89,17 @@ public class PreferencesUIFactory {
         
         DialogDescriptor descriptor = new DialogDescriptor(
                 panel,
-                "Settings",
+                "TMC Settings",
                 false,
                 NotifyDescriptor.OK_CANCEL_OPTION,
                 NotifyDescriptor.PLAIN_MESSAGE,
                 closeListener);
         dialog = DialogDisplayer.getDefault().createDialog(descriptor);
-        dialog.setVisible(true);
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                dialog.setVisible(true);
+            }
+        });
     }
 }

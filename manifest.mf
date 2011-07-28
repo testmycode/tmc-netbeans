@@ -4,4 +4,4 @@ OpenIDE-Module-Layer: fi/helsinki/cs/tmc/layer.xml
 OpenIDE-Module-Localizing-Bundle: fi/helsinki/cs/tmc/Bundle.properties
 OpenIDE-Module-Requires: org.openide.windows.WindowManager
 OpenIDE-Module-Specification-Version: 1.0
-
+OpenIDE-Module-Install: fi/helsinki/cs/tmc/actions/TmcModuleInstall.class

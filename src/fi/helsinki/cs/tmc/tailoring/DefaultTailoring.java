@@ -10,6 +10,11 @@ public class DefaultTailoring implements Tailoring {
     public String getDefaultUsername() {
         return "";
     }
+
+    @Override
+    public String getFirstRunMessage() {
+        return "TestMyCode installed. I'll open the settings screen for you next.";
+    }
     
     
     protected String getSystemUsername() {
