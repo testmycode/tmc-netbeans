@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseProgress;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -79,10 +78,9 @@ public final class SubmitExerciseAction implements ActionListener {
             @Override
             public void backgroundTaskReady(SubmissionResult result) {
                 resultDisplayer.showResult(result);
+                exercise.setAttempted(true);
                 if (result.getStatus() == SubmissionResult.Status.OK) {
-                    exercise.setProgress(ExerciseProgress.DONE);
-                } else {
-                    exercise.setProgress(ExerciseProgress.PARTIALLY_DONE);
+                    exercise.setCompleted(true);
                 }
                 iconAnnotator.updateAllIcons();
                 courseCache.save();

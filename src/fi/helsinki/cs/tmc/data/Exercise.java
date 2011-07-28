@@ -28,7 +28,8 @@ public class Exercise implements Serializable {
     
     private Date deadline;
     
-    private ExerciseProgress progress = ExerciseProgress.NOT_DONE;
+    private boolean attempted;
+    private boolean completed;
 
     public Exercise() {
     }
@@ -103,15 +104,7 @@ public class Exercise implements Serializable {
         }
         this.returnAddress = returnAddress;
     }
-
-    public ExerciseProgress getProgress() {
-        return progress;
-    }
-
-    public void setProgress(ExerciseProgress progress) {
-        this.progress = progress;
-    }
-
+    
     public Date getDeadline() {
         if (deadline == null) {
             throw new IllegalStateException("Deadline not set");
@@ -124,6 +117,22 @@ public class Exercise implements Serializable {
             throw new NullPointerException("dealine was null at Exercise.setDeadline");
         }
         this.deadline = deadline;
+    }
+
+    public boolean isAttempted() {
+        return attempted;
+    }
+
+    public void setAttempted(boolean attempted) {
+        this.attempted = attempted;
+    }
+
+    public boolean isCompleted() {
+        return completed;
+    }
+
+    public void setCompleted(boolean completed) {
+        this.completed = completed;
     }
     
     @Override

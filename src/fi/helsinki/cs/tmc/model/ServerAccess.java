@@ -54,8 +54,8 @@ public class ServerAccess {
     private NbProjectUnzipper unzipper;
     private NbProjectZipper zipper;
     private Tailoring tailoring;
-    private String baseUrl;
-    private String username;
+    
+    private Preferences prefs;
 
     public ServerAccess(
             HttpTasks networkTasks,
@@ -74,18 +74,15 @@ public class ServerAccess {
     
     
     private void loadPreferences() {
-        Preferences prefs = getPreferences();
-        this.baseUrl = prefs.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
-        this.username = prefs.get(PREF_USERNAME, tailoring.getDefaultUsername());
+        this.prefs = getPreferences();
     }
 
     public String getBaseUrl() {
-        return baseUrl;
+        return prefs.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
     }
     
     public void setBaseUrl(String baseUrl) {
         baseUrl = stripTrailingSlashes(baseUrl);
-        this.baseUrl = baseUrl;
         getPreferences().put(PREF_BASE_URL, baseUrl);
     }
 
@@ -94,7 +91,7 @@ public class ServerAccess {
     }
     
     private String getCourseListUrl() {
-        return baseUrl + "/courses.json";
+        return getBaseUrl() + "/courses.json";
     }
     
     private String stripTrailingSlashes(String s) {
@@ -105,11 +102,10 @@ public class ServerAccess {
     }
 
     public String getUsername() {
-        return username;
+        return prefs.get(PREF_USERNAME, tailoring.getDefaultUsername());
     }
 
     public void setUsername(String username) {
-        this.username = username;
         getPreferences().put(PREF_USERNAME, username);
     }
     
@@ -132,7 +128,7 @@ public class ServerAccess {
     }
 
     public Future<ExerciseCollection> startDownloadingExerciseList(final Course course, BgTaskListener<ExerciseCollection> listener) {
-        final String listUrl = course.getExerciseListDownloadAddress();
+        final String listUrl = course.getExerciseListDownloadAddress() + "?username=" + getUsername();
         
         final CancellableCallable<String> download = networkTasks.downloadTextFile(listUrl);
         CancellableCallable<ExerciseCollection> task = new CancellableCallable<ExerciseCollection>() {
@@ -143,7 +139,7 @@ public class ServerAccess {
                 exercises.setCourseNameForEach(course.getName());
                 return exercises;
             }
-
+            
             @Override
             public boolean cancel() {
                 return download.cancel();

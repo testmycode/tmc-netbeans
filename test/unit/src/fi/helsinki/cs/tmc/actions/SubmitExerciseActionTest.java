@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseProgress;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -111,7 +110,8 @@ public class SubmitExerciseActionTest {
         when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
         listenerCaptor.getValue().backgroundTaskReady(result);
         
-        verify(exercise).setProgress(ExerciseProgress.DONE);
+        verify(exercise).setAttempted(true);
+        verify(exercise).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
         verify(courseCache).save();
     }
@@ -122,7 +122,8 @@ public class SubmitExerciseActionTest {
         when(result.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
         listenerCaptor.getValue().backgroundTaskReady(result);
         
-        verify(exercise).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        verify(exercise).setAttempted(true);
+        verify(exercise, never()).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
         verify(courseCache).save();
     }
@@ -133,7 +134,8 @@ public class SubmitExerciseActionTest {
         when(result.getStatus()).thenReturn(SubmissionResult.Status.ERROR);
         listenerCaptor.getValue().backgroundTaskReady(result);
         
-        verify(exercise).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        verify(exercise).setAttempted(true);
+        verify(exercise, never()).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
         verify(courseCache).save();
     }

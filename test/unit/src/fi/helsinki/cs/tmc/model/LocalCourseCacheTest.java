@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
-import fi.helsinki.cs.tmc.data.ExerciseProgress;
 import java.io.IOException;
 import org.junit.After;
 import java.util.logging.Level;
@@ -66,13 +65,14 @@ public class LocalCourseCacheTest {
         ExerciseCollection exercises = new ExerciseCollection();
         exercises.add(new Exercise("Hello"));
         exercises.add(new Exercise("Hello2"));
-        exercises.get(0).setProgress(ExerciseProgress.PARTIALLY_DONE);
+        exercises.get(0).setAttempted(true);
         
         cache.setAvailableExercises(exercises);
         cache = new LocalCourseCache(file);
         
         assertEquals("Hello2", cache.getAvailableExercises().get(1).getName());
-        assertEquals(ExerciseProgress.PARTIALLY_DONE, cache.getAvailableExercises().get(0).getProgress());
+        assertTrue(cache.getAvailableExercises().get(0).isAttempted());
+        assertFalse(cache.getAvailableExercises().get(0).isCompleted());
         
         assertFalse(file.readContents().isEmpty());
     }

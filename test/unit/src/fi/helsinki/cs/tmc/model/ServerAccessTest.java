@@ -146,17 +146,20 @@ public class ServerAccessTest {
         String exerciseUrl = "http://example.com/courses/123/exercises.json";
         Course course = new Course("MyCourse");
         course.setExerciseListDownloadAddress(exerciseUrl);
-        when(networkTasks.downloadTextFile(exerciseUrl)).thenReturn(mockTextDownload);
+        when(networkTasks.downloadTextFile(exerciseUrl + "?username=JohnShepard")).thenReturn(mockTextDownload);
         nextTextDownloadReturns(
                 "[{" +
                 "name: \"MyExercise\"," +
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: null," +
                 "publish_date: null," +
-                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"" +
+                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
+                "attempted: true," +
+                "completed: false" +
                 "}]");
         
         MockBgTaskListener<ExerciseCollection> listener = new MockBgTaskListener<ExerciseCollection>();
+        serverAccess.setUsername("JohnShepard");
         serverAccess.startDownloadingExerciseList(course, listener);
         
         listener.waitForCall();
@@ -167,6 +170,8 @@ public class ServerAccessTest {
         assertEquals("http://example.com/courses/123/exercises/1/submissions", ex.getReturnAddress());
         assertEquals("http://example.com/courses/123/exercises/1.zip", ex.getDownloadAddress());
         assertEquals("MyCourse", ex.getCourseName());
+        assertTrue(ex.isAttempted());
+        assertFalse(ex.isCompleted());
     }
     
     

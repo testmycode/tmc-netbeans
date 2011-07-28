@@ -61,20 +61,22 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     }
     
     private String imageNameForExercise(Exercise exercise) {
-        switch (exercise.getProgress()) {
-            case DONE: return "smiley.gif";
-            case PARTIALLY_DONE: return "serious.gif";
-            case NOT_DONE: return "frownie.gif";
-            default: throw new IllegalArgumentException("Unknown exercise progress setting");
+        if (exercise.isAttempted() && exercise.isCompleted()) {
+            return "smiley.gif";
+        } else if (exercise.isAttempted()) {
+            return "serious.gif";
+        } else {
+            return "frownie.gif";
         }
     }
     
     private String tooltipForExercise(Exercise exercise) {
-        switch (exercise.getProgress()) {
-            case DONE: return "Exercise submitted - all tests successful";
-            case PARTIALLY_DONE: return "Exercise submitted - all tests not completed";
-            case NOT_DONE: return "Exercise not yet submitted";
-            default: throw new IllegalArgumentException("Unknown exercise progress setting");
+        if (exercise.isAttempted() && exercise.isCompleted()) {
+            return "Exercise submitted - all tests successful";
+        } else if (exercise.isAttempted()) {
+            return "Exercise submitted - all tests not completed";
+        } else {
+            return "Exercise not yet submitted";
         }
     }
     

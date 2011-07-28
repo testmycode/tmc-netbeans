@@ -2,15 +2,11 @@ package fi.helsinki.cs.tmc.data.json;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import java.util.GregorianCalendar;
 
 public class JSONExerciseListParserTest {
-    /**
-     * Test of parseJson method, of class JSONExerciseListParser.
-     */
     @Test
     public void testParseJson() throws Exception {
         String json =
@@ -19,7 +15,9 @@ public class JSONExerciseListParserTest {
                 "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: \"2011-06-14T01:30:19+03:00\"," +
                 "publish_date: null," +
-                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"" +
+                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
+                "attempted: true," +
+                "completed: false" +
                 "}]";
         ExerciseCollection result = JSONExerciseListParser.parseJson(json);
         
@@ -33,6 +31,8 @@ public class JSONExerciseListParserTest {
         
         assertEquals("http://example.com/courses/123/exercises/1.zip", exercise.getDownloadAddress());
         assertEquals("http://example.com/courses/123/exercises/1/submissions", exercise.getReturnAddress());
+        assertTrue(exercise.isAttempted());
+        assertFalse(exercise.isCompleted());
     }
 
     @Test
