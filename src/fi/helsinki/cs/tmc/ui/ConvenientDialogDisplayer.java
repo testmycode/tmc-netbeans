@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.ui;
 
 import javax.swing.ImageIcon;
@@ -9,7 +5,6 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
-import fi.helsinki.cs.tmc.ui.LongTextDisplayPanel;
 import java.awt.Component;
 import org.openide.DialogDescriptor;
 
