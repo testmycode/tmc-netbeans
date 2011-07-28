@@ -80,7 +80,7 @@ public class ConvenientDialogDisplayer {
         desc.setOptions(new Object[] { NotifyDescriptor.OK_OPTION });
         desc.setValue(NotifyDescriptor.OK_OPTION);
         desc.setMessageType(notifyType);
-        DialogDisplayer.getDefault().notify(desc);
+        DialogDisplayer.getDefault().notifyLater(desc);
     }
     
     
@@ -96,5 +96,16 @@ public class ConvenientDialogDisplayer {
         dialog.add(label);
 
         showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, title, true);
+    }
+    
+    
+    public boolean askYesNo(String question, String title) {
+        DialogDescriptor desc = new DialogDescriptor(question, title);
+        desc.setModal(true);
+        desc.setOptions(new Object[] { DialogDescriptor.YES_OPTION, DialogDescriptor.NO_OPTION });
+        desc.setValue(DialogDescriptor.YES_OPTION);
+        desc.setMessageType(DialogDescriptor.QUESTION_MESSAGE);
+        Object response = DialogDisplayer.getDefault().notify(desc);
+        return (response == DialogDescriptor.YES_OPTION);
     }
 }

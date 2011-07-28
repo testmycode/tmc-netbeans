@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,6 +17,8 @@ public class SaveSettingsActionTest {
     @Mock private ServerAccess serverAccess;
     @Mock private LocalCourseCache localCourseCache;
     @Mock private ProjectMediator projectMediator;
+    @Mock private ConvenientDialogDisplayer dialogs;
+    @Mock private OpenExercisesAction openExercisesAction;
     
     @Mock private PreferencesUI prefUi;
     private SaveSettingsAction action;
@@ -23,7 +26,12 @@ public class SaveSettingsActionTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        action = new SaveSettingsAction(serverAccess, localCourseCache, projectMediator);
+        action = new SaveSettingsAction(
+                serverAccess,
+                localCourseCache,
+                projectMediator,
+                dialogs,
+                openExercisesAction);
     }
     
     private void performTheAction() {
@@ -66,4 +74,23 @@ public class SaveSettingsActionTest {
         verify(localCourseCache).setCurrentCourseName(null);
     }
     
+    @Test
+    public void whenACourseWasSelectedItShouldAskIfTheUserWantsToOpenExercises() {
+        Course course = new Course("TheCourse");
+        when(prefUi.getSelectedCourse()).thenReturn(course);
+        when(dialogs.askYesNo(any(String.class), any(String.class))).thenReturn(true);
+        
+        performTheAction();
+        
+        verify(openExercisesAction).actionPerformed(any(ActionEvent.class));
+    }
+    
+    @Test
+    public void whenACourseWasNotSelectedItShouldNotAskIfTheUserWantsToOpenExercises() {
+        when(prefUi.getSelectedCourse()).thenReturn(null);
+        
+        performTheAction();
+        
+        verifyZeroInteractions(dialogs, openExercisesAction);
+    }
 }
