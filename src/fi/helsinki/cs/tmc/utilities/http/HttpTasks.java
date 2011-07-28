@@ -10,7 +10,7 @@ import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 
-public class NetworkTasks {
+public class HttpTasks {
     public CancellableCallable<byte[]> downloadBinaryFile(String url) {
         return new HttpRequestExecutor(url);
     }

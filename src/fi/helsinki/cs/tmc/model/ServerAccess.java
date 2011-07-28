@@ -7,13 +7,13 @@ import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
-import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
+import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
+import fi.helsinki.cs.tmc.data.json.JSONCourseListParser;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONExerciseListParser;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONSubmissionResultParser;
+import fi.helsinki.cs.tmc.data.json.JSONExerciseListParser;
+import fi.helsinki.cs.tmc.data.json.JSONSubmissionResultParser;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import java.io.File;
@@ -35,7 +35,7 @@ public class ServerAccess {
     public static ServerAccess getDefault() {
         if (defaultInstance == null) {
             defaultInstance = new ServerAccess(
-                    new NetworkTasks(),
+                    new HttpTasks(),
                     ProjectMediator.getInstance(),
                     NbProjectUnzipper.getDefault(),
                     NbProjectZipper.getDefault(),
@@ -49,7 +49,7 @@ public class ServerAccess {
         return NbPreferences.forModule(ServerAccess.class);
     }
     
-    private NetworkTasks networkTasks;
+    private HttpTasks networkTasks;
     private ProjectMediator projectMediator;
     private NbProjectUnzipper unzipper;
     private NbProjectZipper zipper;
@@ -58,7 +58,7 @@ public class ServerAccess {
     private String username;
 
     public ServerAccess(
-            NetworkTasks networkTasks,
+            HttpTasks networkTasks,
             ProjectMediator projectMediator,
             NbProjectUnzipper unzipper,
             NbProjectZipper zipper,
@@ -89,7 +89,7 @@ public class ServerAccess {
         getPreferences().put(PREF_BASE_URL, baseUrl);
     }
 
-    public NetworkTasks getNetworkTasks() {
+    public HttpTasks getNetworkTasks() {
         return networkTasks;
     }
     

@@ -17,7 +17,7 @@ import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.testing.MockBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.http.NetworkTasks;
+import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
@@ -28,7 +28,7 @@ import static org.junit.Assert.*;
 
 public class ServerAccessTest {
     
-    @Mock private NetworkTasks networkTasks;
+    @Mock private HttpTasks networkTasks;
     @Mock private ProjectMediator projectMediator;
     @Mock private NbProjectUnzipper unzipper;
     @Mock private NbProjectZipper zipper;

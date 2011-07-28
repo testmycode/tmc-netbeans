@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.utilities.json.parsers;
+package fi.helsinki.cs.tmc.data.json;
 
 import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.data.Course;

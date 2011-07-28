@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.data.json;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONSubmissionResultParser;
 import static fi.helsinki.cs.tmc.data.SubmissionResult.Status.*;
 import org.junit.Test;
 import static org.junit.Assert.*;

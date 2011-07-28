@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.data.json;
 
-import fi.helsinki.cs.tmc.utilities.json.parsers.JSONCourseListParser;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import fi.helsinki.cs.tmc.data.Course;
