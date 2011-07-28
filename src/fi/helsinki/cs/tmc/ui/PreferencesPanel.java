@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.ui;
 
-
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseCollection;
@@ -136,22 +135,22 @@ import javax.swing.event.DocumentListener;
     }
     
     private void updateAdvice() {
-        ArrayList<String> fields = new ArrayList<String>();
+        ArrayList<String> advices = new ArrayList<String>();
         if (usernameTextField.getText().isEmpty()) {
-            fields.add("username");
+            advices.add("fill in username");
         }
         if (serverAddressTextField.getText().isEmpty()) {
-            fields.add("server address");
+            advices.add("fill in server address");
         }
         if (projectFolderTextField.getText().isEmpty()) {
-            fields.add("folder for projects");
+            advices.add("select folder for projects");
         }
         if (coursesComboBox.getSelectedIndex() == -1) {
-            fields.add("course");
+            advices.add("select course");
         }
         
-        if (!fields.isEmpty()) {
-            String advice = "Please set " + joinWithCommasAndAnd(fields) + ".";
+        if (!advices.isEmpty()) {
+            String advice = "Please " + joinWithCommasAndAnd(advices) + ".";
             adviceLabel.setText(advice);
         } else {
             adviceLabel.setText("");
