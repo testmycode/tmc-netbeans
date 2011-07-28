@@ -5,7 +5,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
 import org.junit.Before;
 import org.junit.Test;

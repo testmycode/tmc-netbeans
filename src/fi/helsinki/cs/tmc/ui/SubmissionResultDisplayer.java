@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
 import java.util.List;
 
 public class SubmissionResultDisplayer {

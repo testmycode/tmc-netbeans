@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import org.junit.After;
 import java.io.IOException;
-import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;

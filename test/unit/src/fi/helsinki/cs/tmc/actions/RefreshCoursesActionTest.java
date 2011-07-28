@@ -10,7 +10,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
