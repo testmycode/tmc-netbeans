@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import java.awt.event.ActionEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -19,6 +20,7 @@ public class SaveSettingsActionTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private ConvenientDialogDisplayer dialogs;
     @Mock private OpenExercisesAction openExercisesAction;
+    @Mock private ExerciseIconAnnotator iconAnnotator;
     
     @Mock private PreferencesUI prefUi;
     private SaveSettingsAction action;
@@ -31,7 +33,8 @@ public class SaveSettingsActionTest {
                 localCourseCache,
                 projectMediator,
                 dialogs,
-                openExercisesAction);
+                openExercisesAction,
+                iconAnnotator);
     }
     
     private void performTheAction() {
@@ -72,6 +75,12 @@ public class SaveSettingsActionTest {
         when(prefUi.getSelectedCourse()).thenReturn(null);
         performTheAction();
         verify(localCourseCache).setCurrentCourseName(null);
+    }
+    
+    @Test
+    public void itShouldUpdateProjectIcons() {
+        performTheAction();
+        verify(iconAnnotator).updateAllIcons();
     }
     
     @Test

@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.junit.Before;
@@ -95,9 +96,6 @@ public class OpenExercisesActionTest {
         
         verifyStartedProjDownload(threeExercises.get(2));
         verifyNoMoreInteractions(serverAccess);
-        
-        verify(proj1).open();
-        verify(proj2).open();
     }
     
     @Test
@@ -111,8 +109,7 @@ public class OpenExercisesActionTest {
         performAction();
         respondWithThreeExercises();
         
-        verify(proj1).open();
-        verify(proj2).open();
+        verify(projectMediator).openProjects(Arrays.asList(proj1, proj2));
     }
     
     @Test
@@ -123,7 +120,7 @@ public class OpenExercisesActionTest {
         TmcProjectInfo proj = mock(TmcProjectInfo.class);
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskReady(proj);
         
-        verify(proj).open();
+        verify(projectMediator).openProject(proj);
     }
     
     @Test
@@ -162,7 +159,7 @@ public class OpenExercisesActionTest {
         verifyStartedExListDownload().backgroundTaskFailed(new IOException("oops"));
         
         verify(dialogs).displayWarning(any(String.class));
-        verify(proj1).open();
+        verify(projectMediator).openProjects(Arrays.asList(proj1));
         
         verify(courseCache, never()).setAvailableExercises(any(ExerciseCollection.class));
         verify(serverAccess, never()).startDownloadingExerciseProject(any(Exercise.class), any(BgTaskListener.class));

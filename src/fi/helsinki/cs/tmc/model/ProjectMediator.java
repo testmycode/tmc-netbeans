@@ -184,8 +184,20 @@ public class ProjectMediator {
         }
     }
     
+    public void openProject(TmcProjectInfo project) {
+        openProjects.open(new Project[] { project.getProject() }, true, true);
+    }
+    
+    public void openProjects(List<TmcProjectInfo> projects) {
+        Project[] nbProjects = new Project[projects.size()];
+        for (int i = 0; i < nbProjects.length; ++i) {
+            nbProjects[i] = projects.get(i).getProject();
+        }
+        openProjects.open(nbProjects, true, true);
+    }
+    
     public TmcProjectInfo wrapProject(Project p) {
-        return new TmcProjectInfo(openProjects, p);
+        return new TmcProjectInfo(p);
     }
     
 }

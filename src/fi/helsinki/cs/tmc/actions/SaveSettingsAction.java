@@ -5,9 +5,12 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
+import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
+import org.openide.util.Lookup;
 
 public class SaveSettingsAction extends AbstractAction {
 
@@ -16,13 +19,15 @@ public class SaveSettingsAction extends AbstractAction {
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private OpenExercisesAction openExercisesAction;
+    private ExerciseIconAnnotator iconAnnotator;
     
     public SaveSettingsAction() {
         this(ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 ProjectMediator.getInstance(),
                 ConvenientDialogDisplayer.getDefault(),
-                new OpenExercisesAction());
+                new OpenExercisesAction(),
+                Lookup.getDefault().lookup(ExerciseIconAnnotator.class));
     }
 
     public SaveSettingsAction(
@@ -30,12 +35,14 @@ public class SaveSettingsAction extends AbstractAction {
             LocalCourseCache localCourseCache,
             ProjectMediator projectMediator,
             ConvenientDialogDisplayer dialogs,
-            OpenExercisesAction openExercisesAction) {
+            OpenExercisesAction openExercisesAction,
+            ExerciseIconAnnotator iconAnnotator) {
         this.serverAccess = serverAccess;
         this.localCourseCache = localCourseCache;
         this.projectMediator = projectMediator;
         this.dialogs = dialogs;
         this.openExercisesAction = openExercisesAction;
+        this.iconAnnotator = iconAnnotator;
     }
 
     @Override
@@ -59,13 +66,14 @@ public class SaveSettingsAction extends AbstractAction {
         } else {
             localCourseCache.setCurrentCourseName(null);
         }
+        iconAnnotator.updateAllIcons();
     }
 
     private void promptOpeningExercises() {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                if (dialogs.askYesNo("Shall I open the current exercises?", "Open exercises?")) {
+                if (dialogs.askYesNo("Open the latest exercises?", "Open exercises?")) {
                     openExercisesAction.actionPerformed(null);
                 }
             }

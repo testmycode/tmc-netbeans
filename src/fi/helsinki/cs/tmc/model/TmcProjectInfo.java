@@ -1,20 +1,15 @@
 package fi.helsinki.cs.tmc.model;
 
 import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectUtils;
-import org.netbeans.api.project.ui.OpenProjects;
-import org.netbeans.spi.project.AuxiliaryConfiguration;
 import org.openide.filesystems.FileObject;
 
 /**
  * Carries information about a project used in TMC.
  */
 public class TmcProjectInfo {
-    private OpenProjects openProjects;
     private Project project;
     
-    /*package*/ TmcProjectInfo(OpenProjects openProjects, Project project) {
-        this.openProjects = openProjects;
+    /*package*/ TmcProjectInfo(Project project) {
         this.project = project;
     }
 
@@ -24,10 +19,6 @@ public class TmcProjectInfo {
     
     public FileObject getProjectDir() {
         return project.getProjectDirectory();
-    }
-    
-    public void open() {
-        openProjects.open(new Project[] { project }, true, true);
     }
 
     @Override

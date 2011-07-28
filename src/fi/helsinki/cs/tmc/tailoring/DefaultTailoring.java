@@ -13,7 +13,7 @@ public class DefaultTailoring implements Tailoring {
 
     @Override
     public String getFirstRunMessage() {
-        return "TestMyCode installed. I'll open the settings screen for you next.";
+        return "TestMyCode (TMC) installed. Opening settings.";
     }
     
     

@@ -10,6 +10,7 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
+import java.util.ArrayList;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -85,12 +86,14 @@ public class OpenExercisesAction extends AbstractAction {
     }
     
     private void openLocalProjects(ExerciseCollection exercises) {
+        ArrayList<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
         for (Exercise ex : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
             if (proj != null) {
-                proj.open();
+                projects.add(proj);
             }
         }
+        projectMediator.openProjects(projects);
     }
     
     private void downloadNewProjects(ExerciseCollection exercises) {
@@ -100,7 +103,7 @@ public class OpenExercisesAction extends AbstractAction {
                 serverAccess.startDownloadingExerciseProject(exercise, new BgTaskListener<TmcProjectInfo>() {
                     @Override
                     public void backgroundTaskReady(TmcProjectInfo result) {
-                        result.open();
+                        projectMediator.openProject(result);
                     }
 
                     @Override

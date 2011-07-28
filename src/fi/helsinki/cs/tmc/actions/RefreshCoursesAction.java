@@ -36,7 +36,7 @@ public class RefreshCoursesAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ensureLatestBaseUrlSaved(); // not ideal
+        ensureLatestBaseUrlSaved(); // FIXME: this saves a setting before OK is clicked.
         
         if (serverAccess.getBaseUrl() == null || serverAccess.getBaseUrl().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first.");

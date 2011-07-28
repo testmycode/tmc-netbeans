@@ -37,7 +37,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     public Image annotateIcon(Project nbProject, Image origImg, boolean openedNode) {
         TmcProjectInfo project = projectMediator.wrapProject(nbProject);
         Exercise exercise = projectMediator.tryGetExerciseForProject(project, courses);
-        if (exercise == null) {
+        if (exercise == null || !exercise.getCourseName().equals(courses.getCurrentCourseName())) {
             return origImg;
         }
         
