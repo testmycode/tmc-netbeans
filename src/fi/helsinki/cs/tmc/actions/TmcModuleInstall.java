@@ -25,6 +25,8 @@ public class TmcModuleInstall extends ModuleInstall {
                 if (isFirstRun) {
                     showWelcomeDialog();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
+                } else {
+                    new RefreshCoursesAction().actionPerformed(null);
                 }
             }
         });
