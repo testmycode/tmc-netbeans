@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import java.io.IOException;
 import org.junit.After;
@@ -35,7 +35,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itShouldPersitItsCourseList() throws IOException {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.get(0).getExercises().add(new Exercise("ex1"));
@@ -49,7 +49,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itShouldPersistTheCurrentCourse() throws IOException {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         
@@ -63,7 +63,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itShouldBeEmptyWhenFailingToLoadTheLocalCacheFile() throws IOException {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         cache.setAvailableCourses(courses);
@@ -76,7 +76,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void theCurrentCourseShouldHaveAnIdentityOfOneOfTheAvailableCourses() throws IOException {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         cache.setAvailableCourses(courses);
@@ -88,7 +88,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itCanConvenientlyReturnTheExercisesFromTheCurrentCourse() {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         cache.setAvailableCourses(courses);
@@ -103,7 +103,7 @@ public class LocalCourseCacheTest {
     
     @Test
     public void itCanConvenientlyReturnTAllExercisesFromAllCourses() {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         cache.setAvailableCourses(courses);

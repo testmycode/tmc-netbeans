@@ -1,9 +1,9 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.data.ExerciseList;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -68,7 +68,7 @@ public class OpenExercisesAction extends AbstractAction {
         refreshProjectListAndDownloadNewProjects();
     }
     
-    private void openLocalProjects(ExerciseCollection exercises) {
+    private void openLocalProjects(ExerciseList exercises) {
         ArrayList<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
         for (Exercise ex : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
@@ -80,9 +80,9 @@ public class OpenExercisesAction extends AbstractAction {
     }
     
     private void refreshProjectListAndDownloadNewProjects() {
-        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseCollection>() {
+        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
-            public void backgroundTaskReady(CourseCollection result) {
+            public void backgroundTaskReady(CourseList result) {
                 courseCache.setAvailableCourses(result);
                 downloadNewProjects(courseCache.getCurrentCourseExercises());
             }
@@ -99,7 +99,7 @@ public class OpenExercisesAction extends AbstractAction {
         });
     }
     
-    private void downloadNewProjects(ExerciseCollection exercises) {
+    private void downloadNewProjects(ExerciseList exercises) {
         for (final Exercise exercise : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
             if (proj == null) {

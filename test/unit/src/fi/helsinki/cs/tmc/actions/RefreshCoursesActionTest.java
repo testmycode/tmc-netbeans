@@ -4,7 +4,7 @@ import java.io.IOException;
 import fi.helsinki.cs.tmc.data.Course;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -25,9 +25,9 @@ public class RefreshCoursesActionTest {
     @Mock private PreferencesUI prefUi;
     @Mock private ConvenientDialogDisplayer dialogs;
     
-    private CourseCollection courses;
+    private CourseList courses;
     
-    @Captor private ArgumentCaptor<BgTaskListener<CourseCollection>> downloadListenerCaptor;
+    @Captor private ArgumentCaptor<BgTaskListener<CourseList>> downloadListenerCaptor;
     
     private RefreshCoursesAction action;
     
@@ -44,14 +44,14 @@ public class RefreshCoursesActionTest {
     }
     
     private void respondWithThreeCourses() {
-        courses = new CourseCollection();
+        courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));
         getDownloadListener().backgroundTaskReady(courses);
     }
     
-    private BgTaskListener<CourseCollection> getDownloadListener() {
+    private BgTaskListener<CourseList> getDownloadListener() {
         verify(serverAccess).startDownloadingCourseList(downloadListenerCaptor.capture());
         return downloadListenerCaptor.getValue();
     }

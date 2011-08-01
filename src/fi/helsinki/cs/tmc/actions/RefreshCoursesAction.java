@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -44,9 +44,9 @@ public class RefreshCoursesAction extends AbstractAction {
             return;
         }
         
-        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseCollection>() {
+        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
-            public void backgroundTaskReady(CourseCollection result) {
+            public void backgroundTaskReady(CourseList result) {
                 localCourseCache.setAvailableCourses(result);
                 PreferencesUI prefUi = prefUIFactory.getCurrentUI();
                 if (prefUi != null) {

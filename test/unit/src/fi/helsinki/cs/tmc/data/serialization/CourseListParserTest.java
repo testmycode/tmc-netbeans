@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.data.serialization;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import java.util.GregorianCalendar;
 import org.junit.Before;
@@ -30,7 +30,7 @@ public class CourseListParserTest {
                 "completed: false" +
                 "}]";
         String json = "[{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]";
-        CourseCollection result = parser.parseFromJson(json);
+        CourseList result = parser.parseFromJson(json);
         
         Course course = result.getCourseByName("TheCourse");
         assertEquals("TheCourse", course.getName());
@@ -53,7 +53,7 @@ public class CourseListParserTest {
     
     @Test
     public void emptyJson() {
-        CourseCollection empty = parser.parseFromJson("[]");
+        CourseList empty = parser.parseFromJson("[]");
         assertFalse(empty.iterator().hasNext());
     }
 

@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * A list of Exercises.
  */
-public class ExerciseCollection extends ArrayList<Exercise> {
+public class ExerciseList extends ArrayList<Exercise> {
     
     /**
      * Returns the exercise with the given name or null if not found.

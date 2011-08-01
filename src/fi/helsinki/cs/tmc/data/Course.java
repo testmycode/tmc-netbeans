@@ -4,7 +4,7 @@ public class Course {
 
     private String name;
     
-    private ExerciseCollection exercises;
+    private ExerciseList exercises;
     
     
     public Course() {
@@ -13,7 +13,7 @@ public class Course {
 
     public Course(String name) {
         this.name = name;
-        this.exercises = new ExerciseCollection();
+        this.exercises = new ExerciseList();
     }
 
     public String getName() {
@@ -27,11 +27,11 @@ public class Course {
         this.name = name;
     }
 
-    public ExerciseCollection getExercises() {
+    public ExerciseList getExercises() {
         return exercises;
     }
 
-    public void setExercises(ExerciseCollection exercises) {
+    public void setExercises(ExerciseList exercises) {
         this.exercises = exercises;
     }
     

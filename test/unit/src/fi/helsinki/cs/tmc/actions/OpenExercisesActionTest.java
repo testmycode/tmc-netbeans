@@ -1,13 +1,13 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import org.junit.After;
 import java.io.IOException;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.data.ExerciseList;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -31,9 +31,9 @@ public class OpenExercisesActionTest {
     @Mock private ConvenientDialogDisplayer dialogs;
     
     private Course currentCourse;
-    private ExerciseCollection threeExercises;
+    private ExerciseList threeExercises;
     
-    @Captor private ArgumentCaptor<BgTaskListener<CourseCollection>> listListenerCaptor;
+    @Captor private ArgumentCaptor<BgTaskListener<CourseList>> listListenerCaptor;
     @Captor private ArgumentCaptor<BgTaskListener<TmcProjectInfo>> projListenerCaptor;
     
     private OpenExercisesAction action;
@@ -49,7 +49,7 @@ public class OpenExercisesActionTest {
         currentCourse = new Course("MyCourse");
         when(courseCache.getCurrentCourse()).thenReturn(currentCourse);
         
-        threeExercises = new ExerciseCollection();
+        threeExercises = new ExerciseList();
         threeExercises.add(new Exercise("one"));
         threeExercises.add(new Exercise("two"));
         threeExercises.add(new Exercise("three"));
@@ -78,7 +78,7 @@ public class OpenExercisesActionTest {
     
     @Test
     public void itShouldRefreshTheExerciseListForTheCurrentCourseCache() {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("irrelevant"));
         courses.add(currentCourse);
         
@@ -110,7 +110,7 @@ public class OpenExercisesActionTest {
         verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
         listListenerCaptor.getValue().backgroundTaskFailed(new Exception("oops"));
         
-        verify(courseCache, never()).setAvailableCourses(any(CourseCollection.class));
+        verify(courseCache, never()).setAvailableCourses(any(CourseList.class));
         verifyZeroInteractions(dialogs);
         
         verifyStartedProjDownload(threeExercises.get(2));
@@ -170,12 +170,12 @@ public class OpenExercisesActionTest {
         return projListenerCaptor.getValue();
     }
     
-    private BgTaskListener<CourseCollection> verifyStartedCourseListDownload() {
+    private BgTaskListener<CourseList> verifyStartedCourseListDownload() {
         verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
         return listListenerCaptor.getValue();
     }
     
     private void respondWithMockCourseList() {
-        verifyStartedCourseListDownload().backgroundTaskReady(mock(CourseCollection.class));
+        verifyStartedCourseListDownload().backgroundTaskReady(mock(CourseList.class));
     }
 }

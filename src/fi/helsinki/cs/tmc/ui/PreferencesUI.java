@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 
 public interface PreferencesUI {
 
@@ -13,7 +13,7 @@ public interface PreferencesUI {
 
     String getUsername();
 
-    void setAvailableCourses(CourseCollection courses);
+    void setAvailableCourses(CourseList courses);
 
     void courseRefreshFailedOrCanceled();
     

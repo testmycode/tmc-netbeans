@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
@@ -136,11 +136,11 @@ public class ServerAccessTest {
     @Test
     public void itCanDownloadACourseListFromARemoteJSONFile() throws IOException {
         when(networkTasks.downloadTextFile("http://example.com/courses.json?username=JohnShepard")).thenReturn(mockTextDownload);
-        CourseCollection courses = mock(CourseCollection.class);
+        CourseList courses = mock(CourseList.class);
         when(courseListParser.parseFromJson("some json")).thenReturn(courses);
         nextTextDownloadReturns("some json");
         
-        MockBgTaskListener<CourseCollection> listener = new MockBgTaskListener<CourseCollection>();
+        MockBgTaskListener<CourseList> listener = new MockBgTaskListener<CourseList>();
         serverAccess.setUsername("JohnShepard");
         serverAccess.startDownloadingCourseList(listener);
         

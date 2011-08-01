@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
@@ -114,11 +114,11 @@ public class ServerAccess {
         getPreferences().put(PREF_USERNAME, username);
     }
     
-    public Future<CourseCollection> startDownloadingCourseList(BgTaskListener<CourseCollection> listener) {
+    public Future<CourseList> startDownloadingCourseList(BgTaskListener<CourseList> listener) {
         final CancellableCallable<String> download = networkTasks.downloadTextFile(getCourseListUrl());
-        CancellableCallable<CourseCollection> task = new CancellableCallable<CourseCollection>() {
+        CancellableCallable<CourseList> task = new CancellableCallable<CourseList>() {
             @Override
-            public CourseCollection call() throws Exception {
+            public CourseList call() throws Exception {
                 String text = download.call();
                 return courseListParser.parseFromJson(text);
             }

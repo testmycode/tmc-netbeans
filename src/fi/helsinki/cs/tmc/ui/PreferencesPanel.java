@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -60,7 +60,7 @@ import javax.swing.event.DocumentListener;
     }
     
     @Override
-    public void setAvailableCourses(CourseCollection courses) {
+    public void setAvailableCourses(CourseList courses) {
         String previousSelectedCourseName = null;
         if (getSelectedCourse() != null) {
             previousSelectedCourseName = getSelectedCourse().getName();

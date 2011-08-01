@@ -7,7 +7,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import java.lang.reflect.Type;
 import java.text.ParseException;
@@ -17,9 +17,9 @@ import java.util.Date;
 public class CourseListParser {
     
     /**
-     * Creates a CourseCollection object from text.
+     * Creates a CourseList object from text.
      */
-    public CourseCollection parseFromJson(String json) {
+    public CourseList parseFromJson(String json) {
         if (json == null) {
             throw new NullPointerException("Json string is null");
         }
@@ -29,15 +29,15 @@ public class CourseListParser {
                     .create();
             Course[] courses = gson.fromJson(json, Course[].class);
 
-            CourseCollection courseCollection = new CourseCollection();
+            CourseList courseList = new CourseList();
             for (Course course : courses) {
-                courseCollection.add(course);
+                courseList.add(course);
                 for (Exercise ex : course.getExercises()) {
                     ex.setCourseName(course.getName());
                 }
             }
 
-            return courseCollection;
+            return courseList;
         } catch (RuntimeException e) {
             throw new RuntimeException("Failed to parse course list: " + e.getMessage(), e);
         }

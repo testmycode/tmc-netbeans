@@ -5,7 +5,7 @@ import java.util.ArrayList;
 /**
  * A list of Courses.
  */
-public class CourseCollection extends ArrayList<Course> {
+public class CourseList extends ArrayList<Course> {
     /**
      * Returns the course with the given name or null if not found.
      */

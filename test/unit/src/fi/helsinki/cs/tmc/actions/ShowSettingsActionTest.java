@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import java.awt.event.ActionListener;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import java.awt.event.ActionEvent;
@@ -36,7 +36,7 @@ public class ShowSettingsActionTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(localCourseCache.getAvailableCourses()).thenReturn(new CourseCollection());
+        when(localCourseCache.getAvailableCourses()).thenReturn(new CourseList());
         when(prefUiFactory.createCurrentPreferencesUI()).thenReturn(prefUi);
         doNothing().when(prefUiFactory).showPreferencesDialog(prefListenerCaptor.capture());
         
@@ -85,7 +85,7 @@ public class ShowSettingsActionTest {
     
     @Test
     public void itShouldSetTheCachedCourseListInThePreferencesPanel() {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));
@@ -98,7 +98,7 @@ public class ShowSettingsActionTest {
     
     @Test
     public void itShouldSetSelectedCourseInThePreferencesPanel() {
-        CourseCollection courses = new CourseCollection();
+        CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));

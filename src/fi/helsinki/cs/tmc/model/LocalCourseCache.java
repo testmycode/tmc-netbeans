@@ -3,8 +3,8 @@ package fi.helsinki.cs.tmc.model;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseCollection;
-import fi.helsinki.cs.tmc.data.ExerciseCollection;
+import fi.helsinki.cs.tmc.data.CourseList;
+import fi.helsinki.cs.tmc.data.ExerciseList;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
@@ -28,7 +28,7 @@ public class LocalCourseCache {
     }
 
     private ConfigFile configFile;
-    private CourseCollection availableCourses;
+    private CourseList availableCourses;
     private String currentCourseName;
 
     public LocalCourseCache() {
@@ -37,7 +37,7 @@ public class LocalCourseCache {
     
     public LocalCourseCache(ConfigFile configFile) {
         this.configFile = configFile;
-        this.availableCourses = new CourseCollection();
+        this.availableCourses = new CourseList();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -45,11 +45,11 @@ public class LocalCourseCache {
         }
     }
     
-    public CourseCollection getAvailableCourses() {
+    public CourseList getAvailableCourses() {
         return availableCourses;
     }
 
-    public void setAvailableCourses(CourseCollection availableCourses) {
+    public void setAvailableCourses(CourseList availableCourses) {
         this.availableCourses = availableCourses;
         save();
     }
@@ -77,20 +77,20 @@ public class LocalCourseCache {
      * <p>
      * If no course is currently selected then returns the empty collection.
      */
-    public ExerciseCollection getCurrentCourseExercises() {
+    public ExerciseList getCurrentCourseExercises() {
         Course course = getCurrentCourse();
         if (course != null) {
             return course.getExercises();
         } else {
-            return new ExerciseCollection();
+            return new ExerciseList();
         }
     }
     
     /**
      * Returns all exercises from all courses.
      */
-    public ExerciseCollection getAllExercises() {
-        ExerciseCollection result = new ExerciseCollection();
+    public ExerciseList getAllExercises() {
+        ExerciseList result = new ExerciseList();
         for (Course course : availableCourses) {
             result.addAll(course.getExercises());
         }
@@ -136,7 +136,7 @@ public class LocalCourseCache {
             reader.close();
         }
         if (stuff != null) {
-            this.availableCourses = new CourseCollection();
+            this.availableCourses = new CourseList();
             if (stuff.availableCourses != null) {
                 this.availableCourses.addAll(stuff.availableCourses);
             }
