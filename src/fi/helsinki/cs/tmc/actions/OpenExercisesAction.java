@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.data.CourseCollection;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseCollection;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
@@ -63,9 +64,8 @@ public class OpenExercisesAction extends AbstractAction {
             return;
         }
         
-        ExerciseCollection exercises = courseCache.getCurrentCourseExercises();
-        openLocalProjects(exercises);
-        downloadNewProjects(exercises);
+        openLocalProjects(courseCache.getCurrentCourseExercises());
+        refreshProjectListAndDownloadNewProjects();
     }
     
     private void openLocalProjects(ExerciseCollection exercises) {
@@ -77,6 +77,26 @@ public class OpenExercisesAction extends AbstractAction {
             }
         }
         projectMediator.openProjects(projects);
+    }
+    
+    private void refreshProjectListAndDownloadNewProjects() {
+        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseCollection>() {
+            @Override
+            public void backgroundTaskReady(CourseCollection result) {
+                courseCache.setAvailableCourses(result);
+                downloadNewProjects(courseCache.getCurrentCourseExercises());
+            }
+
+            @Override
+            public void backgroundTaskCancelled() {
+                // Do nothing
+            }
+
+            @Override
+            public void backgroundTaskFailed(Throwable ex) {
+                downloadNewProjects(courseCache.getCurrentCourseExercises());
+            }
+        });
     }
     
     private void downloadNewProjects(ExerciseCollection exercises) {

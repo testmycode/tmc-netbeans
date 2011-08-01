@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.data.CourseCollection;
 import org.junit.After;
 import java.io.IOException;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -32,6 +33,7 @@ public class OpenExercisesActionTest {
     private Course currentCourse;
     private ExerciseCollection threeExercises;
     
+    @Captor private ArgumentCaptor<BgTaskListener<CourseCollection>> listListenerCaptor;
     @Captor private ArgumentCaptor<BgTaskListener<TmcProjectInfo>> projListenerCaptor;
     
     private OpenExercisesAction action;
@@ -75,6 +77,19 @@ public class OpenExercisesActionTest {
     }
     
     @Test
+    public void itShouldRefreshTheExerciseListForTheCurrentCourseCache() {
+        CourseCollection courses = new CourseCollection();
+        courses.add(new Course("irrelevant"));
+        courses.add(currentCourse);
+        
+        performAction();
+        verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
+        listListenerCaptor.getValue().backgroundTaskReady(courses);
+        
+        verify(courseCache).setAvailableCourses(courses);
+    }
+    
+    @Test
     public void itShouldDownloadExercisesNotYetDownloaded() {
         TmcProjectInfo proj1 = mock(TmcProjectInfo.class);
         TmcProjectInfo proj2 = mock(TmcProjectInfo.class);
@@ -83,9 +98,22 @@ public class OpenExercisesActionTest {
         when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(null);
         
         performAction();
+        respondWithMockCourseList();
         
         verifyStartedProjDownload(threeExercises.get(2));
         verifyNoMoreInteractions(serverAccess);
+    }
+    
+    @Test
+    public void whenTheExerciseListCannotBeDownloadedItShouldIgnoreTheErrorAndUseTheOldList() {
+        performAction();
+        verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
+        listListenerCaptor.getValue().backgroundTaskFailed(new Exception("oops"));
+        
+        verify(courseCache, never()).setAvailableCourses(any(CourseCollection.class));
+        verifyZeroInteractions(dialogs);
+        
+        verifyStartedProjDownload(threeExercises.get(2));
     }
     
     @Test
@@ -104,6 +132,7 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseIsDownloadedItShouldOpenIt() {
         performAction();
+        respondWithMockCourseList();
         
         TmcProjectInfo proj = mock(TmcProjectInfo.class);
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskReady(proj);
@@ -114,6 +143,7 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseDownloadFailsItShouldDisplayAnError() {
         performAction();
+        respondWithMockCourseList();
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskFailed(new IOException("oops"));
         verify(dialogs).displayError("Failed to download exercise 'two': oops");
     }
@@ -121,6 +151,7 @@ public class OpenExercisesActionTest {
     @Test
     public void whenAnExerciseDownloadIsCancelledItShouldDoNothing() {
         performAction();
+        respondWithMockCourseList();
         verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskCancelled();
     }
     
@@ -137,5 +168,14 @@ public class OpenExercisesActionTest {
     private BgTaskListener<TmcProjectInfo> verifyStartedProjDownload(Exercise exercise) {
         verify(serverAccess).startDownloadingExerciseProject(same(exercise), projListenerCaptor.capture());
         return projListenerCaptor.getValue();
+    }
+    
+    private BgTaskListener<CourseCollection> verifyStartedCourseListDownload() {
+        verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
+        return listListenerCaptor.getValue();
+    }
+    
+    private void respondWithMockCourseList() {
+        verifyStartedCourseListDownload().backgroundTaskReady(mock(CourseCollection.class));
     }
 }
