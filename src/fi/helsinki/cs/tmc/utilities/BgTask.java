@@ -21,13 +21,17 @@ public class BgTask<V> implements CancellableCallable<V> {
     
     
     private String label;
-    private BgTaskListener listener;
+    private BgTaskListener<V> listener;
     private Callable<V> callable;
     private ProgressHandle progressHandle;
     
     private final Object cancelLock = new Object();
     private boolean cancelled;
     private Thread executingThread;
+    
+    public static <V> Future<V> start(String label, BgTaskListener<V> listener, Callable<V> callable) {
+        return new BgTask<V>(label, listener, callable).start();
+    }
     
     public BgTask(String label, BgTaskListener<V> listener, Callable<V> callable) {
         this.label = label;

@@ -49,7 +49,6 @@ public class BgTaskTest {
     
     @Test
     public void whenTheTaskIsCancelledItShouldCallTheListenerInTheSwingThread() {
-        final Exception ex = new Exception();
         Callable<String> callable = new Callable<String>() {
             @Override
             public String call() throws InterruptedException {

@@ -129,7 +129,7 @@ public class ServerAccess {
             }
         };
         
-        return new BgTask("Download " + getCourseListUrl(), listener, task).start();
+        return BgTask.start("Download " + getCourseListUrl(), listener, task);
     }
 
     
@@ -156,7 +156,7 @@ public class ServerAccess {
             }
         };
         
-        return new BgTask("Download " + zipUrl, listener, task).start();
+        return BgTask.start("Download " + zipUrl, listener, task);
     }
     
     public Future<SubmissionResult> startSubmittingExercise(final Exercise exercise, BgTaskListener<SubmissionResult> listener) {
@@ -190,6 +190,6 @@ public class ServerAccess {
             }
         };
         
-        return new BgTask("Upload " + exercise.getName(), listener, task).start();
+        return BgTask.start("Upload " + exercise.getName(), listener, task);
     }
 }
