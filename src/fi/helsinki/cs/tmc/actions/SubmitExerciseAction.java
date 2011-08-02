@@ -12,6 +12,8 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.List;
+import org.netbeans.api.project.Project;
 import org.openide.awt.ActionRegistration;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -30,6 +32,7 @@ displayName = "#CTL_SubmitExerciseAction", iconInMenu=false)
 @Messages("CTL_SubmitExerciseAction=Submit")
 public final class SubmitExerciseAction implements ActionListener {
 
+    private List<Project> projects;
     private ServerAccess serverAccess;
     private LocalCourseCache courseCache;
     private ProjectMediator projectMediator;
@@ -37,8 +40,9 @@ public final class SubmitExerciseAction implements ActionListener {
     private ConvenientDialogDisplayer dialogDisplayer;
     private ExerciseIconAnnotator iconAnnotator;
 
-    public SubmitExerciseAction() {
-        this(ServerAccess.getDefault(),
+    public SubmitExerciseAction(List<Project> projects) {
+        this(projects,
+                ServerAccess.getDefault(),
                 LocalCourseCache.getInstance(),
                 ProjectMediator.getInstance(),
                 SubmissionResultDisplayer.getInstance(),
@@ -46,13 +50,15 @@ public final class SubmitExerciseAction implements ActionListener {
                 Lookup.getDefault().lookup(ExerciseIconAnnotator.class));
     }
 
-    public SubmitExerciseAction(
+    /*package*/ SubmitExerciseAction(
+            List<Project> projects,
             ServerAccess serverAccess,
             LocalCourseCache courseCache,
             ProjectMediator projectMediator,
             SubmissionResultDisplayer resultDisplayer,
             ConvenientDialogDisplayer dialogDisplayer,
             ExerciseIconAnnotator iconAnnotator) {
+        this.projects = projects;
         this.serverAccess = serverAccess;
         this.courseCache = courseCache;
         this.projectMediator = projectMediator;
@@ -63,10 +69,13 @@ public final class SubmitExerciseAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        TmcProjectInfo project = projectMediator.getMainProject();
-        if (project == null) {
-            return;
+        for (Project nbProject : projects) {
+            TmcProjectInfo tmcProject = projectMediator.wrapProject(nbProject);
+            submitProject(tmcProject);
         }
+    }
+    
+    private void submitProject(TmcProjectInfo project) {
         final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseCache);
         if (exercise == null) {
             return;

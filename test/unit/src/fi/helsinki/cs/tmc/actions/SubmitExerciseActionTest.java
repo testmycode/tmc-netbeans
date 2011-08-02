@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
+import java.util.ArrayList;
+import java.util.List;
+import org.netbeans.api.project.Project;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.model.LocalCourseCache;
@@ -10,6 +13,7 @@ import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import java.util.Arrays;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
@@ -26,7 +30,8 @@ public class SubmitExerciseActionTest {
     @Mock private ConvenientDialogDisplayer dialogDisplayer;
     @Mock private ExerciseIconAnnotator iconAnnotator;
     
-    @Mock private TmcProjectInfo project;
+    @Mock private Project nbProject;
+    @Mock private TmcProjectInfo tmcProject;
     @Mock private Exercise exercise;
     @Mock private SubmissionResult result;
     
@@ -38,9 +43,19 @@ public class SubmitExerciseActionTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
         
+        when(projectMediator.wrapProject(nbProject)).thenReturn(tmcProject);
         when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
         
+        initAction();
+    }
+    
+    private void initAction() {
+        initAction(Arrays.asList(nbProject));
+    }
+    
+    private void initAction(List<Project> projects) {
         action = new SubmitExerciseAction(
+                projects,
                 serverAccess,
                 courseCache,
                 projectMediator,
@@ -53,11 +68,10 @@ public class SubmitExerciseActionTest {
         action.actionPerformed(null);
     }
     
-    
     @Test
-    public void itShouldSaveAllFilesAndSubmitTheMainProject() {
-        when(projectMediator.getMainProject()).thenReturn(project);
-        when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(exercise);
+    public void itShouldSaveAllFilesAndSubmitTheSelectedProjects() {
+        when(projectMediator.getMainProject()).thenReturn(tmcProject);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
         
         performAction();
         
@@ -66,8 +80,8 @@ public class SubmitExerciseActionTest {
     }
     
     @Test
-    public void whenNoMainProjectIsSelectedItShouldDoNothing() {
-        when(projectMediator.getMainProject()).thenReturn(null);
+    public void whenNoProjectsAreSelectedItShouldDoNothing() {
+        initAction(new ArrayList<Project>());
         
         performAction();
         
@@ -76,9 +90,8 @@ public class SubmitExerciseActionTest {
     }
     
     @Test
-    public void whenNoExerciseMatchesTheMainProjectItShouldDoNothing() {
-        when(projectMediator.getMainProject()).thenReturn(null);
-        when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(null);
+    public void whenNoExerciseMatchesTheSelectedProjectItShouldDoNothing() {
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(null);
         
         performAction();
         
@@ -87,8 +100,7 @@ public class SubmitExerciseActionTest {
     }
     
     private void performActionAndCaptureListener() {
-        when(projectMediator.getMainProject()).thenReturn(project);
-        when(projectMediator.tryGetExerciseForProject(project, courseCache)).thenReturn(exercise);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
         
         performAction();
         
@@ -157,5 +169,4 @@ public class SubmitExerciseActionTest {
         verify(dialogDisplayer).displayError(exception);
         verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
     }
-    
 }
