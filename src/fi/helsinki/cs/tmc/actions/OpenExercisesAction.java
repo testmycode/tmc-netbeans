@@ -10,8 +10,10 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -64,27 +66,30 @@ public class OpenExercisesAction extends AbstractAction {
             return;
         }
         
-        openLocalProjects(courseCache.getCurrentCourseExercises());
-        refreshProjectListAndDownloadNewProjects();
+        int localProjects = openLocalProjects(courseCache.getCurrentCourseExercises());
+        refreshProjectListAndDownloadNewProjects(localProjects);
     }
     
-    private void openLocalProjects(ExerciseList exercises) {
+    private int openLocalProjects(ExerciseList exercises) {
         ArrayList<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
         for (Exercise ex : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
-            if (proj != null) {
+            if (proj != null && !projectMediator.isProjectOpen(proj)) {
                 projects.add(proj);
             }
         }
+        
         projectMediator.openProjects(projects);
+        
+        return projects.size();
     }
     
-    private void refreshProjectListAndDownloadNewProjects() {
+    private void refreshProjectListAndDownloadNewProjects(final int localProjectCount) {
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
             public void bgTaskReady(CourseList result) {
                 courseCache.setAvailableCourses(result);
-                downloadNewProjects(courseCache.getCurrentCourseExercises());
+                downloadNewProjects(courseCache.getCurrentCourseExercises(), localProjectCount);
             }
 
             @Override
@@ -94,34 +99,52 @@ public class OpenExercisesAction extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                downloadNewProjects(courseCache.getCurrentCourseExercises());
+                downloadNewProjects(courseCache.getCurrentCourseExercises(), localProjectCount);
             }
         });
     }
     
-    private void downloadNewProjects(ExerciseList exercises) {
+    private void downloadNewProjects(ExerciseList allExercises, final int localProjectCount) {
+        ExerciseList exercisesToDownload = undownloadedExercises(allExercises);
+        
+        if (exercisesToDownload.size() == 0 && localProjectCount == 0) {
+            dialogs.displayMessage("There are no new exercises at the moment.");
+        }
+        
+        BgTaskListener<Collection<TmcProjectInfo>> whenFinished = new BgTaskListener<Collection<TmcProjectInfo>>() {
+            @Override
+            public void bgTaskReady(Collection<TmcProjectInfo> result) {
+                projectMediator.openProjects(result);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                // Do nothing
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable exception) {
+                logger.log(Level.WARNING, "Failed to download exercise file.", exception);
+                dialogs.displayError("Failed to download exercises: " + exception.getMessage());
+            }
+        };
+        
+        AggregatingBgTaskListener<TmcProjectInfo> aggregator =
+                new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenFinished);
+        for (final Exercise exercise : exercisesToDownload) {
+            serverAccess.startDownloadingExerciseProject(exercise, aggregator);
+        }
+    }
+    
+    private ExerciseList undownloadedExercises(ExerciseList exercises) {
+        ExerciseList result = new ExerciseList();
         for (final Exercise exercise : exercises) {
             TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
             if (proj == null) {
-                serverAccess.startDownloadingExerciseProject(exercise, new BgTaskListener<TmcProjectInfo>() {
-                    @Override
-                    public void bgTaskReady(TmcProjectInfo result) {
-                        projectMediator.openProject(result);
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {
-                        // Do nothing
-                    }
-
-                    @Override
-                    public void bgTaskFailed(Throwable exception) {
-                        logger.log(Level.WARNING, "Failed to download exercise file.", exception);
-                        dialogs.displayError("Failed to download exercise '" + exercise.getName() + "': " + exception.getMessage());
-                    }
-                });
+                result.add(exercise);
             }
         }
+        return result;
     }
     
     //TODO: disabled if no course selected

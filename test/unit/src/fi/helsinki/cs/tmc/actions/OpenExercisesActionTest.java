@@ -33,6 +33,9 @@ public class OpenExercisesActionTest {
     private Course currentCourse;
     private ExerciseList threeExercises;
     
+    @Mock private TmcProjectInfo proj1AsLocal, proj2AsLocal, proj3AsLocal;
+    @Mock private TmcProjectInfo proj1AsRemote, proj2AsRemote, proj3AsRemote;
+    
     @Captor private ArgumentCaptor<BgTaskListener<CourseList>> listListenerCaptor;
     @Captor private ArgumentCaptor<BgTaskListener<TmcProjectInfo>> projListenerCaptor;
     
@@ -54,6 +57,8 @@ public class OpenExercisesActionTest {
         threeExercises.add(new Exercise("two"));
         threeExercises.add(new Exercise("three"));
         when(courseCache.getCurrentCourseExercises()).thenReturn(threeExercises);
+        
+        when(projectMediator.isProjectOpen(any(TmcProjectInfo.class))).thenReturn(false);
         
         action = new OpenExercisesAction(
                 serverAccess,
@@ -90,11 +95,9 @@ public class OpenExercisesActionTest {
     }
     
     @Test
-    public void itShouldDownloadExercisesNotYetDownloaded() {
-        TmcProjectInfo proj1 = mock(TmcProjectInfo.class);
-        TmcProjectInfo proj2 = mock(TmcProjectInfo.class);
-        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1);
-        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2);
+    public void itShouldOnlyDownloadExercisesNotYetPresent() {
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2AsLocal);
         when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(null);
         
         performAction();
@@ -118,26 +121,26 @@ public class OpenExercisesActionTest {
     
     @Test
     public void itShouldImmediatelyOpenAllLocalExercises() {
-        TmcProjectInfo proj1 = mock(TmcProjectInfo.class);
-        TmcProjectInfo proj2 = mock(TmcProjectInfo.class);
-        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1);
-        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2AsLocal);
         when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(null);
         
         performAction();
         
-        verify(projectMediator).openProjects(Arrays.asList(proj1, proj2));
+        verify(projectMediator).openProjects(Arrays.asList(proj1AsLocal, proj2AsLocal));
     }
     
     @Test
     public void whenAnExerciseIsDownloadedItShouldOpenIt() {
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(proj3AsLocal);
+        
         performAction();
         respondWithMockCourseList();
         
-        TmcProjectInfo proj = mock(TmcProjectInfo.class);
-        verifyStartedProjDownload(threeExercises.get(1)).bgTaskReady(proj);
+        verifyStartedProjDownload(threeExercises.get(1)).bgTaskReady(proj2AsRemote);
         
-        verify(projectMediator).openProject(proj);
+        verify(projectMediator).openProjects(Arrays.asList(proj2AsRemote));
     }
     
     @Test
@@ -145,7 +148,7 @@ public class OpenExercisesActionTest {
         performAction();
         respondWithMockCourseList();
         verifyStartedProjDownload(threeExercises.get(1)).bgTaskFailed(new IOException("oops"));
-        verify(dialogs).displayError("Failed to download exercise 'two': oops");
+        verify(dialogs).displayError("Failed to download exercises: oops");
     }
     
     @Test
@@ -163,6 +166,49 @@ public class OpenExercisesActionTest {
         
         verify(dialogs).displayError(contains("No course selected"));
         verifyZeroInteractions(projectMediator);
+    }
+    
+    @Test
+    public void whenThereAreNoLocalNorRemoteExercisesToOpenItShouldDisplayANotification() {
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(proj3AsLocal);
+        
+        when(projectMediator.isProjectOpen(any(TmcProjectInfo.class))).thenReturn(true);
+        
+        performAction();
+        respondWithMockCourseList();
+        
+        verify(dialogs).displayMessage(contains("no new exercises"));
+    }
+    
+    @Test
+    public void whenThereAreOnlyLocalExercisesToOpenItShouldNotDisplayANotification() {
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(0))).thenReturn(proj1AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(1))).thenReturn(proj2AsLocal);
+        when(projectMediator.tryGetProjectForExercise(threeExercises.get(2))).thenReturn(proj3AsLocal);
+        
+        when(projectMediator.isProjectOpen(any(TmcProjectInfo.class))).thenReturn(false);
+        
+        performAction();
+        respondWithMockCourseList();
+        
+        verifyZeroInteractions(dialogs);
+    }
+    
+    @Test
+    public void whenThereAreOnlyRemoteExercisesToOpenItShouldNotDisplayANotification() {
+        when(projectMediator.isProjectOpen(any(TmcProjectInfo.class))).thenReturn(true);
+        
+        performAction();
+        
+        when(courseCache.getCurrentCourseExercises()).thenReturn(threeExercises);
+        respondWithMockCourseList();
+        
+        verifyStartedProjDownload(threeExercises.get(0)).bgTaskReady(proj1AsRemote);
+        verifyStartedProjDownload(threeExercises.get(1)).bgTaskReady(proj2AsRemote);
+        verifyStartedProjDownload(threeExercises.get(2)).bgTaskReady(proj3AsRemote);
+        verifyZeroInteractions(dialogs);
     }
     
     private BgTaskListener<TmcProjectInfo> verifyStartedProjDownload(Exercise exercise) {

@@ -3,8 +3,7 @@ package fi.helsinki.cs.tmc.model;
 import fi.helsinki.cs.tmc.data.Exercise;
 import java.io.File;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.List;
+import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -48,6 +47,10 @@ public class ProjectMediator {
     public ProjectMediator() {
         this.openProjects = OpenProjects.getDefault();
         this.projectManager = ProjectManager.getDefault();
+    }
+    
+    public TmcProjectInfo wrapProject(Project p) {
+        return new TmcProjectInfo(p);
     }
     
     public String getProjectRootDir() {
@@ -163,16 +166,17 @@ public class ProjectMediator {
         openProjects.open(new Project[] { project.getProject() }, true, true);
     }
     
-    public void openProjects(List<TmcProjectInfo> projects) {
+    public void openProjects(Collection<TmcProjectInfo> projects) {
+        TmcProjectInfo[] projectInfos = projects.toArray(new TmcProjectInfo[projects.size()]);
         Project[] nbProjects = new Project[projects.size()];
         for (int i = 0; i < nbProjects.length; ++i) {
-            nbProjects[i] = projects.get(i).getProject();
+            nbProjects[i] = projectInfos[i].getProject();
         }
         openProjects.open(nbProjects, true, true);
     }
     
-    public TmcProjectInfo wrapProject(Project p) {
-        return new TmcProjectInfo(p);
+    public boolean isProjectOpen(TmcProjectInfo project) {
+        return openProjects.isProjectOpen(project.getProject());
     }
     
 }
