@@ -1,8 +1,0 @@
-[
-  {
-    "course": {
-    "name": "test",
-    "exercises_json": "./test.json"
-    }
-  }
-]
