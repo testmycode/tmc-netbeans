@@ -17,10 +17,6 @@ import java.util.List;
 import java.util.Set;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.openide.awt.ActionRegistration;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionID;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
@@ -29,14 +25,9 @@ import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
 import org.openide.util.actions.NodeAction;
 
-@ActionID(category = "TMC",
-id = "fi.helsinki.cs.tmc.actions.SubmitExerciseAction")
-// ActionRegistration doesn't work for NodeActions :/
-@ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = 20),
-    @ActionReference(path = "Toolbars/TMC", position = 200)
-})
-@Messages("CTL_SubmitExerciseAction=Submit")
+// The action annotations don't work properly with NodeAction (NB 7.0)
+// so this action is declared manually in layer.xml.
+@Messages("CTL_SubmitExerciseAction=Su&bmit")
 public final class SubmitExerciseAction extends NodeAction {
 
     private ServerAccess serverAccess;
@@ -68,8 +59,6 @@ public final class SubmitExerciseAction extends NodeAction {
         this.resultDisplayer = resultDisplayer;
         this.dialogDisplayer = dialogDisplayer;
         this.iconAnnotator = iconAnnotator;
-        
-        this.putValue("noIconInMenu", Boolean.TRUE);
     }
     
     @Override
@@ -127,6 +116,7 @@ public final class SubmitExerciseAction extends NodeAction {
 
     @Override
     protected String iconResource() {
+        // The setting in layer.xml doesn't work with NodeAction
         return "fi/helsinki/cs/tmc/actions/submit.png";
     }
 

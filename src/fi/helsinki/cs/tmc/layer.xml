@@ -1,6 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE filesystem PUBLIC "-//NetBeans//DTD Filesystem 1.2//EN" "http://www.netbeans.org/dtds/filesystem-1_2.dtd">
 <filesystem>
+    <folder name="Actions">
+        <folder name="TMC">
+            <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
+                <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_SubmitExerciseAction" />
+                <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.SubmitExerciseAction" />
+                <attr name="iconBase" stringvalue="fi/helsinki/cs/tmc/actions/submit.png" /> <!-- doesn't actually work with NodeAction -->
+                <attr name="noIconInMenu" boolvalue="false"/>
+            </file>
+        </folder>
+    </folder>
     <folder name="Menu">
         <folder name="TM&amp;C">
             <attr name="position" intvalue="1100"/>
@@ -8,6 +18,9 @@
             <file name="org-netbeans-modules-project-ui-TestProject.instance">
                 <attr name="position" intvalue="10"/>
                 <attr name="instanceCreate" methodvalue="org.netbeans.modules.project.ui.actions.Actions.testProject"/>
+            </file>
+            <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
+                <attr name="position" intvalue="20"/>
             </file>
         </folder>
     </folder>
@@ -22,6 +35,9 @@
             <file name="org-netbeans-modules-project-ui-TestProject.instance">
                 <attr name="position" intvalue="110"/>
                 <attr name="instanceCreate" methodvalue="org.netbeans.modules.project.ui.actions.Actions.testProject"/>
+            </file>
+            <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
+                <attr name="position" intvalue="120"/>
             </file>
         </folder>
     </folder>
