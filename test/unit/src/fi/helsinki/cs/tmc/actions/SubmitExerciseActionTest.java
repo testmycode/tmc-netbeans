@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.logging.Logger;
+import org.junit.AfterClass;
 import org.netbeans.api.project.Project;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
@@ -13,8 +13,9 @@ import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import java.util.Arrays;
+import java.util.logging.Level;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -39,6 +40,20 @@ public class SubmitExerciseActionTest {
     
     private SubmitExerciseAction action;
     
+    private static Level oldSCOLogLevel;
+    
+    @BeforeClass
+    public static void setUpClass() {
+        Logger scoLog = Logger.getLogger("org.openide.util.SharedClassObject");
+        oldSCOLogLevel = scoLog.getLevel();
+        scoLog.setLevel(Level.OFF); // To avoid warning about multiple instances of the action being created
+    }
+    
+    @AfterClass
+    public static void tearDownClass() {
+        Logger.getLogger("org.openide.util.SharedClassObject").setLevel(oldSCOLogLevel);
+    }
+    
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
@@ -46,16 +61,7 @@ public class SubmitExerciseActionTest {
         when(projectMediator.wrapProject(nbProject)).thenReturn(tmcProject);
         when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
         
-        initAction();
-    }
-    
-    private void initAction() {
-        initAction(Arrays.asList(nbProject));
-    }
-    
-    private void initAction(List<Project> projects) {
         action = new SubmitExerciseAction(
-                projects,
                 serverAccess,
                 courseCache,
                 projectMediator,
@@ -65,7 +71,11 @@ public class SubmitExerciseActionTest {
     }
     
     private void performAction() {
-        action.actionPerformed(null);
+        performActionWithProjects(nbProject);
+    }
+    
+    private void performActionWithProjects(Project ... projects) {
+        action.performAction(projects);
     }
     
     @Test
@@ -81,9 +91,7 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void whenNoProjectsAreSelectedItShouldDoNothing() {
-        initAction(new ArrayList<Project>());
-        
-        performAction();
+        performActionWithProjects();
         
         verify(projectMediator, never()).saveAllFiles();
         verifyZeroInteractions(serverAccess);

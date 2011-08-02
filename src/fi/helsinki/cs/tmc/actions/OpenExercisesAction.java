@@ -25,9 +25,9 @@ import org.openide.util.NbBundle.Messages;
 id = "fi.helsinki.cs.tmc.actions.OpenExercises")
 @ActionRegistration(displayName = "#CTL_OpenExercises")
 @ActionReferences({
-    @ActionReference(path = "Menu/TMC", position = -50, separatorAfter = -40)
+    @ActionReference(path = "Menu/TM&C", position = -50, separatorAfter = -40)
 })
-@Messages("CTL_OpenExercises=Open exercises")
+@Messages("CTL_OpenExercises=&Open exercises")
 public class OpenExercisesAction extends AbstractAction {
     
     private static final Logger logger = Logger.getLogger(OpenExercisesAction.class.getName());

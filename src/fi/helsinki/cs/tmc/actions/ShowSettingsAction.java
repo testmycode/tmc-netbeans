@@ -19,9 +19,9 @@ import org.openide.util.NbBundle.Messages;
 id = "fi.helsinki.cs.tmc.actions.ShowSettings")
 @ActionRegistration(displayName = "#CTL_ShowSettings")
 @ActionReferences({
-    @ActionReference(path = "Menu/TMC", position = -100, separatorAfter = -90)
+    @ActionReference(path = "Menu/TM&C", position = -100, separatorAfter = -90)
 })
-@Messages("CTL_ShowSettings=Settings")
+@Messages("CTL_ShowSettings=&Settings")
 public final class ShowSettingsAction extends AbstractAction {
 
     private PreferencesUIFactory prefUiFactory;
