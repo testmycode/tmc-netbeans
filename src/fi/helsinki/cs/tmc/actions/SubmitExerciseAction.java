@@ -108,7 +108,21 @@ public final class SubmitExerciseAction extends NodeAction {
 
     @Override
     protected boolean enable(Node[] nodes) {
-        return !projectsFromNodes(nodes).isEmpty();
+        return enable(projectsFromNodes(nodes).toArray(new Project[0]));
+    }
+    
+    /*package (for tests)*/ boolean enable(Project ... projects) {
+        if (projects.length == 0) {
+            return false;
+        }
+        
+        for (Project p : projects) {
+            Exercise exercise = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(p), courseCache);
+            if (exercise != null) {
+                return true;
+            }
+        }
+        return false;
     }
 
     @Override

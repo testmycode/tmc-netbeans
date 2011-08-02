@@ -22,6 +22,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import static org.mockito.Mockito.*;
+import static org.junit.Assert.*;
 
 public class SubmitExerciseActionTest {
     @Mock private ServerAccess serverAccess;
@@ -80,7 +81,6 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void itShouldSaveAllFilesAndSubmitTheSelectedProjects() {
-        when(projectMediator.getMainProject()).thenReturn(tmcProject);
         when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
         
         performAction();
@@ -176,5 +176,22 @@ public class SubmitExerciseActionTest {
         
         verify(dialogDisplayer).displayError(exception);
         verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
+    }
+    
+    @Test
+    public void itShouldBeEnabledForProjectsAssociatedWithTheExercise() {
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
+        assertTrue(action.enable(nbProject));
+    }
+    
+    @Test
+    public void itShouldNotBeEnabledForProjectsNotAssociatedWithTheExercise() {
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(null);
+        assertFalse(action.enable(nbProject));
+    }
+    
+    @Test
+    public void itShouldNotBeEnabledForAnEmptyProjectSelection() {
+        assertFalse(action.enable());
     }
 }
