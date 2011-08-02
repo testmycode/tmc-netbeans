@@ -27,7 +27,7 @@ id = "fi.helsinki.cs.tmc.actions.OpenExercises")
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -50, separatorAfter = -40)
 })
-@Messages("CTL_OpenExercises=&Open exercises")
+@Messages("CTL_OpenExercises=&Open current exercises")
 public class OpenExercisesAction extends AbstractAction {
     
     private static final Logger logger = Logger.getLogger(OpenExercisesAction.class.getName());
