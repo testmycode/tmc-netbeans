@@ -89,31 +89,6 @@ public class ProjectMediator {
     }
     
     /**
-     * Returns the directory of the main project, or null if no main project selected.
-     */
-    public TmcProjectInfo getMainProject() {
-        Project project = openProjects.getMainProject();
-        if (project != null) {
-            return wrapProject(project);
-        } else {
-            return null;
-        }
-    }
-    
-    /**
-     * Returns the list of projects that are open right now.
-     */
-    public List<TmcProjectInfo> getOpenProjects() {
-        // todo: should this use openProjects().get() instead?
-        Project[] projects = openProjects.getOpenProjects();
-        TmcProjectInfo[] infos = new TmcProjectInfo[projects.length];
-        for (int i = 0; i < projects.length; ++i) {
-            infos[i] = wrapProject(projects[i]);
-        }
-        return Arrays.asList(infos);
-    }
-    
-    /**
      * Saves all unsaved files.
      */
     public void saveAllFiles() {
