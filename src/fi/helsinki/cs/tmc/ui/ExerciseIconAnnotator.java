@@ -49,6 +49,8 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return origImg;
         }
         
+        img = ImageUtilities.mergeImages(origImg, img, 0, 0);
+        
         String tooltip = tooltipForExercise(exercise);
         img = ImageUtilities.assignToolTipToImage(img, tooltip);
         
@@ -57,16 +59,16 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     
     private Image imageForExericse(Exercise exercise) throws IOException {
         String name = imageNameForExercise(exercise);
-        return ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/" + name));
+        return ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
     }
     
     private String imageNameForExercise(Exercise exercise) {
         if (exercise.isAttempted() && exercise.isCompleted()) {
-            return "smiley.gif";
+            return "green-project-dot.png";
         } else if (exercise.isAttempted()) {
-            return "serious.gif";
+            return "red-project-dot.png";
         } else {
-            return "frownie.gif";
+            return "black-project-dot.png";
         }
     }
     
