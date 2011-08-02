@@ -59,6 +59,8 @@ public final class SubmitExerciseAction extends NodeAction {
         this.resultDisplayer = resultDisplayer;
         this.dialogDisplayer = dialogDisplayer;
         this.iconAnnotator = iconAnnotator;
+        
+        putValue("noIconInMenu", Boolean.TRUE);
     }
     
     @Override

@@ -6,7 +6,9 @@
             <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
                 <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_SubmitExerciseAction" />
                 <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.SubmitExerciseAction" />
-                <attr name="iconBase" stringvalue="fi/helsinki/cs/tmc/actions/submit.png" /> <!-- doesn't actually work with NodeAction -->
+                
+                <!-- iconBase and noIconInMenu doesn't seem to work with NodeAction. They are set in the code. -->
+                <attr name="iconBase" stringvalue="fi/helsinki/cs/tmc/actions/submit.png" />
                 <attr name="noIconInMenu" boolvalue="false"/>
             </file>
         </folder>

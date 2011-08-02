@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
-import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
@@ -73,7 +72,7 @@ public class SaveSettingsAction extends AbstractAction {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                if (dialogs.askYesNo("Open the latest exercises?", "Open exercises?")) {
+                if (dialogs.askYesNo("Open latest exercises now?", "Open exercises?")) {
                     openExercisesAction.actionPerformed(null);
                 }
             }

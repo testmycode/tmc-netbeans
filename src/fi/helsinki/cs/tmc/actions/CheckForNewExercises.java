@@ -81,6 +81,6 @@ public class CheckForNewExercises implements ActionListener {
     
     private void displayNotification(int count) {
         Icon icon = ImageUtilities.loadImageIcon("fi/helsinki/cs/tmc/smile.gif", false);
-        notifier.notify("New exercises available (" + count + ")", icon, "Click here to download and open them.", detailsAction);
+        notifier.notify("New exercises are available (" + count + ")", icon, "Click here to download and open them.", detailsAction);
     }
 }
