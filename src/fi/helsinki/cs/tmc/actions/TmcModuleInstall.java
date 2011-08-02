@@ -4,9 +4,11 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.prefs.Preferences;
+import javax.swing.ImageIcon;
 import javax.swing.SwingUtilities;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
+import org.openide.awt.NotificationDisplayer;
 import org.openide.modules.ModuleInstall;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
@@ -26,7 +28,7 @@ public class TmcModuleInstall extends ModuleInstall {
                     showWelcomeDialog();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
                 } else {
-                    new RefreshCoursesAction().actionPerformed(null);
+                    new CheckForNewExercises(new OpenExercisesAction()).actionPerformed(null);
                 }
             }
         });
