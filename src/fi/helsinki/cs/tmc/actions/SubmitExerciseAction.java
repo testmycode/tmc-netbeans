@@ -94,7 +94,7 @@ public final class SubmitExerciseAction extends NodeAction {
 
         serverAccess.startSubmittingExercise(exercise, new BgTaskListener<SubmissionResult>() {
             @Override
-            public void backgroundTaskReady(SubmissionResult result) {
+            public void bgTaskReady(SubmissionResult result) {
                 resultDisplayer.showResult(result);
                 exercise.setAttempted(true);
                 if (result.getStatus() == SubmissionResult.Status.OK) {
@@ -105,11 +105,11 @@ public final class SubmitExerciseAction extends NodeAction {
             }
 
             @Override
-            public void backgroundTaskCancelled() {
+            public void bgTaskCancelled() {
             }
 
             @Override
-            public void backgroundTaskFailed(Throwable ex) {
+            public void bgTaskFailed(Throwable ex) {
                 dialogDisplayer.displayError(ex);
             }
         });

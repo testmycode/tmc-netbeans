@@ -46,7 +46,7 @@ public class RefreshCoursesAction extends AbstractAction {
         
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
-            public void backgroundTaskReady(CourseList result) {
+            public void bgTaskReady(CourseList result) {
                 localCourseCache.setAvailableCourses(result);
                 PreferencesUI prefUi = prefUIFactory.getCurrentUI();
                 if (prefUi != null) {
@@ -55,12 +55,12 @@ public class RefreshCoursesAction extends AbstractAction {
             }
 
             @Override
-            public void backgroundTaskCancelled() {
+            public void bgTaskCancelled() {
                 notifyPrefUiThatCourseRefreshFailed();
             }
 
             @Override
-            public void backgroundTaskFailed(Throwable ex) {
+            public void bgTaskFailed(Throwable ex) {
                 dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
                 notifyPrefUiThatCourseRefreshFailed();
             }

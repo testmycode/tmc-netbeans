@@ -48,7 +48,7 @@ public class RefreshCoursesActionTest {
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));
-        getDownloadListener().backgroundTaskReady(courses);
+        getDownloadListener().bgTaskReady(courses);
     }
     
     private BgTaskListener<CourseList> getDownloadListener() {
@@ -85,7 +85,7 @@ public class RefreshCoursesActionTest {
     @Test
     public void whenDownloadIsCancelledItShouldNotChangeTheCourseCache() {
         performAction();
-        getDownloadListener().backgroundTaskCancelled();
+        getDownloadListener().bgTaskCancelled();
         verifyZeroInteractions(localCourseCache);
     }
     
@@ -93,14 +93,14 @@ public class RefreshCoursesActionTest {
     public void whenDownloadIsCancelledItShouldInformThePreferencesUiIfActive() {
         when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
         performAction();
-        getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
+        getDownloadListener().bgTaskFailed(new IOException("Whoops"));
         verify(prefUi).courseRefreshFailedOrCanceled();
     }
     
     @Test
     public void whenDownloadFailsItShouldDisplayAnError() {
         performAction();
-        getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
+        getDownloadListener().bgTaskFailed(new IOException("Whoops"));
         verify(dialogs).displayError("Course refresh failed.\nWhoops");
     }
     
@@ -108,7 +108,7 @@ public class RefreshCoursesActionTest {
     public void whenDownloadFailsItShouldInformThePreferencesUiIfActive() {
         when(prefUiFactory.getCurrentUI()).thenReturn(prefUi);
         performAction();
-        getDownloadListener().backgroundTaskFailed(new IOException("Whoops"));
+        getDownloadListener().bgTaskFailed(new IOException("Whoops"));
         verify(prefUi).courseRefreshFailedOrCanceled();
     }
     

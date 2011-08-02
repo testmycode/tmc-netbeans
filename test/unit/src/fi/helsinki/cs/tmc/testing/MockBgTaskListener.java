@@ -17,7 +17,7 @@ public class MockBgTaskListener<T> implements BgTaskListener<T> {
     private Semaphore semaphore = new Semaphore(0);
 
     @Override
-    public void backgroundTaskReady(T result) {
+    public void bgTaskReady(T result) {
         checkStatus();
         success = true;
         this.result = result;
@@ -25,14 +25,14 @@ public class MockBgTaskListener<T> implements BgTaskListener<T> {
     }
 
     @Override
-    public void backgroundTaskCancelled() {
+    public void bgTaskCancelled() {
         checkStatus();
         this.cancelled = true;
         semaphore.release();
     }
 
     @Override
-    public void backgroundTaskFailed(Throwable ex) {
+    public void bgTaskFailed(Throwable ex) {
         checkStatus();
         this.taskException = ex;
         semaphore.release();

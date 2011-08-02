@@ -82,18 +82,18 @@ public class OpenExercisesAction extends AbstractAction {
     private void refreshProjectListAndDownloadNewProjects() {
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
-            public void backgroundTaskReady(CourseList result) {
+            public void bgTaskReady(CourseList result) {
                 courseCache.setAvailableCourses(result);
                 downloadNewProjects(courseCache.getCurrentCourseExercises());
             }
 
             @Override
-            public void backgroundTaskCancelled() {
+            public void bgTaskCancelled() {
                 // Do nothing
             }
 
             @Override
-            public void backgroundTaskFailed(Throwable ex) {
+            public void bgTaskFailed(Throwable ex) {
                 downloadNewProjects(courseCache.getCurrentCourseExercises());
             }
         });
@@ -105,17 +105,17 @@ public class OpenExercisesAction extends AbstractAction {
             if (proj == null) {
                 serverAccess.startDownloadingExerciseProject(exercise, new BgTaskListener<TmcProjectInfo>() {
                     @Override
-                    public void backgroundTaskReady(TmcProjectInfo result) {
+                    public void bgTaskReady(TmcProjectInfo result) {
                         projectMediator.openProject(result);
                     }
 
                     @Override
-                    public void backgroundTaskCancelled() {
+                    public void bgTaskCancelled() {
                         // Do nothing
                     }
 
                     @Override
-                    public void backgroundTaskFailed(Throwable exception) {
+                    public void bgTaskFailed(Throwable exception) {
                         logger.log(Level.WARNING, "Failed to download exercise file.", exception);
                         dialogs.displayError("Failed to download exercise '" + exercise.getName() + "': " + exception.getMessage());
                     }

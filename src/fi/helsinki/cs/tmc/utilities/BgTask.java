@@ -52,7 +52,7 @@ public class BgTask<V> implements CancellableCallable<V> {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
-                        listener.backgroundTaskCancelled();
+                        listener.bgTaskCancelled();
                     }
                 });
                 return null;
@@ -71,7 +71,7 @@ public class BgTask<V> implements CancellableCallable<V> {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    listener.backgroundTaskReady(result);
+                    listener.bgTaskReady(result);
                 }
             });
             return result;
@@ -79,7 +79,7 @@ public class BgTask<V> implements CancellableCallable<V> {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    listener.backgroundTaskCancelled();
+                    listener.bgTaskCancelled();
                 }
             });
             return null;
@@ -87,7 +87,7 @@ public class BgTask<V> implements CancellableCallable<V> {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    listener.backgroundTaskFailed(t);
+                    listener.bgTaskFailed(t);
                 }
             });
             return null;

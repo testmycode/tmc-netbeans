@@ -119,7 +119,7 @@ public class SubmitExerciseActionTest {
     public void whenTheServerReturnsAResultItShouldDisplayIt() {
         performActionAndCaptureListener();
         
-        listenerCaptor.getValue().backgroundTaskReady(result);
+        listenerCaptor.getValue().bgTaskReady(result);
         
         verify(resultDisplayer).showResult(result);
     }
@@ -128,7 +128,7 @@ public class SubmitExerciseActionTest {
     public void whenTheServerReturnsASuccessfulResultItShouldSetTheExerciseStatusToDone() {
         performActionAndCaptureListener();
         when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
-        listenerCaptor.getValue().backgroundTaskReady(result);
+        listenerCaptor.getValue().bgTaskReady(result);
         
         verify(exercise).setAttempted(true);
         verify(exercise).setCompleted(true);
@@ -140,7 +140,7 @@ public class SubmitExerciseActionTest {
     public void whenTheServerReturnsTestFailuresResultItShouldSetTheExerciseStatusToPartiallyDone() {
         performActionAndCaptureListener();
         when(result.getStatus()).thenReturn(SubmissionResult.Status.FAIL);
-        listenerCaptor.getValue().backgroundTaskReady(result);
+        listenerCaptor.getValue().bgTaskReady(result);
         
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
@@ -152,7 +152,7 @@ public class SubmitExerciseActionTest {
     public void whenTheServerReturnsAnErrorResultItShouldSetTheExerciseStatusToPartiallyDone() {
         performActionAndCaptureListener();
         when(result.getStatus()).thenReturn(SubmissionResult.Status.ERROR);
-        listenerCaptor.getValue().backgroundTaskReady(result);
+        listenerCaptor.getValue().bgTaskReady(result);
         
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
@@ -163,7 +163,7 @@ public class SubmitExerciseActionTest {
     @Test
     public void whenTheSubmissionIsCancelledItShouldDoNothing() {
         performActionAndCaptureListener();
-        listenerCaptor.getValue().backgroundTaskCancelled();
+        listenerCaptor.getValue().bgTaskCancelled();
         
         verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
     }
@@ -172,7 +172,7 @@ public class SubmitExerciseActionTest {
     public void whenTheSubmissionCannotBeCompletedItShouldDisplayAnError() {
         performActionAndCaptureListener();
         Throwable exception = new Exception("oops");
-        listenerCaptor.getValue().backgroundTaskFailed(exception);
+        listenerCaptor.getValue().bgTaskFailed(exception);
         
         verify(dialogDisplayer).displayError(exception);
         verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);

@@ -84,7 +84,7 @@ public class OpenExercisesActionTest {
         
         performAction();
         verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
-        listListenerCaptor.getValue().backgroundTaskReady(courses);
+        listListenerCaptor.getValue().bgTaskReady(courses);
         
         verify(courseCache).setAvailableCourses(courses);
     }
@@ -108,7 +108,7 @@ public class OpenExercisesActionTest {
     public void whenTheExerciseListCannotBeDownloadedItShouldIgnoreTheErrorAndUseTheOldList() {
         performAction();
         verify(serverAccess).startDownloadingCourseList(listListenerCaptor.capture());
-        listListenerCaptor.getValue().backgroundTaskFailed(new Exception("oops"));
+        listListenerCaptor.getValue().bgTaskFailed(new Exception("oops"));
         
         verify(courseCache, never()).setAvailableCourses(any(CourseList.class));
         verifyZeroInteractions(dialogs);
@@ -135,7 +135,7 @@ public class OpenExercisesActionTest {
         respondWithMockCourseList();
         
         TmcProjectInfo proj = mock(TmcProjectInfo.class);
-        verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskReady(proj);
+        verifyStartedProjDownload(threeExercises.get(1)).bgTaskReady(proj);
         
         verify(projectMediator).openProject(proj);
     }
@@ -144,7 +144,7 @@ public class OpenExercisesActionTest {
     public void whenAnExerciseDownloadFailsItShouldDisplayAnError() {
         performAction();
         respondWithMockCourseList();
-        verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskFailed(new IOException("oops"));
+        verifyStartedProjDownload(threeExercises.get(1)).bgTaskFailed(new IOException("oops"));
         verify(dialogs).displayError("Failed to download exercise 'two': oops");
     }
     
@@ -152,7 +152,7 @@ public class OpenExercisesActionTest {
     public void whenAnExerciseDownloadIsCancelledItShouldDoNothing() {
         performAction();
         respondWithMockCourseList();
-        verifyStartedProjDownload(threeExercises.get(1)).backgroundTaskCancelled();
+        verifyStartedProjDownload(threeExercises.get(1)).bgTaskCancelled();
     }
     
     @Test
@@ -176,6 +176,6 @@ public class OpenExercisesActionTest {
     }
     
     private void respondWithMockCourseList() {
-        verifyStartedCourseListDownload().backgroundTaskReady(mock(CourseList.class));
+        verifyStartedCourseListDownload().bgTaskReady(mock(CourseList.class));
     }
 }
