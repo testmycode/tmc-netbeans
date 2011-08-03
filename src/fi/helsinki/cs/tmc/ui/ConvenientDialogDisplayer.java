@@ -23,13 +23,13 @@ public class ConvenientDialogDisplayer {
     }
 
     
-    /**
-     * Display exception error message.
-     */
-    public void displayError(Throwable e) {
-        displayError(e.getMessage());
+    public void displayError(Throwable t) {
+        displayError(t.getMessage());
     }
     
+    public void displayError(String errorMsg, Throwable t) {
+        displayError(errorMsg + "\n" + t.getMessage());
+    }
     
     public void displayError(String errorMsg) {
         displayMessage(errorMsg, NotifyDescriptor.ERROR_MESSAGE);
@@ -50,26 +50,12 @@ public class ConvenientDialogDisplayer {
         
         showDialog(dialog, notifyType);
     }
-    
-    
-    public void displayLongError(String errorMsg) {
-        displayLongMessage(errorMsg, NotifyDescriptor.ERROR_MESSAGE);
-    }
-    
-    public void displayLongMessage(String text) {
-        displayLongMessage(text, NotifyDescriptor.PLAIN_MESSAGE);
-    }
-    
-    private void displayLongMessage(String text, int notifyType) {
-        LongTextDisplayPanel panel = new LongTextDisplayPanel(text);
-        showDialog(panel, notifyType, "", false);
-    }
 
-    private void showDialog(Component content, int notifyType) {
+    public void showDialog(Component content, int notifyType) {
         showDialog(content, notifyType, "", true);
     }
     
-    private void showDialog(Component content, int notifyType, String title, boolean modal) {
+    public void showDialog(Component content, int notifyType, String title, boolean modal) {
         DialogDescriptor desc = new DialogDescriptor(content,title);
         desc.setModal(modal);
         desc.setOptions(new Object[] { NotifyDescriptor.OK_OPTION });

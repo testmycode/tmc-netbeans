@@ -7,7 +7,6 @@ import javax.swing.SwingUtilities;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
-import org.openide.windows.WindowManager;
 
 /**
  * Wraps PreferencesUI and shows it in a dialog on request.

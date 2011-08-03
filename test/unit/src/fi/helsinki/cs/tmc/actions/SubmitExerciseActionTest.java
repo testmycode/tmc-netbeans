@@ -174,7 +174,7 @@ public class SubmitExerciseActionTest {
         Throwable exception = new Exception("oops");
         listenerCaptor.getValue().bgTaskFailed(exception);
         
-        verify(dialogDisplayer).displayError(exception);
+        verify(dialogDisplayer).displayError("Error submitting exercise.", exception);
         verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
     }
     

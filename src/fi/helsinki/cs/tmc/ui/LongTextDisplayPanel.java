@@ -4,9 +4,9 @@ import javax.swing.JPanel;
 
 public class LongTextDisplayPanel extends JPanel {
 
-    public LongTextDisplayPanel(String text) {
+    public LongTextDisplayPanel(String htmlText) {
         initComponents();
-        textArea.setText(text);
+        editorPane.setText(htmlText);
     }
 
     /** This method is called from within the constructor to
@@ -19,7 +19,7 @@ public class LongTextDisplayPanel extends JPanel {
     private void initComponents() {
 
         scrollPane = new javax.swing.JScrollPane();
-        textArea = new javax.swing.JTextArea();
+        editorPane = new javax.swing.JEditorPane();
 
         setMinimumSize(new java.awt.Dimension(640, 400));
         setPreferredSize(new java.awt.Dimension(640, 400));
@@ -27,17 +27,15 @@ public class LongTextDisplayPanel extends JPanel {
 
         scrollPane.setVerticalScrollBarPolicy(javax.swing.ScrollPaneConstants.VERTICAL_SCROLLBAR_ALWAYS);
 
-        textArea.setColumns(20);
-        textArea.setEditable(false);
-        textArea.setFont(new java.awt.Font("Monospaced", 0, 12));
-        textArea.setRows(5);
-        textArea.setTabSize(4);
-        scrollPane.setViewportView(textArea);
+        editorPane.setContentType(org.openide.util.NbBundle.getMessage(LongTextDisplayPanel.class, "LongTextDisplayPanel.editorPane.contentType")); // NOI18N
+        editorPane.setEditable(false);
+        editorPane.setFont(new java.awt.Font("Monospaced", 0, 12));
+        scrollPane.setViewportView(editorPane);
 
         add(scrollPane, java.awt.BorderLayout.CENTER);
     }// </editor-fold>//GEN-END:initComponents
     // Variables declaration - do not modify//GEN-BEGIN:variables
+    private javax.swing.JEditorPane editorPane;
     private javax.swing.JScrollPane scrollPane;
-    private javax.swing.JTextArea textArea;
     // End of variables declaration//GEN-END:variables
 }

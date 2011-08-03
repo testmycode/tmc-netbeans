@@ -177,6 +177,10 @@
                 <binary-origin>release/modules/ext/commons-logging-1.1.1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
+                <runtime-relative-path>ext/commons-lang3-3.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/commons-lang3-3.0.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
                 <runtime-relative-path>ext/httpmime-4.1.1.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/httpmime-4.1.1.jar</binary-origin>
             </class-path-extension>

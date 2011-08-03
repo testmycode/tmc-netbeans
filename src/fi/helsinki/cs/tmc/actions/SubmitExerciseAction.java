@@ -101,7 +101,7 @@ public final class SubmitExerciseAction extends NodeAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogDisplayer.displayError(ex);
+                dialogDisplayer.displayError("Error submitting exercise.", ex);
             }
         });
     }
