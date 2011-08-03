@@ -114,6 +114,11 @@ public class ServerAccess {
         getPreferences().put(PREF_USERNAME, username);
     }
     
+    public boolean hasEnoughSettings() {
+        return !getUsername().isEmpty() &&
+                !getBaseUrl().isEmpty();
+    }
+    
     public Future<CourseList> startDownloadingCourseList(BgTaskListener<CourseList> listener) {
         final CancellableCallable<String> download = networkTasks.downloadTextFile(getCourseListUrl());
         CancellableCallable<CourseList> task = new CancellableCallable<CourseList>() {
