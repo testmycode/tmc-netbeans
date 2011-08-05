@@ -9,6 +9,7 @@ import java.util.logging.Level;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
+import static org.mockito.Mockito.*;
 
 public class CourseDbTest {
     
@@ -113,5 +114,18 @@ public class CourseDbTest {
         courses.getCourseByName("one").getExercises().add(new Exercise("ex"));
         courses.getCourseByName("two").getExercises().add(new Exercise("ex"));
         assertEquals("ex", db.getAllExercises().get(0).getName());
+    }
+    
+    @Test
+    public void itShouldCallListenersWhenSaved() {
+        CourseDbListener listener1 = mock(CourseDbListener.class);
+        CourseDbListener listener2 = mock(CourseDbListener.class);
+        
+        db.addListener(listener1);
+        db.addListener(listener2);
+        db.save();
+        
+        verify(listener1).courseDbSaved();
+        verify(listener2).courseDbSaved();
     }
 }

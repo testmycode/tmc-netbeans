@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -30,6 +31,8 @@ public class CourseDb {
     private ConfigFile configFile;
     private CourseList availableCourses;
     private String currentCourseName;
+    
+    private List<CourseDbListener> listeners;
 
     public CourseDb() {
         this(new ConfigFile("CourseDb.json"));
@@ -38,6 +41,7 @@ public class CourseDb {
     public CourseDb(ConfigFile configFile) {
         this.configFile = configFile;
         this.availableCourses = new CourseList();
+        this.listeners = new ArrayList<CourseDbListener>();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -102,6 +106,17 @@ public class CourseDb {
             saveToFile();
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to save course database", e);
+        }
+        fireCourseDbSaved();
+    }
+
+    public void addListener(CourseDbListener listener) {
+        listeners.add(listener);
+    }
+    
+    private void fireCourseDbSaved() {
+        for (CourseDbListener listener : listeners) {
+            listener.courseDbSaved();
         }
     }
     
