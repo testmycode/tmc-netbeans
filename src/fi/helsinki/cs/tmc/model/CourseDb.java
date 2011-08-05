@@ -13,16 +13,16 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- * Stores list of available courses, the current course and its exercise list.
+ * Stores the list of available courses, the current course and its exercise list.
  */
-public class LocalCourseCache {
+public class CourseDb {
     
-    public static final Logger logger = Logger.getLogger(LocalCourseCache.class.getName());
-    private static LocalCourseCache defaultInstance;
+    public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
+    private static CourseDb defaultInstance;
     
-    public static LocalCourseCache getInstance() {
+    public static CourseDb getInstance() {
         if (defaultInstance == null) {
-            defaultInstance = new LocalCourseCache();
+            defaultInstance = new CourseDb();
         }
         return defaultInstance;
     }
@@ -31,17 +31,17 @@ public class LocalCourseCache {
     private CourseList availableCourses;
     private String currentCourseName;
 
-    public LocalCourseCache() {
-        this(new ConfigFile("LocalCourseCache.json"));
+    public CourseDb() {
+        this(new ConfigFile("CourseDb.json"));
     }
     
-    public LocalCourseCache(ConfigFile configFile) {
+    public CourseDb(ConfigFile configFile) {
         this.configFile = configFile;
         this.availableCourses = new CourseList();
         try {
             loadFromFile();
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to load local course cache", e);
+            logger.log(Level.WARNING, "Failed to load course database", e);
         }
     }
     
@@ -101,7 +101,7 @@ public class LocalCourseCache {
         try {
             saveToFile();
         } catch (Exception e) {
-            logger.log(Level.WARNING, "Failed to save local course cache", e);
+            logger.log(Level.WARNING, "Failed to save course database", e);
         }
     }
     

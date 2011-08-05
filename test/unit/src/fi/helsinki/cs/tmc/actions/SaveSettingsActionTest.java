@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -16,7 +16,7 @@ import static org.mockito.Mockito.*;
 
 public class SaveSettingsActionTest {
     @Mock private ServerAccess serverAccess;
-    @Mock private LocalCourseCache localCourseCache;
+    @Mock private CourseDb courseDb;
     @Mock private ProjectMediator projectMediator;
     @Mock private ConvenientDialogDisplayer dialogs;
     @Mock private OpenExercisesAction openExercisesAction;
@@ -30,7 +30,7 @@ public class SaveSettingsActionTest {
         MockitoAnnotations.initMocks(this);
         action = new SaveSettingsAction(
                 serverAccess,
-                localCourseCache,
+                courseDb,
                 projectMediator,
                 dialogs,
                 openExercisesAction,
@@ -67,14 +67,14 @@ public class SaveSettingsActionTest {
         Course course = new Course("xoo");
         when(prefUi.getSelectedCourse()).thenReturn(course);
         performTheAction();
-        verify(localCourseCache).setCurrentCourseName("xoo");
+        verify(courseDb).setCurrentCourseName("xoo");
     }
     
     @Test
     public void itShouldSaveTheFactThatNoCourseIsSelected() {
         when(prefUi.getSelectedCourse()).thenReturn(null);
         performTheAction();
-        verify(localCourseCache).setCurrentCourseName(null);
+        verify(courseDb).setCurrentCourseName(null);
     }
     
     @Test

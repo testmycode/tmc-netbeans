@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
@@ -12,24 +12,24 @@ import javax.swing.AbstractAction;
 
 public class RefreshCoursesAction extends AbstractAction {
     private ServerAccess serverAccess;
-    private LocalCourseCache localCourseCache;
+    private CourseDb courseDb;
     private PreferencesUIFactory prefUIFactory;
     private ConvenientDialogDisplayer dialogs;
 
     public RefreshCoursesAction() {
         this(ServerAccess.getDefault(),
-                LocalCourseCache.getInstance(),
+                CourseDb.getInstance(),
                 PreferencesUIFactory.getInstance(),
                 ConvenientDialogDisplayer.getDefault());
     }
 
     public RefreshCoursesAction(
             ServerAccess serverAccess,
-            LocalCourseCache localCourseCache,
+            CourseDb courseDb,
             PreferencesUIFactory prefUiFactory,
             ConvenientDialogDisplayer dialogs) {
         this.serverAccess = serverAccess;
-        this.localCourseCache = localCourseCache;
+        this.courseDb = courseDb;
         this.prefUIFactory = prefUiFactory;
         this.dialogs = dialogs;
     }
@@ -47,7 +47,7 @@ public class RefreshCoursesAction extends AbstractAction {
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
             public void bgTaskReady(CourseList result) {
-                localCourseCache.setAvailableCourses(result);
+                courseDb.setAvailableCourses(result);
                 PreferencesUI prefUi = prefUIFactory.getCurrentUI();
                 if (prefUi != null) {
                     prefUi.setAvailableCourses(result);

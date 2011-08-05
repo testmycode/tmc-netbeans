@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -14,7 +14,7 @@ import org.openide.util.Lookup;
 public class SaveSettingsAction extends AbstractAction {
 
     private ServerAccess serverAccess;
-    private LocalCourseCache localCourseCache;
+    private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private OpenExercisesAction openExercisesAction;
@@ -22,7 +22,7 @@ public class SaveSettingsAction extends AbstractAction {
     
     public SaveSettingsAction() {
         this(ServerAccess.getDefault(),
-                LocalCourseCache.getInstance(),
+                CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 ConvenientDialogDisplayer.getDefault(),
                 new OpenExercisesAction(),
@@ -31,13 +31,13 @@ public class SaveSettingsAction extends AbstractAction {
 
     public SaveSettingsAction(
             ServerAccess serverAccess,
-            LocalCourseCache localCourseCache,
+            CourseDb courseDb,
             ProjectMediator projectMediator,
             ConvenientDialogDisplayer dialogs,
             OpenExercisesAction openExercisesAction,
             ExerciseIconAnnotator iconAnnotator) {
         this.serverAccess = serverAccess;
-        this.localCourseCache = localCourseCache;
+        this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.dialogs = dialogs;
         this.openExercisesAction = openExercisesAction;
@@ -60,10 +60,10 @@ public class SaveSettingsAction extends AbstractAction {
         projectMediator.setProjectRootDir(prefUi.getProjectDir());
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();
-            localCourseCache.setCurrentCourseName(courseName);
+            courseDb.setCurrentCourseName(courseName);
             promptOpeningExercises();
         } else {
-            localCourseCache.setCurrentCourseName(null);
+            courseDb.setCurrentCourseName(null);
         }
         iconAnnotator.updateAllIcons();
     }

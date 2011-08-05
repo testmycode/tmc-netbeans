@@ -1,10 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import java.awt.Color;
 import java.util.List;
 import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.openide.NotifyDescriptor;
 
 public class SubmissionResultDisplayer {

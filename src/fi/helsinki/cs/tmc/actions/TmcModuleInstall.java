@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -19,12 +19,12 @@ public class TmcModuleInstall extends ModuleInstall {
     private static final String PREF_FIRST_RUN = "firstRun";
     
     private ServerAccess serverAccess;
-    private LocalCourseCache courseCache;
+    private CourseDb courseDb;
     
     @Override
     public void restored() {
         serverAccess = ServerAccess.getDefault();
-        courseCache = LocalCourseCache.getInstance();
+        courseDb = CourseDb.getInstance();
         
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
@@ -53,9 +53,9 @@ public class TmcModuleInstall extends ModuleInstall {
             serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
                 @Override
                 public void bgTaskReady(CourseList result) {
-                    courseCache.setAvailableCourses(result);
+                    courseDb.setAvailableCourses(result);
                     if (result.size() == 1 && result.get(0).getExercises().size() > 0) {
-                        courseCache.setCurrentCourseName(result.get(0).getName());
+                        courseDb.setCurrentCourseName(result.get(0).getName());
                         showOpenNowWelcomeDialog();
                     } else {
                         showWelcomeDialog();
@@ -116,7 +116,7 @@ public class TmcModuleInstall extends ModuleInstall {
     private void showOpenNowWelcomeDialog() {
         String msg =
                 "Test My Code (TMC) installed.\n" +
-                courseCache.getCurrentCourse().getExercises().size() +
+                courseDb.getCurrentCourse().getExercises().size() +
                 " exercises available.\n" +
                 "Open them?";
         String title = "TMC installed";

@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -31,7 +31,7 @@ import org.openide.util.actions.NodeAction;
 public final class SubmitExerciseAction extends NodeAction {
 
     private ServerAccess serverAccess;
-    private LocalCourseCache courseCache;
+    private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private SubmissionResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
@@ -39,7 +39,7 @@ public final class SubmitExerciseAction extends NodeAction {
 
     public SubmitExerciseAction() {
         this(ServerAccess.getDefault(),
-                LocalCourseCache.getInstance(),
+                CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 SubmissionResultDisplayer.getInstance(),
                 ConvenientDialogDisplayer.getDefault(),
@@ -48,13 +48,13 @@ public final class SubmitExerciseAction extends NodeAction {
     
     /*package*/ SubmitExerciseAction(
             ServerAccess serverAccess,
-            LocalCourseCache courseCache,
+            CourseDb courseDb,
             ProjectMediator projectMediator,
             SubmissionResultDisplayer resultDisplayer,
             ConvenientDialogDisplayer dialogDisplayer,
             ExerciseIconAnnotator iconAnnotator) {
         this.serverAccess = serverAccess;
-        this.courseCache = courseCache;
+        this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.resultDisplayer = resultDisplayer;
         this.dialogDisplayer = dialogDisplayer;
@@ -76,7 +76,7 @@ public final class SubmitExerciseAction extends NodeAction {
     }
     
     private void submitProject(TmcProjectInfo project) {
-        final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseCache);
+        final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseDb);
         if (exercise == null) {
             return;
         }
@@ -92,7 +92,7 @@ public final class SubmitExerciseAction extends NodeAction {
                     exercise.setCompleted(true);
                 }
                 iconAnnotator.updateAllIcons();
-                courseCache.save();
+                courseDb.save();
             }
 
             @Override
@@ -117,7 +117,7 @@ public final class SubmitExerciseAction extends NodeAction {
         }
         
         for (Project p : projects) {
-            Exercise exercise = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(p), courseCache);
+            Exercise exercise = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(p), courseDb);
             if (exercise != null) {
                 return true;
             }

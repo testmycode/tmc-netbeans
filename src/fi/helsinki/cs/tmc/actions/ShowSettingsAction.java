@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -27,14 +27,14 @@ public final class ShowSettingsAction extends AbstractAction {
     private PreferencesUIFactory prefUiFactory;
     private SaveSettingsAction saveAction;
     private ServerAccess serverAccess;
-    private LocalCourseCache localCourseCache;
+    private CourseDb courseDb;
     private ProjectMediator projectMediator;
 
     public ShowSettingsAction() {
         this(PreferencesUIFactory.getInstance(),
                 new SaveSettingsAction(),
                 ServerAccess.getDefault(),
-                LocalCourseCache.getInstance(),
+                CourseDb.getInstance(),
                 ProjectMediator.getInstance());
     }
 
@@ -42,12 +42,12 @@ public final class ShowSettingsAction extends AbstractAction {
             PreferencesUIFactory prefUiFactory,
             SaveSettingsAction saveAction,
             ServerAccess serverAccess,
-            LocalCourseCache localCourseCache,
+            CourseDb courseDb,
             ProjectMediator projectMediator) {
         this.prefUiFactory = prefUiFactory;
         this.saveAction = saveAction;
         this.serverAccess = serverAccess;
-        this.localCourseCache = localCourseCache;
+        this.courseDb = courseDb;
         this.projectMediator = projectMediator;
     }
 
@@ -63,8 +63,8 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setUsername(serverAccess.getUsername());
         prefUI.setServerBaseUrl(serverAccess.getBaseUrl());
         prefUI.setProjectDir(projectMediator.getProjectRootDir());
-        prefUI.setAvailableCourses(localCourseCache.getAvailableCourses());
-        prefUI.setSelectedCourse(localCourseCache.getCurrentCourse());
+        prefUI.setAvailableCourses(courseDb.getAvailableCourses());
+        prefUI.setSelectedCourse(courseDb.getCurrentCourse());
 
         ActionListener listener = new ActionListener() {
             @Override

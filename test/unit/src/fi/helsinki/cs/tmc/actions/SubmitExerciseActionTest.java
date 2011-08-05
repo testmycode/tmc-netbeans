@@ -5,7 +5,7 @@ import org.junit.AfterClass;
 import org.netbeans.api.project.Project;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -26,7 +26,7 @@ import static org.junit.Assert.*;
 
 public class SubmitExerciseActionTest {
     @Mock private ServerAccess serverAccess;
-    @Mock private LocalCourseCache courseCache;
+    @Mock private CourseDb courseDb;
     @Mock private ProjectMediator projectMediator;
     @Mock private SubmissionResultDisplayer resultDisplayer;
     @Mock private ConvenientDialogDisplayer dialogDisplayer;
@@ -64,7 +64,7 @@ public class SubmitExerciseActionTest {
         
         action = new SubmitExerciseAction(
                 serverAccess,
-                courseCache,
+                courseDb,
                 projectMediator,
                 resultDisplayer,
                 dialogDisplayer,
@@ -81,7 +81,7 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void itShouldSaveAllFilesAndSubmitTheSelectedProjects() {
-        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(exercise);
         
         performAction();
         
@@ -99,7 +99,7 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void whenNoExerciseMatchesTheSelectedProjectItShouldDoNothing() {
-        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(null);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(null);
         
         performAction();
         
@@ -108,7 +108,7 @@ public class SubmitExerciseActionTest {
     }
     
     private void performActionAndCaptureListener() {
-        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(exercise);
         
         performAction();
         
@@ -133,7 +133,7 @@ public class SubmitExerciseActionTest {
         verify(exercise).setAttempted(true);
         verify(exercise).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
-        verify(courseCache).save();
+        verify(courseDb).save();
     }
     
     @Test
@@ -145,7 +145,7 @@ public class SubmitExerciseActionTest {
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
-        verify(courseCache).save();
+        verify(courseDb).save();
     }
     
     @Test
@@ -157,7 +157,7 @@ public class SubmitExerciseActionTest {
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
         verify(iconAnnotator).updateAllIcons();
-        verify(courseCache).save();
+        verify(courseDb).save();
     }
     
     @Test
@@ -180,13 +180,13 @@ public class SubmitExerciseActionTest {
     
     @Test
     public void itShouldBeEnabledForProjectsAssociatedWithTheExercise() {
-        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(exercise);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(exercise);
         assertTrue(action.enable(nbProject));
     }
     
     @Test
     public void itShouldNotBeEnabledForProjectsNotAssociatedWithTheExercise() {
-        when(projectMediator.tryGetExerciseForProject(tmcProject, courseCache)).thenReturn(null);
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(null);
         assertFalse(action.enable(nbProject));
     }
     

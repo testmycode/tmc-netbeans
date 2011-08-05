@@ -5,7 +5,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
 import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 public class RefreshCoursesActionTest {
     
     @Mock private ServerAccess serverAccess;
-    @Mock private LocalCourseCache localCourseCache;
+    @Mock private CourseDb courseDb;
     @Mock private PreferencesUIFactory prefUiFactory;
     @Mock private PreferencesUI prefUi;
     @Mock private ConvenientDialogDisplayer dialogs;
@@ -36,7 +36,7 @@ public class RefreshCoursesActionTest {
         MockitoAnnotations.initMocks(this);
         when(serverAccess.getBaseUrl()).thenReturn("http://default.example.com");
         
-        this.action = new RefreshCoursesAction(serverAccess, localCourseCache, prefUiFactory, dialogs);
+        this.action = new RefreshCoursesAction(serverAccess, courseDb, prefUiFactory, dialogs);
     }
     
     private void performAction() {
@@ -57,11 +57,11 @@ public class RefreshCoursesActionTest {
     }
     
     @Test
-    public void whenDownloadSucceedsItShouldRefreshTheCourseListInTheLocalCache() {
+    public void whenDownloadSucceedsItShouldRefreshTheCourseListInTheLocalDatabase() {
         performAction();
         respondWithThreeCourses();
         
-        verify(localCourseCache).setAvailableCourses(courses);
+        verify(courseDb).setAvailableCourses(courses);
     }
     
     @Test
@@ -83,10 +83,10 @@ public class RefreshCoursesActionTest {
     }
     
     @Test
-    public void whenDownloadIsCancelledItShouldNotChangeTheCourseCache() {
+    public void whenDownloadIsCancelledItShouldNotChangeTheCourseDb() {
         performAction();
         getDownloadListener().bgTaskCancelled();
-        verifyZeroInteractions(localCourseCache);
+        verifyZeroInteractions(courseDb);
     }
     
     @Test

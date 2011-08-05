@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -20,7 +20,7 @@ import static org.mockito.Mockito.*;
 import org.openide.awt.NotificationDisplayer;
 
 public class CheckForNewExercisesTest {
-    @Mock private LocalCourseCache courseCache;
+    @Mock private CourseDb courseDb;
     @Mock private ProjectMediator projectMediator;
     @Mock private ServerAccess serverAccess;
     @Mock private NotificationDisplayer notifier;
@@ -44,10 +44,10 @@ public class CheckForNewExercisesTest {
         bothCourses.add(currentCourse);
         bothCourses.add(otherCourse);
         
-        when(courseCache.getCurrentCourse()).thenReturn(currentCourse);
+        when(courseDb.getCurrentCourse()).thenReturn(currentCourse);
         
         action = new CheckForNewExercises(
-                courseCache,
+                courseDb,
                 projectMediator,
                 serverAccess,
                 notifier,
@@ -75,7 +75,7 @@ public class CheckForNewExercisesTest {
     }
     
     @Test
-    public void whenNewExercisesAreAvailableItShouldDisplayANotificationAndUpdateTheCourseCache() {
+    public void whenNewExercisesAreAvailableItShouldDisplayANotificationAndUpdateTheCourseDb() {
         Exercise ex1 = new Exercise();
         Exercise ex2 = new Exercise();
         Exercise ex3 = new Exercise();
@@ -88,7 +88,7 @@ public class CheckForNewExercisesTest {
         downloadTask().bgTaskReady(bothCourses);
         
         verifyNotificationDisplayed(true);
-        verify(courseCache).setAvailableCourses(bothCourses);
+        verify(courseDb).setAvailableCourses(bothCourses);
     }
     
     @Test
@@ -110,7 +110,7 @@ public class CheckForNewExercisesTest {
     
     @Test
     public void whenThereIsNoCurrentCourseItShouldDoNothing() {
-        when(courseCache.getCurrentCourse()).thenReturn(null);
+        when(courseDb.getCurrentCourse()).thenReturn(null);
         performAction();
         verifyZeroInteractions(serverAccess);
         verifyNotificationDisplayed(false);

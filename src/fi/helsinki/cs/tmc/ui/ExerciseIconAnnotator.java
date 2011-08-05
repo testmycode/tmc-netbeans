@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
@@ -24,12 +24,12 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     private static final Logger log = Logger.getLogger(ExerciseIconAnnotator.class.getName());
     
     private ChangeSupport changeSupport;
-    private LocalCourseCache courses;
+    private CourseDb courses;
     private ProjectMediator projectMediator;
 
     public ExerciseIconAnnotator() {
         this.changeSupport = new ChangeSupport(this);
-        this.courses = LocalCourseCache.getInstance();
+        this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
     }
 

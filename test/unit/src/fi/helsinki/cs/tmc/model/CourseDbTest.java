@@ -10,27 +10,27 @@ import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class LocalCourseCacheTest {
+public class CourseDbTest {
     
     private Level oldLogLevel;
     
     private ConfigFile file;
     
-    private LocalCourseCache cache;
+    private CourseDb db;
     
     @Before
     public void setUp() {
-        oldLogLevel = LocalCourseCache.logger.getLevel();
-        LocalCourseCache.logger.setLevel(Level.OFF);
+        oldLogLevel = CourseDb.logger.getLevel();
+        CourseDb.logger.setLevel(Level.OFF);
         
-        file = new ConfigFile("LocalCourseCacheTest.json");
-        cache = new LocalCourseCache(file);
+        file = new ConfigFile("CourseDbTest.json");
+        db = new CourseDb(file);
     }
     
     @After
     public void tearDown() throws IOException {
         file.getFileObject().delete();
-        LocalCourseCache.logger.setLevel(oldLogLevel);
+        CourseDb.logger.setLevel(oldLogLevel);
     }
     
     @Test
@@ -40,11 +40,11 @@ public class LocalCourseCacheTest {
         courses.add(new Course("two"));
         courses.get(0).getExercises().add(new Exercise("ex1"));
         
-        cache.setAvailableCourses(courses);
-        cache = new LocalCourseCache(file);
+        db.setAvailableCourses(courses);
+        db = new CourseDb(file);
         
-        assertEquals("one", cache.getAvailableCourses().get(0).getName());
-        assertEquals("ex1", cache.getAvailableCourses().get(0).getExercises().get(0).getName());
+        assertEquals("one", db.getAvailableCourses().get(0).getName());
+        assertEquals("ex1", db.getAvailableCourses().get(0).getExercises().get(0).getName());
     }
     
     @Test
@@ -53,25 +53,25 @@ public class LocalCourseCacheTest {
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         
-        cache.setAvailableCourses(courses);
-        cache.setCurrentCourseName("one");
-        cache = new LocalCourseCache(file);
+        db.setAvailableCourses(courses);
+        db.setCurrentCourseName("one");
+        db = new CourseDb(file);
         
-        assertEquals("one", cache.getCurrentCourse().getName());
-        assertSame(cache.getAvailableCourses().get(0), cache.getCurrentCourse());
+        assertEquals("one", db.getCurrentCourse().getName());
+        assertSame(db.getAvailableCourses().get(0), db.getCurrentCourse());
     }
     
     @Test
-    public void itShouldBeEmptyWhenFailingToLoadTheLocalCacheFile() throws IOException {
+    public void itShouldBeEmptyWhenFailingToLoadTheFile() throws IOException {
         CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
-        cache.setAvailableCourses(courses);
+        db.setAvailableCourses(courses);
         
         file.writeContents("oops!");
         
-        cache = new LocalCourseCache(file);
-        assertTrue(cache.getAvailableCourses().isEmpty());
+        db = new CourseDb(file);
+        assertTrue(db.getAvailableCourses().isEmpty());
     }
     
     @Test
@@ -79,11 +79,11 @@ public class LocalCourseCacheTest {
         CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
-        cache.setAvailableCourses(courses);
-        cache.setCurrentCourseName("two");
+        db.setAvailableCourses(courses);
+        db.setCurrentCourseName("two");
         
-        cache = new LocalCourseCache(file);
-        assertSame("current course has the wrong object identity", cache.getAvailableCourses().get(1), cache.getCurrentCourse());
+        db = new CourseDb(file);
+        assertSame("current course has the wrong object identity", db.getAvailableCourses().get(1), db.getCurrentCourse());
     }
     
     @Test
@@ -91,14 +91,14 @@ public class LocalCourseCacheTest {
         CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
-        cache.setAvailableCourses(courses);
+        db.setAvailableCourses(courses);
         
-        assertNull(cache.getCurrentCourse());
-        assertTrue(cache.getCurrentCourseExercises().isEmpty());
+        assertNull(db.getCurrentCourse());
+        assertTrue(db.getCurrentCourseExercises().isEmpty());
         
-        cache.setCurrentCourseName("two");
+        db.setCurrentCourseName("two");
         courses.getCourseByName("two").getExercises().add(new Exercise("ex1"));
-        assertEquals("ex1", cache.getCurrentCourseExercises().get(0).getName());
+        assertEquals("ex1", db.getCurrentCourseExercises().get(0).getName());
     }
     
     @Test
@@ -106,12 +106,12 @@ public class LocalCourseCacheTest {
         CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
-        cache.setAvailableCourses(courses);
+        db.setAvailableCourses(courses);
         
-        assertTrue(cache.getAllExercises().isEmpty());
+        assertTrue(db.getAllExercises().isEmpty());
         
         courses.getCourseByName("one").getExercises().add(new Exercise("ex"));
         courses.getCourseByName("two").getExercises().add(new Exercise("ex"));
-        assertEquals("ex", cache.getAllExercises().get(0).getName());
+        assertEquals("ex", db.getAllExercises().get(0).getName());
     }
 }

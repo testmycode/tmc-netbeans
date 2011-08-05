@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -14,14 +14,14 @@ import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
 
 public class CheckForNewExercises implements ActionListener {
-    private LocalCourseCache courseCache;
+    private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ServerAccess serverAccess;
     private NotificationDisplayer notifier;
     private ActionListener detailsAction;
 
     public CheckForNewExercises(ActionListener detailsAction) {
-        this(LocalCourseCache.getInstance(),
+        this(CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 ServerAccess.getDefault(),
                 NotificationDisplayer.getDefault(),
@@ -29,12 +29,12 @@ public class CheckForNewExercises implements ActionListener {
     }
     
     public CheckForNewExercises(
-            LocalCourseCache courseCache,
+            CourseDb courseDb,
             ProjectMediator projectMediator,
             ServerAccess serverAccess,
             NotificationDisplayer notifier,
             ActionListener detailsAction) {
-        this.courseCache = courseCache;
+        this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.serverAccess = serverAccess;
         this.notifier = notifier;
@@ -43,7 +43,7 @@ public class CheckForNewExercises implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        final Course currentCourse = courseCache.getCurrentCourse();
+        final Course currentCourse = courseDb.getCurrentCourse();
         if (currentCourse != null) {
             serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
                 @Override
@@ -52,7 +52,7 @@ public class CheckForNewExercises implements ActionListener {
                     if (receivedCourse != null) {
                         int count = countUndownloadedExercisesInCourse(receivedCourse);
                         if (count > 0) {
-                            courseCache.setAvailableCourses(receivedCourseList);
+                            courseDb.setAvailableCourses(receivedCourseList);
                             displayNotification(count);
                         }
                     }

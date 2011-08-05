@@ -5,7 +5,7 @@ import java.awt.event.ActionListener;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import java.awt.event.ActionEvent;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -22,7 +22,7 @@ import static org.mockito.Mockito.*;
 public class ShowSettingsActionTest {
     
     @Mock private ServerAccess serverAccess;
-    @Mock private LocalCourseCache localCourseCache;
+    @Mock private CourseDb courseDb;
     @Mock private ProjectMediator projectMediator;
     @Mock private PreferencesUIFactory prefUiFactory;
     @Mock private PreferencesUI prefUi;
@@ -36,11 +36,11 @@ public class ShowSettingsActionTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(localCourseCache.getAvailableCourses()).thenReturn(new CourseList());
+        when(courseDb.getAvailableCourses()).thenReturn(new CourseList());
         when(prefUiFactory.createCurrentPreferencesUI()).thenReturn(prefUi);
         doNothing().when(prefUiFactory).showPreferencesDialog(prefListenerCaptor.capture());
         
-        action = new ShowSettingsAction(prefUiFactory, saveAction, serverAccess, localCourseCache, projectMediator);
+        action = new ShowSettingsAction(prefUiFactory, saveAction, serverAccess, courseDb, projectMediator);
     }
     
     private void performAction() {
@@ -84,12 +84,12 @@ public class ShowSettingsActionTest {
     }
     
     @Test
-    public void itShouldSetTheCachedCourseListInThePreferencesPanel() {
+    public void itShouldSetTheLocalCourseListInThePreferencesPanel() {
         CourseList courses = new CourseList();
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));
-        when(localCourseCache.getAvailableCourses()).thenReturn(courses);
+        when(courseDb.getAvailableCourses()).thenReturn(courses);
         
         performAction();
         
@@ -102,8 +102,8 @@ public class ShowSettingsActionTest {
         courses.add(new Course("one"));
         courses.add(new Course("two"));
         courses.add(new Course("three"));
-        when(localCourseCache.getAvailableCourses()).thenReturn(courses);
-        when(localCourseCache.getCurrentCourse()).thenReturn(courses.get(1));
+        when(courseDb.getAvailableCourses()).thenReturn(courses);
+        when(courseDb.getCurrentCourse()).thenReturn(courses.get(1));
         
         performAction();
         

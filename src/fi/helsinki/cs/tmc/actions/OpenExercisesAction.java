@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseList;
-import fi.helsinki.cs.tmc.model.LocalCourseCache;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -35,38 +35,38 @@ public class OpenExercisesAction extends AbstractAction {
     private static final Logger logger = Logger.getLogger(OpenExercisesAction.class.getName());
     
     private ServerAccess serverAccess;
-    private LocalCourseCache courseCache;
+    private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
 
     public OpenExercisesAction() {
         this(ServerAccess.getDefault(),
-                LocalCourseCache.getInstance(),
+                CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 ConvenientDialogDisplayer.getDefault());
     }
 
     public OpenExercisesAction(
             ServerAccess serverAccess,
-            LocalCourseCache courseCache,
+            CourseDb courseDb,
             ProjectMediator projectMediator,
             ConvenientDialogDisplayer dialogs) {
         this.serverAccess = serverAccess;
-        this.courseCache = courseCache;
+        this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.dialogs = dialogs;
     }
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        Course course = courseCache.getCurrentCourse();
+        Course course = courseDb.getCurrentCourse();
         
         if (course == null) {
             dialogs.displayError("No course selected. Please select one in TMC -> Settings");
             return;
         }
         
-        int localProjects = openLocalProjects(courseCache.getCurrentCourseExercises());
+        int localProjects = openLocalProjects(courseDb.getCurrentCourseExercises());
         refreshProjectListAndDownloadNewProjects(localProjects);
     }
     
@@ -88,8 +88,8 @@ public class OpenExercisesAction extends AbstractAction {
         serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
             @Override
             public void bgTaskReady(CourseList result) {
-                courseCache.setAvailableCourses(result);
-                downloadNewProjects(courseCache.getCurrentCourseExercises(), localProjectCount);
+                courseDb.setAvailableCourses(result);
+                downloadNewProjects(courseDb.getCurrentCourseExercises(), localProjectCount);
             }
 
             @Override
@@ -99,7 +99,7 @@ public class OpenExercisesAction extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                downloadNewProjects(courseCache.getCurrentCourseExercises(), localProjectCount);
+                downloadNewProjects(courseDb.getCurrentCourseExercises(), localProjectCount);
             }
         });
     }
