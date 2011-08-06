@@ -5,6 +5,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -22,30 +23,37 @@ import org.apache.http.params.HttpParams;
     private static final int DEFAULT_TIMEOUT = 3 * 60 * 1000;
     
     private HttpUriRequest request;
+    private CookieStore cookieStore;
     
     /*package*/ HttpRequestExecutor(String url) {
-        this.request = new HttpGet(url);
+        this(new HttpGet(url));
     }
     
     /*package*/ HttpRequestExecutor(HttpUriRequest request) {
         this.request = request;
+        this.cookieStore = null;
     }
     
     @Override
     public byte[] call() throws IOException, InterruptedException {
         ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        HttpEntity entity = download();
+        HttpEntity entity = executeRequest();
         entity.writeTo(buf);
         return buf.toByteArray();
     }
     
-    private HttpEntity download() throws IOException, InterruptedException {
+    private HttpEntity executeRequest() throws IOException, InterruptedException {
         HttpResponse response;
         try {
             HttpParams p = new BasicHttpParams();
             p.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, DEFAULT_TIMEOUT);
             DefaultHttpClient httpClient = new DefaultHttpClient(p);
-
+            if (cookieStore == null) {
+                cookieStore = httpClient.getCookieStore();
+            } else {
+                httpClient.setCookieStore(cookieStore);
+            }
+        
             response = httpClient.execute(request);
         } catch (IOException ex) {
             if (request.isAborted()) {
@@ -65,7 +73,7 @@ import org.apache.http.params.HttpParams;
             // won't do it in all cases (multipart POST requests)?
             if (response.getFirstHeader("location") != null) {
                 request = new HttpGet(response.getFirstHeader("location").getValue());
-                return download();
+                return executeRequest();
             } else {
                 throw new IOException("Redirect without a location header");
             }
