@@ -9,7 +9,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -30,7 +29,6 @@ public class SubmitExerciseActionTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private SubmissionResultDisplayer resultDisplayer;
     @Mock private ConvenientDialogDisplayer dialogDisplayer;
-    @Mock private ExerciseIconAnnotator iconAnnotator;
     
     @Mock private Project nbProject;
     @Mock private TmcProjectInfo tmcProject;
@@ -67,8 +65,7 @@ public class SubmitExerciseActionTest {
                 courseDb,
                 projectMediator,
                 resultDisplayer,
-                dialogDisplayer,
-                iconAnnotator);
+                dialogDisplayer);
     }
     
     private void performAction() {
@@ -132,7 +129,6 @@ public class SubmitExerciseActionTest {
         
         verify(exercise).setAttempted(true);
         verify(exercise).setCompleted(true);
-        verify(iconAnnotator).updateAllIcons();
         verify(courseDb).save();
     }
     
@@ -144,7 +140,6 @@ public class SubmitExerciseActionTest {
         
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
-        verify(iconAnnotator).updateAllIcons();
         verify(courseDb).save();
     }
     
@@ -156,7 +151,6 @@ public class SubmitExerciseActionTest {
         
         verify(exercise).setAttempted(true);
         verify(exercise, never()).setCompleted(true);
-        verify(iconAnnotator).updateAllIcons();
         verify(courseDb).save();
     }
     
@@ -165,7 +159,7 @@ public class SubmitExerciseActionTest {
         performActionAndCaptureListener();
         listenerCaptor.getValue().bgTaskCancelled();
         
-        verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
+        verifyZeroInteractions(resultDisplayer, exercise);
     }
     
     @Test
@@ -175,7 +169,7 @@ public class SubmitExerciseActionTest {
         listenerCaptor.getValue().bgTaskFailed(exception);
         
         verify(dialogDisplayer).displayError("Error submitting exercise.", exception);
-        verifyZeroInteractions(resultDisplayer, exercise, iconAnnotator);
+        verifyZeroInteractions(resultDisplayer, exercise);
     }
     
     @Test

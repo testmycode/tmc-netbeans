@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -35,15 +34,13 @@ public final class SubmitExerciseAction extends NodeAction {
     private ProjectMediator projectMediator;
     private SubmissionResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
-    private ExerciseIconAnnotator iconAnnotator;
 
     public SubmitExerciseAction() {
         this(ServerAccess.getDefault(),
                 CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 SubmissionResultDisplayer.getInstance(),
-                ConvenientDialogDisplayer.getDefault(),
-                Lookup.getDefault().lookup(ExerciseIconAnnotator.class));
+                ConvenientDialogDisplayer.getDefault());
     }
     
     /*package*/ SubmitExerciseAction(
@@ -51,14 +48,12 @@ public final class SubmitExerciseAction extends NodeAction {
             CourseDb courseDb,
             ProjectMediator projectMediator,
             SubmissionResultDisplayer resultDisplayer,
-            ConvenientDialogDisplayer dialogDisplayer,
-            ExerciseIconAnnotator iconAnnotator) {
+            ConvenientDialogDisplayer dialogDisplayer) {
         this.serverAccess = serverAccess;
         this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.resultDisplayer = resultDisplayer;
         this.dialogDisplayer = dialogDisplayer;
-        this.iconAnnotator = iconAnnotator;
         
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -91,7 +86,6 @@ public final class SubmitExerciseAction extends NodeAction {
                 if (result.getStatus() == SubmissionResult.Status.OK) {
                     exercise.setCompleted(true);
                 }
-                iconAnnotator.updateAllIcons();
                 courseDb.save();
             }
 

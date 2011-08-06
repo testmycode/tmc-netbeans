@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import java.awt.event.ActionEvent;
 import org.junit.Before;
 import org.junit.Test;
@@ -20,7 +19,6 @@ public class SaveSettingsActionTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private ConvenientDialogDisplayer dialogs;
     @Mock private OpenExercisesAction openExercisesAction;
-    @Mock private ExerciseIconAnnotator iconAnnotator;
     
     @Mock private PreferencesUI prefUi;
     private SaveSettingsAction action;
@@ -33,8 +31,7 @@ public class SaveSettingsActionTest {
                 courseDb,
                 projectMediator,
                 dialogs,
-                openExercisesAction,
-                iconAnnotator);
+                openExercisesAction);
     }
     
     private void performTheAction() {
@@ -75,12 +72,6 @@ public class SaveSettingsActionTest {
         when(prefUi.getSelectedCourse()).thenReturn(null);
         performTheAction();
         verify(courseDb).setCurrentCourseName(null);
-    }
-    
-    @Test
-    public void itShouldUpdateProjectIcons() {
-        performTheAction();
-        verify(iconAnnotator).updateAllIcons();
     }
     
     @Test

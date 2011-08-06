@@ -5,11 +5,9 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.ExerciseIconAnnotator;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 import javax.swing.SwingUtilities;
-import org.openide.util.Lookup;
 
 public class SaveSettingsAction extends AbstractAction {
 
@@ -18,15 +16,13 @@ public class SaveSettingsAction extends AbstractAction {
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private OpenExercisesAction openExercisesAction;
-    private ExerciseIconAnnotator iconAnnotator;
     
     public SaveSettingsAction() {
         this(ServerAccess.getDefault(),
                 CourseDb.getInstance(),
                 ProjectMediator.getInstance(),
                 ConvenientDialogDisplayer.getDefault(),
-                new OpenExercisesAction(),
-                Lookup.getDefault().lookup(ExerciseIconAnnotator.class));
+                new OpenExercisesAction());
     }
 
     public SaveSettingsAction(
@@ -34,14 +30,12 @@ public class SaveSettingsAction extends AbstractAction {
             CourseDb courseDb,
             ProjectMediator projectMediator,
             ConvenientDialogDisplayer dialogs,
-            OpenExercisesAction openExercisesAction,
-            ExerciseIconAnnotator iconAnnotator) {
+            OpenExercisesAction openExercisesAction) {
         this.serverAccess = serverAccess;
         this.courseDb = courseDb;
         this.projectMediator = projectMediator;
         this.dialogs = dialogs;
         this.openExercisesAction = openExercisesAction;
-        this.iconAnnotator = iconAnnotator;
     }
 
     @Override
@@ -65,7 +59,6 @@ public class SaveSettingsAction extends AbstractAction {
         } else {
             courseDb.setCurrentCourseName(null);
         }
-        iconAnnotator.updateAllIcons();
     }
 
     private void promptOpeningExercises() {

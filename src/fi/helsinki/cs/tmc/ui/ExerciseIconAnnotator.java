@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.CourseDbListener;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
@@ -16,10 +17,8 @@ import org.openide.util.ChangeSupport;
 import org.openide.util.ImageUtilities;
 import org.openide.util.lookup.ServiceProvider;
 
-
-
 @ServiceProvider(service = ProjectIconAnnotator.class)
-public class ExerciseIconAnnotator implements ProjectIconAnnotator {
+public class ExerciseIconAnnotator implements ProjectIconAnnotator, CourseDbListener {
 
     private static final Logger log = Logger.getLogger(ExerciseIconAnnotator.class.getName());
     
@@ -27,10 +26,13 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     private CourseDb courses;
     private ProjectMediator projectMediator;
 
+    @SuppressWarnings("LeakingThisInConstructor")
     public ExerciseIconAnnotator() {
         this.changeSupport = new ChangeSupport(this);
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
+        
+        this.courses.addListener(this);
     }
 
     @Override
@@ -94,5 +96,10 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     @Override
     public void removeChangeListener(ChangeListener listener) {
         changeSupport.removeChangeListener(listener);
+    }
+
+    @Override
+    public void courseDbSaved() {
+        updateAllIcons();
     }
 }
