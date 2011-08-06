@@ -18,7 +18,7 @@ public class CourseListParserTest {
     }
     
     @Test
-    public void testParseJson() {
+    public void itShouldParseJsonCourseLists() {
         String exercisesJson =
                 "[{" +
                 "name: \"TheExercise\"," +
@@ -52,13 +52,18 @@ public class CourseListParserTest {
     }
     
     @Test
-    public void emptyJson() {
+    public void itShouldParseAnEmptyJsonArrayAsAnEmptyCourseList() {
         CourseList empty = parser.parseFromJson("[]");
         assertFalse(empty.iterator().hasNext());
     }
 
     @Test(expected = NullPointerException.class)
-    public void nullThrow() throws Exception {
+    public void itShouldThrowAnNullPointerExceptionIfTheInputIsEmpty() throws Exception {
         parser.parseFromJson(null);
+    }
+    
+    @Test(expected = IllegalArgumentException.class)
+    public void itShouldThrowAnIllegalArgumentExceptionIfTheInputIsEmpty() throws Exception {
+        parser.parseFromJson("   ");
     }
 }

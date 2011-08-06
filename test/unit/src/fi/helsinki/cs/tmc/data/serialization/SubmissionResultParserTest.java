@@ -45,4 +45,9 @@ public class SubmissionResultParserTest {
         assertEquals("one", result.getTestFailures().get(0));
         assertEquals("two", result.getTestFailures().get(1));
     }
+    
+    @Test(expected=IllegalArgumentException.class)
+    public void itShouldThrowAnIllegalArgumentExceptionWhenGivenAnEmptyInput() {
+        parse("   ");
+    }
 }

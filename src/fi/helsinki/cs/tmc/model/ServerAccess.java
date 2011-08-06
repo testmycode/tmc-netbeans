@@ -186,6 +186,9 @@ public class ServerAccess {
             @Override
             public SubmissionResult call() throws Exception {
                 String text = upload.call();
+                if (text.isEmpty()) {
+                    throw new RuntimeException("Server returned an empty response.");
+                }
                 return submissionResultParser.parseFromJson(text);
             }
 

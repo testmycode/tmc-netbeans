@@ -13,6 +13,9 @@ import java.lang.reflect.Type;
 public class SubmissionResultParser {
     
     public SubmissionResult parseFromJson(String json) {
+        if (json.trim().isEmpty()) {
+            throw new IllegalArgumentException("Empty input");
+        }
         try {
             Gson gson = new GsonBuilder()
                     .setFieldNamingPolicy(FieldNamingPolicy.LOWER_CASE_WITH_UNDERSCORES)

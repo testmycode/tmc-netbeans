@@ -23,6 +23,9 @@ public class CourseListParser {
         if (json == null) {
             throw new NullPointerException("Json string is null");
         }
+        if (json.trim().isEmpty()) {
+            throw new IllegalArgumentException("Empty input");
+        }
         try {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Date.class, new CustomDateDeserializer())
