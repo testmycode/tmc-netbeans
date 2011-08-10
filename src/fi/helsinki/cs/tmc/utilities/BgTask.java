@@ -105,7 +105,6 @@ public class BgTask<V> implements CancellableCallable<V> {
 
     @Override
     public boolean cancel() {
-        Thread theThread = null;
         synchronized (cancelLock) {
             cancelled = true;
             if (callable instanceof Cancellable) {

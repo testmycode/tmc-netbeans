@@ -124,7 +124,7 @@ public class OpenExercisesAction extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable exception) {
-                logger.log(Level.WARNING, "Failed to download exercise file.", exception);
+                logger.log(Level.INFO, "Failed to download exercise file.", exception);
                 dialogs.displayError("Failed to download exercises: " + exception.getMessage());
             }
         };
