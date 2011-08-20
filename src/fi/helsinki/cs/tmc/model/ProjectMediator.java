@@ -9,6 +9,7 @@ import java.util.logging.Logger;
 import java.util.prefs.Preferences;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
+import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.LifecycleManager;
@@ -139,6 +140,8 @@ public class ProjectMediator {
      * The exercise must have a course name set.
      */
     public TmcProjectInfo tryGetProjectForExercise(Exercise exercise) {
+        projectManager.clearNonProjectCache(); // Just to be sure.
+        
         File path = getProjectDirForExercise(exercise);
         FileObject fo = FileUtil.toFileObject(path);
         if (fo != null) {
