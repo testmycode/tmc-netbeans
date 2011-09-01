@@ -72,7 +72,7 @@ public final class SubmitExerciseAction extends NodeAction {
     
     private void submitProject(TmcProjectInfo project) {
         final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseDb);
-        if (exercise == null) {
+        if (exercise == null || !exercise.isReturnable()) {
             return;
         }
         
@@ -112,7 +112,7 @@ public final class SubmitExerciseAction extends NodeAction {
         
         for (Project p : projects) {
             Exercise exercise = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(p), courseDb);
-            if (exercise != null) {
+            if (exercise != null && exercise.isReturnable()) {
                 return true;
             }
         }

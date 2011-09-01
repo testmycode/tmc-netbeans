@@ -30,6 +30,7 @@ public class Exercise implements Serializable {
     
     private boolean attempted;
     private boolean completed;
+    private boolean returnable;
 
     public Exercise() {
     }
@@ -133,6 +134,14 @@ public class Exercise implements Serializable {
 
     public void setCompleted(boolean completed) {
         this.completed = completed;
+    }
+
+    public boolean isReturnable() {
+        return returnable;
+    }
+
+    public void setReturnable(boolean returnable) {
+        this.returnable = returnable;
     }
     
     @Override

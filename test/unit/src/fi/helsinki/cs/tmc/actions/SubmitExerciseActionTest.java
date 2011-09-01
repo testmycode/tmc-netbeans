@@ -60,6 +60,8 @@ public class SubmitExerciseActionTest {
         when(projectMediator.wrapProject(nbProject)).thenReturn(tmcProject);
         when(result.getStatus()).thenReturn(SubmissionResult.Status.OK);
         
+        when(exercise.isReturnable()).thenReturn(true);
+        
         action = new SubmitExerciseAction(
                 serverAccess,
                 courseDb,
@@ -101,6 +103,16 @@ public class SubmitExerciseActionTest {
         performAction();
         
         verify(projectMediator, never()).saveAllFiles();
+        verifyZeroInteractions(serverAccess);
+    }
+    
+    @Test
+    public void itShouldNotAttemptToSubmitUnreturnableExercises() {
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(exercise);
+        when(exercise.isReturnable()).thenReturn(false);
+        
+        performAction();
+        
         verifyZeroInteractions(serverAccess);
     }
     
@@ -159,7 +171,7 @@ public class SubmitExerciseActionTest {
         performActionAndCaptureListener();
         listenerCaptor.getValue().bgTaskCancelled();
         
-        verifyZeroInteractions(resultDisplayer, exercise);
+        verifyZeroInteractions(resultDisplayer);
     }
     
     @Test
@@ -169,7 +181,7 @@ public class SubmitExerciseActionTest {
         listenerCaptor.getValue().bgTaskFailed(exception);
         
         verify(dialogDisplayer).displayError("Error submitting exercise.", exception);
-        verifyZeroInteractions(resultDisplayer, exercise);
+        verifyZeroInteractions(resultDisplayer);
     }
     
     @Test
@@ -187,5 +199,12 @@ public class SubmitExerciseActionTest {
     @Test
     public void itShouldNotBeEnabledForAnEmptyProjectSelection() {
         assertFalse(action.enable());
+    }
+    
+    @Test
+    public void itShouldNotBeEnabledIfTheExerciseIsNotReturnable() {
+        when(projectMediator.tryGetExerciseForProject(tmcProject, courseDb)).thenReturn(exercise);
+        when(exercise.isReturnable()).thenReturn(false);
+        assertFalse(action.enable(nbProject));
     }
 }

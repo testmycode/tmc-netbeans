@@ -27,7 +27,8 @@ public class CourseListParserTest {
                 "publish_date: null," +
                 "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
                 "attempted: true," +
-                "completed: false" +
+                "completed: false," +
+                "returnable: true" +
                 "}]";
         String json = "[{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]";
         CourseList result = parser.parseFromJson(json);
@@ -49,6 +50,7 @@ public class CourseListParserTest {
         assertEquals("http://example.com/courses/123/exercises/1/submissions", exercise.getReturnAddress());
         assertTrue(exercise.isAttempted());
         assertFalse(exercise.isCompleted());
+        assertTrue(exercise.isReturnable());
     }
     
     @Test
