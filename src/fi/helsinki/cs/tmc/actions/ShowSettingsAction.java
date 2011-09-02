@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
+import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import java.awt.event.ActionEvent;
@@ -29,13 +31,15 @@ public final class ShowSettingsAction extends AbstractAction {
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
+    private Tailoring tailoring;
 
     public ShowSettingsAction() {
         this(PreferencesUIFactory.getInstance(),
                 new SaveSettingsAction(),
                 ServerAccess.getDefault(),
                 CourseDb.getInstance(),
-                ProjectMediator.getInstance());
+                ProjectMediator.getInstance(),
+                SelectedTailoring.get());
     }
 
     public ShowSettingsAction(
@@ -43,12 +47,14 @@ public final class ShowSettingsAction extends AbstractAction {
             SaveSettingsAction saveAction,
             ServerAccess serverAccess,
             CourseDb courseDb,
-            ProjectMediator projectMediator) {
+            ProjectMediator projectMediator,
+            Tailoring tailoring) {
         this.prefUiFactory = prefUiFactory;
         this.saveAction = saveAction;
         this.serverAccess = serverAccess;
         this.courseDb = courseDb;
         this.projectMediator = projectMediator;
+        this.tailoring = tailoring;
     }
 
     @Override
@@ -65,6 +71,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setProjectDir(projectMediator.getProjectRootDir());
         prefUI.setAvailableCourses(courseDb.getAvailableCourses());
         prefUI.setSelectedCourse(courseDb.getCurrentCourse());
+        prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());
 
         ActionListener listener = new ActionListener() {
             @Override

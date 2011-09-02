@@ -9,6 +9,7 @@ package fi.helsinki.cs.tmc.tailoring;
 public interface Tailoring {
     public String getDefaultServerUrl();
     public String getDefaultUsername();
+    public String getUsernameFieldName();
     
     /**
      * A message dialog to be shown when the plugin is first installed

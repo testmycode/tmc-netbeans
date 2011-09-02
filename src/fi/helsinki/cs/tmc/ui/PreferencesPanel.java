@@ -12,6 +12,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * The settings panel.
@@ -22,11 +23,13 @@ import javax.swing.event.DocumentListener;
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
     
     private RefreshCoursesAction refreshAction = new RefreshCoursesAction();
+    private String usernameFieldName = "username";
     
     /*package*/ PreferencesPanel() {
         initComponents();
         
         setUpAdviceUpdating();
+        setUsernameFieldName(usernameFieldName);
     }
     
     @Override
@@ -37,6 +40,13 @@ import javax.swing.event.DocumentListener;
     @Override
     public void setUsername(String username) {
         usernameTextField.setText(username);
+    }
+    
+    @Override
+    public final void setUsernameFieldName(String usernameFieldName) {
+        this.usernameFieldName = usernameFieldName;
+        this.usernameLabel.setText(StringUtils.capitalize(usernameFieldName));
+        updateAdvice();
     }
     
     @Override
@@ -137,7 +147,7 @@ import javax.swing.event.DocumentListener;
     private void updateAdvice() {
         ArrayList<String> advices = new ArrayList<String>();
         if (usernameTextField.getText().isEmpty()) {
-            advices.add("fill in username");
+            advices.add("fill in " + StringUtils.uncapitalize(usernameFieldName));
         }
         if (serverAddressTextField.getText().isEmpty()) {
             advices.add("fill in server address");
@@ -348,6 +358,5 @@ import javax.swing.event.DocumentListener;
     private javax.swing.JLabel usernameLabel;
     private javax.swing.JTextField usernameTextField;
     // End of variables declaration//GEN-END:variables
-
     
 }

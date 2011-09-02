@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import java.awt.event.ActionListener;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
@@ -26,6 +27,7 @@ public class ShowSettingsActionTest {
     @Mock private ProjectMediator projectMediator;
     @Mock private PreferencesUIFactory prefUiFactory;
     @Mock private PreferencesUI prefUi;
+    @Mock private Tailoring tailoring;
     
     @Mock private SaveSettingsAction saveAction;
     @Captor private ArgumentCaptor<ActionListener> prefListenerCaptor;
@@ -40,7 +42,7 @@ public class ShowSettingsActionTest {
         when(prefUiFactory.createCurrentPreferencesUI()).thenReturn(prefUi);
         doNothing().when(prefUiFactory).showPreferencesDialog(prefListenerCaptor.capture());
         
-        action = new ShowSettingsAction(prefUiFactory, saveAction, serverAccess, courseDb, projectMediator);
+        action = new ShowSettingsAction(prefUiFactory, saveAction, serverAccess, courseDb, projectMediator, tailoring);
     }
     
     private void performAction() {

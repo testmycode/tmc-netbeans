@@ -10,6 +10,11 @@ public class DefaultTailoring implements Tailoring {
     public String getDefaultUsername() {
         return "";
     }
+    
+    @Override
+    public String getUsernameFieldName() {
+        return "username";
+    }
 
     @Override
     public String getFirstRunMessage() {

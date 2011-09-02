@@ -25,4 +25,6 @@ public interface PreferencesUI {
 
     void setUsername(String username);
     
+    void setUsernameFieldName(String usernameFieldName);
+    
 }

@@ -8,11 +8,16 @@ public class UniversityOfHelsinkiTailoring extends DefaultTailoring {
 
     @Override
     public String getDefaultUsername() {
-        return getSystemUsername();
+        return "";
+    }
+    
+    @Override
+    public String getUsernameFieldName() {
+        return "student number";
     }
 
     @Override
     public String getFirstRunMessage() {
-        return "TestMyCode installed. Please check your username and select the course in the next dialog.";
+        return "TestMyCode installed. Please fill in your student number in the next dialog.";
     }
 }
