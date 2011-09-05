@@ -1,7 +1,9 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.NotifyDescriptor;
 
@@ -27,7 +29,7 @@ public class SubmissionResultDisplayer {
                 dialogs.displayHappyMessage("All tests passed!", "Yay!");
                 break;
             case FAIL:
-                displayTestFailures(result.getTestFailures());
+                displayTestFailures(result.getCategorizedTestFailures());
                 break;
             case ERROR:
                 displayError(result.getError());
@@ -35,7 +37,7 @@ public class SubmissionResultDisplayer {
         }
     }
     
-    private void displayTestFailures(List<String> failures) {
+    private void displayTestFailures(Map<String, List<String>> failures) {
         LongTextDisplayPanel panel = new LongTextDisplayPanel(testFailuresToHtml(failures));
         dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "", false);
     }
@@ -57,15 +59,29 @@ public class SubmissionResultDisplayer {
                 .replace("\n", "<br>");
     }
     
-    private String testFailuresToHtml(List<String> failures) {
+    private String testFailuresToHtml(Map<String, List<String>> failures) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<p>Some tests failed.</p>");
         sb.append("<ul>");
-        for (String failure : failures) {
-            sb.append("<li><font color=\"red\">")
-                    .append(StringEscapeUtils.escapeHtml4(failure))
-                    .append("</font></li>");
+        
+        String[] categories = failures.keySet().toArray(new String[0]);
+        Arrays.sort(categories);
+        for (String category : categories) {
+            sb.append("<li>")
+                    .append("<font color=\"red\">")
+                    .append(StringEscapeUtils.escapeHtml4(category))
+                    .append("</font>")
+                    .append("<ul>");
+            
+            for (String msg : failures.get(category)) {
+                sb.append("<li><font color=\"red\">")
+                        .append(StringEscapeUtils.escapeHtml4(msg))
+                        .append("</font></li>");
+            }
+            
+            sb.append("</ul>")
+                    .append("</li>");
         }
         sb.append("</ul>").append("</html>");
         return sb.toString();

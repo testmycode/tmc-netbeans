@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.data;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 public class SubmissionResult {
 
@@ -13,12 +14,12 @@ public class SubmissionResult {
     
     private Status status;;
     private String error; // e.g. compile error
-    private List<String> testFailures;
+    private Map<String, List<String>> categorizedTestFailures;
     
     public SubmissionResult() {
         status = Status.ERROR;
         error = null;
-        testFailures = Collections.emptyList();
+        categorizedTestFailures = Collections.emptyMap();
     }
 
     public Status getStatus() {
@@ -37,11 +38,11 @@ public class SubmissionResult {
         this.error = compileError;
     }
 
-    public List<String> getTestFailures() {
-        return testFailures;
+    public Map<String, List<String>> getCategorizedTestFailures() {
+        return categorizedTestFailures;
     }
 
-    public void setTestFailures(List<String> testFailures) {
-        this.testFailures = testFailures;
+    public void setCategorizedTestFailures(Map<String, List<String>> categorizedTestFailures) {
+        this.categorizedTestFailures = categorizedTestFailures;
     }
 }

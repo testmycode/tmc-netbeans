@@ -19,7 +19,7 @@ public class SubmissionResultParserTest {
         
         assertEquals(OK, result.getStatus());
         assertNull(result.getError());
-        assertTrue(result.getTestFailures().isEmpty());
+        assertTrue(result.getCategorizedTestFailures().isEmpty());
     }
     
     @Test
@@ -30,20 +30,24 @@ public class SubmissionResultParserTest {
         
         assertEquals(ERROR, result.getStatus());
         assertEquals("Failed to compile.", result.getError());
-        assertTrue(result.getTestFailures().isEmpty());
+        assertTrue(result.getCategorizedTestFailures().isEmpty());
     }
     
     @Test
     public void testFail() {
-        String input = "{status: \"fail\", test_failures: [\"one\", \"two\"]}";
+        String input = "{status: \"fail\", categorized_test_failures: {\"Cat1\": [\"one\", \"two\"], \"Cat2\": [\"three\"]}}";
         
         SubmissionResult result = parse(input);
         
         assertEquals(FAIL, result.getStatus());
         assertNull(result.getError());
-        assertEquals(2, result.getTestFailures().size());
-        assertEquals("one", result.getTestFailures().get(0));
-        assertEquals("two", result.getTestFailures().get(1));
+        assertEquals(2, result.getCategorizedTestFailures().size());
+        assertEquals(2, result.getCategorizedTestFailures().get("Cat1").size());
+        assertEquals(1, result.getCategorizedTestFailures().get("Cat2").size());
+        
+        assertEquals("one", result.getCategorizedTestFailures().get("Cat1").get(0));
+        assertEquals("two", result.getCategorizedTestFailures().get("Cat1").get(1));
+        assertEquals("three", result.getCategorizedTestFailures().get("Cat2").get(0));
     }
     
     @Test(expected=IllegalArgumentException.class)
