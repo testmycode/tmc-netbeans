@@ -34,7 +34,7 @@ import org.apache.commons.lang3.StringUtils;
     
     @Override
     public String getUsername() {
-        return usernameTextField.getText();
+        return usernameTextField.getText().trim();
     }
     
     @Override
@@ -51,7 +51,7 @@ import org.apache.commons.lang3.StringUtils;
     
     @Override
     public String getServerBaseUrl() {
-        return serverAddressTextField.getText();
+        return serverAddressTextField.getText().trim();
     }
     
     @Override
@@ -61,7 +61,7 @@ import org.apache.commons.lang3.StringUtils;
     
     @Override
     public String getProjectDir() {
-        return projectFolderTextField.getText();
+        return projectFolderTextField.getText().trim();
     }
     
     @Override
