@@ -2,8 +2,6 @@
 
 This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading and submitting exercises directly from the IDE.
 
-The project is currently undergoing finishing touches to be ready for the Autumn semester. Instructions for setup and use will appear here soon.
-
 
 ## Credits ##
 
