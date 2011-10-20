@@ -39,11 +39,6 @@ public class BgTask<V> implements CancellableCallable<V> {
         this.callable = callable;
         this.progressHandle = null;
     }
-
-    public BgTask<V> withProgressHandle(ProgressHandle handle) {
-        this.progressHandle = handle;
-        return this;
-    }
     
     public Future<V> start() {
         return defaultRequestProcessor.submit(this);
