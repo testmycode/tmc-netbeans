@@ -18,13 +18,13 @@ public class Exercise implements Serializable {
      * The URL this exercise can be downloaded from.
      */
     @SerializedName("zip_url")
-    private String downloadAddress;
+    private String downloadUrl;
     
     /**
      * The URL where this exercise should be posted for review.
      */
-    @SerializedName("return_address")
-    private String returnAddress;
+    @SerializedName("return_url")
+    private String returnUrl;
     
     private Date deadline;
     
@@ -44,10 +44,7 @@ public class Exercise implements Serializable {
         this.courseName = courseName;
     }
 
-    /**
-     * Checks wether this exercise has expired or not.
-     */
-    public boolean isDeadlineEnded(Date currentTime) {
+    public boolean hasDeadlinePassed(Date currentTime) {
         if (currentTime == null) {
             throw new NullPointerException("current time was null at Exercise.isDeadlineEnded");
         }
@@ -77,11 +74,11 @@ public class Exercise implements Serializable {
         this.courseName = courseName;
     }
     
-    public String getDownloadAddress() {
-        return this.downloadAddress;
+    public String getDownloadUrl() {
+        return this.downloadUrl;
     }
 
-    public void setDownloadAddress(String downloadAddress) {
+    public void setDownloadUrl(String downloadAddress) {
         if (downloadAddress == null) {
             throw new NullPointerException("downloadAddress was null at Exercise.setDownloadAddress");
         }
@@ -89,21 +86,21 @@ public class Exercise implements Serializable {
             throw new IllegalArgumentException("downloadAddress cannot be empty at Exercise.setDownloadAddress");
         }
 
-        this.downloadAddress = downloadAddress;
+        this.downloadUrl = downloadAddress;
     }
 
-    public String getReturnAddress() {
-        return this.returnAddress;
+    public String getReturnUrl() {
+        return this.returnUrl;
     }
 
-    public void setReturnAddress(String returnAddress) {
+    public void setReturnUrl(String returnAddress) {
         if (returnAddress == null) {
             throw new NullPointerException("returnAddress was null at Exercise.setReturnAddress");
         }
         if (returnAddress.isEmpty()) {
             throw new IllegalArgumentException("downloadAddress cannot be empty at Exercise.setReturnAddress");
         }
-        this.returnAddress = returnAddress;
+        this.returnUrl = returnAddress;
     }
     
     public Date getDeadline() {

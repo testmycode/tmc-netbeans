@@ -9,14 +9,18 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.concurrent.Callable;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
 import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
@@ -31,29 +35,18 @@ public final class SubmitExerciseAction extends NodeAction {
 
     private ServerAccess serverAccess;
     private CourseDb courseDb;
+    private NbProjectZipper zipper;
     private ProjectMediator projectMediator;
     private SubmissionResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
 
     public SubmitExerciseAction() {
-        this(ServerAccess.getDefault(),
-                CourseDb.getInstance(),
-                ProjectMediator.getInstance(),
-                SubmissionResultDisplayer.getInstance(),
-                ConvenientDialogDisplayer.getDefault());
-    }
-    
-    /*package*/ SubmitExerciseAction(
-            ServerAccess serverAccess,
-            CourseDb courseDb,
-            ProjectMediator projectMediator,
-            SubmissionResultDisplayer resultDisplayer,
-            ConvenientDialogDisplayer dialogDisplayer) {
-        this.serverAccess = serverAccess;
-        this.courseDb = courseDb;
-        this.projectMediator = projectMediator;
-        this.resultDisplayer = resultDisplayer;
-        this.dialogDisplayer = dialogDisplayer;
+        this.serverAccess = ServerAccess.create();
+        this.courseDb = CourseDb.getInstance();
+        this.zipper = NbProjectZipper.getDefault();
+        this.projectMediator = ProjectMediator.getInstance();
+        this.resultDisplayer = SubmissionResultDisplayer.getInstance();
+        this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -70,15 +63,15 @@ public final class SubmitExerciseAction extends NodeAction {
         }
     }
     
-    private void submitProject(TmcProjectInfo project) {
+    private void submitProject(final TmcProjectInfo project) {
         final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseDb);
         if (exercise == null || !exercise.isReturnable()) {
             return;
         }
         
         projectMediator.saveAllFiles();
-
-        serverAccess.startSubmittingExercise(exercise, new BgTaskListener<SubmissionResult>() {
+        
+        final BgTaskListener<SubmissionResult> listener = new BgTaskListener<SubmissionResult>() {
             @Override
             public void bgTaskReady(SubmissionResult result) {
                 resultDisplayer.showResult(result);
@@ -96,6 +89,28 @@ public final class SubmitExerciseAction extends NodeAction {
             @Override
             public void bgTaskFailed(Throwable ex) {
                 dialogDisplayer.displayError("Error submitting exercise.", ex);
+            }
+        };
+
+        BgTask.start("Zipping up " + exercise.getName(), new BgTaskListener<byte[]>() {
+            @Override
+            public void bgTaskReady(byte[] zipData) {
+                serverAccess.startSubmittingExercise(exercise, zipData, listener);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                listener.bgTaskCancelled();
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                listener.bgTaskFailed(ex);
+            }
+        }, new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                return zipper.zipProjectSources(FileUtil.toFile(project.getProjectDir()));
             }
         });
     }

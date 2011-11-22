@@ -22,15 +22,14 @@ public class CourseListParserTest {
         String exercisesJson =
                 "[{" +
                 "name: \"TheExercise\"," +
-                "return_address: \"http://example.com/courses/123/exercises/1/submissions\"," +
+                "return_url: \"http://example.com/courses/123/exercises/1/submissions\"," +
                 "deadline: \"2011-06-14T01:30:19+03:00\"," +
-                "publish_date: null," +
                 "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
                 "attempted: true," +
                 "completed: false," +
                 "returnable: true" +
                 "}]";
-        String json = "[{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]";
+        String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
         CourseList result = parser.parseFromJson(json);
         
         Course course = result.getCourseByName("TheCourse");
@@ -46,8 +45,8 @@ public class CourseListParserTest {
         assertEquals(1, cal.get(GregorianCalendar.HOUR_OF_DAY));
         assertEquals(30, cal.get(GregorianCalendar.MINUTE));
         
-        assertEquals("http://example.com/courses/123/exercises/1.zip", exercise.getDownloadAddress());
-        assertEquals("http://example.com/courses/123/exercises/1/submissions", exercise.getReturnAddress());
+        assertEquals("http://example.com/courses/123/exercises/1.zip", exercise.getDownloadUrl());
+        assertEquals("http://example.com/courses/123/exercises/1/submissions", exercise.getReturnUrl());
         assertTrue(exercise.isAttempted());
         assertFalse(exercise.isCompleted());
         assertTrue(exercise.isReturnable());
@@ -55,7 +54,7 @@ public class CourseListParserTest {
     
     @Test
     public void itShouldParseAnEmptyJsonArrayAsAnEmptyCourseList() {
-        CourseList empty = parser.parseFromJson("[]");
+        CourseList empty = parser.parseFromJson("{api_version: 1, courses: []}");
         assertFalse(empty.iterator().hasNext());
     }
 

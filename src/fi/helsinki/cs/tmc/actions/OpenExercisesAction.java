@@ -11,9 +11,12 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -36,25 +39,16 @@ public class OpenExercisesAction extends AbstractAction {
     
     private ServerAccess serverAccess;
     private CourseDb courseDb;
+    private NbProjectUnzipper unzipper;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
 
     public OpenExercisesAction() {
-        this(ServerAccess.getDefault(),
-                CourseDb.getInstance(),
-                ProjectMediator.getInstance(),
-                ConvenientDialogDisplayer.getDefault());
-    }
-
-    public OpenExercisesAction(
-            ServerAccess serverAccess,
-            CourseDb courseDb,
-            ProjectMediator projectMediator,
-            ConvenientDialogDisplayer dialogs) {
-        this.serverAccess = serverAccess;
-        this.courseDb = courseDb;
-        this.projectMediator = projectMediator;
-        this.dialogs = dialogs;
+        this.serverAccess = ServerAccess.create();
+        this.courseDb = CourseDb.getInstance();
+        this.unzipper = NbProjectUnzipper.getDefault();
+        this.projectMediator = ProjectMediator.getInstance();
+        this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
     
     @Override
@@ -129,11 +123,41 @@ public class OpenExercisesAction extends AbstractAction {
             }
         };
         
-        AggregatingBgTaskListener<TmcProjectInfo> aggregator =
+        final AggregatingBgTaskListener<TmcProjectInfo> aggregator =
                 new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenFinished);
+        
         for (final Exercise exercise : exercisesToDownload) {
-            serverAccess.startDownloadingExerciseProject(exercise, aggregator);
+            startDownloadingAndUnzippingExercise(exercise, aggregator);
         }
+    }
+
+    private void startDownloadingAndUnzippingExercise(final Exercise exercise, final BgTaskListener<TmcProjectInfo> listener) {
+        serverAccess.startDownloadingExerciseZip(exercise, new BgTaskListener<byte[]>() {
+            @Override
+            public void bgTaskReady(final byte[] zipData) {
+                BgTask.start("Extracting project", listener, new Callable<TmcProjectInfo>() {
+                    @Override
+                    public TmcProjectInfo call() throws Exception {
+                        unzipper.unzipProject(zipData, projectMediator.getProjectDirForExercise(exercise), exercise.getName());
+                        TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
+                        if (proj == null) {
+                            throw new RuntimeException("Failed to open project for exercise " + exercise.getName());
+                        }
+                        return proj;
+                    }
+                });
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                listener.bgTaskCancelled();
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                listener.bgTaskFailed(ex);
+            }
+        });
     }
     
     private ExerciseList undownloadedExercises(ExerciseList exercises) {

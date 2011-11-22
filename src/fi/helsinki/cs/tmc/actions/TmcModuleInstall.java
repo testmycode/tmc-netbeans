@@ -23,7 +23,7 @@ public class TmcModuleInstall extends ModuleInstall {
     
     @Override
     public void restored() {
-        serverAccess = ServerAccess.getDefault();
+        serverAccess = ServerAccess.create();
         courseDb = CourseDb.getInstance();
         
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {

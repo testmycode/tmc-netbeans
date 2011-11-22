@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -11,34 +12,28 @@ import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
 
 public class RefreshCoursesAction extends AbstractAction {
+    private TmcSettings settings;
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private PreferencesUIFactory prefUIFactory;
     private ConvenientDialogDisplayer dialogs;
 
     public RefreshCoursesAction() {
-        this(ServerAccess.getDefault(),
-                CourseDb.getInstance(),
-                PreferencesUIFactory.getInstance(),
-                ConvenientDialogDisplayer.getDefault());
+        this(TmcSettings.getSaved());
     }
-
-    public RefreshCoursesAction(
-            ServerAccess serverAccess,
-            CourseDb courseDb,
-            PreferencesUIFactory prefUiFactory,
-            ConvenientDialogDisplayer dialogs) {
-        this.serverAccess = serverAccess;
-        this.courseDb = courseDb;
-        this.prefUIFactory = prefUiFactory;
-        this.dialogs = dialogs;
+    
+    public RefreshCoursesAction(TmcSettings settings) {
+        this.settings = TmcSettings.getSaved();
+        this.serverAccess = ServerAccess.create();
+        this.serverAccess.setSettings(settings);
+        this.courseDb = CourseDb.getInstance();
+        this.prefUIFactory = PreferencesUIFactory.getInstance();
+        this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        ensureLatestBaseUrlSaved(); // FIXME: this saves a setting before OK is clicked.
-        
-        if (serverAccess.getBaseUrl() == null || serverAccess.getBaseUrl().trim().isEmpty()) {
+        if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first.");
             notifyPrefUiThatCourseRefreshFailed();
             return;
@@ -65,13 +60,6 @@ public class RefreshCoursesAction extends AbstractAction {
                 notifyPrefUiThatCourseRefreshFailed();
             }
         });
-    }
-
-    private void ensureLatestBaseUrlSaved() {
-        PreferencesUI prefUi = prefUIFactory.getCurrentUI();
-        if (prefUi != null) {
-            serverAccess.setBaseUrl(prefUi.getServerBaseUrl());
-        }
     }
     
     private void notifyPrefUiThatCourseRefreshFailed() {

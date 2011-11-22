@@ -1,8 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -28,33 +27,14 @@ public final class ShowSettingsAction extends AbstractAction {
 
     private PreferencesUIFactory prefUiFactory;
     private SaveSettingsAction saveAction;
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
-    private ProjectMediator projectMediator;
     private Tailoring tailoring;
 
     public ShowSettingsAction() {
-        this(PreferencesUIFactory.getInstance(),
-                new SaveSettingsAction(),
-                ServerAccess.getDefault(),
-                CourseDb.getInstance(),
-                ProjectMediator.getInstance(),
-                SelectedTailoring.get());
-    }
-
-    public ShowSettingsAction(
-            PreferencesUIFactory prefUiFactory,
-            SaveSettingsAction saveAction,
-            ServerAccess serverAccess,
-            CourseDb courseDb,
-            ProjectMediator projectMediator,
-            Tailoring tailoring) {
-        this.prefUiFactory = prefUiFactory;
-        this.saveAction = saveAction;
-        this.serverAccess = serverAccess;
-        this.courseDb = courseDb;
-        this.projectMediator = projectMediator;
-        this.tailoring = tailoring;
+        this.prefUiFactory = PreferencesUIFactory.getInstance();
+        this.saveAction = new SaveSettingsAction();
+        this.courseDb = CourseDb.getInstance();
+        this.tailoring = SelectedTailoring.get();
     }
 
     @Override
@@ -66,9 +46,12 @@ public final class ShowSettingsAction extends AbstractAction {
         
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
-        prefUI.setUsername(serverAccess.getUsername());
-        prefUI.setServerBaseUrl(serverAccess.getBaseUrl());
-        prefUI.setProjectDir(projectMediator.getProjectRootDir());
+        TmcSettings settings = TmcSettings.getSaved();
+        prefUI.setUsername(settings.getUsername());
+        prefUI.setPassword(settings.getPassword());
+        prefUI.setShouldSavePassword(settings.isSavingPassword());
+        prefUI.setServerBaseUrl(settings.getServerBaseUrl());
+        prefUI.setProjectDir(settings.getProjectRootDir());
         prefUI.setAvailableCourses(courseDb.getAvailableCourses());
         prefUI.setSelectedCourse(courseDb.getCurrentCourse());
         prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());

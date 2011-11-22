@@ -6,16 +6,13 @@ import java.io.IOException;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.Preferences;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
-import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.LifecycleManager;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.NbPreferences;
 
 /**
  * The sole interface to query and update the NetBeans project list from TMC.
@@ -26,8 +23,6 @@ public class ProjectMediator {
     
     private static final Logger logger = Logger.getLogger(ProjectMediator.class.getName());
     
-    private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
-    
     private static ProjectMediator instance;
 
     public static ProjectMediator getInstance() {
@@ -36,11 +31,6 @@ public class ProjectMediator {
         }
         return instance;
     }
-    
-    private static Preferences getPreferences() {
-        return NbPreferences.forModule(ServerAccess.class);
-    }
-
     
     private OpenProjects openProjects;
     private ProjectManager projectManager;
@@ -55,15 +45,10 @@ public class ProjectMediator {
     }
     
     public String getProjectRootDir() {
-        String dir = getPreferences().get(PREF_PROJECT_ROOT_DIR, null);
-        if (dir != null) {
-            return dir;
-        } else {
-            return getDefaultProjectRootDir();
-        }
+        return TmcSettings.getSaved().getProjectRootDir();
     }
     
-    private String getDefaultProjectRootDir() {
+    public static String getDefaultProjectRootDir() {
         File candidate;
         
         candidate = ProjectChooser.getProjectsFolder();
@@ -79,17 +64,13 @@ public class ProjectMediator {
         return new File(System.getProperty("user.home") + File.separator + "NetBeansProjects").getAbsolutePath();
     }
     
-    private File getDirectoryContainingMainProject() {
-        Project project = openProjects.getMainProject();
+    private static File getDirectoryContainingMainProject() {
+        Project project = OpenProjects.getDefault().getMainProject();
         if (project != null) {
             return new File(project.getProjectDirectory().getParent().getPath());
         } else {
             return null;
         }
-    }
-
-    public void setProjectRootDir(String projectDir) {
-        getPreferences().put(PREF_PROJECT_ROOT_DIR, projectDir);
     }
     
     /**

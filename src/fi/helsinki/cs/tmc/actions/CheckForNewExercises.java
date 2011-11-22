@@ -21,26 +21,13 @@ public class CheckForNewExercises implements ActionListener {
     private ActionListener detailsAction;
 
     public CheckForNewExercises(ActionListener detailsAction) {
-        this(CourseDb.getInstance(),
-                ProjectMediator.getInstance(),
-                ServerAccess.getDefault(),
-                NotificationDisplayer.getDefault(),
-                detailsAction);
-    }
-    
-    public CheckForNewExercises(
-            CourseDb courseDb,
-            ProjectMediator projectMediator,
-            ServerAccess serverAccess,
-            NotificationDisplayer notifier,
-            ActionListener detailsAction) {
-        this.courseDb = courseDb;
-        this.projectMediator = projectMediator;
-        this.serverAccess = serverAccess;
-        this.notifier = notifier;
+        this.courseDb = CourseDb.getInstance();
+        this.projectMediator = ProjectMediator.getInstance();
+        this.serverAccess = ServerAccess.create();
+        this.notifier = NotificationDisplayer.getDefault();
         this.detailsAction = detailsAction;
     }
-
+    
     @Override
     public void actionPerformed(ActionEvent e) {
         final Course currentCourse = courseDb.getCurrentCourse();

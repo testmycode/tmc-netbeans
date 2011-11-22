@@ -16,6 +16,11 @@ import java.util.Date;
 
 public class CourseListParser {
     
+    private static class CourseListContainer {
+        public int apiVersion;
+        public Course[] courses;
+    }
+    
     /**
      * Creates a CourseList object from text.
      */
@@ -30,7 +35,8 @@ public class CourseListParser {
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(Date.class, new CustomDateDeserializer())
                     .create();
-            Course[] courses = gson.fromJson(json, Course[].class);
+            
+            Course[] courses = gson.fromJson(json, CourseListContainer.class).courses;
 
             CourseList courseList = new CourseList();
             for (Course course : courses) {

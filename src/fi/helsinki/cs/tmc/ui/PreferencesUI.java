@@ -12,6 +12,10 @@ public interface PreferencesUI {
     String getServerBaseUrl();
 
     String getUsername();
+    
+    String getPassword();
+    
+    boolean getShouldSavePassword();
 
     void setAvailableCourses(CourseList courses);
 
@@ -27,4 +31,7 @@ public interface PreferencesUI {
     
     void setUsernameFieldName(String usernameFieldName);
     
+    void setPassword(String password);
+    
+    void setShouldSavePassword(boolean shouldSavePassword);
 }
