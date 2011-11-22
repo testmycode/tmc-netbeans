@@ -39,10 +39,12 @@
                               <EmptySpace min="-2" pref="78" max="-2" attributes="0"/>
                               <Group type="103" groupAlignment="0" attributes="0">
                                   <Component id="serverAddressTextField" alignment="0" pref="481" max="32767" attributes="1"/>
-                                  <Group type="102" alignment="0" attributes="0">
-                                      <Component id="refreshCoursesBtn" min="-2" max="-2" attributes="0"/>
+                                  <Group type="102" alignment="1" attributes="0">
+                                      <Component id="coursesComboBox" pref="276" max="32767" attributes="1"/>
                                       <EmptySpace max="-2" attributes="0"/>
-                                      <Component id="coursesComboBox" pref="360" max="32767" attributes="1"/>
+                                      <Component id="refreshCoursesBtn" min="-2" pref="115" max="-2" attributes="0"/>
+                                      <EmptySpace max="-2" attributes="0"/>
+                                      <Component id="courseListReloadingLabel" min="-2" max="-2" attributes="0"/>
                                   </Group>
                                   <Group type="102" alignment="1" attributes="0">
                                       <Group type="103" groupAlignment="1" attributes="0">
@@ -101,6 +103,7 @@
                   <Component id="coursesComboBox" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="coursesLabel" alignment="3" min="-2" max="-2" attributes="0"/>
                   <Component id="refreshCoursesBtn" alignment="3" min="-2" max="-2" attributes="0"/>
+                  <Component id="courseListReloadingLabel" alignment="3" min="-2" max="-2" attributes="0"/>
               </Group>
               <EmptySpace min="-2" max="-2" attributes="0"/>
           </Group>
@@ -192,9 +195,6 @@
     </Component>
     <Component class="javax.swing.JLabel" name="coursesLabel">
       <Properties>
-        <Property name="labelFor" type="java.awt.Component" editor="org.netbeans.modules.form.ComponentChooserEditor">
-          <ComponentRef name="coursesComboBox"/>
-        </Property>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.coursesLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
@@ -252,6 +252,13 @@
         <Property name="selected" type="boolean" value="true"/>
         <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.savePasswordCheckBox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JLabel" name="courseListReloadingLabel">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.courseListReloadingLabel.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
 import javax.swing.JComboBox;
 import junit.framework.Test;
-import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.junit.NbModuleSuite;
 import static fi.helsinki.cs.tmc.testing.JsonBuilder.*;
 
@@ -40,8 +39,7 @@ public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTes
         settings.getPasswordField().setText("thepassword");
         settings.getServerAddressField().setText(fakeServer.getBaseUrl());
         
-        JButtonOperator.findJButton(settings.getDialog(), "Refresh list", true, true).doClick(); // TODO: do away with
-        
+        // Should make a request automatically once all fields are filled in
         fakeServer.waitForRequestToComplete();
         Thread.sleep(1000);
         

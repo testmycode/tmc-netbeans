@@ -17,6 +17,8 @@ public class RefreshCoursesAction extends AbstractAction {
     private CourseDb courseDb;
     private PreferencesUIFactory prefUIFactory;
     private ConvenientDialogDisplayer dialogs;
+    
+    private boolean failSilently = false;
 
     public RefreshCoursesAction() {
         this(TmcSettings.getSaved());
@@ -29,6 +31,10 @@ public class RefreshCoursesAction extends AbstractAction {
         this.courseDb = CourseDb.getInstance();
         this.prefUIFactory = PreferencesUIFactory.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+    }
+    
+    public void setFailSilently(boolean failSilently) {
+        this.failSilently = failSilently;
     }
 
     @Override
@@ -56,7 +62,9 @@ public class RefreshCoursesAction extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
+                if (!failSilently) {
+                    dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
+                }
                 notifyPrefUiThatCourseRefreshFailed();
             }
         });

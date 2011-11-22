@@ -44,7 +44,9 @@ public class SaveSettingsAction extends AbstractAction {
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();
             courseDb.setCurrentCourseName(courseName);
-            promptOpeningExercises();
+            if (!courseDb.getCurrentCourseExercises().isEmpty()) {
+                promptOpeningExercises();
+            }
         } else {
             courseDb.setCurrentCourseName(null);
         }

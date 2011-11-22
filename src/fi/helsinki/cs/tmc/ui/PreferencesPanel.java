@@ -3,7 +3,9 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -11,8 +13,10 @@ import java.util.ArrayList;
 import java.util.List;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
+import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 
 /**
@@ -25,10 +29,49 @@ import org.apache.commons.lang3.StringUtils;
     
     private String usernameFieldName = "username";
     
+    private DelayedRunner refreshRunner = new DelayedRunner();
+    private RefreshSettings lastRefreshSettings = null;
+    
+    private static class RefreshSettings {
+        private final String username;
+        private final String password;
+        private final String baseUrl;
+
+        public RefreshSettings(String username, String password, String baseUrl) {
+            this.username = username;
+            this.password = password;
+            this.baseUrl = baseUrl;
+        }
+        
+        public boolean isAllSet() {
+            return username != null && password != null && baseUrl != null;
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (obj instanceof RefreshSettings) {
+                RefreshSettings that = (RefreshSettings)obj;
+                return
+                        ObjectUtils.equals(this.username, that.username) &&
+                        ObjectUtils.equals(this.password, that.password) &&
+                        ObjectUtils.equals(this.baseUrl, that.baseUrl);
+            } else {
+                return false;
+            }
+        }
+        
+        @Override
+        public int hashCode() {
+            return 0;
+        }
+        
+    }
+    
     /*package*/ PreferencesPanel() {
         initComponents();
+        makeLoadingLabelNicer();
         
-        setUpAdviceUpdating();
+        setUpFieldChangeListeners();
         setUsernameFieldName(usernameFieldName);
     }
     
@@ -46,7 +89,7 @@ import org.apache.commons.lang3.StringUtils;
     public final void setUsernameFieldName(String usernameFieldName) {
         this.usernameFieldName = usernameFieldName;
         this.usernameLabel.setText(StringUtils.capitalize(usernameFieldName));
-        updateAdvice();
+        fieldChanged();
     }
 
     @Override
@@ -91,6 +134,8 @@ import org.apache.commons.lang3.StringUtils;
     
     @Override
     public void setAvailableCourses(CourseList courses) {
+        setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
+        
         String previousSelectedCourseName = null;
         if (getSelectedCourse() != null) {
             previousSelectedCourseName = getSelectedCourse().getName();
@@ -109,17 +154,19 @@ import org.apache.commons.lang3.StringUtils;
         
         coursesComboBox.setSelectedIndex(newSelectedIndex);
         
-        setCourseSelectionEnabled(true);
+        // Process any change events before enabling course selection
+        // to avoid triggering another refresh.
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                setCourseListRefreshInProgress(false);
+            }
+        });
     }
     
     @Override
     public void courseRefreshFailedOrCanceled() {
-        setCourseSelectionEnabled(true);
-    }
-    
-    private void setCourseSelectionEnabled(boolean enabled) {
-        refreshCoursesBtn.setEnabled(enabled);
-        coursesComboBox.setEnabled(enabled);
+        setCourseListRefreshInProgress(false);
     }
     
     @Override
@@ -146,20 +193,39 @@ import org.apache.commons.lang3.StringUtils;
         return settings;
     }
     
+    private RefreshSettings getRefreshSettings() {
+        return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
+    }
     
-    private void setUpAdviceUpdating() {
+    
+    private void makeLoadingLabelNicer() {
+        try {
+            courseListReloadingLabel.setIcon(new javax.swing.ImageIcon(this.getClass().getResource("loading-spinner.gif")));
+        } catch (Exception e) {
+            return;
+        }
+        courseListReloadingLabel.setText("");
+    }
+    
+    private void setCourseListRefreshInProgress(boolean inProgress) {
+        refreshCoursesBtn.setEnabled(!inProgress);
+        coursesComboBox.setEnabled(!inProgress);
+        courseListReloadingLabel.setVisible(inProgress);
+    }
+    
+    private void setUpFieldChangeListeners() {
         DocumentListener docListener = new DocumentListener() {
             @Override
             public void insertUpdate(DocumentEvent e) {
-                updateAdvice();
+                fieldChanged();
             }
             @Override
             public void removeUpdate(DocumentEvent e) {
-                updateAdvice();
+                fieldChanged();
             }
             @Override
             public void changedUpdate(DocumentEvent e) {
-                updateAdvice();
+                fieldChanged();
             }
         };
         usernameTextField.getDocument().addDocumentListener(docListener);
@@ -170,9 +236,17 @@ import org.apache.commons.lang3.StringUtils;
         coursesComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                updateAdvice();
+                fieldChanged();
             }
         });
+    }
+    
+    private void fieldChanged() {
+        updateAdvice();
+        
+        if (canProbablyRefreshCourseList() && !alreadyRefreshingCourseList() && settingsChangedSinceLastRefresh()) {
+            startRefreshingCourseList(true);
+        }
     }
     
     private void updateAdvice() {
@@ -218,6 +292,31 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
     
+    private boolean canProbablyRefreshCourseList() {
+        return getRefreshSettings().isAllSet();
+    }
+    
+    private boolean alreadyRefreshingCourseList() {
+        return courseListReloadingLabel.isVisible();
+    }
+    
+    private boolean settingsChangedSinceLastRefresh() {
+        return lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings());
+    }
+    
+    private void startRefreshingCourseList(boolean failSilently) {
+        final RefreshCoursesAction action = new RefreshCoursesAction(getSettings());
+        action.setFailSilently(failSilently);
+        refreshRunner.setTask(new Runnable() {
+            @Override
+            public void run() {
+                setCourseListRefreshInProgress(true);
+                lastRefreshSettings = getRefreshSettings();
+                action.actionPerformed(null);
+            }
+        });
+    }
+    
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -244,6 +343,7 @@ import org.apache.commons.lang3.StringUtils;
         passwordLabel = new javax.swing.JLabel();
         passwordField = new javax.swing.JPasswordField();
         savePasswordCheckBox = new javax.swing.JCheckBox();
+        courseListReloadingLabel = new javax.swing.JLabel();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -287,7 +387,6 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
 
-        coursesLabel.setLabelFor(coursesComboBox);
         coursesLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.coursesLabel.text")); // NOI18N
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, coursesComboBox, org.jdesktop.beansbinding.ObjectProperty.create(), coursesLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
@@ -308,6 +407,8 @@ import org.apache.commons.lang3.StringUtils;
 
         savePasswordCheckBox.setSelected(true);
         savePasswordCheckBox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.savePasswordCheckBox.text")); // NOI18N
+
+        courseListReloadingLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.courseListReloadingLabel.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
@@ -334,10 +435,12 @@ import org.apache.commons.lang3.StringUtils;
                                 .addGap(78, 78, 78)
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
-                                    .addGroup(layout.createSequentialGroup()
-                                        .addComponent(refreshCoursesBtn)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(coursesComboBox, 0, 276, Short.MAX_VALUE)
                                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(coursesComboBox, 0, 360, Short.MAX_VALUE))
+                                        .addComponent(refreshCoursesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(courseListReloadingLabel))
                                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
                                             .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
@@ -379,7 +482,8 @@ import org.apache.commons.lang3.StringUtils;
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(coursesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(coursesLabel)
-                    .addComponent(refreshCoursesBtn))
+                    .addComponent(refreshCoursesBtn)
+                    .addComponent(courseListReloadingLabel))
                 .addContainerGap())
         );
 
@@ -405,8 +509,7 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        setCourseSelectionEnabled(false);
-        new RefreshCoursesAction(getSettings()).actionPerformed(evt);
+        startRefreshingCourseList(false);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
     private void serverAddressTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressTextFieldActionPerformed
@@ -416,6 +519,7 @@ import org.apache.commons.lang3.StringUtils;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel adviceLabel;
+    private javax.swing.JLabel courseListReloadingLabel;
     private javax.swing.JComboBox coursesComboBox;
     private javax.swing.JLabel coursesLabel;
     private javax.swing.JButton folderChooserBtn;

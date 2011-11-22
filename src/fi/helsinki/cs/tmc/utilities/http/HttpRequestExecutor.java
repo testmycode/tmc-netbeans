@@ -8,6 +8,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
@@ -48,6 +49,9 @@ import org.apache.http.params.HttpParams;
             HttpParams p = new BasicHttpParams();
             p.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, DEFAULT_TIMEOUT);
             DefaultHttpClient httpClient = new DefaultHttpClient(p);
+            
+            httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
+            
             if (cookieStore == null) {
                 cookieStore = httpClient.getCookieStore();
             } else {
