@@ -58,6 +58,10 @@ public class NbProjectUnzipperTest {
         w.flush();
     }
     
+    private File inTempDir(String subpath) {
+        return new File(tempDir.getPath() + File.separator + subpath);
+    }
+    
     @Test
     public void itShouldUnzipTheFirstProjectDirectoryItSeesInAZip() throws IOException {
         addFakeProjectToZip("dir1/dir12/project1", "P1");
@@ -65,7 +69,7 @@ public class NbProjectUnzipperTest {
         addFakeProjectToZip("project3", "P3");
         zipOut.close();
         
-        unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
+        unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"), "my-project");
         
         assertEquals(1, tempDir.get().listFiles().length);
         String contents = FileUtils.readFileToString(new File(tempDir.getPath() + File.separator + "my-project/nbproject/project.xml"));
@@ -81,7 +85,7 @@ public class NbProjectUnzipperTest {
         writeFileToZip("dir1/dir2/oops.txt", "oops");
         zipOut.close();
         
-        unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
+        unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"), "my-project");
     }
     
     @Test
@@ -95,7 +99,7 @@ public class NbProjectUnzipperTest {
         
         boolean caughtException = false;
         try {
-            unzipper.unzipProject(zipBuffer.toByteArray(), tempDir.get(), "my-project");
+            unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"), "my-project");
         } catch (IllegalStateException e) {
             caughtException = true;
         }
