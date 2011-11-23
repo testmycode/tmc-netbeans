@@ -8,6 +8,10 @@ import com.google.gson.JsonObject;
 
 public class JsonBuilder {
 
+    public static interface Jsonable {
+        public JsonElement toJson();
+    }
+    
     public static class Prop {
         public final String key;
         public final JsonElement value;
@@ -22,7 +26,7 @@ public class JsonBuilder {
         return new Prop(key, toJson(value));
     }
     
-    public static JsonElement object(Prop... props) {
+    public static JsonObject object(Prop... props) {
         JsonObject obj = new JsonObject();
         for (Prop prop : props) {
             obj.add(prop.key, prop.value);
@@ -30,7 +34,7 @@ public class JsonBuilder {
         return obj;
     }
     
-    public static JsonElement array(Object... elements) {
+    public static JsonArray array(Object... elements) {
         JsonArray result = new JsonArray();
         for (int i = 0; i < elements.length; ++i) {
             result.add(toJson(elements[i]));
@@ -41,6 +45,8 @@ public class JsonBuilder {
     private static JsonElement toJson(Object value) {
         if (value instanceof JsonElement) {
             return (JsonElement)value;
+        } else if (value instanceof Jsonable) {
+            return ((Jsonable)value).toJson();
         } else {
             return gson().toJsonTree(value);
         }

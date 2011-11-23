@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
 import javax.swing.JComboBox;
 import junit.framework.Test;
 import org.netbeans.junit.NbModuleSuite;
-import static fi.helsinki.cs.tmc.testing.JsonBuilder.*;
 
 public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTestCase {
     public static Test suite() {
@@ -17,30 +16,17 @@ public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTes
     }
     
     public void testFetchingCourseListInSettingsWindow() throws Exception {
-        fakeServer.expectUser("theuser", "thepassword");
-        fakeServer.respondWithCourses(
-                object(
-                    prop("api_version", "1"),
-                    prop("courses", array(
-                        object(
-                            prop("name", "Course1"),
-                            prop("exercises", array())
-                        ),
-                        object(
-                            prop("name", "Course2"),
-                            prop("exercises", array())
-                        )
-                    ))
-                ).toString());
+        serverFixture.addEmptyCourse("Course1");
+        serverFixture.addEmptyCourse("Course2");
         
         SettingsOperator settings = SettingsOperator.openSettingsDialog();
         
-        settings.getUsernameField().setText("theuser");
-        settings.getPasswordField().setText("thepassword");
-        settings.getServerAddressField().setText(fakeServer.getBaseUrl());
+        settings.getUsernameField().setText(serverFixture.expectedUser);
+        settings.getPasswordField().setText(serverFixture.expectedPassword);
+        settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());
         
         // Should make a request automatically once all fields are filled in
-        fakeServer.waitForRequestToComplete();
+        serverFixture.getFakeServer().waitForRequestToComplete();
         Thread.sleep(1000);
         
         JComboBox courseList = settings.getCourseList();

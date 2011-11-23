@@ -48,8 +48,11 @@ public class Exercise implements Serializable {
         if (currentTime == null) {
             throw new NullPointerException("current time was null at Exercise.isDeadlineEnded");
         }
-        return deadline.getTime() < currentTime.getTime();
-
+        if (deadline != null) {
+            return deadline.getTime() < currentTime.getTime();
+        } else {
+            return false;
+        }
     }
 
     public String getName() {

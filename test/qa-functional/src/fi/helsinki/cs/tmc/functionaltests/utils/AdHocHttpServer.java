@@ -114,7 +114,7 @@ public class AdHocHttpServer {
     
     public synchronized void stop() throws Exception {
         if (!isStarted()) {
-            throw new IllegalStateException("Not started");
+            return;
         }
         
         debug("Stopping");
@@ -168,7 +168,7 @@ public class AdHocHttpServer {
         }
     };
     
-    protected void debug(String msg) {
-        System.out.println("AdHocHttpServer: " + msg);
+    protected void debug(Object msg) {
+        System.out.println(this.getClass().getSimpleName() + ": " + msg.toString());
     }
 }

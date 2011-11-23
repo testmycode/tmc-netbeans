@@ -60,6 +60,32 @@ public class SettingsOperator {
         JButtonOperator.findJButton(dialog, "Cancel", true, true).doClick();
     }
     
+    public static void setAllSettings(FullServerFixture serverFixture, String courseName) throws Exception {
+        SettingsOperator settings = openSettingsDialog();
+        
+        settings.getUsernameField().setText(serverFixture.expectedUser);
+        settings.getPasswordField().setText(serverFixture.expectedPassword);
+        settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());
+        
+        // Should make a request automatically once all fields are filled in
+        serverFixture.getFakeServer().waitForRequestToComplete();
+        Thread.sleep(1000);
+        
+        boolean foundCourse = false;
+        JComboBox courseList = settings.getCourseList();
+        for (int i = 0; i < courseList.getItemCount(); ++i) {
+            if (courseList.getItemAt(i).toString().equals(courseName)) {
+                courseList.setSelectedIndex(i);
+                foundCourse = true;
+                break;
+            }
+        }
+        
+        assertTrue("Course '" + courseName + "' not found in settings window", foundCourse);
+        
+        settings.clickOk();
+    }
+    
     @SuppressWarnings("unchecked")
     protected <T> T findByLabel(Class<T> cls, String text) {
         JLabel label = JLabelOperator.findJLabel(dialog, text, true, true);

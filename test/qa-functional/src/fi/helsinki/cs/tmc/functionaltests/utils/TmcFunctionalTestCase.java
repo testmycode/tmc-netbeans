@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
-import fi.helsinki.cs.tmc.functionaltests.utils.FakeTmcServer;
+import java.io.File;
 import javax.swing.JDialog;
 import org.netbeans.jellytools.JellyTestCase;
 import org.netbeans.jellytools.NbDialogOperator;
@@ -10,7 +10,7 @@ import org.netbeans.jemmy.operators.JDialogOperator;
 
 public abstract class TmcFunctionalTestCase extends JellyTestCase {
 
-    protected FakeTmcServer fakeServer;
+    protected FullServerFixture serverFixture;
     
     public TmcFunctionalTestCase(String testName) {
         super(testName);
@@ -19,16 +19,14 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
 
     @Override
     protected void setUp() throws Exception {
-        fakeServer = new FakeTmcServer();
-        fakeServer.start();
+        serverFixture = new FullServerFixture();
         super.setUp();
         dismissInitialDialogIfAny();
     }
     
     @Override
     protected void tearDown() throws Exception {
-        fakeServer.stop();
-        fakeServer = null;
+        serverFixture.tearDown();
         super.tearDown();
     }
     
@@ -39,6 +37,10 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
             JButtonOperator.findJButton(settingsDialog, "Cancel", true, true).doClick();
         } catch (JemmyException e) {
         }
+    }
+    
+    protected File getTestProjectZip() {
+        return new File(getDataDir().getPath() + File.separator + "TestProject.zip");
     }
     
 }

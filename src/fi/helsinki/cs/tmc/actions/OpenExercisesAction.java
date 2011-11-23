@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Date;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -99,7 +100,7 @@ public class OpenExercisesAction extends AbstractAction {
     }
     
     private void downloadNewProjects(ExerciseList allExercises, final int localProjectCount) {
-        ExerciseList exercisesToDownload = undownloadedExercises(allExercises);
+        ExerciseList exercisesToDownload = undownloadedUnexpiredExercises(allExercises);
         
         if (exercisesToDownload.size() == 0 && localProjectCount == 0) {
             dialogs.displayMessage("There are no new exercises at the moment.");
@@ -160,12 +161,16 @@ public class OpenExercisesAction extends AbstractAction {
         });
     }
     
-    private ExerciseList undownloadedExercises(ExerciseList exercises) {
+    private ExerciseList undownloadedUnexpiredExercises(ExerciseList exercises) {
+        Date now = new Date();
+        
         ExerciseList result = new ExerciseList();
         for (final Exercise exercise : exercises) {
-            TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
-            if (proj == null) {
-                result.add(exercise);
+            if (!exercise.hasDeadlinePassed(now)) {
+                TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
+                if (proj == null) {
+                    result.add(exercise);
+                }
             }
         }
         return result;

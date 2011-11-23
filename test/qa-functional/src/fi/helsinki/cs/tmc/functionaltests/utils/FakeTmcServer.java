@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import java.io.File;
 import java.io.UnsupportedEncodingException;
 import org.apache.http.entity.StringEntity;
 import java.io.IOException;
@@ -13,6 +14,7 @@ import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
+import org.apache.http.entity.FileEntity;
 import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import static org.junit.Assert.*;
@@ -23,6 +25,8 @@ public class FakeTmcServer extends AdHocHttpServer {
     private String expectedUsername;
     private String expectedPassword;
     private String coursesJson = "{}";
+    
+    private HashMap<String, File> zipFiles = new HashMap<String, File>();
 
     public FakeTmcServer() {
         setHandler(new Handler());
@@ -38,6 +42,14 @@ public class FakeTmcServer extends AdHocHttpServer {
         this.coursesJson = coursesJson;
     }
     
+    public synchronized void addZipFile(String path, File file) {
+        zipFiles.put(path, file);
+    }
+    
+    public synchronized void clearZipFiles() {
+        zipFiles.clear();
+    }
+    
     private class Handler implements HttpRequestHandler {
         @Override
         public void handle(HttpRequest req, HttpResponse resp, HttpContext hc) throws HttpException, IOException {
@@ -50,11 +62,19 @@ public class FakeTmcServer extends AdHocHttpServer {
                 }
 
                 Map<String, String> params = parseQueryParameters(uri);
-                authenticate(params);
 
-                if (uri.getPath().startsWith("/courses.json")) {
+                String path = uri.getPath();
+                debug("Path: " + path);
+                
+                if (path.startsWith("/courses.json")) {
+                    authenticate(params);
                     debug("Responding with course list: " + coursesJson);
                     respondWithJson(resp, coursesJson);
+                } else if (zipFiles.containsKey(path)) {
+                    respondWithFile(resp, zipFiles.get(path), "application/zip");
+                } else {
+                    resp.setStatusCode(404);
+                    resp.setEntity(new StringEntity("Not Found"));
                 }
             }
         }
@@ -84,6 +104,10 @@ public class FakeTmcServer extends AdHocHttpServer {
             } catch (UnsupportedEncodingException ex) {
                 throw new RuntimeException(ex);
             }
+        }
+
+        private void respondWithFile(HttpResponse resp, File file, String mimeType) {
+            resp.setEntity(new FileEntity(file, mimeType));
         }
     }
 }
