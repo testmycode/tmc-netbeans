@@ -6,6 +6,7 @@ import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
 import org.apache.http.client.CookieStore;
+import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.NoConnectionReuseStrategy;
@@ -16,12 +17,9 @@ import org.apache.http.params.HttpParams;
 
 /**
  * Downloads a single file over HTTP into memory while being cancellable.
- * 
- * <p>
- * TODO: test with a local HTTP server (httpcore has one).
  */
 /*package*/ class HttpRequestExecutor implements CancellableCallable<byte[]> {
-    private static final int DEFAULT_TIMEOUT = 3 * 60 * 1000;
+    private static final int DEFAULT_TIMEOUT = 30 * 1000;
     
     private HttpUriRequest request;
     private CookieStore cookieStore;
@@ -37,27 +35,40 @@ import org.apache.http.params.HttpParams;
     
     @Override
     public byte[] call() throws IOException, InterruptedException {
-        ByteArrayOutputStream buf = new ByteArrayOutputStream();
-        HttpEntity entity = executeRequest();
-        entity.writeTo(buf);
-        return buf.toByteArray();
+        HttpClient httpClient = makeHttpClient();
+        try {
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
+            HttpEntity entity = executeRequest(httpClient);
+            entity.writeTo(buf);
+            return buf.toByteArray();
+        } finally {
+            disposeOfHttpClient(httpClient);
+        }
     }
     
-    private HttpEntity executeRequest() throws IOException, InterruptedException {
+    private HttpClient makeHttpClient() {
+        HttpParams params = new BasicHttpParams();
+        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, DEFAULT_TIMEOUT);
+
+        DefaultHttpClient httpClient = new DefaultHttpClient(params);
+        httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
+
+        if (cookieStore == null) {
+            cookieStore = httpClient.getCookieStore();
+        } else {
+            httpClient.setCookieStore(cookieStore);
+        }
+        
+        return httpClient;
+    }
+    
+    private void disposeOfHttpClient(HttpClient httpClient) {
+        httpClient.getConnectionManager().shutdown();
+    }
+    
+    private HttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException {
         HttpResponse response;
         try {
-            HttpParams p = new BasicHttpParams();
-            p.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, DEFAULT_TIMEOUT);
-            DefaultHttpClient httpClient = new DefaultHttpClient(p);
-            
-            httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
-            
-            if (cookieStore == null) {
-                cookieStore = httpClient.getCookieStore();
-            } else {
-                httpClient.setCookieStore(cookieStore);
-            }
-        
             response = httpClient.execute(request);
         } catch (IOException ex) {
             if (request.isAborted()) {
@@ -67,17 +78,17 @@ import org.apache.http.params.HttpParams;
             }
         }
         
-        return handleResponse(response);
+        return handleResponse(httpClient, response);
     }
     
-    private HttpEntity handleResponse(HttpResponse response) throws IOException, InterruptedException {
+    private HttpEntity handleResponse(HttpClient httpClient, HttpResponse response) throws IOException, InterruptedException {
         int responseCode = response.getStatusLine().getStatusCode();
         if (responseCode == 302 || responseCode == 303) {
             // Need to handle redirect manually. Apparently HttpClient
             // won't do it in all cases (multipart POST requests)?
             if (response.getFirstHeader("location") != null) {
                 request = new HttpGet(response.getFirstHeader("location").getValue());
-                return executeRequest();
+                return executeRequest(httpClient);
             } else {
                 throw new IOException("Redirect without a location header");
             }
