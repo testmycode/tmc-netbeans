@@ -11,6 +11,7 @@ import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.client.DefaultHttpClient;
+import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
@@ -52,6 +53,13 @@ import org.apache.http.params.HttpParams;
 
         DefaultHttpClient httpClient = new DefaultHttpClient(params);
         httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
+        
+        /*
+         * Not entirely sure why this incantation is needed.
+         * It does fix an error in the scenario of POST + redirect + GET
+         */
+        ThreadSafeClientConnManager tsccm = new ThreadSafeClientConnManager(httpClient.getConnectionManager().getSchemeRegistry());
+        httpClient = new DefaultHttpClient(tsccm, params);
 
         if (cookieStore == null) {
             cookieStore = httpClient.getCookieStore();

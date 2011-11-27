@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import fi.helsinki.cs.tmc.testing.AdHocHttpServer;
 import java.io.File;
 import java.io.UnsupportedEncodingException;
 import org.apache.http.entity.StringEntity;

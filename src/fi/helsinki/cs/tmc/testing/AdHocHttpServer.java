@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.functionaltests.utils;
+package fi.helsinki.cs.tmc.testing;
 
 import java.io.IOException;
 import java.io.InterruptedIOException;
@@ -41,9 +41,15 @@ public class AdHocHttpServer {
     
     private Exception inThreadException; // Set by thread, read in stop()
     private Semaphore requestCounter = new Semaphore(0);
+    
+    private volatile boolean debugEnabled = false;
 
     public AdHocHttpServer() {
         this.handlers = new HttpRequestHandlerRegistry();
+    }
+    
+    public void enableDebug() {
+        debugEnabled = true;
     }
     
     public void setHandler(HttpRequestHandler handler) {
@@ -169,6 +175,8 @@ public class AdHocHttpServer {
     };
     
     protected void debug(Object msg) {
-        System.out.println(this.getClass().getSimpleName() + ": " + msg.toString());
+        if (debugEnabled) {
+            System.out.println(this.getClass().getSimpleName() + ": " + msg.toString());
+        }
     }
 }
