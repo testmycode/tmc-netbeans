@@ -5,16 +5,20 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.params.ClientPNames;
 import org.apache.http.impl.NoConnectionReuseStrategy;
+import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.impl.conn.tsccm.ThreadSafeClientConnManager;
 import org.apache.http.params.BasicHttpParams;
 import org.apache.http.params.CoreConnectionPNames;
 import org.apache.http.params.HttpParams;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Downloads a single file over HTTP into memory while being cancellable.
@@ -22,8 +26,10 @@ import org.apache.http.params.HttpParams;
 /*package*/ class HttpRequestExecutor implements CancellableCallable<byte[]> {
     private static final int DEFAULT_TIMEOUT = 30 * 1000;
     
+    private int timeout = DEFAULT_TIMEOUT;
     private HttpUriRequest request;
     private CookieStore cookieStore;
+    private UsernamePasswordCredentials credentials; // May be null
     
     /*package*/ HttpRequestExecutor(String url) {
         this(new HttpGet(url));
@@ -32,6 +38,26 @@ import org.apache.http.params.HttpParams;
     /*package*/ HttpRequestExecutor(HttpUriRequest request) {
         this.request = request;
         this.cookieStore = null;
+        
+        if (request.getURI().getUserInfo() != null) {
+            credentials = new UsernamePasswordCredentials(request.getURI().getUserInfo());
+            setRequestCredentials();
+        }
+    }
+    
+    public HttpRequestExecutor setCredentials(String username, String password) {
+        return setCredentials(new UsernamePasswordCredentials(username, password));
+    }
+    
+    public HttpRequestExecutor setCredentials(UsernamePasswordCredentials credentials) {
+        this.credentials = credentials;
+        setRequestCredentials();
+        return this;
+    }
+    
+    public HttpRequestExecutor setTimeout(int timeoutMs) {
+        this.timeout = timeoutMs;
+        return this;
     }
     
     @Override
@@ -49,17 +75,12 @@ import org.apache.http.params.HttpParams;
     
     private HttpClient makeHttpClient() {
         HttpParams params = new BasicHttpParams();
-        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, DEFAULT_TIMEOUT);
+        params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
+        params.setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
+        params.setParameter(AuthPNames.CREDENTIAL_CHARSET, "UTF-8");
 
         DefaultHttpClient httpClient = new DefaultHttpClient(params);
         httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
-        
-        /*
-         * Not entirely sure why this incantation is needed.
-         * It does fix an error in the scenario of POST + redirect + GET
-         */
-        ThreadSafeClientConnManager tsccm = new ThreadSafeClientConnManager(httpClient.getConnectionManager().getSchemeRegistry());
-        httpClient = new DefaultHttpClient(tsccm, params);
 
         if (cookieStore == null) {
             cookieStore = httpClient.getCookieStore();
@@ -95,7 +116,11 @@ import org.apache.http.params.HttpParams;
             // Need to handle redirect manually. Apparently HttpClient
             // won't do it in all cases (multipart POST requests)?
             if (response.getFirstHeader("location") != null) {
+                EntityUtils.consume(response.getEntity());
+                
                 request = new HttpGet(response.getFirstHeader("location").getValue());
+                setRequestCredentials();
+                
                 return executeRequest(httpClient);
             } else {
                 throw new IOException("Redirect without a location header");
@@ -108,7 +133,15 @@ import org.apache.http.params.HttpParams;
                 throw new IOException("No content in HTTP response");
             }
         } else {
+            EntityUtils.consume(response.getEntity());
             throw new IOException("Response code " + responseCode);
+        }
+    }
+    
+    private void setRequestCredentials() {
+        request.removeHeaders("Authorization");
+        if (credentials != null) {
+            request.addHeader(BasicScheme.authenticate(credentials, "UTF-8", false));
         }
     }
     

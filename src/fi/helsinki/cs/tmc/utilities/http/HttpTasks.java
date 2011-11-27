@@ -4,20 +4,38 @@ import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.Map;
+import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
 
+/**
+ * Convenient methods to start asynchronous HTTP tasks.
+ */
 public class HttpTasks {
+    private UsernamePasswordCredentials credentials = null;
+
+    public HttpTasks setCredentials(String username, String password) {
+        this.credentials = new UsernamePasswordCredentials(username, password);
+        return this;
+    }
+    
+    private HttpRequestExecutor createExecutor(String url) {
+        return new HttpRequestExecutor(url).setCredentials(credentials);
+    }
+    
+    private HttpRequestExecutor createExecutor(HttpPost request) {
+        return new HttpRequestExecutor(request).setCredentials(credentials);
+    }
+    
     public CancellableCallable<byte[]> downloadBinaryFile(String url) {
-        return new HttpRequestExecutor(url);
+        return createExecutor(url);
     }
     
     public CancellableCallable<String> downloadTextFile(String url) {
-        HttpRequestExecutor requestExecutor = new HttpRequestExecutor(url);
-        return downloadToText(requestExecutor);
+        return downloadToText(createExecutor(url));
     }
 
     private CancellableCallable<String> downloadToText(final HttpRequestExecutor download) {
@@ -36,8 +54,7 @@ public class HttpTasks {
     
     public CancellableCallable<String> uploadFileForTextResponse(String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = makeFileUploadRequest(url, params, fileField, data);
-        HttpRequestExecutor requestExecutor = new HttpRequestExecutor(request);
-        return downloadToText(requestExecutor);
+        return downloadToText(createExecutor(request));
     }
 
     private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) throws RuntimeException {

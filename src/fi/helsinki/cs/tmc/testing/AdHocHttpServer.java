@@ -25,6 +25,7 @@ import org.apache.http.protocol.ResponseConnControl;
 import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
+import org.openide.util.Exceptions;
 
 /**
  * A HTTP server running on a random port in a single background thread.
@@ -138,9 +139,9 @@ public class AdHocHttpServer {
         @Override
         public void run() {
             while (!Thread.interrupted()) {
+                Socket socket = null;
                 try {
                     debug("Accepting at port " + serverSocket.getLocalPort());
-                    Socket socket;
                     try {
                         socket = serverSocket.accept();
                     } catch (SocketException ex) {
@@ -169,6 +170,14 @@ public class AdHocHttpServer {
                     inThreadException = ex;
                     debug("Exception: " + ex);
                     break;
+                } finally {
+                    try {
+                        if (socket != null) {
+                            socket.close();
+                        }
+                    } catch (IOException ex) {
+                        Exceptions.printStackTrace(ex);
+                    }
                 }
             }
         }
