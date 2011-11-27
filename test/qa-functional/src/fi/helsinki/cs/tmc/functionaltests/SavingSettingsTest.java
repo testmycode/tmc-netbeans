@@ -24,6 +24,7 @@ public class SavingSettingsTest extends TmcFunctionalTestCase {
         assertFalse(settings.getSavePasswordCheckbox().isSelected());
         settings.getUsernameField().setText(serverFixture.expectedUser);
         settings.getPasswordField().setText(serverFixture.expectedPassword);
+        settings.getSavePasswordCheckbox().doClick();
         settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());
         
         serverFixture.getFakeServer().waitForRequestToComplete(); // Wait for course list to load
@@ -35,23 +36,14 @@ public class SavingSettingsTest extends TmcFunctionalTestCase {
         
         settings = SettingsOperator.openSettingsDialog();
         settings.getUsernameField().setText("anotheruser");
-        settings.clickCancel();
-        
-        settings = SettingsOperator.openSettingsDialog();
-        assertEquals("theuser", settings.getUsernameField().getText());
-        assertEquals(0, settings.getPasswordField().getPassword().length);
-        assertFalse(settings.getSavePasswordCheckbox().isSelected());
-        assertEquals(1, settings.getCourseList().getSelectedIndex());
-        settings.clickCancel();
-        
-        settings = SettingsOperator.openSettingsDialog();
-        settings.getPasswordField().setText("thenewpassword");
         settings.getSavePasswordCheckbox().doClick();
-        settings.clickOk();
+        settings.clickCancel();
         
         settings = SettingsOperator.openSettingsDialog();
+        assertEquals(serverFixture.expectedUser, settings.getUsernameField().getText());
+        assertEquals(serverFixture.expectedPassword, new String(settings.getPasswordField().getPassword()));
         assertTrue(settings.getSavePasswordCheckbox().isSelected());
-        assertEquals("thenewpassword", new String(settings.getPasswordField().getPassword()));
+        assertEquals(1, settings.getCourseList().getSelectedIndex());
         settings.clickCancel();
     }
 }

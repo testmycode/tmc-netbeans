@@ -17,6 +17,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -33,6 +35,8 @@ import org.openide.util.actions.NodeAction;
 @Messages("CTL_SubmitExerciseAction=Su&bmit")
 public final class SubmitExerciseAction extends NodeAction {
 
+    private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
+    
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private NbProjectZipper zipper;
@@ -88,6 +92,7 @@ public final class SubmitExerciseAction extends NodeAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
+                log.log(Level.INFO, "Error submitting exercise.", ex);
                 dialogDisplayer.displayError("Error submitting exercise.", ex);
             }
         };

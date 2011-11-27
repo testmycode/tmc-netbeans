@@ -46,7 +46,7 @@ public final class ShowSettingsAction extends AbstractAction {
         
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
-        TmcSettings settings = TmcSettings.getSaved();
+        TmcSettings settings = TmcSettings.getDefault();
         prefUI.setUsername(settings.getUsername());
         prefUI.setPassword(settings.getPassword());
         prefUI.setShouldSavePassword(settings.isSavingPassword());

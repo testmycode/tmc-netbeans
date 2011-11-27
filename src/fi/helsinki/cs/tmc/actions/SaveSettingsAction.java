@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -13,13 +12,11 @@ import javax.swing.SwingUtilities;
 public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
-    private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private OpenExercisesAction openExercisesAction;
     
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
-        this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.openExercisesAction = new OpenExercisesAction();
     }
@@ -35,12 +32,13 @@ public class SaveSettingsAction extends AbstractAction {
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
-        TmcSettings settings = TmcSettings.getSaved();
+        TmcSettings settings = TmcSettings.getDefault();
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());
         settings.setServerBaseUrl(prefUi.getServerBaseUrl());
         settings.setProjectRootDir(prefUi.getProjectDir());
+        
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();
             courseDb.setCurrentCourseName(courseName);
@@ -50,6 +48,7 @@ public class SaveSettingsAction extends AbstractAction {
         } else {
             courseDb.setCurrentCourseName(null);
         }
+        
         settings.save();
     }
 

@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import java.awt.event.ActionEvent;
@@ -185,7 +184,7 @@ import org.apache.commons.lang3.StringUtils;
     }
     
     public TmcSettings getSettings() {
-        TmcSettings settings = TmcSettings.getSaved();
+        TmcSettings settings = TmcSettings.getTransient();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());

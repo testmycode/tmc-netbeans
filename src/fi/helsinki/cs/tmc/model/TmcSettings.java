@@ -12,19 +12,26 @@ public class TmcSettings {
     private static final String PREF_PASSWORD = "password";
     private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
     
+    private static final TmcSettings defaultInstance =
+            new TmcSettings(
+                    PersistableSettings.forModule(TmcSettings.class),
+                    SelectedTailoring.get()
+                    );
+    
     private PersistableSettings settings;
     private Tailoring tailoring;
     
     private String unsavedPassword;
 
-    public static TmcSettings getSaved() {
-        return new TmcSettings(
-                PersistableSettings.forModule(TmcSettings.class),
-                SelectedTailoring.get()
-                );
+    public static TmcSettings getDefault() {
+        return defaultInstance;
     }
     
-    public TmcSettings(PersistableSettings settings, Tailoring tailoring) {
+    public static TmcSettings getTransient() {
+        return new TmcSettings(PersistableSettings.forModule(TmcSettings.class), SelectedTailoring.get());
+    }
+    
+    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring) {
         this.settings = settings;
         this.tailoring = tailoring;
         
@@ -32,6 +39,9 @@ public class TmcSettings {
     }
     
     public void save() {
+        if (this != defaultInstance) {
+            throw new IllegalStateException("May only safe the default instance of TmcSettings.");
+        }
         settings.saveAll();
     }
 

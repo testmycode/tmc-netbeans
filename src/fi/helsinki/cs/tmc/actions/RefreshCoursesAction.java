@@ -21,11 +21,11 @@ public class RefreshCoursesAction extends AbstractAction {
     private boolean failSilently = false;
 
     public RefreshCoursesAction() {
-        this(TmcSettings.getSaved());
+        this(TmcSettings.getDefault());
     }
     
     public RefreshCoursesAction(TmcSettings settings) {
-        this.settings = TmcSettings.getSaved();
+        this.settings = settings;
         this.serverAccess = ServerAccess.create();
         this.serverAccess.setSettings(settings);
         this.courseDb = CourseDb.getInstance();

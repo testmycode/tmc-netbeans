@@ -23,7 +23,7 @@ public class ServerAccess {
     
     public static ServerAccess create() {
         return new ServerAccess(
-                TmcSettings.getSaved(),
+                TmcSettings.getDefault(),
                 new HttpTasks(),
                 new CourseListParser(),
                 new SubmissionResultParser()
@@ -55,11 +55,13 @@ public class ServerAccess {
     }
     
     private String getCourseListUrl() {
-        String query =
-                "api_version=" + API_VERSION +
+        return settings.getServerBaseUrl() + "/courses.json?" + getApiCallQueryParameters();
+    }
+    
+    private String getApiCallQueryParameters() {
+        return "api_version=" + API_VERSION +
                 "&api_username=" + encParam(settings.getUsername()) +
                 "&api_password=" + encParam(settings.getPassword());
-        return settings.getServerBaseUrl() + "/courses.json?" + query;
     }
     
     private String encParam(String s) {
@@ -102,7 +104,7 @@ public class ServerAccess {
     }
     
     public Future<SubmissionResult> startSubmittingExercise(final Exercise exercise, final byte[] sourceZip, BgTaskListener<SubmissionResult> listener) {
-        final String submitUrl = exercise.getReturnUrl();
+        final String submitUrl = exercise.getReturnUrl() + '?' + getApiCallQueryParameters();
         
         Map<String, String> params = Collections.emptyMap();
         final CancellableCallable<String> upload =
