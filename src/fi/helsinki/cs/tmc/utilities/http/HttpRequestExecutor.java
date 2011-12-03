@@ -12,6 +12,7 @@ import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
+import org.apache.http.client.params.HttpClientParams;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -64,8 +65,8 @@ import org.apache.http.util.EntityUtils;
     public byte[] call() throws IOException, InterruptedException {
         HttpClient httpClient = makeHttpClient();
         try {
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
             HttpEntity entity = executeRequest(httpClient);
+            ByteArrayOutputStream buf = new ByteArrayOutputStream();
             entity.writeTo(buf);
             return buf.toByteArray();
         } finally {
@@ -78,6 +79,8 @@ import org.apache.http.util.EntityUtils;
         params.setIntParameter(CoreConnectionPNames.SO_TIMEOUT, timeout);
         params.setBooleanParameter(ClientPNames.HANDLE_AUTHENTICATION, true);
         params.setParameter(AuthPNames.CREDENTIAL_CHARSET, "UTF-8");
+        
+        HttpClientParams.setRedirecting(params, true);
 
         DefaultHttpClient httpClient = new DefaultHttpClient(params);
         httpClient.setReuseStrategy(new NoConnectionReuseStrategy());
@@ -112,20 +115,7 @@ import org.apache.http.util.EntityUtils;
     
     private HttpEntity handleResponse(HttpClient httpClient, HttpResponse response) throws IOException, InterruptedException {
         int responseCode = response.getStatusLine().getStatusCode();
-        if (responseCode == 302 || responseCode == 303) {
-            // Need to handle redirect manually. Apparently HttpClient
-            // won't do it in all cases (multipart POST requests)?
-            if (response.getFirstHeader("location") != null) {
-                EntityUtils.consume(response.getEntity());
-                
-                request = new HttpGet(response.getFirstHeader("location").getValue());
-                setRequestCredentials();
-                
-                return executeRequest(httpClient);
-            } else {
-                throw new IOException("Redirect without a location header");
-            }
-        } else if (200 <= responseCode && responseCode <= 299) {
+        if (200 <= responseCode && responseCode <= 299) {
             HttpEntity entity = response.getEntity();
             if (entity != null) {
                 return entity;

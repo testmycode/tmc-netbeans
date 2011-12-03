@@ -1,15 +1,16 @@
 package fi.helsinki.cs.tmc.model;
 
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
 import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
+import java.net.URI;
 import java.util.Collections;
 import java.util.Map;
 import java.util.concurrent.Future;
@@ -23,22 +24,18 @@ public class ServerAccess {
     public static ServerAccess create() {
         return new ServerAccess(
                 TmcSettings.getDefault(),
-                new CourseListParser(),
-                new SubmissionResultParser()
+                new CourseListParser()
                 );
     }
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
-    private SubmissionResultParser submissionResultParser;
 
     public ServerAccess(
             TmcSettings settings,
-            CourseListParser courseListParser,
-            SubmissionResultParser submissionResultParser) {
+            CourseListParser courseListParser) {
         this.settings = settings;
         this.courseListParser = courseListParser;
-        this.submissionResultParser = submissionResultParser;
     }
     
     public void setSettings(TmcSettings settings) {
@@ -88,29 +85,41 @@ public class ServerAccess {
         return BgTask.start("Downloading " + zipUrl, listener, download);
     }
     
-    public Future<SubmissionResult> startSubmittingExercise(final Exercise exercise, final byte[] sourceZip, BgTaskListener<SubmissionResult> listener) {
+    public Future<URI> startSubmittingExercise(final Exercise exercise, final byte[] sourceZip, BgTaskListener<URI> listener) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
         
         Map<String, String> params = Collections.emptyMap();
         final CancellableCallable<String> upload =
-                createHttpTasks().uploadFileForTextResponse(submitUrl, params, "submission[file]", sourceZip);
+                createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
         
-        CancellableCallable<SubmissionResult> task = new CancellableCallable<SubmissionResult>() {
+        final CancellableCallable<URI> task = new CancellableCallable<URI>() {
             @Override
-            public SubmissionResult call() throws Exception {
-                String text = upload.call();
-                if (text.isEmpty()) {
-                    throw new RuntimeException("Server returned an empty response.");
+            public URI call() throws Exception {
+                String response = upload.call();
+                JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
+                if (respJson.get("error") != null) {
+                    throw new RuntimeException("Server responded with error: " + respJson.get("error"));
+                } else if (respJson.get("submission_url") != null) {
+                    try {
+                        return new URI(respJson.get("submission_url").getAsString());
+                    } catch (Exception e) {
+                        throw new RuntimeException("Server responded with malformed submission url");
+                    }
+                } else {
+                    throw new RuntimeException("Server returned unknown response");
                 }
-                return submissionResultParser.parseFromJson(text);
             }
 
             @Override
             public boolean cancel() {
-                return upload.cancel();
+                throw new UnsupportedOperationException("Not supported yet.");
             }
         };
         
         return BgTask.start("Submitting " + exercise.getName(), listener, task);
+    }
+    
+    public CancellableCallable<String> getSubmissionFetchJob(URI submissionUrl) {
+        return createHttpTasks().downloadTextFile(submissionUrl.toString());
     }
 }

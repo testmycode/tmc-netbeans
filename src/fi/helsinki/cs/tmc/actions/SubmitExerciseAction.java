@@ -5,20 +5,28 @@ import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.CancellableRunnable;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.Callable;
+import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
+import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -75,15 +83,47 @@ public final class SubmitExerciseAction extends NodeAction {
         
         projectMediator.saveAllFiles();
         
-        final BgTaskListener<SubmissionResult> listener = new BgTaskListener<SubmissionResult>() {
+        // Oh what a mess :/
+        
+        final BgTaskListener<URI> uriListener = new BgTaskListener<URI>() {
             @Override
-            public void bgTaskReady(SubmissionResult result) {
-                resultDisplayer.showResult(result);
-                exercise.setAttempted(true);
-                if (result.getStatus() == SubmissionResult.Status.OK) {
-                    exercise.setCompleted(true);
-                }
-                courseDb.save();
+            public void bgTaskReady(URI submissionUri) {
+                final ProgressHandle progressHandle = ProgressHandleFactory.createHandle("Waiting for results from server.");
+                final SubmissionResultWaiter waiter = new SubmissionResultWaiter(submissionUri, progressHandle);
+                
+                ProgressUtils.showProgressDialogAndRun(new CancellableRunnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            progressHandle.switchToIndeterminate();
+                            final SubmissionResult result = waiter.call();
+                            
+                            SwingUtilities.invokeLater(new Runnable() {
+                                @Override
+                                public void run() {
+                                    resultDisplayer.showResult(result);
+                                    exercise.setAttempted(true);
+                                    if (result.getStatus() == SubmissionResult.Status.OK) {
+                                        exercise.setCompleted(true);
+                                    }
+                                    courseDb.save();
+                                }
+                            });
+                            
+                        } catch (InterruptedException ex) {
+                        } catch (TimeoutException ex) {
+                            log.log(Level.INFO, "Timeout waiting for results from server.", ex);
+                            dialogDisplayer.displayError("This is taking too long.\nPlease try again in a few minutes or ask someone to look into the problem.");
+                        } catch (Exception ex) {
+                            log.log(Level.INFO, "Error waiting for results from server.", ex);
+                        }
+                    }
+
+                    @Override
+                    public boolean cancel() {
+                        return waiter.cancel();
+                    }
+                }, progressHandle, true);
             }
 
             @Override
@@ -100,17 +140,17 @@ public final class SubmitExerciseAction extends NodeAction {
         BgTask.start("Zipping up " + exercise.getName(), new BgTaskListener<byte[]>() {
             @Override
             public void bgTaskReady(byte[] zipData) {
-                serverAccess.startSubmittingExercise(exercise, zipData, listener);
+                serverAccess.startSubmittingExercise(exercise, zipData, uriListener);
             }
 
             @Override
             public void bgTaskCancelled() {
-                listener.bgTaskCancelled();
+                uriListener.bgTaskCancelled();
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                listener.bgTaskFailed(ex);
+                uriListener.bgTaskFailed(ex);
             }
         }, new Callable<byte[]>() {
             @Override

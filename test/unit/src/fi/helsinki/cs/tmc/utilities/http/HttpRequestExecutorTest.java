@@ -22,7 +22,6 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.openide.util.Exceptions;
 
 public class HttpRequestExecutorTest {
     
@@ -141,7 +140,7 @@ public class HttpRequestExecutorTest {
         byte[] result = new HttpRequestExecutor(uri.toString()).setTimeout(5000).call();
         assertEquals("Yay", new String(result, "UTF-8"));
     }
-    
+            
     private HttpRequestHandler oneTwoThreeHandler() {
         return new HttpRequestHandler() {
             @Override

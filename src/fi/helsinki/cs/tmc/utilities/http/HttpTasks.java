@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.utilities.http;
 
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -52,7 +53,7 @@ public class HttpTasks {
         };
     }
     
-    public CancellableCallable<String> uploadFileForTextResponse(String url, Map<String, String> params, String fileField, byte[] data) {
+    public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = makeFileUploadRequest(url, params, fileField, data);
         return downloadToText(createExecutor(request));
     }
