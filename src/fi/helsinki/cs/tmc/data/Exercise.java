@@ -107,16 +107,10 @@ public class Exercise implements Serializable {
     }
     
     public Date getDeadline() {
-        if (deadline == null) {
-            throw new IllegalStateException("Deadline not set");
-        }
         return deadline;
     }
 
     public void setDeadline(Date deadline) {
-        if (deadline == null) {
-            throw new NullPointerException("dealine was null at Exercise.setDeadline");
-        }
         this.deadline = deadline;
     }
 

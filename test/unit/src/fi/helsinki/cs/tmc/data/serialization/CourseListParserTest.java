@@ -75,7 +75,7 @@ public class CourseListParserTest {
                 "[{" +
                 "name: \"TheExercise\"," +
                 "return_url: \"http://example.com/courses/123/exercises/1/submissions\"," +
-                "deadline: \"2011-06-14T01:30:19+03:00\"," +
+                "deadline: null," +
                 "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
                 "attempted: true," +
                 "completed: false," +
