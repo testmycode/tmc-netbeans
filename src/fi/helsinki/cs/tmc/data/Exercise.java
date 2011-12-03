@@ -44,12 +44,12 @@ public class Exercise implements Serializable {
         this.courseName = courseName;
     }
 
-    public boolean hasDeadlinePassed(Date currentTime) {
-        if (currentTime == null) {
-            throw new NullPointerException("current time was null at Exercise.isDeadlineEnded");
+    public boolean hasDeadlinePassedAt(Date time) {
+        if (time == null) {
+            throw new NullPointerException("Given time was null at Exercise.isDeadlineEnded");
         }
         if (deadline != null) {
-            return deadline.getTime() < currentTime.getTime();
+            return deadline.getTime() < time.getTime();
         } else {
             return false;
         }

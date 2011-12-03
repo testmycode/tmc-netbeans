@@ -30,6 +30,7 @@ public class CourseListParserTest {
                 "returnable: true" +
                 "}]";
         String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
+        
         CourseList result = parser.parseFromJson(json);
         
         Course course = result.getCourseByName("TheCourse");
@@ -66,5 +67,24 @@ public class CourseListParserTest {
     @Test(expected = IllegalArgumentException.class)
     public void itShouldThrowAnIllegalArgumentExceptionIfTheInputIsEmpty() throws Exception {
         parser.parseFromJson("   ");
+    }
+    
+    @Test
+    public void itShouldParseANullDeadlineAsNull() {
+        String exercisesJson =
+                "[{" +
+                "name: \"TheExercise\"," +
+                "return_url: \"http://example.com/courses/123/exercises/1/submissions\"," +
+                "deadline: \"2011-06-14T01:30:19+03:00\"," +
+                "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
+                "attempted: true," +
+                "completed: false," +
+                "returnable: true" +
+                "}]";
+        String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
+        
+        CourseList result = parser.parseFromJson(json);
+        
+        assertNull(result.get(0).getExercises().get(0).getDeadline());
     }
 }

@@ -166,7 +166,7 @@ public class OpenExercisesAction extends AbstractAction {
         
         ExerciseList result = new ExerciseList();
         for (final Exercise exercise : exercises) {
-            if (!exercise.hasDeadlinePassed(now)) {
+            if (!exercise.hasDeadlinePassedAt(now)) {
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
                 if (proj == null) {
                     result.add(exercise);
