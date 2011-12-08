@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.data.serialization;
 
+import java.util.List;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
+import fi.helsinki.cs.tmc.data.TestCaseRecord;
 import static fi.helsinki.cs.tmc.data.SubmissionResult.Status.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -19,7 +21,7 @@ public class SubmissionResultParserTest {
         
         assertEquals(OK, result.getStatus());
         assertNull(result.getError());
-        assertTrue(result.getCategorizedTestFailures().isEmpty());
+        assertTrue(result.getTestCases().isEmpty());
     }
     
     @Test
@@ -30,24 +32,27 @@ public class SubmissionResultParserTest {
         
         assertEquals(ERROR, result.getStatus());
         assertEquals("Failed to compile.", result.getError());
-        assertTrue(result.getCategorizedTestFailures().isEmpty());
+        assertTrue(result.getTestCases().isEmpty());
     }
     
     @Test
     public void testFail() {
-        String input = "{status: \"fail\", categorized_test_failures: {\"Cat1\": [\"one\", \"two\"], \"Cat2\": [\"three\"]}}";
+        String testCasesJson = "[{name: \"Some test\", successful: true}, {name: \"Another test\", successful: false, message: \"it failed\"}]";
+        String input = "{status: \"fail\", test_cases: " + testCasesJson + "}";
         
         SubmissionResult result = parse(input);
         
         assertEquals(FAIL, result.getStatus());
         assertNull(result.getError());
-        assertEquals(2, result.getCategorizedTestFailures().size());
-        assertEquals(2, result.getCategorizedTestFailures().get("Cat1").size());
-        assertEquals(1, result.getCategorizedTestFailures().get("Cat2").size());
         
-        assertEquals("one", result.getCategorizedTestFailures().get("Cat1").get(0));
-        assertEquals("two", result.getCategorizedTestFailures().get("Cat1").get(1));
-        assertEquals("three", result.getCategorizedTestFailures().get("Cat2").get(0));
+        List<TestCaseRecord> testCases = result.getTestCases();
+        assertEquals(2, testCases.size());
+        assertEquals("Some test", testCases.get(0).getName());
+        assertEquals("Another test", testCases.get(1).getName());
+        assertTrue(testCases.get(0).isSuccessful());
+        assertFalse(testCases.get(1).isSuccessful());
+        assertNull(testCases.get(0).getMessage());
+        assertEquals("it failed", testCases.get(1).getMessage());
     }
     
     @Test(expected=IllegalArgumentException.class)
