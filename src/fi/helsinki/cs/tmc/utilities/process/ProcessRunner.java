@@ -9,8 +9,11 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
+import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.commons.io.output.WriterOutputStream;
 import org.netbeans.api.extexecution.ExternalProcessSupport;
 import org.openide.filesystems.FileUtil;
+import org.openide.windows.InputOutput;
 
 /**
  * Used to run subprocesses with a timeout and capture their output.
@@ -20,10 +23,12 @@ public class ProcessRunner implements Callable<ProcessResult> {
     
     private final String[] command;
     private final File workDir;
+    private final InputOutput inOut;
     
-    public ProcessRunner(String[] command, File workDir) {
+    public ProcessRunner(String[] command, File workDir, InputOutput inOut) {
         this.command = command;
         this.workDir = workDir;
+        this.inOut = inOut;
     }
     
     @Override
@@ -39,9 +44,19 @@ public class ProcessRunner implements Callable<ProcessResult> {
         ByteArrayOutputStream stdoutBuf = new ByteArrayOutputStream();
         ByteArrayOutputStream stderrBuf = new ByteArrayOutputStream();
         
+        OutputStream out;
+        OutputStream err;
+        if (inOut != null) {
+            out = new TeeOutputStream(stdoutBuf, new WriterOutputStream(inOut.getOut()));
+            err = new TeeOutputStream(stdoutBuf, new WriterOutputStream(inOut.getErr()));
+        } else {
+            out = stdoutBuf;
+            err = stderrBuf;
+        }
+        
         try {
-            startReaderThread(process.getInputStream(), stdoutBuf);
-            startReaderThread(process.getErrorStream(), stderrBuf);
+            startReaderThread(process.getInputStream(), out);
+            startReaderThread(process.getErrorStream(), err);
 
             statusCode = process.waitFor();
         } catch (InterruptedException e) {

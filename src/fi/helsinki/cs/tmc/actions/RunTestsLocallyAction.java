@@ -31,6 +31,8 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.IOProvider;
+import org.openide.windows.InputOutput;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractTmcRunAction {
@@ -236,7 +238,10 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         command[2] = classPath.toString(ClassPath.PathConversionMode.WARN);
         System.arraycopy(args, 0, command, 3, args.length);
         
-        ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir));
+        InputOutput inOut = IOProvider.getDefault().getIO("test output", false);
+        inOut.select();
+        
+        ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
         BgTask.start(taskName, listener, runner);
     }
     
