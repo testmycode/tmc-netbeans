@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import javax.swing.SwingUtilities;
+import java.io.IOException;
+import org.netbeans.junit.NbTestCase;
 import javax.swing.JCheckBox;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import javax.swing.JComboBox;
@@ -10,6 +13,7 @@ import javax.swing.JLabel;
 import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jemmy.operators.JCheckBoxOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
+import org.netbeans.jemmy.operators.JFileChooserOperator;
 import org.netbeans.jemmy.operators.JLabelOperator;
 import static org.junit.Assert.*;
 
@@ -60,9 +64,25 @@ public class SettingsOperator {
         JButtonOperator.findJButton(dialog, "Cancel", true, true).doClick();
     }
     
-    public static void setAllSettings(FullServerFixture serverFixture, String courseName) throws Exception {
+    public void setProjectDownloadDirToTestWorkDir(NbTestCase testCase) throws IOException {
+        // doClick blocks waiting for the file chooser so we send it to the background
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                JButtonOperator.findJButton(dialog, "Browse", true, true).doClick();
+            }
+        });
+        
+        JFileChooserOperator fileChooser = new JFileChooserOperator();
+        fileChooser.setSelectedFile(testCase.getWorkDir());
+        fileChooser.approve();
+    }
+    
+    public static void setAllSettings(TmcFunctionalTestCase testCase, String courseName) throws Exception {
+        FullServerFixture serverFixture = testCase.serverFixture;
         SettingsOperator settings = openSettingsDialog();
         
+        settings.setProjectDownloadDirToTestWorkDir(testCase);
         settings.getUsernameField().setText(serverFixture.expectedUser);
         settings.getPasswordField().setText(serverFixture.expectedPassword);
         settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());

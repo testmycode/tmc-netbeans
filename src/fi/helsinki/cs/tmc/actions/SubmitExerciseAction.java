@@ -7,18 +7,13 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.ui.SubmissionResultDisplayer;
+import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableRunnable;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import java.net.URI;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
@@ -27,21 +22,15 @@ import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.api.progress.ProgressUtils;
-import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
-import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.loaders.DataObject;
 import org.openide.nodes.Node;
-import org.openide.util.HelpCtx;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.actions.NodeAction;
 
 // The action annotations don't work properly with NodeAction (NB 7.0)
 // so this action is declared manually in layer.xml.
 @Messages("CTL_SubmitExerciseAction=Su&bmit")
-public final class SubmitExerciseAction extends NodeAction {
+public final class SubmitExerciseAction extends AbstractTmcRunAction {
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
     
@@ -49,7 +38,7 @@ public final class SubmitExerciseAction extends NodeAction {
     private CourseDb courseDb;
     private NbProjectZipper zipper;
     private ProjectMediator projectMediator;
-    private SubmissionResultDisplayer resultDisplayer;
+    private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
 
     public SubmitExerciseAction() {
@@ -57,10 +46,20 @@ public final class SubmitExerciseAction extends NodeAction {
         this.courseDb = CourseDb.getInstance();
         this.zipper = NbProjectZipper.getDefault();
         this.projectMediator = ProjectMediator.getInstance();
-        this.resultDisplayer = SubmissionResultDisplayer.getInstance();
+        this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         
         putValue("noIconInMenu", Boolean.TRUE);
+    }
+
+    @Override
+    protected CourseDb getCourseDb() {
+        return courseDb;
+    }
+
+    @Override
+    protected ProjectMediator getProjectMediator() {
+        return projectMediator;
     }
     
     @Override
@@ -101,7 +100,7 @@ public final class SubmitExerciseAction extends NodeAction {
                             SwingUtilities.invokeLater(new Runnable() {
                                 @Override
                                 public void run() {
-                                    resultDisplayer.showResult(result);
+                                    resultDisplayer.showSubmissionResult(result);
                                     exercise.setAttempted(true);
                                     if (result.getStatus() == SubmissionResult.Status.OK) {
                                         exercise.setCompleted(true);
@@ -161,25 +160,6 @@ public final class SubmitExerciseAction extends NodeAction {
     }
 
     @Override
-    protected boolean enable(Node[] nodes) {
-        return enable(projectsFromNodes(nodes).toArray(new Project[0]));
-    }
-    
-    /*package (for tests)*/ boolean enable(Project ... projects) {
-        if (projects.length == 0) {
-            return false;
-        }
-        
-        for (Project p : projects) {
-            Exercise exercise = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(p), courseDb);
-            if (exercise != null && exercise.isReturnable()) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-    @Override
     public String getName() {
         return "Su&bmit";
     }
@@ -188,38 +168,5 @@ public final class SubmitExerciseAction extends NodeAction {
     protected String iconResource() {
         // The setting in layer.xml doesn't work with NodeAction
         return "fi/helsinki/cs/tmc/actions/submit.png";
-    }
-
-    @Override
-    public HelpCtx getHelpCtx() {
-        return HelpCtx.DEFAULT_HELP;
-    }
-
-    @Override
-    protected boolean asynchronous() {
-        return false;
-    }
-    
-    private static Set<Project> projectsFromNodes(Node[] nodes) {
-        HashSet<Project> result = new HashSet<Project>();
-        for (Node node : nodes) {
-            Lookup lkp = node.getLookup();
-            result.addAll(lkp.lookupAll(Project.class));
-            result.addAll(projectsFromDataObjects(lkp.lookupAll(DataObject.class)));
-        }
-        return result;
-    }
-    
-    private static List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
-        ArrayList<Project> result = new ArrayList<Project>();
-        for (DataObject dataObj : dataObjects) {
-            result.add(projectFromDataObject(dataObj));
-        }
-        return result;
-    }
-    
-    private static Project projectFromDataObject(DataObject dataObj) {
-        FileObject fileObj = dataObj.getPrimaryFile();
-        return FileOwnerQuery.getOwner(fileObj);
     }
 }

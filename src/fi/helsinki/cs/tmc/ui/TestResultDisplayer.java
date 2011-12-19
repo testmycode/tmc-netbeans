@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.data.TestCaseRecord;
+import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -10,23 +10,23 @@ import java.util.Map;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.NotifyDescriptor;
 
-public class SubmissionResultDisplayer {
-    private static SubmissionResultDisplayer instance;
+public class TestResultDisplayer {
+    private static TestResultDisplayer instance;
     
-    public static SubmissionResultDisplayer getInstance() {
+    public static TestResultDisplayer getInstance() {
         if (instance == null) {
-            instance = new SubmissionResultDisplayer();
+            instance = new TestResultDisplayer();
         }
         return instance;
     }
     
     private ConvenientDialogDisplayer dialogs;
     
-    /*package*/ SubmissionResultDisplayer() {
+    /*package*/ TestResultDisplayer() {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
     
-    public void showResult(SubmissionResult result) {
+    public void showSubmissionResult(SubmissionResult result) {
         switch (result.getStatus()) {
             case OK:
                 dialogs.displayHappyMessage("All tests passed!", "Yay!");
@@ -37,6 +37,25 @@ public class SubmissionResultDisplayer {
             case ERROR:
                 displayError(result.getError());
                 break;
+        }
+    }
+    
+    /**
+     * Shows local results and returns whether a submission should be started.
+     */
+    public boolean showLocalRunResult(List<TestCaseResult> results) {
+        int numFailed = 0;
+        for (TestCaseResult result : results) {
+            if (!result.isSuccessful()) {
+                numFailed += 1;
+            }
+        }
+        
+        if (numFailed == 0) {
+            return dialogs.askYesNo("All tests passed. Submit to server?", "Submit?");
+        } else {
+            displayTestCases(results);
+            return false;
         }
     }
     
@@ -57,12 +76,12 @@ public class SubmissionResultDisplayer {
                 .replace("\n", "<br>");
     }
     
-    private void displayTestCases(List<TestCaseRecord> testCases) {
+    private void displayTestCases(List<TestCaseResult> testCases) {
         LongTextDisplayPanel panel = new LongTextDisplayPanel(testCasesToHtml(groupTestCases(testCases)));
-        dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "", false);
+        dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "Test results", false);
     }
     
-    private String testCasesToHtml(Map<String, List<TestCaseRecord>> testCases) {
+    private String testCasesToHtml(Map<String, List<TestCaseResult>> testCases) {
         StringBuilder sb = new StringBuilder();
         sb.append("<html>");
         sb.append("<p>Some tests failed.</p>");
@@ -78,7 +97,7 @@ public class SubmissionResultDisplayer {
                     .append("</font>")
                     .append("<ul>");
             
-            for (TestCaseRecord tcr : testCases.get(group)) {
+            for (TestCaseResult tcr : testCases.get(group)) {
                 String color = tcr.isSuccessful() ? "green" : "red";
                 sb.append("<li><font color=\"").append(color).append("\">")
                         .append(testCaseLine(tcr))
@@ -92,20 +111,20 @@ public class SubmissionResultDisplayer {
         return sb.toString();
     }
     
-    private Map<String, List<TestCaseRecord>> groupTestCases(List<TestCaseRecord> testCases) {
-        Map<String, List<TestCaseRecord>> result = new HashMap<String, List<TestCaseRecord>>();
-        for (TestCaseRecord tcr : testCases) {
+    private Map<String, List<TestCaseResult>> groupTestCases(List<TestCaseResult> testCases) {
+        Map<String, List<TestCaseResult>> result = new HashMap<String, List<TestCaseResult>>();
+        for (TestCaseResult tcr : testCases) {
             String[] parts = tcr.getName().split(" ", 2);
             String group = parts[0];
             if (!result.containsKey(group)) {
-                result.put(group, new ArrayList<TestCaseRecord>());
+                result.put(group, new ArrayList<TestCaseResult>());
             }
             result.get(group).add(tcr);
         }
         return result;
     }
     
-    private String testCaseLine(TestCaseRecord tcr) {
+    private String testCaseLine(TestCaseResult tcr) {
         String msg;
         if (tcr.getMessage() != null) {
             msg = StringEscapeUtils.escapeHtml4(tcr.getMessage());
@@ -117,7 +136,7 @@ public class SubmissionResultDisplayer {
         return testCaseLinePrefix(tcr) + msg;
     }
     
-    private String testCaseLinePrefix(TestCaseRecord tcr) {
+    private String testCaseLinePrefix(TestCaseResult tcr) {
         String[] parts = tcr.getName().split(" ", 2);
         if (parts.length == 2) {
             return parts[1] + " &ndash; ";
@@ -126,8 +145,8 @@ public class SubmissionResultDisplayer {
         }
     }
 
-    private boolean allSuccessful(List<TestCaseRecord> testCases) {
-        for (TestCaseRecord tcr : testCases) {
+    private boolean allSuccessful(List<TestCaseResult> testCases) {
+        for (TestCaseResult tcr : testCases) {
             if (!tcr.isSuccessful()) {
                 return false;
             }

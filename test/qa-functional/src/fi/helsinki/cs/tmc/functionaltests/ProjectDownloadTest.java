@@ -19,7 +19,7 @@ public class ProjectDownloadTest extends TmcFunctionalTestCase {
     
     public void testProjectDownloadAndExtraction() throws Exception {
         serverFixture.addDefaultCourse("TestCourse", getTestProjectZip());
-        SettingsOperator.setAllSettings(serverFixture, "TestCourse");
+        SettingsOperator.setAllSettings(this, "TestCourse");
         
         new NbDialogOperator("Open exercises?").btYes().doClick();
         

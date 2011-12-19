@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import java.util.List;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.data.TestCaseRecord;
+import fi.helsinki.cs.tmc.data.TestCaseResult;
 import static fi.helsinki.cs.tmc.data.SubmissionResult.Status.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -45,7 +45,7 @@ public class SubmissionResultParserTest {
         assertEquals(FAIL, result.getStatus());
         assertNull(result.getError());
         
-        List<TestCaseRecord> testCases = result.getTestCases();
+        List<TestCaseResult> testCases = result.getTestCases();
         assertEquals(2, testCases.size());
         assertEquals("Some test", testCases.get(0).getName());
         assertEquals("Another test", testCases.get(1).getName());

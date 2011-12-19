@@ -19,6 +19,7 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
 
     @Override
     protected void setUp() throws Exception {
+        this.clearWorkDir();
         serverFixture = new FullServerFixture();
         super.setUp();
         dismissInitialDialogIfAny();
@@ -26,6 +27,7 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
     
     @Override
     protected void tearDown() throws Exception {
+        this.clearWorkDir();
         serverFixture.tearDown();
         super.tearDown();
     }
@@ -37,6 +39,13 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
             JButtonOperator.findJButton(settingsDialog, "Cancel", true, true).doClick();
         } catch (JemmyException e) {
         }
+    }
+    
+    protected void arrangeForCourseToBeDownloaded(String courseName) throws Exception {
+        serverFixture.addDefaultCourse(courseName, getTestProjectZip());
+        SettingsOperator.setAllSettings(this, courseName);
+        
+        new NbDialogOperator("Open exercises?").btYes().doClick();
     }
     
     protected File getTestProjectZip() {

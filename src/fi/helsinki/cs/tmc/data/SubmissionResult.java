@@ -13,7 +13,7 @@ public class SubmissionResult {
     
     private Status status;
     private String error; // e.g. compile error
-    private List<TestCaseRecord> testCases;
+    private List<TestCaseResult> testCases;
     
     public SubmissionResult() {
         status = Status.ERROR;
@@ -25,11 +25,23 @@ public class SubmissionResult {
         return status;
     }
 
+    public void setStatus(Status status) {
+        this.status = status;
+    }
+
     public String getError() {
         return error;
     }
 
-    public List<TestCaseRecord> getTestCases() {
+    public void setError(String error) {
+        this.error = error;
+    }
+
+    public List<TestCaseResult> getTestCases() {
         return testCases;
+    }
+
+    public void setTestCases(List<TestCaseResult> testCases) {
+        this.testCases = testCases;
     }
 }
