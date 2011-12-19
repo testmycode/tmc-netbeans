@@ -31,6 +31,7 @@ public class Exercise implements Serializable {
     private boolean attempted;
     private boolean completed;
     private boolean returnable;
+    private String checksum;
 
     public Exercise() {
     }
@@ -136,6 +137,14 @@ public class Exercise implements Serializable {
 
     public void setReturnable(boolean returnable) {
         this.returnable = returnable;
+    }
+
+    public String getChecksum() {
+        return checksum;
+    }
+
+    public void setChecksum(String checksum) {
+        this.checksum = checksum;
     }
     
     @Override

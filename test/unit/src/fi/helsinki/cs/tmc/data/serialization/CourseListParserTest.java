@@ -27,7 +27,8 @@ public class CourseListParserTest {
                 "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
                 "attempted: true," +
                 "completed: false," +
-                "returnable: true" +
+                "returnable: true," +
+                "checksum: \"123abc\"" +
                 "}]";
         String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
         
@@ -51,6 +52,7 @@ public class CourseListParserTest {
         assertTrue(exercise.isAttempted());
         assertFalse(exercise.isCompleted());
         assertTrue(exercise.isReturnable());
+        assertEquals("123abc", exercise.getChecksum());
     }
     
     @Test
