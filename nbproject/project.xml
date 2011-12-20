@@ -275,12 +275,12 @@
                 <binary-origin>release/modules/ext/httpcore-4.1.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
-                <runtime-relative-path>ext/mockito-all-1.8.5.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/mockito-all-1.8.5.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
                 <runtime-relative-path>ext/commons-codec-1.4.jar</runtime-relative-path>
                 <binary-origin>release/modules/ext/commons-codec-1.4.jar</binary-origin>
+            </class-path-extension>
+            <class-path-extension>
+                <runtime-relative-path>ext/mockito-all-1.9.0.jar</runtime-relative-path>
+                <binary-origin>release/modules/ext/mockito-all-1.9.0.jar</binary-origin>
             </class-path-extension>
             <class-path-extension>
                 <runtime-relative-path>ext/commons-io-2.0.1.jar</runtime-relative-path>
