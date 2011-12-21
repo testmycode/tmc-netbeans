@@ -7,12 +7,13 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParseException;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.data.Exercise;
 import java.lang.reflect.Type;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 public class CourseListParser {
     
@@ -24,7 +25,7 @@ public class CourseListParser {
     /**
      * Creates a CourseList object from text.
      */
-    public CourseList parseFromJson(String json) {
+    public List<Course> parseFromJson(String json) {
         if (json == null) {
             throw new NullPointerException("Json string is null");
         }
@@ -38,7 +39,7 @@ public class CourseListParser {
             
             Course[] courses = gson.fromJson(json, CourseListContainer.class).courses;
 
-            CourseList courseList = new CourseList();
+            List<Course> courseList = new ArrayList<Course>();
             for (Course course : courses) {
                 courseList.add(course);
                 for (Exercise ex : course.getExercises()) {

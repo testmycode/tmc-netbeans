@@ -54,9 +54,9 @@ public class HttpRequestExecutorTest {
         MockBgTaskListener<byte[]> listener1 = new MockBgTaskListener<byte[]>();
         MockBgTaskListener<byte[]> listener2 = new MockBgTaskListener<byte[]>();
         MockBgTaskListener<byte[]> listener3 = new MockBgTaskListener<byte[]>();
-        Future<byte[]> result1 = BgTask.start("1", listener1, new HttpRequestExecutor(server.getBaseUrl()));
-        Future<byte[]> result2 = BgTask.start("2", listener2, new HttpRequestExecutor(server.getBaseUrl()));
-        Future<byte[]> result3 = BgTask.start("3", listener3, new HttpRequestExecutor(server.getBaseUrl()));
+        Future<byte[]> result1 = BgTask.start("1", new HttpRequestExecutor(server.getBaseUrl()), listener1);
+        Future<byte[]> result2 = BgTask.start("2", new HttpRequestExecutor(server.getBaseUrl()), listener2);
+        Future<byte[]> result3 = BgTask.start("3", new HttpRequestExecutor(server.getBaseUrl()), listener3);
         
         assertArrayEquals(new byte[] { 1, 2, 3 }, result3.get());
         assertArrayEquals(new byte[] { 1, 2, 3 }, result2.get());

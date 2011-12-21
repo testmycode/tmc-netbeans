@@ -2,18 +2,16 @@ package fi.helsinki.cs.tmc.model;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
-import fi.helsinki.cs.tmc.data.CourseList;
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
 import java.net.URI;
 import java.util.Collections;
+import java.util.List;
 import java.util.Map;
-import java.util.concurrent.Future;
 
 /**
  * A frontend for the server.
@@ -21,19 +19,18 @@ import java.util.concurrent.Future;
 public class ServerAccess {
     private static final int API_VERSION = 1;
     
-    public static ServerAccess create() {
-        return new ServerAccess(
-                TmcSettings.getDefault(),
-                new CourseListParser()
-                );
-    }
-    
     private TmcSettings settings;
     private CourseListParser courseListParser;
 
-    public ServerAccess(
-            TmcSettings settings,
-            CourseListParser courseListParser) {
+    public ServerAccess() {
+        this(TmcSettings.getDefault());
+    }
+
+    public ServerAccess(TmcSettings settings) {
+        this(settings, new CourseListParser());
+    }
+
+    public ServerAccess(TmcSettings settings, CourseListParser courseListParser) {
         this.settings = settings;
         this.courseListParser = courseListParser;
     }
@@ -61,11 +58,11 @@ public class ServerAccess {
                 !settings.getServerBaseUrl().isEmpty();
     }
     
-    public Future<CourseList> startDownloadingCourseList(BgTaskListener<CourseList> listener) {
+    public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
         final CancellableCallable<String> download = createHttpTasks().downloadTextFile(getCourseListUrl());
-        CancellableCallable<CourseList> task = new CancellableCallable<CourseList>() {
+        return new CancellableCallable<List<Course>>() {
             @Override
-            public CourseList call() throws Exception {
+            public List<Course> call() throws Exception {
                 String text = download.call();
                 return courseListParser.parseFromJson(text);
             }
@@ -75,24 +72,21 @@ public class ServerAccess {
                 return download.cancel();
             }
         };
-        
-        return BgTask.start("Downloading " + getCourseListUrl(), listener, task);
     }
     
-    public Future<byte[]> startDownloadingExerciseZip(final Exercise exercise, BgTaskListener<byte[]> listener) {
-        final String zipUrl = exercise.getDownloadUrl();
-        final CancellableCallable<byte[]> download = createHttpTasks().downloadBinaryFile(zipUrl);
-        return BgTask.start("Downloading " + zipUrl, listener, download);
+    public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {
+        String zipUrl = exercise.getDownloadUrl();
+        return createHttpTasks().downloadBinaryFile(zipUrl);
     }
     
-    public Future<URI> startSubmittingExercise(final Exercise exercise, final byte[] sourceZip, BgTaskListener<URI> listener) {
+    public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
         
         Map<String, String> params = Collections.emptyMap();
         final CancellableCallable<String> upload =
                 createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
         
-        final CancellableCallable<URI> task = new CancellableCallable<URI>() {
+        return new CancellableCallable<URI>() {
             @Override
             public URI call() throws Exception {
                 String response = upload.call();
@@ -115,8 +109,6 @@ public class ServerAccess {
                 throw new UnsupportedOperationException("Not supported yet.");
             }
         };
-        
-        return BgTask.start("Submitting " + exercise.getName(), listener, task);
     }
     
     public CancellableCallable<String> getSubmissionFetchJob(URI submissionUrl) {

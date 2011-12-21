@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseList;
+import java.util.List;
 
 public interface PreferencesUI {
 
@@ -17,9 +17,9 @@ public interface PreferencesUI {
     
     boolean getShouldSavePassword();
 
-    void setAvailableCourses(CourseList courses);
+    public List<Course> getAvailableCourses();
 
-    void courseRefreshFailedOrCanceled();
+    void setAvailableCourses(List<Course> courses);
     
     void setProjectDir(String projectDir);
 

@@ -3,13 +3,19 @@ package fi.helsinki.cs.tmc.model;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseList;
-import fi.helsinki.cs.tmc.data.ExerciseList;
+import fi.helsinki.cs.tmc.data.CourseListUtils;
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseKey;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -17,6 +23,8 @@ import java.util.logging.Logger;
  * Stores the list of available courses, the current course and its exercise list.
  */
 public class CourseDb {
+
+    public static class SavedEvent implements TmcEvent {}
     
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;
@@ -28,20 +36,22 @@ public class CourseDb {
         return defaultInstance;
     }
 
+    private TmcEventBus eventBus;
     private ConfigFile configFile;
-    private CourseList availableCourses;
+    private List<Course> availableCourses;
     private String currentCourseName;
-    
-    private List<CourseDbListener> listeners;
+    private Map<ExerciseKey, String> downloadedExerciseChecksums;
 
     public CourseDb() {
-        this(new ConfigFile("CourseDb.json"));
+        this(TmcEventBus.getInstance(), new ConfigFile("CourseDb.json"));
     }
     
-    public CourseDb(ConfigFile configFile) {
+    public CourseDb(TmcEventBus eventBus, ConfigFile configFile) {
+        this.eventBus = eventBus;
         this.configFile = configFile;
-        this.availableCourses = new CourseList();
-        this.listeners = new ArrayList<CourseDbListener>();
+        this.availableCourses = new ArrayList<Course>();
+        this.currentCourseName = null;
+        this.downloadedExerciseChecksums = new HashMap<ExerciseKey, String>();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -49,17 +59,17 @@ public class CourseDb {
         }
     }
     
-    public CourseList getAvailableCourses() {
-        return availableCourses;
+    public List<Course> getAvailableCourses() {
+        return Collections.unmodifiableList(availableCourses);
     }
 
-    public void setAvailableCourses(CourseList availableCourses) {
+    public void setAvailableCourses(List<Course> availableCourses) {
         this.availableCourses = availableCourses;
         save();
     }
 
     public Course getCurrentCourse() {
-        return availableCourses.getCourseByName(currentCourseName);
+        return CourseListUtils.getCourseByName(availableCourses, currentCourseName);
     }
 
     public String getCurrentCourseName() {
@@ -67,12 +77,21 @@ public class CourseDb {
     }
 
     public void setCurrentCourseName(String currentCourseName) {
-        if (availableCourses.hasCourseByName(currentCourseName)) {
+        if (CourseListUtils.hasCourseByName(availableCourses, currentCourseName)) {
             this.currentCourseName = currentCourseName;
             save();
         } else {
-            logger.warning("Tried to set current course set to one not in available courses");
+            logger.warning("Tried to set current course to one not in available courses");
         }
+    }
+
+    public Exercise getExerciseByKey(ExerciseKey key) {
+        for (Exercise ex : getAllExercises()) {
+            if (key.equals(ex.getKey())) {
+                return ex;
+            }
+        }
+        return null;
     }
 
     /**
@@ -81,25 +100,42 @@ public class CourseDb {
      * <p>
      * If no course is currently selected then returns the empty collection.
      */
-    public ExerciseList getCurrentCourseExercises() {
+    public List<Exercise> getCurrentCourseExercises() {
         Course course = getCurrentCourse();
         if (course != null) {
             return course.getExercises();
         } else {
-            return new ExerciseList();
+            return new ArrayList<Exercise>();
         }
     }
     
     /**
      * Returns all exercises from all courses.
      */
-    public ExerciseList getAllExercises() {
-        ExerciseList result = new ExerciseList();
+    public List<Exercise> getAllExercises() {
+        List<Exercise> result = new ArrayList<Exercise>();
         for (Course course : availableCourses) {
             result.addAll(course.getExercises());
         }
         return result;
     }
+
+    public String getDownloadedExerciseChecksum(ExerciseKey ex) {
+        return downloadedExerciseChecksums.get(ex);
+    }
+    
+    /**
+     * Informs the course database that the exercise is considered downloaded.
+     * 
+     * <p>
+     * Sets the downloaded checksum of the exercise to be the one reported by the server.
+     */
+    public void exerciseDownloaded(Exercise ex) {
+        downloadedExerciseChecksums.put(ex.getKey(), ex.getChecksum());
+        save();
+    }
+    
+    //TODO: arrange for downloadedExerciseChecksums.put(..., null) when a project is deleted!
     
     public void save() {
         try {
@@ -107,56 +143,56 @@ public class CourseDb {
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to save course database", e);
         }
-        fireCourseDbSaved();
-    }
-
-    public void addListener(CourseDbListener listener) {
-        listeners.add(listener);
-    }
-    
-    private void fireCourseDbSaved() {
-        for (CourseDbListener listener : listeners) {
-            listener.courseDbSaved();
-        }
+        eventBus.post(new SavedEvent());
     }
     
     private static class StoredStuff {
-        public ArrayList<Course> availableCourses;
+        public List<Course> availableCourses;
         public String currentCourseName;
+        public Map<ExerciseKey, String> downloadedExerciseChecksums;
     }
     
     private void saveToFile() throws IOException {
-        Gson gson = new GsonBuilder()
-                .serializeNulls()
-                .setPrettyPrinting()
-                .create();
         StoredStuff stuff = new StoredStuff();
         stuff.availableCourses = this.availableCourses;
         stuff.currentCourseName = this.currentCourseName;
+        stuff.downloadedExerciseChecksums = this.downloadedExerciseChecksums;
         Writer w = configFile.getWriter();
         try {
-            gson.toJson(stuff, w);
+            getGson().toJson(stuff, w);
         } finally {
             w.close();
         }
     }
 
     private void loadFromFile() throws IOException {
-        Gson gson = new Gson();
+        if (!configFile.exists()) {
+            return;
+        }
+        
         Reader reader = configFile.getReader();
         StoredStuff stuff;
         try {
-            stuff = gson.fromJson(reader, StoredStuff.class);
+            stuff = getGson().fromJson(reader, StoredStuff.class);
         } finally {
             reader.close();
         }
         if (stuff != null) {
-            this.availableCourses = new CourseList();
+            this.availableCourses = new ArrayList<Course>();
             if (stuff.availableCourses != null) {
                 this.availableCourses.addAll(stuff.availableCourses);
             }
             
             this.currentCourseName = stuff.currentCourseName;
+            this.downloadedExerciseChecksums = stuff.downloadedExerciseChecksums;
         }
+    }
+    
+    private Gson getGson() {
+        return new GsonBuilder()
+                .serializeNulls()
+                .setPrettyPrinting()
+                .registerTypeAdapter(ExerciseKey.class, new ExerciseKey.GsonAdapter())
+                .create();
     }
 }

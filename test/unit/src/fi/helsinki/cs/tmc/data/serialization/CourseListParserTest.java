@@ -3,9 +3,11 @@ package fi.helsinki.cs.tmc.data.serialization;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseList;
+import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseListUtils;
 import java.util.GregorianCalendar;
+import java.util.List;
 import org.junit.Before;
 
 public class CourseListParserTest {
@@ -32,12 +34,12 @@ public class CourseListParserTest {
                 "}]";
         String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
         
-        CourseList result = parser.parseFromJson(json);
+        List<Course> result = parser.parseFromJson(json);
         
-        Course course = result.getCourseByName("TheCourse");
+        Course course = CourseListUtils.getCourseByName(result, "TheCourse");
         assertEquals("TheCourse", course.getName());
         
-        Exercise exercise = course.getExercises().getExerciseByName("TheExercise");
+        Exercise exercise = ExerciseListUtils.getExerciseByName(course.getExercises(), "TheExercise");
         
         assertEquals("TheCourse", exercise.getCourseName());
         
@@ -57,7 +59,7 @@ public class CourseListParserTest {
     
     @Test
     public void itShouldParseAnEmptyJsonArrayAsAnEmptyCourseList() {
-        CourseList empty = parser.parseFromJson("{api_version: 1, courses: []}");
+        List<Course> empty = parser.parseFromJson("{api_version: 1, courses: []}");
         assertFalse(empty.iterator().hasNext());
     }
 
@@ -85,7 +87,7 @@ public class CourseListParserTest {
                 "}]";
         String json = "{api_version: 1, courses: [{\"name\": \"TheCourse\",\"exercises\": " + exercisesJson + "}]}";
         
-        CourseList result = parser.parseFromJson(json);
+        List<Course> result = parser.parseFromJson(json);
         
         assertNull(result.get(0).getExercises().get(0).getDeadline());
     }

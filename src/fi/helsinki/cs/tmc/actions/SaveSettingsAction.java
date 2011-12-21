@@ -1,24 +1,22 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
-import javax.swing.SwingUtilities;
 
 public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
-    private OpenExercisesAction openExercisesAction;
     
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
-        this.openExercisesAction = new OpenExercisesAction();
     }
 
     @Override
@@ -41,25 +39,16 @@ public class SaveSettingsAction extends AbstractAction {
         
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();
+            courseDb.setAvailableCourses(prefUi.getAvailableCourses());
             courseDb.setCurrentCourseName(courseName);
-            if (!courseDb.getCurrentCourseExercises().isEmpty()) {
-                promptOpeningExercises();
+            LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
+            if (status.thereIsSomethingToDownload()) {
+                DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
             }
         } else {
             courseDb.setCurrentCourseName(null);
         }
         
         settings.save();
-    }
-
-    private void promptOpeningExercises() {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (dialogs.askYesNo("Open latest exercises now?", "Open exercises?")) {
-                    openExercisesAction.actionPerformed(null);
-                }
-            }
-        });
     }
 }

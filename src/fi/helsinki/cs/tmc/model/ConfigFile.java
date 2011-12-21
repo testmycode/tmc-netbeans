@@ -33,6 +33,10 @@ public class ConfigFile {
         }
         return fileObject;
     }
+    
+    public boolean exists() throws IOException {
+        return getFileObject().getSize() > 0;
+    }
 
     public Writer getWriter() throws IOException {
         return new OutputStreamWriter(new BufferedOutputStream(getFileObject().getOutputStream()), "UTF-8");

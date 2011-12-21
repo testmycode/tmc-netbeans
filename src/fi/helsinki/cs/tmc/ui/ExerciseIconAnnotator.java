@@ -1,8 +1,9 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.CourseDbListener;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
@@ -18,21 +19,29 @@ import org.openide.util.ImageUtilities;
 import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = ProjectIconAnnotator.class)
-public class ExerciseIconAnnotator implements ProjectIconAnnotator, CourseDbListener {
+public class ExerciseIconAnnotator implements ProjectIconAnnotator {
 
     private static final Logger log = Logger.getLogger(ExerciseIconAnnotator.class.getName());
-    
+
+    private TmcEventBus eventBus;
     private ChangeSupport changeSupport;
     private CourseDb courses;
     private ProjectMediator projectMediator;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public ExerciseIconAnnotator() {
+        this.eventBus = new TmcEventBus();
         this.changeSupport = new ChangeSupport(this);
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         
-        this.courses.addListener(this);
+        eventBus.subscribe(new TmcEventListener() {
+            public void receive(CourseDb.SavedEvent event) {
+                updateAllIcons();
+            }
+        });
+
+        //TODO: also update on project open!
     }
 
     @Override
@@ -96,10 +105,5 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator, CourseDbList
     @Override
     public void removeChangeListener(ChangeListener listener) {
         changeSupport.removeChangeListener(listener);
-    }
-
-    @Override
-    public void courseDbSaved() {
-        updateAllIcons();
     }
 }

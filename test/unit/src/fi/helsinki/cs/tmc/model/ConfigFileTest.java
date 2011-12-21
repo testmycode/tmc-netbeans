@@ -22,9 +22,12 @@ public class ConfigFileTest {
     
     @Test
     public void itShouldAllowConvenientReadsAndWritesOfTheFile() throws IOException {
-        ConfigFile sf = new ConfigFile("hello.txt");
-        sf.writeContents("Hello");
-        sf = new ConfigFile("hello.txt");
-        assertEquals("Hello", sf.readContents());
+        ConfigFile f = new ConfigFile("hello.txt");
+        assertFalse(f.exists());
+        f.writeContents("Hello");
+        assertTrue(f.exists());
+        f = new ConfigFile("hello.txt");
+        assertTrue(f.exists());
+        assertEquals("Hello", f.readContents());
     }
 }

@@ -11,6 +11,7 @@ import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.CancellableRunnable;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
 import java.net.URI;
@@ -42,7 +43,7 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
     private ConvenientDialogDisplayer dialogDisplayer;
 
     public SubmitExerciseAction() {
-        this.serverAccess = ServerAccess.create();
+        this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.zipper = NbProjectZipper.getDefault();
         this.projectMediator = ProjectMediator.getInstance();
@@ -136,10 +137,16 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
             }
         };
 
-        BgTask.start("Zipping up " + exercise.getName(), new BgTaskListener<byte[]>() {
+        BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                return zipper.zipProjectSources(FileUtil.toFile(project.getProjectDir()));
+            }
+        }, new BgTaskListener<byte[]>() {
             @Override
             public void bgTaskReady(byte[] zipData) {
-                serverAccess.startSubmittingExercise(exercise, zipData, uriListener);
+                CancellableCallable<URI> task = serverAccess.getSubmittingExerciseTask(exercise, zipData);
+                BgTask.start("Sending " + exercise.getName(), task, uriListener);
             }
 
             @Override
@@ -150,11 +157,6 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
             @Override
             public void bgTaskFailed(Throwable ex) {
                 uriListener.bgTaskFailed(ex);
-            }
-        }, new Callable<byte[]>() {
-            @Override
-            public byte[] call() throws Exception {
-                return zipper.zipProjectSources(FileUtil.toFile(project.getProjectDir()));
             }
         });
     }

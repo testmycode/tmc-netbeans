@@ -29,11 +29,11 @@ public class BgTask<V> implements CancellableCallable<V> {
     private boolean cancelled;
     private Thread executingThread;
     
-    public static <V> Future<V> start(String label, BgTaskListener<V> listener, Callable<V> callable) {
-        return new BgTask<V>(label, listener, callable).start();
+    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<V> listener) {
+        return new BgTask<V>(label, callable, listener).start();
     }
     
-    public BgTask(String label, BgTaskListener<V> listener, Callable<V> callable) {
+    public BgTask(String label, Callable<V> callable, BgTaskListener<V> listener) {
         this.label = label;
         this.listener = listener;
         this.callable = callable;

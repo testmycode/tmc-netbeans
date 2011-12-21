@@ -45,6 +45,10 @@ public class Exercise implements Serializable {
         this.courseName = courseName;
     }
 
+    public boolean hasDeadlinePassed() {
+        return hasDeadlinePassedAt(new Date());
+    }
+
     public boolean hasDeadlinePassedAt(Date time) {
         if (time == null) {
             throw new NullPointerException("Given time was null at Exercise.isDeadlineEnded");
@@ -54,6 +58,10 @@ public class Exercise implements Serializable {
         } else {
             return false;
         }
+    }
+    
+    public ExerciseKey getKey() {
+        return new ExerciseKey(courseName, name);
     }
 
     public String getName() {

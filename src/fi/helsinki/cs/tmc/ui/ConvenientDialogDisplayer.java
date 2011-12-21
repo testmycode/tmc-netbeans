@@ -59,7 +59,7 @@ public class ConvenientDialogDisplayer {
         DialogDescriptor desc = new DialogDescriptor(content,title);
         desc.setModal(modal);
         desc.setOptions(new Object[] { NotifyDescriptor.OK_OPTION });
-        desc.setValue(NotifyDescriptor.OK_OPTION); //FIXME: probably wrong. Find a way to focus on the OK button.
+        desc.setValue(NotifyDescriptor.OK_OPTION);
         desc.setMessageType(notifyType);
         DialogDisplayer.getDefault().notifyLater(desc);
     }

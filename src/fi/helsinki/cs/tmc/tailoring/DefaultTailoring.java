@@ -15,11 +15,6 @@ public class DefaultTailoring implements Tailoring {
     public String getUsernameFieldName() {
         return "username";
     }
-
-    @Override
-    public String getFirstRunMessage() {
-        return "TestMyCode (TMC) installed. Opening settings.";
-    }
     
     
     protected String getSystemUsername() {

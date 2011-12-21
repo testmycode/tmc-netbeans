@@ -73,7 +73,12 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
     private void performAction(Project ... projects) {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
-            BgTask.start("Compiling project", new BgTaskListener<Integer>() {
+            BgTask.start("Compiling project", new Callable<Integer>() {
+                @Override
+                public Integer call() throws Exception {
+                    return startCompilingProject(project).result();
+                }
+            }, new BgTaskListener<Integer>() {
                 @Override
                 public void bgTaskReady(Integer result) {
                     if (result == 0) {
@@ -90,12 +95,6 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
 
                 @Override
                 public void bgTaskCancelled() {
-                }
-                
-            }, new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    return startCompilingProject(project).result();
                 }
             });
         }
@@ -145,11 +144,12 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
             for (int i = 0; i < testMethods.size(); ++i) {
                 args[argsBeforeMethods + i] = testMethods.get(i).toString();
             }
-            
-            //TODO: I/O to the output window!
-            
+
+            InputOutput inOut = IOProvider.getDefault().getIO("test output", false);
+            inOut.select();
+
             final File tempFileAsFinal = tempFile;
-            runJavaProcessInProject(project, "Running tests", args, new BgTaskListener<ProcessResult>() {
+            runJavaProcessInProject(project, "Running tests", args, inOut, new BgTaskListener<ProcessResult>() {
                 @Override
                 public void bgTaskReady(ProcessResult result) {
                     log.info("Test run standard output:");
@@ -221,10 +221,10 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         return results;
     }
     
-    private void runJavaProcessInProject(Project project, String taskName, String[] args, BgTaskListener<ProcessResult> listener) {
+    private void runJavaProcessInProject(Project project, String taskName, String[] args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
         FileObject projectDir = project.getProjectDirectory();
         
-        JavaPlatform platform = JavaPlatform.getDefault(); // TODO: should use project's configured platform instead
+        JavaPlatform platform = JavaPlatform.getDefault(); // Should probably use project's configured platform instead
         ClassPath classPath = getTestClassPath(project);
         
         FileObject javaExe = platform.findTool("java");
@@ -238,11 +238,8 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         command[2] = classPath.toString(ClassPath.PathConversionMode.WARN);
         System.arraycopy(args, 0, command, 3, args.length);
         
-        InputOutput inOut = IOProvider.getDefault().getIO("test output", false);
-        inOut.select();
-        
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
-        BgTask.start(taskName, listener, runner);
+        BgTask.start(taskName, runner, listener);
     }
     
     private ClassPath getTestClassPath(Project project) throws RuntimeException {

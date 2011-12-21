@@ -39,7 +39,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
         this.submissionUrl = submissionUrl;
         this.progress = progress;
         this.resultParser = new SubmissionResultParser();
-        this.serverAccess = ServerAccess.create();
+        this.serverAccess = new ServerAccess();
         this.timeout = DEFAULT_TIMEOUT;
         this.pollDelay = DEFAULT_POLL_DELAY;
     }

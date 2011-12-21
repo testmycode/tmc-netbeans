@@ -2,8 +2,8 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseList;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,9 +25,11 @@ import org.apache.commons.lang3.StringUtils;
  * a dialog that provides these.
  */
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
-    
+
     private String usernameFieldName = "username";
-    
+
+    private ConvenientDialogDisplayer dialogs = ConvenientDialogDisplayer.getDefault();
+
     private DelayedRunner refreshRunner = new DelayedRunner();
     private RefreshSettings lastRefreshSettings = null;
     
@@ -63,9 +65,8 @@ import org.apache.commons.lang3.StringUtils;
         public int hashCode() {
             return 0;
         }
-        
     }
-    
+
     /*package*/ PreferencesPanel() {
         initComponents();
         makeLoadingLabelNicer();
@@ -130,9 +131,9 @@ import org.apache.commons.lang3.StringUtils;
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
     }
-    
+
     @Override
-    public void setAvailableCourses(CourseList courses) {
+    public void setAvailableCourses(List<Course> courses) {
         setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
         
         String previousSelectedCourseName = null;
@@ -162,12 +163,16 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
     }
-    
+
     @Override
-    public void courseRefreshFailedOrCanceled() {
-        setCourseListRefreshInProgress(false);
+    public List<Course> getAvailableCourses() {
+        List<Course> result = new ArrayList<Course>(coursesComboBox.getItemCount());
+        for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
+            result.add((Course)coursesComboBox.getItemAt(i));
+        }
+        return result;
     }
-    
+
     @Override
     public void setSelectedCourse(Course course) {
         coursesComboBox.setSelectedItem(course);
@@ -244,7 +249,7 @@ import org.apache.commons.lang3.StringUtils;
         updateAdvice();
         
         if (canProbablyRefreshCourseList() && !alreadyRefreshingCourseList() && settingsChangedSinceLastRefresh()) {
-            startRefreshingCourseList(true);
+            startRefreshingCourseList(true, true);
         }
     }
     
@@ -303,17 +308,43 @@ import org.apache.commons.lang3.StringUtils;
         return lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings());
     }
     
-    private void startRefreshingCourseList(boolean failSilently) {
+    private void startRefreshingCourseList(boolean failSilently, boolean delay) {
         final RefreshCoursesAction action = new RefreshCoursesAction(getSettings());
-        action.setFailSilently(failSilently);
-        refreshRunner.setTask(new Runnable() {
+        action.addDefaultListener(!failSilently, false);
+        action.addListener(new BgTaskListener<List<Course>>() {
             @Override
-            public void run() {
-                setCourseListRefreshInProgress(true);
-                lastRefreshSettings = getRefreshSettings();
-                action.actionPerformed(null);
+            public void bgTaskReady(List<Course> result) {
+                setCourseListRefreshInProgress(false);
+                setAvailableCourses(result);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                setCourseListRefreshInProgress(false);
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                setCourseListRefreshInProgress(false);
             }
         });
+
+        if (delay) {
+            refreshRunner.setTask(new Runnable() {
+                @Override
+                public void run() {
+                    refreshCourseListNow(action);
+                }
+            });
+        } else {
+            refreshCourseListNow(action);
+        }
+    }
+    
+    private void refreshCourseListNow(RefreshCoursesAction action) {
+        setCourseListRefreshInProgress(true);
+        lastRefreshSettings = getRefreshSettings();
+        action.run();
     }
     
 
@@ -495,7 +526,6 @@ import org.apache.commons.lang3.StringUtils;
      * @param evt 
      */
     private void folderChooserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folderChooserBtnActionPerformed
-
         JFileChooser folderChooser = new JFileChooser();
         folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int choice = folderChooser.showOpenDialog(this);
@@ -508,7 +538,11 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        startRefreshingCourseList(false);
+        TmcSettings settings = getSettings();
+        if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
+            dialogs.displayError("Please set the server address first");
+        }
+        startRefreshingCourseList(false, false);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
     private void serverAddressTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressTextFieldActionPerformed

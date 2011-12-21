@@ -1,80 +1,75 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.CourseList;
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
-import fi.helsinki.cs.tmc.ui.PreferencesUI;
-import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import java.awt.event.ActionEvent;
-import javax.swing.AbstractAction;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListenerList;
+import java.util.List;
 
-public class RefreshCoursesAction extends AbstractAction {
-    private TmcSettings settings;
+/**
+ * Refreshes the course list in the background.
+ */
+public final class RefreshCoursesAction {
     private ServerAccess serverAccess;
     private CourseDb courseDb;
-    private PreferencesUIFactory prefUIFactory;
     private ConvenientDialogDisplayer dialogs;
     
-    private boolean failSilently = false;
+    private BgTaskListenerList<List<Course>> listeners;
 
     public RefreshCoursesAction() {
         this(TmcSettings.getDefault());
     }
     
     public RefreshCoursesAction(TmcSettings settings) {
-        this.settings = settings;
-        this.serverAccess = ServerAccess.create();
+        this.serverAccess = new ServerAccess(settings);
         this.serverAccess.setSettings(settings);
         this.courseDb = CourseDb.getInstance();
-        this.prefUIFactory = PreferencesUIFactory.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
-    }
-    
-    public void setFailSilently(boolean failSilently) {
-        this.failSilently = failSilently;
+
+        this.listeners = new BgTaskListenerList<List<Course>>();
     }
 
-    @Override
-    public void actionPerformed(ActionEvent e) {
-        if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
-            dialogs.displayError("Please set the server address first.");
-            notifyPrefUiThatCourseRefreshFailed();
-            return;
+    public void addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
+        this.listeners.addListener(new DefaultListener(showDialogOnError, updateCourseDb));
+    }
+
+    public void addListener(BgTaskListener<List<Course>> listener) {
+        this.listeners.addListener(listener);
+    }
+
+    public void run() {
+        BgTask.start("Refreshing course list", serverAccess.getDownloadingCourseListTask(), listeners);
+    }
+
+    private class DefaultListener implements BgTaskListener<List<Course>> {
+        private final boolean showDialogOnError;
+        private final boolean updateCourseDb;
+
+        public DefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
+            this.showDialogOnError = showDialogOnError;
+            this.updateCourseDb = updateCourseDb;
         }
-        
-        serverAccess.startDownloadingCourseList(new BgTaskListener<CourseList>() {
-            @Override
-            public void bgTaskReady(CourseList result) {
+
+        @Override
+        public void bgTaskReady(List<Course> result) {
+            if (updateCourseDb) {
                 courseDb.setAvailableCourses(result);
-                PreferencesUI prefUi = prefUIFactory.getCurrentUI();
-                if (prefUi != null) {
-                    prefUi.setAvailableCourses(result);
-                }
             }
+        }
 
-            @Override
-            public void bgTaskCancelled() {
-                notifyPrefUiThatCourseRefreshFailed();
-            }
+        @Override
+        public void bgTaskCancelled() {
+        }
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                if (!failSilently) {
-                    dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
-                }
-                notifyPrefUiThatCourseRefreshFailed();
+        @Override
+        public void bgTaskFailed(Throwable ex) {
+            if (showDialogOnError) {
+                dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
             }
-        });
-    }
-    
-    private void notifyPrefUiThatCourseRefreshFailed() {
-        PreferencesUI prefUi = prefUIFactory.getCurrentUI();
-        if (prefUi != null) {
-            prefUi.courseRefreshFailedOrCanceled();
         }
     }
-    
 }

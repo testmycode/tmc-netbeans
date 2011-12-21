@@ -3,13 +3,18 @@
 <filesystem>
     <folder name="Actions">
         <folder name="TMC">
+            <file name="fi-helsinki-cs-tmc-actions-CheckForNewExercises.instance_hidden"/>
+            <file name="fi-helsinki-cs-tmc-actions-CheckForNewExercisesOrUpdates.instance">
+                <attr name="instanceCreate" methodvalue="org.openide.awt.Actions.alwaysEnabled"/>
+                <attr name="noIconInMenu" boolvalue="false"/>
+            </file>
             <file name="fi-helsinki-cs-tmc-actions-RunTestsLocallyAction.instance">
-                <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_RunTestsLocallyAction" />
-                <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.RunTestsLocallyAction" />
+                <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_RunTestsLocallyAction"/>
+                <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.RunTestsLocallyAction"/>
             </file>
             <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
-                <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_SubmitExerciseAction" />
-                <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.SubmitExerciseAction" />
+                <attr name="displayName" bundlevalue="fi.helsinki.cs.tmc.actions.Bundle#CTL_SubmitExerciseAction"/>
+                <attr name="instanceCreate" newvalue="fi.helsinki.cs.tmc.actions.SubmitExerciseAction"/>
                 
                 <!-- iconBase and noIconInMenu doesn't seem to work with NodeAction. They are set in the code. -->
             </file>

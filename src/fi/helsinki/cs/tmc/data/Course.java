@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.data;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Course {
 
     private String name;
     
-    private ExerciseList exercises;
+    private List<Exercise> exercises;
     
     
     public Course() {
@@ -13,7 +16,7 @@ public class Course {
 
     public Course(String name) {
         this.name = name;
-        this.exercises = new ExerciseList();
+        this.exercises = new ArrayList<Exercise>();
     }
 
     public String getName() {
@@ -27,16 +30,17 @@ public class Course {
         this.name = name;
     }
 
-    public ExerciseList getExercises() {
+    public List<Exercise> getExercises() {
         return exercises;
     }
 
-    public void setExercises(ExerciseList exercises) {
+    public void setExercises(List<Exercise> exercises) {
         this.exercises = exercises;
     }
     
     @Override
     public String toString() {
+        //TODO: this cannot return anything else until PreferencesPanel is fixed to not use toString to present Course objects
         return name;
     }
 }

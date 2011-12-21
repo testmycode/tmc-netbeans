@@ -39,11 +39,15 @@ public final class ShowSettingsAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        run();
+    }
+
+    public void run() {
         if (prefUiFactory.isPreferencesUiVisible()) {
             prefUiFactory.activateVisiblePreferencesUi();
             return;
         }
-        
+
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
         TmcSettings settings = TmcSettings.getDefault();
@@ -65,7 +69,7 @@ public final class ShowSettingsAction extends AbstractAction {
                 }
             }
         };
-        
+
         prefUiFactory.showPreferencesDialog(listener);
     }
 }

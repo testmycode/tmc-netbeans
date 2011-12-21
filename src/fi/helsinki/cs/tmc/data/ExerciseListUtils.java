@@ -1,21 +1,17 @@
 package fi.helsinki.cs.tmc.data;
 
-import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A list of Exercises.
- */
-public class ExerciseList extends ArrayList<Exercise> {
-    
+public class ExerciseListUtils {
     /**
      * Returns the exercise with the given name or null if not found.
      */
-    public Exercise getExerciseByName(String exerciseName) {
+    public static Exercise getExerciseByName(List<Exercise> exercises, String exerciseName) {
         if (exerciseName == null) {
             return null;
         }
 
-        for (Exercise exercise : this) {
+        for (Exercise exercise : exercises) {
             if (exercise.getName().equals(exerciseName)) {
                 return exercise;
             }
@@ -24,8 +20,8 @@ public class ExerciseList extends ArrayList<Exercise> {
         return null;
     }
 
-    public void setCourseNameForEach(String courseName) {
-        for (Exercise ex : this) {
+    public static void setCourseNameForEach(List<Exercise> exercises, String courseName) {
+        for (Exercise ex : exercises) {
             ex.setCourseName(courseName);
         }
     }
