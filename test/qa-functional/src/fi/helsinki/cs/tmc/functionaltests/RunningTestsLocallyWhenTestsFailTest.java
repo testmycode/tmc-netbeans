@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.functionaltests;
 
 import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
-import javax.swing.JDialog;
 import junit.framework.Test;
 import org.netbeans.jellytools.EditorOperator;
 import org.netbeans.jellytools.NbDialogOperator;
@@ -10,6 +9,7 @@ import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
 import org.netbeans.jemmy.operators.JButtonOperator;
+import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.junit.NbModuleSuite;
 
 public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase {
@@ -37,7 +37,9 @@ public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase 
         editor.save();
 
         new Action("TMC|Run tests locally", null).performMenu();
-        JDialog dialog = NbDialogOperator.waitJDialog("Test results", true, true);
-        JButtonOperator.findJButton(dialog, "OK", true, true).doClick();
+
+        // We expect to get a test result dialog with the test failures
+        JDialogOperator dialog = new NbDialogOperator("Test results");
+        new JButtonOperator(dialog, "OK").doClick();
     }
 }

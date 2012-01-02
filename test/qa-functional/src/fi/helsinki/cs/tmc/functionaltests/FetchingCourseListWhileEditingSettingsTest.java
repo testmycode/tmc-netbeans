@@ -2,8 +2,8 @@ package fi.helsinki.cs.tmc.functionaltests;
 
 import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
-import javax.swing.JComboBox;
 import junit.framework.Test;
+import org.netbeans.jemmy.operators.JComboBoxOperator;
 import org.netbeans.junit.NbModuleSuite;
 
 public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTestCase {
@@ -29,7 +29,7 @@ public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTes
         serverFixture.getFakeServer().waitForRequestToComplete();
         Thread.sleep(1000);
         
-        JComboBox courseList = settings.getCourseList();
+        JComboBoxOperator courseList = settings.getCourseList();
         assertEquals(2, courseList.getItemCount());
         assertEquals("Course1", courseList.getItemAt(0).toString());
         assertEquals("Course2", courseList.getItemAt(1).toString());

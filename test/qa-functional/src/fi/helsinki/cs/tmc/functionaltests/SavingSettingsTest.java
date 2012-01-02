@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.functionaltests;
 
-import com.google.gson.JsonArray;
 import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
 import junit.framework.Test;

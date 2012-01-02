@@ -1,15 +1,15 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import org.netbeans.jemmy.operators.JPasswordFieldOperator;
+import org.netbeans.jemmy.operators.JTextFieldOperator;
+import org.netbeans.jemmy.operators.JComboBoxOperator;
 import javax.swing.SwingUtilities;
 import java.io.IOException;
 import org.netbeans.junit.NbTestCase;
-import javax.swing.JCheckBox;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import javax.swing.JComboBox;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
 import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jemmy.operators.JCheckBoxOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
@@ -21,47 +21,53 @@ import static org.junit.Assert.*;
  * Helpers on working with the settings dialog.
  */
 public class SettingsOperator {
-    private JDialog dialog;
+    private JDialogOperator dialog;
 
-    public SettingsOperator(JDialog dialog) {
+    public SettingsOperator(JDialogOperator dialog) {
         this.dialog = dialog;
     }
     
     public static SettingsOperator openSettingsDialog() {
         new Action("TMC|Settings", null).perform();
-        return new SettingsOperator(JDialogOperator.waitJDialog("TMC Settings", true, true));
+        return new SettingsOperator(new JDialogOperator("TMC Settings"));
     }
-
-    public JDialog getDialog() {
+    
+    public JDialogOperator getDialogOperator() {
         return dialog;
     }
     
-    public JTextField getUsernameField() {
-        return findByLabel(JTextField.class, "Username");
+    public JTextFieldOperator getUsernameField() {
+        return new JTextFieldOperator(waitByLabel(JTextField.class, "Username"));
     }
     
-    public JPasswordField getPasswordField() {
-        return findByLabel(JPasswordField.class, "Password");
+    public JPasswordFieldOperator getPasswordField() {
+        return new JPasswordFieldOperator(waitByLabel(JPasswordField.class, "Password"));
     }
     
-    public JTextField getServerAddressField() {
-        return findByLabel(JTextField.class, "Server address");
+    public JTextFieldOperator getServerAddressField() {
+        return new JTextFieldOperator(waitByLabel(JTextField.class, "Server address"));
     }
     
-    public JComboBox getCourseList() {
-        return findByLabel(JComboBox.class, "Current course");
+    public JComboBoxOperator getCourseList() {
+        return new JComboBoxOperator(waitByLabel(JComboBox.class, "Current course"));
     }
     
-    public JCheckBox getSavePasswordCheckbox() {
-        return JCheckBoxOperator.findJCheckBox(dialog, "Save password", true, true);
+    public JCheckBoxOperator getSavePasswordCheckbox() {
+        return new JCheckBoxOperator(dialog, "Save password");
     }
     
     public void clickOk() {
-        JButtonOperator.findJButton(dialog, "OK", true, true).doClick();
+        // The OK handler may block so we need to background it
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                new JButtonOperator(dialog, "OK").doClick();
+            }
+        });
     }
     
     public void clickCancel() {
-        JButtonOperator.findJButton(dialog, "Cancel", true, true).doClick();
+        new JButtonOperator(dialog, "Cancel").doClick();
     }
     
     public void setProjectDownloadDirToTestWorkDir(NbTestCase testCase) throws IOException {
@@ -69,7 +75,7 @@ public class SettingsOperator {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                JButtonOperator.findJButton(dialog, "Browse", true, true).doClick();
+                new JButtonOperator(dialog, "Browse").doClick();
             }
         });
         
@@ -92,7 +98,7 @@ public class SettingsOperator {
         Thread.sleep(1000);
         
         boolean foundCourse = false;
-        JComboBox courseList = settings.getCourseList();
+        JComboBoxOperator courseList = settings.getCourseList();
         for (int i = 0; i < courseList.getItemCount(); ++i) {
             if (courseList.getItemAt(i).toString().equals(courseName)) {
                 courseList.setSelectedIndex(i);
@@ -107,9 +113,8 @@ public class SettingsOperator {
     }
     
     @SuppressWarnings("unchecked")
-    protected <T> T findByLabel(Class<T> cls, String text) {
-        JLabel label = JLabelOperator.findJLabel(dialog, text, true, true);
-        assertNotNull("Label with \"" + text + "\" not found", label);
+    protected <T> T waitByLabel(Class<T> cls, String text) {
+        JLabelOperator label = new JLabelOperator(dialog, text);
         return (T)label.getLabelFor();
     }
 }

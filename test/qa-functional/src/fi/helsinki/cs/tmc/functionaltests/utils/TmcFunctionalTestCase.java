@@ -1,10 +1,7 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
 import java.io.File;
-import javax.swing.JDialog;
 import org.netbeans.jellytools.JellyTestCase;
-import org.netbeans.jellytools.NbDialogOperator;
-import org.netbeans.jemmy.JemmyException;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
 
@@ -22,7 +19,7 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
         this.clearWorkDir();
         serverFixture = new FullServerFixture();
         super.setUp();
-        dismissInitialDialogIfAny();
+        dismissInitialSettingsDialog();
     }
     
     @Override
@@ -32,20 +29,17 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
         super.tearDown();
     }
     
-    private void dismissInitialDialogIfAny() {
-        try {
-            new NbDialogOperator("TMC installed").ok();
-            JDialog settingsDialog = JDialogOperator.waitJDialog("TMC Settings", true, true);
-            JButtonOperator.findJButton(settingsDialog, "Cancel", true, true).doClick();
-        } catch (JemmyException e) {
-        }
+    private void dismissInitialSettingsDialog() {
+        JDialogOperator settingsDialog = new JDialogOperator("TMC Settings");
+        new JButtonOperator(settingsDialog, "Cancel").doClick();
     }
     
     protected void arrangeForCourseToBeDownloaded(String courseName) throws Exception {
         serverFixture.addDefaultCourse(courseName, getTestProjectZip());
         SettingsOperator.setAllSettings(this, courseName);
-        
-        new NbDialogOperator("Open exercises?").btYes().doClick();
+
+        JDialogOperator downloadDialog = new JDialogOperator("Download exercises");
+        new JButtonOperator(downloadDialog, "Download").doClick();
     }
     
     protected File getTestProjectZip() {
