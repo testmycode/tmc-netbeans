@@ -1,8 +1,13 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import java.io.ByteArrayOutputStream;
+import java.io.InputStream;
 import java.io.File;
+import java.io.IOException;
 import java.util.ArrayList;
 import com.google.gson.JsonObject;
+import java.io.BufferedInputStream;
+import java.io.FileInputStream;
 import static fi.helsinki.cs.tmc.testing.JsonBuilder.*;
 
 /**
@@ -18,6 +23,15 @@ public class FullServerFixture {
         public CourseFixture(String name) {
             this.name = name;
             this.exercises = new ArrayList<ExerciseFixture>();
+        }
+
+        public ExerciseFixture getExerciseFixture(String name) {
+            for (ExerciseFixture ex : exercises) {
+                if (ex.name.equals(name)) {
+                    return ex;
+                }
+            }
+            return null;
         }
         
         @Override
@@ -37,8 +51,9 @@ public class FullServerFixture {
         public boolean returnable = true;
         public boolean attempted = false;
         public boolean completed = false;
+        public String checksum = "initialchecksum";
         
-        public File zipFile;
+        public byte[] zipData;
 
         public ExerciseFixture(String name) {
             this.name = name;
@@ -53,7 +68,8 @@ public class FullServerFixture {
                         prop("zip_url", zipUrl),
                         prop("returnable", returnable),
                         prop("attempted", attempted),
-                        prop("completed", completed)
+                        prop("completed", completed),
+                        prop("checksum", checksum)
                     );
         }
     }
@@ -73,8 +89,13 @@ public class FullServerFixture {
         courses.add(new CourseFixture(name));
         updateServerCourseList();
     }
-    
-    public void addDefaultCourse(String name, File zipFile) {
+
+    public CourseFixture addDefaultCourse(String name, File zipFile) throws IOException {
+        InputStream in = new BufferedInputStream(new FileInputStream(zipFile));
+        return addDefaultCourse(name, MyIOUtils.toByteArray(in));
+    }
+
+    public CourseFixture addDefaultCourse(String name, byte[] zipData) {
         CourseFixture course = new CourseFixture(name);
         
         ExerciseFixture expiredEx = new ExerciseFixture("ExpiredExercise");
@@ -84,14 +105,16 @@ public class FullServerFixture {
         ExerciseFixture testEx = new ExerciseFixture("TestExercise");
         testEx.returnUrl = fakeServer.getBaseUrl() + "/courses/123/exercises/456/submissions.json";
         testEx.zipUrl = fakeServer.getBaseUrl() + "/courses/123/exercises/456.zip";
-        testEx.zipFile = zipFile;
+        testEx.zipData = zipData;
         course.exercises.add(testEx);
         
         courses.add(course);
         updateServerCourseList();
+        
+        return course;
     }
     
-    private void updateServerCourseList() {
+    public void updateServerCourseList() {
         JsonObject json =
                 object(
                     prop("api_version", 1),
@@ -102,9 +125,9 @@ public class FullServerFixture {
         fakeServer.clearZipFiles();
         for (CourseFixture course : courses) {
             for (ExerciseFixture exercise : course.exercises) {
-                if (exercise.zipFile != null && exercise.zipUrl.startsWith(fakeServer.getBaseUrl())) {
+                if (exercise.zipData != null && exercise.zipUrl.startsWith(fakeServer.getBaseUrl())) {
                     String zipPath = exercise.zipUrl.substring(fakeServer.getBaseUrl().length());
-                    fakeServer.addZipFile(zipPath, exercise.zipFile);
+                    fakeServer.putZipFile(zipPath, exercise.zipData);
                 }
             }
         }
