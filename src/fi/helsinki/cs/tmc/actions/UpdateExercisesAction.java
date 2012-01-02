@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -51,6 +52,11 @@ public class UpdateExercisesAction implements ActionListener {
                         return;
                     }
                     courseDb.exerciseDownloaded(exercise);
+                    
+                    TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
+                    if (project != null) {
+                        projectMediator.openProject(project);
+                    }
                 }
 
                 @Override
