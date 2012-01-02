@@ -75,7 +75,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    dialogs.displayError("Failed to check for new exercises.", ex);
+                    dialogs.displayError("Failed to check for new exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
                 }
             });
         }

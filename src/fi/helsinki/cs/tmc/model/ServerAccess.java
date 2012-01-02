@@ -57,6 +57,13 @@ public class ServerAccess {
                 !settings.getPassword().isEmpty() &&
                 !settings.getServerBaseUrl().isEmpty();
     }
+
+    public boolean needsOnlyPassword() {
+        return
+                !settings.getUsername().isEmpty() &&
+                settings.getPassword().isEmpty() &&
+                !settings.getServerBaseUrl().isEmpty();
+    }
     
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
         final CancellableCallable<String> download = createHttpTasks().downloadTextFile(getCourseListUrl());

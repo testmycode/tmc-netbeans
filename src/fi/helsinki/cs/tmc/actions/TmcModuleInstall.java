@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.ui.LoginDialog;
 import java.util.prefs.Preferences;
 import org.openide.modules.ModuleInstall;
 import org.openide.util.NbPreferences;
@@ -19,6 +21,8 @@ public class TmcModuleInstall extends ModuleInstall {
                 if (isFirstRun) {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
+                } else if (new ServerAccess().needsOnlyPassword()) {
+                    LoginDialog.display(new CheckForNewExercisesOrUpdates());
                 } else {
                     new CheckForNewExercisesOrUpdates().run();
                 }

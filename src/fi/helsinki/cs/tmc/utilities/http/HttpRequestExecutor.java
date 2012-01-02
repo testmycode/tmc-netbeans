@@ -5,10 +5,12 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
+import org.apache.http.HttpStatus;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
+import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
@@ -124,7 +126,7 @@ import org.apache.http.util.EntityUtils;
             }
         } else {
             EntityUtils.consume(response.getEntity());
-            throw new IOException("Response code " + responseCode);
+            throw new HttpResponseException(responseCode, "Failed");
         }
     }
     

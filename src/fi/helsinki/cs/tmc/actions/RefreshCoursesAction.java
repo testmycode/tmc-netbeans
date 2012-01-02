@@ -68,7 +68,7 @@ public final class RefreshCoursesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             if (showDialogOnError) {
-                dialogs.displayError("Course refresh failed.\n" + ex.getMessage());
+                dialogs.displayError("Course refresh failed.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
             }
         }
     }
