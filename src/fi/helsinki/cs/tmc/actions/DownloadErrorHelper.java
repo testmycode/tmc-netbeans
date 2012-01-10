@@ -1,11 +1,12 @@
 package fi.helsinki.cs.tmc.actions;
 
-import org.apache.http.client.HttpResponseException;
+import fi.helsinki.cs.tmc.model.ObsoleteClientException;
+import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 
 class DownloadErrorHelper {
     public static String getDownloadExceptionMsg(Throwable t) {
-        if (t instanceof HttpResponseException) {
-            if (((HttpResponseException)t).getStatusCode() == 403) {
+        if (t instanceof FailedHttpResponseException) {
+            if (((FailedHttpResponseException)t).getStatusCode() == 403) {
                 return "Invalid username or password";
             }
         }

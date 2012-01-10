@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.utilities.http;
 
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
-import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Map;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -11,9 +10,13 @@ import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.util.EntityUtils;
 
 /**
  * Convenient methods to start asynchronous HTTP tasks.
+ * 
+ * Tasks throw a {@link FailedHttpResponseException} when getting a response
+ * with a non-successful status code.
  */
 public class HttpTasks {
     private UsernamePasswordCredentials credentials = null;
@@ -32,18 +35,32 @@ public class HttpTasks {
     }
     
     public CancellableCallable<byte[]> downloadBinaryFile(String url) {
-        return createExecutor(url);
+        return downloadToBinary(createExecutor(url));
     }
     
     public CancellableCallable<String> downloadTextFile(String url) {
         return downloadToText(createExecutor(url));
     }
 
+    private CancellableCallable<byte[]> downloadToBinary(final HttpRequestExecutor download) {
+        return new CancellableCallable<byte[]>() {
+            @Override
+            public byte[] call() throws Exception {
+                return EntityUtils.toByteArray(download.call());
+            }
+
+            @Override
+            public boolean cancel() {
+                return download.cancel();
+            }
+        };
+    }
+    
     private CancellableCallable<String> downloadToText(final HttpRequestExecutor download) {
         return new CancellableCallable<String>() {
             @Override
             public String call() throws Exception {
-                return new String(download.call(), "UTF-8");
+                return EntityUtils.toString(download.call(), "UTF-8");
             }
 
             @Override

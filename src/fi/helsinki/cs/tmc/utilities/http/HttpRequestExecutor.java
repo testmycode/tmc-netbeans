@@ -1,20 +1,17 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import org.apache.http.HttpEntity;
 import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.auth.params.AuthPNames;
 import org.apache.http.client.CookieStore;
 import org.apache.http.client.HttpClient;
-import org.apache.http.client.HttpResponseException;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.params.ClientPNames;
 import org.apache.http.client.params.HttpClientParams;
+import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.DefaultHttpClient;
@@ -25,8 +22,11 @@ import org.apache.http.util.EntityUtils;
 
 /**
  * Downloads a single file over HTTP into memory while being cancellable.
+ * 
+ * If the response was not a successful one (status code 2xx) then a
+ * {@link FailedHttpResponseException} with a preloaded buffered entity is thrown.
  */
-/*package*/ class HttpRequestExecutor implements CancellableCallable<byte[]> {
+/*package*/ class HttpRequestExecutor implements CancellableCallable<BufferedHttpEntity> {
     private static final int DEFAULT_TIMEOUT = 30 * 1000;
     
     private int timeout = DEFAULT_TIMEOUT;
@@ -64,13 +64,10 @@ import org.apache.http.util.EntityUtils;
     }
     
     @Override
-    public byte[] call() throws IOException, InterruptedException {
+    public BufferedHttpEntity call() throws IOException, InterruptedException, FailedHttpResponseException {
         HttpClient httpClient = makeHttpClient();
         try {
-            HttpEntity entity = executeRequest(httpClient);
-            ByteArrayOutputStream buf = new ByteArrayOutputStream();
-            entity.writeTo(buf);
-            return buf.toByteArray();
+            return executeRequest(httpClient);
         } finally {
             disposeOfHttpClient(httpClient);
         }
@@ -100,7 +97,7 @@ import org.apache.http.util.EntityUtils;
         httpClient.getConnectionManager().shutdown();
     }
     
-    private HttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException {
+    private BufferedHttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException, FailedHttpResponseException {
         HttpResponse response;
         try {
             response = httpClient.execute(request);
@@ -112,21 +109,21 @@ import org.apache.http.util.EntityUtils;
             }
         }
         
-        return handleResponse(httpClient, response);
+        return handleResponse(response);
     }
     
-    private HttpEntity handleResponse(HttpClient httpClient, HttpResponse response) throws IOException, InterruptedException {
+    private BufferedHttpEntity handleResponse(HttpResponse response) throws IOException, InterruptedException, FailedHttpResponseException {
         int responseCode = response.getStatusLine().getStatusCode();
+        if (response.getEntity() == null) {
+            throw new IOException("HTTP " + responseCode + " with no response");
+        }
+        
+        BufferedHttpEntity entity = new BufferedHttpEntity(response.getEntity());
+        EntityUtils.consume(entity); // Ensure it's loaded into memory
         if (200 <= responseCode && responseCode <= 299) {
-            HttpEntity entity = response.getEntity();
-            if (entity != null) {
-                return entity;
-            } else {
-                throw new IOException("No content in HTTP response");
-            }
+            return entity;
         } else {
-            EntityUtils.consume(response.getEntity());
-            throw new HttpResponseException(responseCode, "Failed");
+            throw new FailedHttpResponseException(responseCode, entity);
         }
     }
     

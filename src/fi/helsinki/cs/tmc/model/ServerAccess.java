@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
+import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import java.net.URI;
 import java.util.Collections;
 import java.util.List;
@@ -70,8 +71,12 @@ public class ServerAccess {
         return new CancellableCallable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
-                String text = download.call();
-                return courseListParser.parseFromJson(text);
+                try {
+                    String text = download.call();
+                    return courseListParser.parseFromJson(text);
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
             }
 
             @Override
@@ -96,7 +101,13 @@ public class ServerAccess {
         return new CancellableCallable<URI>() {
             @Override
             public URI call() throws Exception {
-                String response = upload.call();
+                String response;
+                try {
+                    response = upload.call();
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
+                
                 JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
                 if (respJson.get("error") != null) {
                     throw new RuntimeException("Server responded with error: " + respJson.get("error"));
@@ -120,5 +131,21 @@ public class ServerAccess {
     
     public CancellableCallable<String> getSubmissionFetchJob(URI submissionUrl) {
         return createHttpTasks().downloadTextFile(submissionUrl.toString());
+    }
+    
+    private <T> T checkForObsoleteClient(FailedHttpResponseException ex) throws ObsoleteClientException, FailedHttpResponseException {
+        if (ex.getStatusCode() == 404) {
+            boolean obsolete;
+            try {
+                obsolete = new JsonParser().parse(ex.getEntityAsString()).getAsJsonObject().get("obsolete_client").getAsBoolean();
+            } catch (Exception ex2) {
+                obsolete = false;
+            }
+            if (obsolete) {
+                throw new ObsoleteClientException();
+            }
+        }
+
+        throw ex;
     }
 }
