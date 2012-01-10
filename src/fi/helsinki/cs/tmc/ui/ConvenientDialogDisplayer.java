@@ -73,12 +73,15 @@ public class ConvenientDialogDisplayer {
     public void displayHappyMessage(String message, String title) {
         JPanel dialog = new JPanel();
         JLabel label = new JLabel(message);
-        label.setIcon(new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/smile.gif")));
+        label.setIcon(getSmileyIcon());
         dialog.add(label);
 
         showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, title, true);
     }
     
+    public ImageIcon getSmileyIcon() {
+        return new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/smile.gif"));
+    }
     
     public boolean askYesNo(String question, String title) {
         DialogDescriptor desc = new DialogDescriptor(question, title);

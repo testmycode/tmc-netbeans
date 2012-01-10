@@ -15,11 +15,12 @@ public class SubmissionResultParserTest {
     
     @Test
     public void testOk() {
-        String input = "{status: \"ok\"}";
+        String input = "{status: \"ok\", solution_url: \"http://example.com/solution\"}";
         
         SubmissionResult result = parse(input);
         
         assertEquals(OK, result.getStatus());
+        assertEquals("http://example.com/solution", result.getSolutionUrl());
         assertNull(result.getError());
         assertTrue(result.getTestCases().isEmpty());
     }

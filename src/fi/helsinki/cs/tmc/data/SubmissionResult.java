@@ -14,6 +14,7 @@ public class SubmissionResult {
     private Status status;
     private String error; // e.g. compile error
     private List<TestCaseResult> testCases;
+    private String solutionUrl;
     
     public SubmissionResult() {
         status = Status.ERROR;
@@ -43,5 +44,13 @@ public class SubmissionResult {
 
     public void setTestCases(List<TestCaseResult> testCases) {
         this.testCases = testCases;
+    }
+
+    public String getSolutionUrl() {
+        return solutionUrl;
+    }
+
+    public void setSolutionUrl(String solutionUrl) {
+        this.solutionUrl = solutionUrl;
     }
 }

@@ -2,13 +2,22 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import java.awt.event.ActionEvent;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import javax.swing.AbstractAction;
+import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.NotifyDescriptor;
+import org.openide.awt.HtmlBrowser;
 
 public class TestResultDisplayer {
     private static TestResultDisplayer instance;
@@ -29,7 +38,7 @@ public class TestResultDisplayer {
     public void showSubmissionResult(SubmissionResult result) {
         switch (result.getStatus()) {
             case OK:
-                dialogs.displayHappyMessage("All tests passed!", "Yay!");
+                displaySuccessfulSubmissionMsg(result);
                 break;
             case FAIL:
                 displayTestCases(result.getTestCases());
@@ -38,6 +47,33 @@ public class TestResultDisplayer {
                 displayError(result.getError());
                 break;
         }
+    }
+
+    private void displaySuccessfulSubmissionMsg(final SubmissionResult result) {
+        JPanel dialog = new JPanel();
+        dialog.setLayout(new BoxLayout(dialog, BoxLayout.PAGE_AXIS));
+        JLabel label = new JLabel("All tests passed!");
+        label.setIcon(dialogs.getSmileyIcon());
+        label.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        dialog.add(label);
+        
+        if (result.getSolutionUrl() != null) {
+            JButton solutionButton = new JButton(new AbstractAction("View model solution") {
+                @Override
+                public void actionPerformed(ActionEvent ev) {
+                    try {
+                        HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(result.getSolutionUrl()));
+                    } catch (Exception ex) {
+                        dialogs.displayError("Failed to open browser.\n" + ex.getMessage());
+                    }
+                }
+            });
+            dialog.add(solutionButton);
+        }
+        
+        dialog.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
+        
+        dialogs.showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, "Success.", true);
     }
     
     /**
