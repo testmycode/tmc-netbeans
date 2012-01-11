@@ -18,6 +18,8 @@ import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
@@ -28,10 +30,12 @@ import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.platform.JavaPlatform;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
+import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -239,17 +243,25 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
             throw new IllegalArgumentException();
         }
         
+        // TMC server packages this with every exercise for our convenience
+        ClassPath testRunnerClassPath = getTestRunnerClassPath(project);
+        
+        String classPathString = classPath.toString(ClassPath.PathConversionMode.WARN);
+        if (testRunnerClassPath != null) {
+            classPathString += ":" + testRunnerClassPath.toString(ClassPath.PathConversionMode.WARN);
+        }
+        
         String[] command = new String[3 + args.length];
         command[0] = FileUtil.toFile(javaExe).getAbsolutePath();
         command[1] = "-cp";
-        command[2] = classPath.toString(ClassPath.PathConversionMode.WARN);
+        command[2] = classPathString;
         System.arraycopy(args, 0, command, 3, args.length);
         
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
         BgTask.start(taskName, runner, listener);
     }
     
-    private ClassPath getTestClassPath(Project project) throws RuntimeException {
+    private ClassPath getTestClassPath(Project project) {
         FileObject projectDir = project.getProjectDirectory();
         ClassPathProvider classPathProvider = project.getLookup().lookup(ClassPathProvider.class);
         
@@ -258,6 +270,24 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
             throw new RuntimeException("Failed to get 'execute' classpath for project's tests");
         }
         return cp;
+    }
+    
+    private ClassPath getTestRunnerClassPath(Project project) {
+        FileObject projectDir = project.getProjectDirectory();
+        FileObject testrunnerDir = projectDir.getFileObject("lib/testrunner");
+        if (testrunnerDir != null) {
+            FileObject[] files = testrunnerDir.getChildren();
+            ArrayList<URL> urls = new ArrayList<URL>();
+            for (FileObject file : files) {
+                URL url = FileUtil.urlForArchiveOrDir(FileUtil.toFile(file));
+                if (url != null) {
+                    urls.add(url);
+                }
+            }
+            return ClassPathSupport.createClassPath(urls.toArray(new URL[0]));
+        } else {
+            return null;
+        }
     }
     
     @Override
