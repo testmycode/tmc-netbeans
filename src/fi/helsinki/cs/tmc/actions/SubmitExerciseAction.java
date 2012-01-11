@@ -116,6 +116,7 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
                             dialogDisplayer.displayError("This is taking too long.\nPlease try again in a few minutes or ask someone to look into the problem.");
                         } catch (Exception ex) {
                             log.log(Level.INFO, "Error waiting for results from server.", ex);
+                            dialogDisplayer.displayError("Error trying to get test results.", ex);
                         }
                     }
 
