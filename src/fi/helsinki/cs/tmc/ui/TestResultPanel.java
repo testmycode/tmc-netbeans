@@ -46,6 +46,7 @@ class TestResultPanel extends JPanel {
             }
         }
         this.revalidate();
+        this.repaint();
     }
     
     public void clear() {
