@@ -4,17 +4,14 @@ import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.awt.event.ActionEvent;
 import java.net.URL;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import javax.swing.AbstractAction;
 import javax.swing.BorderFactory;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.HtmlBrowser;
@@ -38,12 +35,14 @@ public class TestResultDisplayer {
     public void showSubmissionResult(SubmissionResult result) {
         switch (result.getStatus()) {
             case OK:
+                displayTestCases(result.getTestCases(), false);
                 displaySuccessfulSubmissionMsg(result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases());
+                displayTestCases(result.getTestCases(), true);
                 break;
             case ERROR:
+                clearTestCaseView();
                 displayError(result.getError());
                 break;
         }
@@ -88,9 +87,10 @@ public class TestResultDisplayer {
         }
         
         if (numFailed == 0) {
+            displayTestCases(results, false);
             return dialogs.askYesNo("All tests passed. Submit to server?", "Submit?");
         } else {
-            displayTestCases(results);
+            displayTestCases(results, true);
             return false;
         }
     }
@@ -112,81 +112,16 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
     
-    private void displayTestCases(List<TestCaseResult> testCases) {
-        LongTextDisplayPanel panel = new LongTextDisplayPanel(testCasesToHtml(groupTestCases(testCases)));
-        dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "Test results", false);
+    private void displayTestCases(List<TestCaseResult> testCases, boolean activate) {
+        TestResultWindow window = TestResultWindow.get();
+        window.setTestCaseResults(testCases);
+        if (activate) {
+            window.openAtTabPosition(0);
+            window.requestActive();
+        }
     }
     
-    private String testCasesToHtml(Map<String, List<TestCaseResult>> testCases) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("<html>");
-        sb.append("<p>Some tests failed.</p>");
-        sb.append("<ul>");
-        
-        String[] groups = testCases.keySet().toArray(new String[0]);
-        Arrays.sort(groups);
-        for (String group : groups) {
-            String groupColor = allSuccessful(testCases.get(group)) ? "green" : "red";
-            sb.append("<li>")
-                    .append("<font color=\"" + groupColor + "\">")
-                    .append(StringEscapeUtils.escapeHtml4(group))
-                    .append("</font>")
-                    .append("<ul>");
-            
-            for (TestCaseResult tcr : testCases.get(group)) {
-                String color = tcr.isSuccessful() ? "green" : "red";
-                sb.append("<li><font color=\"").append(color).append("\">")
-                        .append(testCaseLine(tcr))
-                        .append("</font></li>");
-            }
-            
-            sb.append("</ul>")
-                    .append("</li>");
-        }
-        sb.append("</ul>").append("</html>");
-        return sb.toString();
-    }
-    
-    private Map<String, List<TestCaseResult>> groupTestCases(List<TestCaseResult> testCases) {
-        Map<String, List<TestCaseResult>> result = new HashMap<String, List<TestCaseResult>>();
-        for (TestCaseResult tcr : testCases) {
-            String[] parts = tcr.getName().split(" ", 2);
-            String group = parts[0];
-            if (!result.containsKey(group)) {
-                result.put(group, new ArrayList<TestCaseResult>());
-            }
-            result.get(group).add(tcr);
-        }
-        return result;
-    }
-    
-    private String testCaseLine(TestCaseResult tcr) {
-        String msg;
-        if (tcr.getMessage() != null) {
-            msg = StringEscapeUtils.escapeHtml4(tcr.getMessage());
-        } else if (tcr.isSuccessful()) {
-            msg = "OK";
-        } else {
-            msg = "Fail";
-        }
-        return testCaseLinePrefix(tcr) + msg;
-    }
-    
-    private String testCaseLinePrefix(TestCaseResult tcr) {
-        String[] parts = tcr.getName().split(" ", 2);
-        if (parts.length == 2) {
-            return parts[1] + " &ndash; ";
-        } else {
-            return "";
-        }
-    }
-
-    private boolean allSuccessful(List<TestCaseResult> testCases) {
-        for (TestCaseResult tcr : testCases) {
-            if (!tcr.isSuccessful()) {
-                return false;
-            }
-        }
-        return true;
+    private void clearTestCaseView() {
+        TestResultWindow.get().clear();
     }
 }

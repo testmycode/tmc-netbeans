@@ -9,7 +9,7 @@ public class TestCaseResult {
     private String name;
     private boolean successful;
     private String message;
-    private String stackTrace;
+    private StackTraceElement[] stackTrace;
 
     public TestCaseResult() {
     }
@@ -34,7 +34,7 @@ public class TestCaseResult {
     }
 
     @CheckForNull
-    public String getStackTrace() {
+    public StackTraceElement[] getStackTrace() {
         return stackTrace;
     }
     
@@ -46,15 +46,7 @@ public class TestCaseResult {
         tcr.name = tc.className + " " + tc.methodName;
         tcr.successful = (tc.status == PASSED);
         tcr.message = tc.message;
-        tcr.stackTrace = tc.stackTrace != null ? stackTraceToString(tc.stackTrace) : null;
+        tcr.stackTrace = tc.stackTrace;
         return tcr;
-    }
-    
-    private static String stackTraceToString(StackTraceElement[] stackTrace) {
-        StringBuilder sb = new StringBuilder();
-        for (StackTraceElement ste : stackTrace) {
-            sb.append(ste.toString());
-        }
-        return sb.toString();
     }
 }

@@ -56,6 +56,22 @@ public class SubmissionResultParserTest {
         assertEquals("it failed", testCases.get(1).getMessage());
     }
     
+    @Test
+    public void testStackTraces() {
+        String traceJson = "[{\"declaringClass\":\"Foo\",\"methodName\":\"bar\",\"fileName\":\"Foo.java\",\"lineNumber\":123}]";
+        String testCasesJson = "[{name: \"A test\", successful: false, message: \"it failed\", stack_trace: " + traceJson + "}]";
+        String input = "{status: \"fail\", test_cases: " + testCasesJson + "}";
+        
+        SubmissionResult result = parse(input);
+        
+        StackTraceElement[] trace = result.getTestCases().get(0).getStackTrace();
+        assertNotNull(trace);
+        assertEquals("Foo", trace[0].getClassName());
+        assertEquals("bar", trace[0].getMethodName());
+        assertEquals("Foo.java", trace[0].getFileName());
+        assertEquals(123, trace[0].getLineNumber());
+    }
+    
     @Test(expected=IllegalArgumentException.class)
     public void itShouldThrowAnIllegalArgumentExceptionWhenGivenAnEmptyInput() {
         parse("   ");

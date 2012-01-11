@@ -5,6 +5,7 @@ import junit.framework.Test;
 import org.netbeans.jellytools.EditorOperator;
 import org.netbeans.jellytools.NbDialogOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
+import org.netbeans.jellytools.TopComponentOperator;
 import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
@@ -39,7 +40,7 @@ public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase 
         new Action("TMC|Run tests locally", null).performMenu();
 
         // We expect to get a test result dialog with the test failures
-        JDialogOperator dialog = new NbDialogOperator("Test results");
-        new JButtonOperator(dialog, "OK").doClick();
+        TopComponentOperator window = new TopComponentOperator("TMC Test Results");
+        assertTrue(window.isShowing());
     }
 }

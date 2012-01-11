@@ -1,9 +1,11 @@
 package fi.helsinki.cs.tmc.actions;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import fi.helsinki.cs.tmc.testrunner.TestCaseList;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
@@ -216,7 +218,10 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
     }
     
     private TestCaseList parseTestResults(String json) {
-        TestCaseList results = new Gson().fromJson(json, TestCaseList.class);
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
+                .create();
+        TestCaseList results = gson.fromJson(json, TestCaseList.class);
         if (results == null) {
             throw new IllegalArgumentException("Invalid test results");
         }
