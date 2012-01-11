@@ -17,8 +17,6 @@ import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
@@ -114,18 +112,7 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         TestScanner scanner = new TestScanner();
         scanner.setClassPath(getTestClassPath(project).toString(ClassPath.PathConversionMode.WARN));
         scanner.addSource(FileUtil.toFile(testDir));
-        return sorted(scanner.findTests());
-    }
-    
-    private List<TestMethod> sorted(List<TestMethod> unsortedMethods) {
-        ArrayList<TestMethod> methods = new ArrayList<TestMethod>(unsortedMethods);
-        Collections.sort(methods, new Comparator<TestMethod>() {
-            @Override
-            public int compare(TestMethod m1, TestMethod m2) {
-                return (m1.className + m1.methodName).compareTo(m2.className + m2.methodName);
-            }
-        });
-        return methods;
+        return scanner.findTests();
     }
     
     private void startRunningTests(Project project) {
