@@ -23,21 +23,21 @@ public class BgTaskListenerList<T> implements BgTaskListener<T> {
 
     @Override
     public void bgTaskReady(T result) {
-        for (BgTaskListener listener : listeners) {
+        for (BgTaskListener<T> listener : listeners) {
             listener.bgTaskReady(result);
         }
     }
 
     @Override
     public void bgTaskCancelled() {
-        for (BgTaskListener listener : listeners) {
+        for (BgTaskListener<T> listener : listeners) {
             listener.bgTaskCancelled();
         }
     }
 
     @Override
     public void bgTaskFailed(Throwable ex) {
-        for (BgTaskListener listener : listeners) {
+        for (BgTaskListener<T> listener : listeners) {
             listener.bgTaskFailed(ex);
         }
     }
