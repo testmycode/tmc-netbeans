@@ -80,7 +80,7 @@ public class NbProjectUnzipper {
         }
     }
     
-    private static OverwritingDecider allowAllOverwrites = new OverwritingDecider() {
+    private static OverwritingDecider neverAllowOverwrites = new OverwritingDecider() {
         @Override
         public boolean canOverwrite(String relPath) {
             return false;
@@ -101,7 +101,7 @@ public class NbProjectUnzipper {
 
     
     public Result unzipProject(byte[] data, File projectDir, String projectName) throws IOException {
-        return unzipProject(data, projectDir, projectName, allowAllOverwrites);
+        return unzipProject(data, projectDir, projectName, neverAllowOverwrites);
     }
     
     public Result unzipProject(byte[] data, File projectDir, String projectName, OverwritingDecider overwriting) throws IOException {

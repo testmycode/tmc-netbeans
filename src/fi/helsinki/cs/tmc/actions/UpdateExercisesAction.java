@@ -76,7 +76,9 @@ public class UpdateExercisesAction implements ActionListener {
         public boolean canOverwrite(String relPath) {
             String s = File.separator;
             return relPath.startsWith("test") ||
-                    relPath.startsWith("lib");
+                    relPath.startsWith("lib") ||
+                    (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private")) ||
+                    !relPath.contains(s); // i.e. a file in the project's root dir
         }
     };
     
