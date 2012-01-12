@@ -66,7 +66,7 @@ class TestResultPanel extends JPanel {
     }
     
     private static class TestCaseResultCell extends JPanel {
-        private static final Color FAIL_COLOR = new Color(0xFF8383);
+        private static final Color FAIL_COLOR = new Color(0xED0000);
         private static final Color PASS_COLOR = new Color(0x6FD06D);
         
         private final TestCaseResult result;
