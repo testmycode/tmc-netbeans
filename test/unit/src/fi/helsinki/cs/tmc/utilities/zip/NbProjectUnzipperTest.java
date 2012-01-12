@@ -116,13 +116,14 @@ public class NbProjectUnzipperTest {
         FileUtils.write(expectedSameFile, "four");
         
         NbProjectUnzipper.OverwritingDecider overwriting = mock(NbProjectUnzipper.OverwritingDecider.class);
-        when(overwriting.canOverwrite("one.txt")).thenReturn(false);
-        when(overwriting.canOverwrite("two.txt")).thenReturn(true);
+        when(overwriting.mayOverwrite("one.txt")).thenReturn(false);
+        when(overwriting.mayOverwrite("two.txt")).thenReturn(true);
         
         Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest", overwriting);
         
-        verify(overwriting).canOverwrite("one.txt");
-        verify(overwriting).canOverwrite("two.txt");
+        verify(overwriting).mayOverwrite("one.txt");
+        verify(overwriting).mayOverwrite("two.txt");
+        verify(overwriting, atLeast(0)).mayDelete(anyString()); // Don't care about these here
         verifyNoMoreInteractions(overwriting); // Should only call for existing files
         
         assertEquals("This should remain", FileUtils.readFileToString(expectedPreservedFile));
@@ -141,6 +142,87 @@ public class NbProjectUnzipperTest {
     }
     
     @Test
+    public void itShouldOnlyDeleteExistingFilesIfTheyreNotInTheZipAndTheOverwritingDeciderPermits() throws IOException {
+        writeDirToZip("dir1/");
+        writeDirToZip("dir1/nbproject/");
+        writeFileToZip("dir1/one.txt", "one");
+        zipOut.close();
+        
+        new File(tempDir.getPath() + "/dest").mkdir();
+        File expectedPreservedFile = new File(tempDir.getPath() + "/dest/one.txt");
+        FileUtils.write(expectedPreservedFile, "This should remain");
+        File expectedDeletedFile = new File(tempDir.getPath() + "/dest/two.txt");
+        FileUtils.write(expectedDeletedFile, "This should be deleted");
+        File expectedNotDeletedFile = new File(tempDir.getPath() + "/dest/three.txt");
+        FileUtils.write(expectedNotDeletedFile, "This should not be deleted");
+        
+        NbProjectUnzipper.OverwritingDecider overwriting = mock(NbProjectUnzipper.OverwritingDecider.class);
+        when(overwriting.mayDelete("two.txt")).thenReturn(true);
+        when(overwriting.mayDelete("three.txt")).thenReturn(false);
+        
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest", overwriting);
+        
+        verify(overwriting).mayDelete("two.txt");
+        verify(overwriting).mayDelete("three.txt");
+        verify(overwriting, atLeast(0)).mayOverwrite(anyString()); // Don't care about these here
+        verifyNoMoreInteractions(overwriting); // Should only call for existing files
+        
+        assertTrue(expectedPreservedFile.exists());
+        assertFalse(expectedDeletedFile.exists());
+        assertTrue(expectedNotDeletedFile.exists());
+        
+        assertTrue(result.deletedFiles.contains("two.txt"));
+        assertTrue(result.skippedDeletingFiles.contains("three.txt"));
+    }
+    
+    @Test
+    public void itCanDeleteDeletedDirectories() throws IOException {
+        writeDirToZip("dir1/");
+        writeDirToZip("dir1/nbproject/");
+        writeDirToZip("dir1/stuff/");
+        writeDirToZip("dir1/stuff/remaining/");
+        writeFileToZip("dir1/stuff/remaining/one.txt", "one");
+        zipOut.close();
+        
+        new File(tempDir.getPath() + "/dest").mkdir();
+        new File(tempDir.getPath() + "/dest/stuff").mkdir();
+        new File(tempDir.getPath() + "/dest/stuff/remaining").mkdir();
+        new File(tempDir.getPath() + "/dest/stuff/deleted").mkdir();
+        new File(tempDir.getPath() + "/dest/stuff/preserved").mkdir();
+        File expectedPreservedFile = new File(tempDir.getPath() + "/dest/stuff/remaining/one.txt");
+        FileUtils.write(expectedPreservedFile, "This should remain");
+        File expectedDeletedFile = new File(tempDir.getPath() + "/dest/stuff/deleted/two.txt");
+        FileUtils.write(expectedDeletedFile, "This should be deleted");
+        File expectedNotDeletedFile = new File(tempDir.getPath() + "/dest/stuff/preserved/three.txt");
+        FileUtils.write(expectedNotDeletedFile, "This should not be deleted");
+        
+        NbProjectUnzipper.OverwritingDecider overwriting = mock(NbProjectUnzipper.OverwritingDecider.class);
+        when(overwriting.mayDelete("stuff/deleted/two.txt")).thenReturn(true);
+        when(overwriting.mayDelete("stuff/deleted")).thenReturn(true);
+        when(overwriting.mayDelete("stuff/preserved/three.txt")).thenReturn(false);
+        when(overwriting.mayDelete("stuff/preserved")).thenReturn(false);
+        
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest", overwriting);
+        
+        verify(overwriting).mayDelete("stuff/deleted/two.txt");
+        verify(overwriting).mayDelete("stuff/deleted");
+        verify(overwriting).mayDelete("stuff/preserved/three.txt");
+        verify(overwriting).mayDelete("stuff/preserved");
+        verify(overwriting, atLeast(0)).mayOverwrite(anyString()); // Don't care about these here
+        verifyNoMoreInteractions(overwriting); // Should only call for existing files
+        
+        assertTrue(expectedPreservedFile.exists());
+        assertFalse(expectedDeletedFile.exists());
+        assertFalse(expectedDeletedFile.getParentFile().exists());
+        assertTrue(expectedNotDeletedFile.exists());
+        
+        assertTrue(result.deletedFiles.contains("stuff/deleted"));
+        assertTrue(result.deletedFiles.contains("stuff/deleted/two.txt"));
+        assertTrue(result.skippedDeletingFiles.contains("stuff/preserved"));
+        assertTrue(result.skippedDeletingFiles.contains("stuff/preserved/three.txt"));
+    }
+    
+    @Test
     public void itCanWorkInDryRunMode() throws IOException {
         writeDirToZip("dir1/");
         writeDirToZip("dir1/nbproject/");
@@ -148,27 +230,35 @@ public class NbProjectUnzipperTest {
         writeFileToZip("dir1/two.txt", "two");
         zipOut.close();
         
-        new File(tempDir.getPath() + "/dest").mkdirs();
+        new File(tempDir.getPath() + "/dest").mkdir();
+        new File(tempDir.getPath() + "/dest/stuff").mkdir();
         File file1 = new File(tempDir.getPath() + "/dest/one.txt");
         FileUtils.write(file1, "This should remain");
         File file2 = new File(tempDir.getPath() + "/dest/two.txt");
         FileUtils.write(file2, "This would be overwritten if not in dry run mode");
+        File file3 = new File(tempDir.getPath() + "/dest/stuff/three.txt");
+        FileUtils.write(file3, "This would be deleted if not in dry run mode");
         
         NbProjectUnzipper.OverwritingDecider overwriting = mock(NbProjectUnzipper.OverwritingDecider.class);
-        when(overwriting.canOverwrite("one.txt")).thenReturn(false);
-        when(overwriting.canOverwrite("two.txt")).thenReturn(true);
+        when(overwriting.mayOverwrite("one.txt")).thenReturn(false);
+        when(overwriting.mayOverwrite("two.txt")).thenReturn(true);
+        when(overwriting.mayDelete("stuff/three.txt")).thenReturn(true);
         
         Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest", overwriting, false);
         
-        verify(overwriting).canOverwrite("one.txt");
-        verify(overwriting).canOverwrite("two.txt");
+        verify(overwriting).mayOverwrite("one.txt");
+        verify(overwriting).mayOverwrite("two.txt");
+        verify(overwriting).mayDelete("stuff/three.txt");
         
         assertEquals("This should remain", FileUtils.readFileToString(file1));
         assertEquals("This would be overwritten if not in dry run mode", FileUtils.readFileToString(file2));
+        assertEquals("This would be deleted if not in dry run mode", FileUtils.readFileToString(file3));
         
         assertTrue(result.skippedFiles.contains("one.txt"));
         assertTrue(result.overwrittenFiles.contains("two.txt"));
+        assertTrue(result.deletedFiles.contains("stuff/three.txt"));
         assertEquals(1, result.overwrittenFiles.size());
         assertEquals(1, result.skippedFiles.size());
+        assertEquals(1, result.deletedFiles.size());
     }
 }

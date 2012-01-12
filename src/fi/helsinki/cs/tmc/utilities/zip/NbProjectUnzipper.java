@@ -10,7 +10,9 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
@@ -28,7 +30,18 @@ public class NbProjectUnzipper {
          * <p>
          * Note that the given path has platform-specific directory separators.
          */
-        public boolean canOverwrite(String relPath);
+        public boolean mayOverwrite(String relPath);
+        
+        /**
+         * Decides whether the given relative path in the project may be deleted.
+         * 
+         * <p>
+         * Only called for files and directories that are on disk but not in the zip.
+         * 
+         * <p>
+         * Note that the given path has platform-specific directory separators.
+         */
+        public boolean mayDelete(String relPath);
     }
     
     /**
@@ -65,6 +78,16 @@ public class NbProjectUnzipper {
          */
         public List<String> unchangedFiles = new ArrayList<String>();
         
+        /**
+         * Files that were deleted because they weren't in the zip.
+         */
+        public List<String> deletedFiles = new ArrayList<String>();
+        
+        /**
+         * Files skipped because the given {@code OverwritingDecider} didn't allow deleting.
+         */
+        public List<String> skippedDeletingFiles = new ArrayList<String>();
+        
         Result(File projectDir) {
             this.projectDir = projectDir;
         }
@@ -72,17 +95,24 @@ public class NbProjectUnzipper {
         @Override
         public String toString() {
             StringBuilder sb = new StringBuilder();
-            sb.append("New files: ").append(newFiles).append('\n');
-            sb.append("Overwritten files: ").append(overwrittenFiles).append('\n');
-            sb.append("Skipped files: ").append(skippedFiles).append('\n');
-            sb.append("Unchanged files: ").append(unchangedFiles).append('\n');
+            sb.append("New: ").append(newFiles).append('\n');
+            sb.append("Overwritten: ").append(overwrittenFiles).append('\n');
+            sb.append("Skipped: ").append(skippedFiles).append('\n');
+            sb.append("Unchanged: ").append(unchangedFiles).append('\n');
+            sb.append("Deleted: ").append(deletedFiles).append('\n');
+            sb.append("Not deleted: ").append(deletedFiles).append('\n');
             return sb.toString();
         }
     }
     
     private static OverwritingDecider neverAllowOverwrites = new OverwritingDecider() {
         @Override
-        public boolean canOverwrite(String relPath) {
+        public boolean mayOverwrite(String relPath) {
+            return false;
+        }
+
+        @Override
+        public boolean mayDelete(String relPath) {
             return false;
         }
     };
@@ -110,6 +140,7 @@ public class NbProjectUnzipper {
     
     public Result unzipProject(byte[] data, File projectDir, String projectName, OverwritingDecider overwriting, boolean reallyWriteFiles) throws IOException {
         Result result = new Result(projectDir);
+        Set<String> pathsInZip = new HashSet<String>();
         
         String projectDirInZip = findProjectDirInZip(data);
         if (projectDirInZip == null) {
@@ -121,11 +152,10 @@ public class NbProjectUnzipper {
         while ((zent = zis.getNextEntry()) != null) {
             if (zent.getName().startsWith(projectDirInZip)) {
                 String restOfPath = zent.getName().substring(projectDirInZip.length());
-                if (restOfPath.startsWith("/")) {
-                    restOfPath = restOfPath.substring(1);
-                }
+                restOfPath = trimSlashes(restOfPath);
                 
-                String destFileRelativePath = restOfPath.replace("/", File.separator);
+                String destFileRelativePath = trimSlashes(restOfPath.replace("/", File.separator));
+                pathsInZip.add(destFileRelativePath);
                 File destFile = new File(
                         projectDir.toString() + File.separator + destFileRelativePath
                         );
@@ -142,7 +172,7 @@ public class NbProjectUnzipper {
                         if (fileContentEquals(destFile, entryData)) {
                             shouldWrite = true;
                             result.unchangedFiles.add(destFileRelativePath);
-                        } else if (overwriting.canOverwrite(destFileRelativePath)) {
+                        } else if (overwriting.mayOverwrite(destFileRelativePath)) {
                             shouldWrite = true;
                             result.overwrittenFiles.add(destFileRelativePath);
                         } else {
@@ -163,7 +193,46 @@ public class NbProjectUnzipper {
             }
         }
         
+        deleteFilesNotInZip(projectDir, projectDir, result, pathsInZip, overwriting, reallyWriteFiles);
+        
         return result;
+    }
+    
+    private void deleteFilesNotInZip(File projectDir, File curDir, Result result, Set<String> pathsInZip, OverwritingDecider overwriting, boolean reallyWriteFiles) throws IOException {
+        for (File file : curDir.listFiles()) {
+            String relPath = file.getPath().substring(projectDir.getPath().length());
+            relPath = trimSlashes(relPath);
+            
+            if (file.isDirectory()) {
+                deleteFilesNotInZip(projectDir, file, result, pathsInZip, overwriting, reallyWriteFiles);
+            }
+            
+            if (!pathsInZip.contains(relPath)) {
+                if (overwriting.mayDelete(relPath)) {
+                    if (file.isDirectory() && file.listFiles().length > 0) {
+                        // Won't delete directories if they still have contents
+                        result.skippedDeletingFiles.add(relPath);
+                    } else {
+                        if (reallyWriteFiles) {
+                            file.delete();
+                        }
+                        result.deletedFiles.add(relPath);
+                    }
+                } else {
+                    result.skippedDeletingFiles.add(relPath);
+                }
+            }
+        }
+    }
+    
+    private String trimSlashes(String s) {
+        while (s.startsWith("/") || s.startsWith(File.separator)) {
+            s = s.substring(1);
+        }
+        while (s.endsWith("/") || s.startsWith(File.separator)) {
+            s = s.substring(0, s.length() - 1);
+        }
+        return s;
     }
     
     private String findProjectDirInZip(byte[] data) throws IOException {

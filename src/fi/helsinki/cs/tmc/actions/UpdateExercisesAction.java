@@ -14,9 +14,12 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import java.util.logging.Logger;
 import org.openide.filesystems.FileUtil;
 
 public class UpdateExercisesAction implements ActionListener {
+    
+    private static final Logger log = Logger.getLogger(UpdateExercisesAction.class.getName());
 
     private List<Exercise> exercisesToUpdate;
     private CourseDb courseDb;
@@ -47,7 +50,8 @@ public class UpdateExercisesAction implements ActionListener {
                 @Override
                 public void bgTaskReady(byte[] data) {
                     try {
-                        unzipper.unzipProject(data, projectDir, exercise.getName(), overwritingDecider);
+                        NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir, exercise.getName(), overwritingDecider);
+                        log.info("== Exercise unzip result ==\n" + result);
                     } catch (IOException ex) {
                         dialogDisplayer.displayError("Failed to update project.", ex);
                         return;
@@ -79,13 +83,23 @@ public class UpdateExercisesAction implements ActionListener {
     }
     
     private final NbProjectUnzipper.OverwritingDecider overwritingDecider = new NbProjectUnzipper.OverwritingDecider() {
+        private final String s = File.separator;
+        
         @Override
-        public boolean canOverwrite(String relPath) {
-            String s = File.separator;
+        public boolean mayOverwrite(String relPath) {
+            return mayBothOverwriteOrDelete(relPath) ||
+                    !relPath.contains(s); // i.e. a file in the project's root dir
+        }
+
+        @Override
+        public boolean mayDelete(String relPath) {
+            return mayBothOverwriteOrDelete(relPath);
+        }
+        
+        private boolean mayBothOverwriteOrDelete(String relPath) {
             return relPath.startsWith("test") ||
                     relPath.startsWith("lib") ||
-                    (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private")) ||
-                    !relPath.contains(s); // i.e. a file in the project's root dir
+                    (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private"));
         }
     };
     
