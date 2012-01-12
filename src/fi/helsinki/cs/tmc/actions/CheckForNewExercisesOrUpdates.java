@@ -34,12 +34,18 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private ServerAccess serverAccess;
     private NotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
+    private boolean tellIfNothingToDownload;
 
     public CheckForNewExercisesOrUpdates() {
+        this(true);
+    }
+    
+    public CheckForNewExercisesOrUpdates(boolean tellIfNothingToDownload) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
         this.notifier = NotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.tellIfNothingToDownload = tellIfNothingToDownload;
     }
 
     @Override
@@ -65,6 +71,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                                     DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
                                 }
                             });
+                        } else if (tellIfNothingToDownload) {
+                            dialogs.displayMessage("No new exercises or updates to download.");
                         }
                     }
                 }
