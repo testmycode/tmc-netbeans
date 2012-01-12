@@ -85,7 +85,7 @@ class TestResultPanel extends JPanel {
             this.add(titleLabel);
             
             if (result.getMessage() != null) {
-                this.add(new JLabel(result.getMessage()));
+                this.add(new JLabel(messageToHtml(result.getMessage())));
             }
             
             if (result.getStackTrace() != null) {
@@ -101,15 +101,25 @@ class TestResultPanel extends JPanel {
             this.setBorder(this.createBorder());
         }
         
+        private String messageToHtml(String message) {
+            StringBuilder sb = new StringBuilder();
+            sb.append("<html>");
+            for (String line : message.split("\n")) {
+                sb.append(StringEscapeUtils.escapeHtml3(line.toString())).append("<br/>");
+            }
+            sb.append("</html>");
+            return sb.toString();
+        }
+        
         private Action backtraceAction = new AbstractAction("Show backtrace") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 remove(backtraceButton);
-                add(new JLabel(stackTraceToString(result.getStackTrace())));
+                add(new JLabel(stackTraceToHtml(result.getStackTrace())));
                 revalidate();
             }
             
-            private String stackTraceToString(StackTraceElement[] stackTrace) {
+            private String stackTraceToHtml(StackTraceElement[] stackTrace) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("<html>");
                 for (StackTraceElement ste : stackTrace) {
