@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.List;
+import org.openide.filesystems.FileUtil;
 
 public class UpdateExercisesAction implements ActionListener {
 
@@ -52,6 +53,12 @@ public class UpdateExercisesAction implements ActionListener {
                         return;
                     }
                     courseDb.exerciseDownloaded(exercise);
+                    
+                    // Refresh NB's file cache like "Source -> Scan for External Changes".
+                    try {
+                        FileUtil.toFileObject(projectDir).getFileSystem().refresh(true);
+                    } catch (Exception e) {
+                    }
                     
                     TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
                     if (project != null) {
