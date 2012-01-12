@@ -20,7 +20,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     private static final Logger log = Logger.getLogger(SubmissionResultWaiter.class.getName());
     
     private final long DEFAULT_TIMEOUT = 180 * 1000;
-    private final long DEFAULT_POLL_DELAY = 10 * 1000;
+    private final long DEFAULT_POLL_DELAY = 3 * 1000;
     
     private final URI submissionUrl;
     private final ProgressHandle progress;
