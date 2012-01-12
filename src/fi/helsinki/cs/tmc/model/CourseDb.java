@@ -178,13 +178,17 @@ public class CourseDb {
             reader.close();
         }
         if (stuff != null) {
-            this.availableCourses = new ArrayList<Course>();
             if (stuff.availableCourses != null) {
+                this.availableCourses.clear();
                 this.availableCourses.addAll(stuff.availableCourses);
             }
             
             this.currentCourseName = stuff.currentCourseName;
-            this.downloadedExerciseChecksums = stuff.downloadedExerciseChecksums;
+            
+            if (stuff.downloadedExerciseChecksums != null) {
+                this.downloadedExerciseChecksums.clear();
+                this.downloadedExerciseChecksums.putAll(stuff.downloadedExerciseChecksums);
+            }
         }
     }
     
