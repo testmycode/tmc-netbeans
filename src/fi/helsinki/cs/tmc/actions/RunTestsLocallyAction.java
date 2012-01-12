@@ -18,7 +18,6 @@ import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -35,7 +34,6 @@ import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -246,15 +244,14 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         // TMC server packages this with every exercise for our convenience
         ClassPath testRunnerClassPath = getTestRunnerClassPath(project);
         
-        String classPathString = classPath.toString(ClassPath.PathConversionMode.WARN);
         if (testRunnerClassPath != null) {
-            classPathString += ":" + testRunnerClassPath.toString(ClassPath.PathConversionMode.WARN);
+            classPath = ClassPathSupport.createProxyClassPath(classPath, testRunnerClassPath);
         }
         
         String[] command = new String[3 + args.length];
         command[0] = FileUtil.toFile(javaExe).getAbsolutePath();
         command[1] = "-cp";
-        command[2] = classPathString;
+        command[2] = classPath.toString(ClassPath.PathConversionMode.WARN);
         System.arraycopy(args, 0, command, 3, args.length);
         
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
