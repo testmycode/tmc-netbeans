@@ -21,7 +21,7 @@ import static org.junit.Assert.*;
 
 public class FakeTmcServer extends AdHocHttpServer {
 
-    private int expectedApiVersion = 1;
+    private int expectedApiVersion = 2;
     private String expectedUsername;
     private String expectedPassword;
     private String coursesJson = "{}";

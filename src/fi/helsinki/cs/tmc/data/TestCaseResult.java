@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import static fi.helsinki.cs.tmc.testrunner.TestCase.Status.*;
 import org.netbeans.api.annotations.common.CheckForNull;
@@ -9,7 +10,7 @@ public class TestCaseResult {
     private String name;
     private boolean successful;
     private String message;
-    private StackTraceElement[] stackTrace;
+    private CaughtException exception;
 
     public TestCaseResult() {
     }
@@ -34,8 +35,8 @@ public class TestCaseResult {
     }
 
     @CheckForNull
-    public StackTraceElement[] getStackTrace() {
-        return stackTrace;
+    public CaughtException getException() {
+        return exception;
     }
     
     /**
@@ -46,7 +47,7 @@ public class TestCaseResult {
         tcr.name = tc.className + " " + tc.methodName;
         tcr.successful = (tc.status == PASSED);
         tcr.message = tc.message;
-        tcr.stackTrace = tc.stackTrace;
+        tcr.exception = tc.exception;
         return tcr;
     }
 }

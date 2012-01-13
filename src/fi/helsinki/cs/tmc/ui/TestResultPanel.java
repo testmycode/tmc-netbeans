@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
@@ -81,14 +82,14 @@ class TestResultPanel extends JPanel {
             
             String passFail = result.isSuccessful() ? "PASS: " : "FAIL: ";
             JLabel titleLabel = new JLabel(passFail + result.getName());
-            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD));
+            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize2D() + 2));
             this.add(titleLabel);
             
             if (result.getMessage() != null) {
                 this.add(new JLabel(messageToHtml(result.getMessage())));
             }
             
-            if (result.getStackTrace() != null) {
+            if (result.getException() != null) {
                 this.backtraceButton = new JButton(backtraceAction);
                 add(Box.createVerticalStrut(16));
                 this.add(backtraceButton);
@@ -102,28 +103,58 @@ class TestResultPanel extends JPanel {
         }
         
         private String messageToHtml(String message) {
+            return "<html>" + nlToBr(message) + "</html>";
+        }
+
+        private String nlToBr(String message) {
             StringBuilder sb = new StringBuilder();
-            sb.append("<html>");
             for (String line : message.split("\n")) {
-                sb.append(StringEscapeUtils.escapeHtml3(line.toString())).append("<br/>");
+                sb.append(escapeHtml(line.toString())).append("<br/>");
             }
-            sb.append("</html>");
             return sb.toString();
+        }
+        
+        private String escapeHtml(String s) {
+            return StringEscapeUtils.escapeHtml3(s);
         }
         
         private Action backtraceAction = new AbstractAction("Show backtrace") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 remove(backtraceButton);
-                add(new JLabel(stackTraceToHtml(result.getStackTrace())));
+                addException(result.getException(), false);
                 revalidate();
+            }
+            
+            private void addException(CaughtException ex, boolean isCause) {
+                String mainLine;
+                if (ex.message != null) {
+                    mainLine = escapeHtml(ex.className) + ": " + nlToBr(ex.message);
+                } else {
+                    mainLine = escapeHtml(ex.className);
+                }
+                if (isCause) {
+                    mainLine = "Caused by: " + mainLine;
+                }
+                mainLine = "<html>" + mainLine + "</html>";
+                
+                JLabel mainLineLabel = new JLabel(mainLine);
+                mainLineLabel.setFont(mainLineLabel.getFont().deriveFont(Font.BOLD));
+                JLabel stackTraceLabel = new JLabel(stackTraceToHtml(result.getException().stackTrace));
+                
+                add(mainLineLabel);
+                add(stackTraceLabel);
+                
+                if (ex.cause != null) {
+                    addException(ex.cause, true);
+                }
             }
             
             private String stackTraceToHtml(StackTraceElement[] stackTrace) {
                 StringBuilder sb = new StringBuilder();
                 sb.append("<html>");
                 for (StackTraceElement ste : stackTrace) {
-                    sb.append(StringEscapeUtils.escapeHtml3(ste.toString())).append("<br/>");
+                    sb.append(escapeHtml(ste.toString())).append("<br/>");
                 }
                 sb.append("</html>");
                 return sb.toString();

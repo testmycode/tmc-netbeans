@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.Collections;
 import java.util.List;
 
@@ -13,7 +14,9 @@ public class SubmissionResult {
     
     private Status status;
     private String error; // e.g. compile error
+    @SerializedName("test_cases")
     private List<TestCaseResult> testCases;
+    @SerializedName("solution_url")
     private String solutionUrl;
     
     public SubmissionResult() {

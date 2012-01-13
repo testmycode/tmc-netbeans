@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.data.serialization;
 import java.util.List;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import static fi.helsinki.cs.tmc.data.SubmissionResult.Status.*;
 import org.junit.Test;
 import static org.junit.Assert.*;
@@ -57,14 +58,21 @@ public class SubmissionResultParserTest {
     }
     
     @Test
-    public void testStackTraces() {
-        String traceJson = "[{\"declaringClass\":\"Foo\",\"methodName\":\"bar\",\"fileName\":\"Foo.java\",\"lineNumber\":123}]";
-        String testCasesJson = "[{name: \"A test\", successful: false, message: \"it failed\", stack_trace: " + traceJson + "}]";
+    public void testExceptions() {
+        String traceJson = "[{declaringClass: \"Foo\", methodName: \"bar\", fileName: \"Foo.java\", lineNumber: 123}]";
+        String exceptionJson = "{className: \"FooEx\", message: \"xoo\", stackTrace: " + traceJson + ", cause: null}";
+        String testCasesJson = "[{name: \"A test\", successful: false, message: \"it failed\", exception: " + exceptionJson + "}]";
         String input = "{status: \"fail\", test_cases: " + testCasesJson + "}";
         
         SubmissionResult result = parse(input);
         
-        StackTraceElement[] trace = result.getTestCases().get(0).getStackTrace();
+        CaughtException cex = result.getTestCases().get(0).getException();
+        assertNotNull(cex);
+        assertEquals("FooEx", cex.className);
+        assertEquals("xoo", cex.message);
+        assertNull(null, cex.cause);
+        
+        StackTraceElement[] trace = cex.stackTrace;
         assertNotNull(trace);
         assertEquals("Foo", trace[0].getClassName());
         assertEquals("bar", trace[0].getMethodName());
