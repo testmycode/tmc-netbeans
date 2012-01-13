@@ -140,7 +140,7 @@ class TestResultPanel extends JPanel {
                 
                 JLabel mainLineLabel = new JLabel(mainLine);
                 mainLineLabel.setFont(mainLineLabel.getFont().deriveFont(Font.BOLD));
-                JLabel stackTraceLabel = new JLabel(stackTraceToHtml(result.getException().stackTrace));
+                JLabel stackTraceLabel = new JLabel(stackTraceToHtml(ex.stackTrace));
                 
                 add(mainLineLabel);
                 add(stackTraceLabel);

@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.net.URI;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Logger;
 import org.netbeans.api.progress.ProgressHandle;
 import org.openide.util.Cancellable;
