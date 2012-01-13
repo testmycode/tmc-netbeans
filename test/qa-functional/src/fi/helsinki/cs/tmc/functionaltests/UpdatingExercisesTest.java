@@ -50,9 +50,6 @@ public class UpdatingExercisesTest extends TmcFunctionalTestCase {
 
         new Action("TMC|Check for new exercises / updates", null).perform();
         Thread.sleep(1000);
-        // We don't have the means to assert that the status line now displays the notification
-        // We'll go through the settings dialog instead.
-        SettingsOperator.openSettingsDialog().clickOk();
 
         JDialogOperator updateDialog = new JDialogOperator("Update exercises");
         new JButtonOperator(updateDialog, "Update").doClick();

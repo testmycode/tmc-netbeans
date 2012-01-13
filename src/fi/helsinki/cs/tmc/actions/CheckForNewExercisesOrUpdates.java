@@ -34,18 +34,18 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private ServerAccess serverAccess;
     private NotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
-    private boolean tellIfNothingToDownload;
+    private boolean beSubtle;
 
     public CheckForNewExercisesOrUpdates() {
-        this(true);
+        this(false);
     }
     
-    public CheckForNewExercisesOrUpdates(boolean tellIfNothingToDownload) {
+    public CheckForNewExercisesOrUpdates(boolean beSubtle) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
         this.notifier = NotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
-        this.tellIfNothingToDownload = tellIfNothingToDownload;
+        this.beSubtle = beSubtle;
     }
 
     @Override
@@ -65,13 +65,17 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
                         final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
                         if (status.thereIsSomethingToDownload()) {
-                            displayNotification(status, new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
-                                }
-                            });
-                        } else if (tellIfNothingToDownload) {
+                            if (beSubtle) {
+                                displayNotification(status, new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                                    }
+                                });
+                            } else {
+                                DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                            }
+                        } else if (!beSubtle) {
                             dialogs.displayMessage("No new exercises or updates to download.");
                         }
                     }

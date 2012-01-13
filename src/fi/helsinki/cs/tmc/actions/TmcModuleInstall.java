@@ -22,9 +22,9 @@ public class TmcModuleInstall extends ModuleInstall {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
                 } else if (new ServerAccess().needsOnlyPassword()) {
-                    LoginDialog.display(new CheckForNewExercisesOrUpdates(false));
+                    LoginDialog.display(new CheckForNewExercisesOrUpdates(true));
                 } else {
-                    new CheckForNewExercisesOrUpdates(false).run();
+                    new CheckForNewExercisesOrUpdates(true).run();
                 }
             }
         });
