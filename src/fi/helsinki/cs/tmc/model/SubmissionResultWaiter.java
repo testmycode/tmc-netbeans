@@ -19,7 +19,6 @@ import org.openide.util.Cancellable;
 public class SubmissionResultWaiter implements CancellableCallable<SubmissionResult> {
     private static final Logger log = Logger.getLogger(SubmissionResultWaiter.class.getName());
     
-    private final long DEFAULT_TIMEOUT = 180 * 1000;
     private final long DEFAULT_POLL_DELAY = 3 * 1000;
     
     private final URI submissionUrl;
@@ -27,7 +26,6 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     
     private final SubmissionResultParser resultParser;
     private final ServerAccess serverAccess;
-    private final long timeout;
     private final long pollDelay;
     
     // Concurrency control on cancel
@@ -40,14 +38,12 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
         this.progress = progress;
         this.resultParser = new SubmissionResultParser();
         this.serverAccess = new ServerAccess();
-        this.timeout = DEFAULT_TIMEOUT;
         this.pollDelay = DEFAULT_POLL_DELAY;
     }
 
     @Override
     public SubmissionResult call() throws Exception {
-        long startTime = System.currentTimeMillis();
-        while (System.currentTimeMillis() - startTime < timeout) {
+        while (true) {
             CancellableCallable<String> downloadTask = serverAccess.getSubmissionFetchJob(submissionUrl);
             
             synchronized (lock) {
@@ -70,7 +66,6 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
                 return resultParser.parseFromJson(jsonText);
             }
         }
-        throw new TimeoutException("Waiting for server timed out");
     }
     
     private boolean isProcessing(JsonElement responseRoot) {
