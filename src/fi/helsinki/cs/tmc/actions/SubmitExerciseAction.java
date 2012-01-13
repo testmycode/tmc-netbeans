@@ -93,7 +93,7 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
                     @Override
                     public void bgTaskReady(SubmissionResult result) {
                         dialog.close();
-                        resultDisplayer.showSubmissionResult(result);
+                        resultDisplayer.showSubmissionResult(exercise, result);
                         exercise.setAttempted(true);
                         if (result.getStatus() == SubmissionResult.Status.OK) {
                             exercise.setCompleted(true);

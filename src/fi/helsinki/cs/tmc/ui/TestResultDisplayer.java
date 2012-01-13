@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.awt.event.ActionEvent;
@@ -11,7 +12,6 @@ import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.HtmlBrowser;
@@ -32,14 +32,15 @@ public class TestResultDisplayer {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
     
-    public void showSubmissionResult(SubmissionResult result) {
+    public void showSubmissionResult(Exercise exercise, SubmissionResult result) {
         switch (result.getStatus()) {
             case OK:
                 displayTestCases(result.getTestCases(), false);
-                displaySuccessfulSubmissionMsg(result);
+                displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
                 displayTestCases(result.getTestCases(), true);
+                displayFailedTestsMsg(exercise);
                 break;
             case ERROR:
                 clearTestCaseView();
@@ -48,20 +49,21 @@ public class TestResultDisplayer {
         }
     }
 
-    private void displaySuccessfulSubmissionMsg(final SubmissionResult result) {
+    private void displaySuccessfulSubmissionMsg(Exercise exercise, SubmissionResult result) {
         JPanel dialog = new JPanel();
         dialog.setLayout(new BoxLayout(dialog, BoxLayout.PAGE_AXIS));
-        JLabel label = new JLabel("All tests passed!");
+        JLabel label = new JLabel("Exercise " + exercise.getName() + " completed!");
         label.setIcon(dialogs.getSmileyIcon());
         label.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         dialog.add(label);
         
         if (result.getSolutionUrl() != null) {
+            final String solutionUrl = result.getSolutionUrl();
             JButton solutionButton = new JButton(new AbstractAction("View model solution") {
                 @Override
                 public void actionPerformed(ActionEvent ev) {
                     try {
-                        HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(result.getSolutionUrl()));
+                        HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(solutionUrl));
                     } catch (Exception ex) {
                         dialogs.displayError("Failed to open browser.\n" + ex.getMessage());
                     }
@@ -73,6 +75,10 @@ public class TestResultDisplayer {
         dialog.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         
         dialogs.showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, "Success.", true);
+    }
+    
+    private void displayFailedTestsMsg(Exercise exercise) {
+        dialogs.displayError("Exercise " + exercise.getName() + " failed.\nSome tests failed on the server.\nSee below.");
     }
     
     /**
