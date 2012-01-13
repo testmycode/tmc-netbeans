@@ -10,21 +10,14 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.CancellableRunnable;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
-import java.awt.event.ActionEvent;
 import java.net.URI;
 import java.util.concurrent.Callable;
-import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.AbstractAction;
-import javax.swing.SwingUtilities;
-import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
-import org.netbeans.api.progress.ProgressUtils;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
@@ -87,56 +80,51 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
         
         // Oh what a mess :/
         
-        final BgTaskListener<URI> uriListener = new BgTaskListener<URI>() {
+        final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
+        
+        final BgTaskListener<URI> submissionUriListener = new BgTaskListener<URI>() {
             @Override
             public void bgTaskReady(URI submissionUri) {
-                final ProgressHandle progressHandle = ProgressHandleFactory.createHandle("Waiting for results from server.");
-                final SubmissionResultWaiter waiter = new SubmissionResultWaiter(submissionUri, progressHandle);
+                final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(submissionUri, dialog);
+                dialog.setTask(waitingTask);
                 
-                ProgressUtils.showProgressDialogAndRun(new CancellableRunnable() {
+                BgTask.start("Waiting for results from server.", waitingTask, new BgTaskListener<SubmissionResult>() {
+
                     @Override
-                    public void run() {
-                        try {
-                            progressHandle.switchToIndeterminate();
-                            final SubmissionResult result = waiter.call();
-                            
-                            SwingUtilities.invokeLater(new Runnable() {
-                                @Override
-                                public void run() {
-                                    resultDisplayer.showSubmissionResult(result);
-                                    exercise.setAttempted(true);
-                                    if (result.getStatus() == SubmissionResult.Status.OK) {
-                                        exercise.setCompleted(true);
-                                    }
-                                    courseDb.save();
-                                }
-                            });
-                            
-                        } catch (InterruptedException ex) {
-                        } catch (TimeoutException ex) {
-                            log.log(Level.INFO, "Timeout waiting for results from server.", ex);
-                            dialogDisplayer.displayError("This is taking too long.\nPlease try again in a few minutes or ask someone to look into the problem.");
-                        } catch (Exception ex) {
-                            log.log(Level.INFO, "Error waiting for results from server.", ex);
-                            dialogDisplayer.displayError("Error trying to get test results.", ex);
+                    public void bgTaskReady(SubmissionResult result) {
+                        dialog.close();
+                        resultDisplayer.showSubmissionResult(result);
+                        exercise.setAttempted(true);
+                        if (result.getStatus() == SubmissionResult.Status.OK) {
+                            exercise.setCompleted(true);
                         }
+                        courseDb.save();
                     }
 
                     @Override
-                    public boolean cancel() {
-                        return waiter.cancel();
+                    public void bgTaskCancelled() {
+                        dialog.close();
                     }
-                }, progressHandle, true);
+
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        log.log(Level.INFO, "Error waiting for results from server.", ex);
+                        dialogDisplayer.displayError("Error trying to get test results.", ex);
+                        dialog.close();
+                    }
+                });
             }
 
             @Override
             public void bgTaskCancelled() {
+                dialog.close();
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Error submitting exercise.", ex);
                 dialogDisplayer.displayError("Error submitting exercise.", ex);
+                dialog.close();
             }
         };
 
@@ -148,18 +136,19 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
         }, new BgTaskListener<byte[]>() {
             @Override
             public void bgTaskReady(byte[] zipData) {
-                CancellableCallable<URI> task = serverAccess.getSubmittingExerciseTask(exercise, zipData);
-                BgTask.start("Sending " + exercise.getName(), task, uriListener);
+                CancellableCallable<URI> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData);
+                dialog.setTask(submitTask);
+                BgTask.start("Sending " + exercise.getName(), submitTask, submissionUriListener);
             }
 
             @Override
             public void bgTaskCancelled() {
-                uriListener.bgTaskCancelled();
+                submissionUriListener.bgTaskCancelled();
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                uriListener.bgTaskFailed(ex);
+                submissionUriListener.bgTaskFailed(ex);
             }
         });
     }

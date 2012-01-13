@@ -124,7 +124,7 @@ public class ServerAccess {
 
             @Override
             public boolean cancel() {
-                throw new UnsupportedOperationException("Not supported yet.");
+                return upload.cancel();
             }
         };
     }

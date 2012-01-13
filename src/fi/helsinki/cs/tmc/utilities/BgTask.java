@@ -19,7 +19,6 @@ public class BgTask<V> implements CancellableCallable<V> {
     private static RequestProcessor defaultRequestProcessor =
             new RequestProcessor("BgTask processor", 5, true);
     
-    
     private String label;
     private BgTaskListener<V> listener;
     private Callable<V> callable;

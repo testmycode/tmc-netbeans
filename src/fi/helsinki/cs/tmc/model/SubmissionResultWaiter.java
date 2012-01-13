@@ -4,11 +4,12 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
+import fi.helsinki.cs.tmc.ui.SubmissionProgressView;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.net.URI;
 import java.util.logging.Logger;
-import org.netbeans.api.progress.ProgressHandle;
 import org.openide.util.Cancellable;
+import org.openide.util.Exceptions;
 
 /**
  * Sends a submission to the server and polls for results for a time.
@@ -21,7 +22,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     private final long DEFAULT_POLL_DELAY = 3 * 1000;
     
     private final URI submissionUrl;
-    private final ProgressHandle progress;
+    private final SubmissionProgressView view;
     
     private final SubmissionResultParser resultParser;
     private final ServerAccess serverAccess;
@@ -31,10 +32,11 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     private final Object lock = new Object();
     private boolean canceled = false;
     private Cancellable cancellableDownloadTask = null;
+    private Thread sleepingThread = null;
 
-    public SubmissionResultWaiter(URI submissionUrl, ProgressHandle progress) {
+    public SubmissionResultWaiter(URI submissionUrl, SubmissionProgressView view) {
         this.submissionUrl = submissionUrl;
-        this.progress = progress;
+        this.view = view;
         this.resultParser = new SubmissionResultParser();
         this.serverAccess = new ServerAccess();
         this.pollDelay = DEFAULT_POLL_DELAY;
@@ -60,10 +62,27 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
             
             if (isProcessing(json)) {
                 updateProgress(json);
-                Thread.sleep(pollDelay);
+                sleepInterruptably(pollDelay);
             } else {
                 return resultParser.parseFromJson(jsonText);
             }
+        }
+    }
+    
+    private void sleepInterruptably(long delay) {
+        synchronized (lock) {
+            if (canceled) {
+                return;
+            }
+            sleepingThread = Thread.currentThread(); // Prepare to receive interrupt.
+        }
+        try {
+            Thread.sleep(delay);
+        } catch (InterruptedException ex) {
+        }
+        synchronized (lock) {
+            sleepingThread = null;
+            Thread.interrupted(); // Consume any interrupt.
         }
     }
     
@@ -74,19 +93,23 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     
     private void updateProgress(JsonElement responseRoot) {
         int submissionsBefore = responseRoot.getAsJsonObject().get("submissions_before_this").getAsInt();
-        if (submissionsBefore > 0) {
-            progress.progress("Server is busy. Place in queue: " + (submissionsBefore + 1) + ".");
-        } else {
-            progress.progress("");
-        }
+        view.setPositionInQueueFromAnyThread(submissionsBefore + 1);
     }
 
     @Override
     public boolean cancel() {
+        /*
+         * One of three conditions always hold:
+         * 1. cancellableDownloadTask is set to an active download task.
+         * 2. sleepingThread is set and may be sent an interrupt.
+         * 3. canceled will be checked soon.
+         */
         synchronized (lock) {
             canceled = true;
             if (cancellableDownloadTask != null) {
                 cancellableDownloadTask.cancel();
+            } else if (sleepingThread != null) {
+                sleepingThread.interrupt();
             }
         }
         return true;
