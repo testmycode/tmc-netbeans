@@ -17,6 +17,15 @@ class TestColorBar extends JProgressBar {
     }
 
     @Override
+    public String getString() {
+        if (getMaximum() - getMinimum() > 0) {
+            return super.getString();
+        } else {
+            return "(no tests)";
+        }
+    }
+
+    @Override
     protected void paintComponent(Graphics g) {
         
         Color oldColor = g.getColor();
@@ -27,7 +36,13 @@ class TestColorBar extends JProgressBar {
             g.clearRect(0, 0, w, h);
             
             if (!isIndeterminate()) {
-                int filled = w * getValue() / (getMaximum() - getMinimum());
+                int range = (getMaximum() - getMinimum());
+                int filled;
+                if (range > 0) {
+                    filled = w * getValue() / range;
+                } else {
+                    filled = w;
+                }
                 int notFilled = w - filled;
 
                 g.setColor(PASS_COLOR);
