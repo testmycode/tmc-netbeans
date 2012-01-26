@@ -90,6 +90,10 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                     dialogs.displayError("Failed to check for new exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
                 }
             });
+        } else {
+            if (!beSubtle) {
+                dialogs.displayMessage("Please select a course in TMC -> Settings.");
+            }
         }
     }
 
