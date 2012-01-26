@@ -30,6 +30,15 @@ id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
 })
 @Messages("CTL_CheckForNewExercisesOrUpdates=&Check for new exercises / updates")
 public class CheckForNewExercisesOrUpdates extends AbstractAction {
+
+    public static void startTimer() {
+        int interval = 20*60*1000; // 20 mintues
+        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true));
+        timer.setRepeats(true);
+        timer.start();
+    }
+    
+    
     private CourseDb courseDb;
     private ServerAccess serverAccess;
     private NotificationDisplayer notifier;

@@ -27,6 +27,8 @@ public class TmcModuleInstall extends ModuleInstall {
                 } else {
                     new CheckForNewExercisesOrUpdates(true).run();
                 }
+                
+                CheckForNewExercisesOrUpdates.startTimer();
             }
         });
     }
