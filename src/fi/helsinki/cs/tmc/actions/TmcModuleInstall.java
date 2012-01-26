@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import java.util.prefs.Preferences;
@@ -21,7 +22,7 @@ public class TmcModuleInstall extends ModuleInstall {
                 if (isFirstRun) {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
-                } else if (new ServerAccess().needsOnlyPassword()) {
+                } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(true));
                 } else {
                     new CheckForNewExercisesOrUpdates(true).run();
