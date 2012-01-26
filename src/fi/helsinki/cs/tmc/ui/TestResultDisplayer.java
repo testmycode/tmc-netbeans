@@ -13,6 +13,7 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.NotifyDescriptor;
 import org.openide.awt.HtmlBrowser;
 
@@ -40,7 +41,7 @@ public class TestResultDisplayer {
                 break;
             case FAIL:
                 displayTestCases(result.getTestCases(), true);
-                displayFailedTestsMsg(exercise);
+                displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
                 clearTestCaseView();
@@ -50,9 +51,15 @@ public class TestResultDisplayer {
     }
 
     private void displaySuccessfulSubmissionMsg(Exercise exercise, SubmissionResult result) {
+        String msg = "Exercise " + exercise.getName() + " completed!";
+        if (!result.getPoints().isEmpty()) {
+            msg += "\nPoints permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".";
+        }
+        msg = "<html>" + StringEscapeUtils.escapeHtml4(msg).replace("\n", "<br />\n") + "</html>";
+        
         JPanel dialog = new JPanel();
         dialog.setLayout(new BoxLayout(dialog, BoxLayout.PAGE_AXIS));
-        JLabel label = new JLabel("Exercise " + exercise.getName() + " completed!");
+        JLabel label = new JLabel(msg);
         label.setIcon(dialogs.getSmileyIcon());
         label.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         dialog.add(label);
@@ -77,8 +84,16 @@ public class TestResultDisplayer {
         dialogs.showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, "Success.", true);
     }
     
-    private void displayFailedTestsMsg(Exercise exercise) {
-        dialogs.displayError("Exercise " + exercise.getName() + " failed.\nSome tests failed on the server.\nSee below.");
+    private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
+        String msg;
+        if (!result.getPoints().isEmpty()) {
+            msg = "Exercise " + exercise.getName() + " failed partially.\n";
+            msg += "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".\n\n";
+        } else {
+            msg = "Exercise " + exercise.getName() + " failed.\n";
+        }
+        msg += "Some tests failed on the server.\nSee below.";
+        dialogs.displayError(msg);
     }
     
     /**

@@ -16,7 +16,7 @@ public class SubmissionResultParserTest {
     
     @Test
     public void testOk() {
-        String input = "{status: \"ok\", solution_url: \"http://example.com/solution\"}";
+        String input = "{status: \"ok\", solution_url: \"http://example.com/solution\", points: [\"1.1\", \"1.2\"]}";
         
         SubmissionResult result = parse(input);
         
@@ -24,6 +24,9 @@ public class SubmissionResultParserTest {
         assertEquals("http://example.com/solution", result.getSolutionUrl());
         assertNull(result.getError());
         assertTrue(result.getTestCases().isEmpty());
+        assertEquals(2, result.getPoints().size());
+        assertEquals("1.1", result.getPoints().get(0));
+        assertEquals("1.2", result.getPoints().get(1));
     }
     
     @Test
@@ -40,12 +43,14 @@ public class SubmissionResultParserTest {
     @Test
     public void testFail() {
         String testCasesJson = "[{name: \"Some test\", successful: true}, {name: \"Another test\", successful: false, message: \"it failed\"}]";
-        String input = "{status: \"fail\", test_cases: " + testCasesJson + "}";
+        String input = "{status: \"fail\", test_cases: " + testCasesJson + ", points: [\"1.1\"]}";
         
         SubmissionResult result = parse(input);
         
         assertEquals(FAIL, result.getStatus());
         assertNull(result.getError());
+        assertEquals(1, result.getPoints().size());
+        assertEquals("1.1", result.getPoints().get(0));
         
         List<TestCaseResult> testCases = result.getTestCases();
         assertEquals(2, testCases.size());
@@ -62,7 +67,7 @@ public class SubmissionResultParserTest {
         String traceJson = "[{declaringClass: \"Foo\", methodName: \"bar\", fileName: \"Foo.java\", lineNumber: 123}]";
         String exceptionJson = "{className: \"FooEx\", message: \"xoo\", stackTrace: " + traceJson + ", cause: null}";
         String testCasesJson = "[{name: \"A test\", successful: false, message: \"it failed\", exception: " + exceptionJson + "}]";
-        String input = "{status: \"fail\", test_cases: " + testCasesJson + "}";
+        String input = "{status: \"fail\", test_cases: " + testCasesJson + ", points: []}";
         
         SubmissionResult result = parse(input);
         

@@ -18,11 +18,13 @@ public class SubmissionResult {
     private List<TestCaseResult> testCases;
     @SerializedName("solution_url")
     private String solutionUrl;
+    private List<String> points;
     
     public SubmissionResult() {
         status = Status.ERROR;
         error = null;
         testCases = Collections.emptyList();
+        points = Collections.emptyList();
     }
 
     public Status getStatus() {
@@ -55,5 +57,13 @@ public class SubmissionResult {
 
     public void setSolutionUrl(String solutionUrl) {
         this.solutionUrl = solutionUrl;
+    }
+
+    public List<String> getPoints() {
+        return points;
+    }
+
+    public void setPoints(List<String> points) {
+        this.points = points;
     }
 }
