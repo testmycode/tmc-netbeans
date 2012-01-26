@@ -66,4 +66,13 @@ public class SubmissionResult {
     public void setPoints(List<String> points) {
         this.points = points;
     }
+    
+    public boolean allTestCasesFailed() {
+        for (TestCaseResult tcr : testCases) {
+            if (tcr.isSuccessful()) {
+                return false;
+            }
+        }
+        return true;
+    }
 }
