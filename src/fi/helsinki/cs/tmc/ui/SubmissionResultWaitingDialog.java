@@ -101,7 +101,7 @@ public class SubmissionResultWaitingDialog extends JDialog implements Submission
                     .addComponent(queueLabel)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(backgroundLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(cancelButton)
                         .addContainerGap())
                     .addGroup(layout.createSequentialGroup()

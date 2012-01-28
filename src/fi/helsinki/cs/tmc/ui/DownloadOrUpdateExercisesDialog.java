@@ -144,7 +144,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
                     .addComponent(selectAllButton, javax.swing.GroupLayout.Alignment.TRAILING)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addComponent(downloadButton)
-                        .addGap(18, 18, 18)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                         .addComponent(closeButton)))
                 .addContainerGap())
         );
