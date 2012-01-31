@@ -9,4 +9,12 @@ public class ExceptionUtils {
         t.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
+
+    public static RuntimeException toRuntimeException(Exception ex) {
+        if (ex instanceof RuntimeException) {
+            return (RuntimeException)ex;
+        } else {
+            return new RuntimeException(ex);
+        }
+    }
 }

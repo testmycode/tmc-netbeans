@@ -3,13 +3,17 @@ package fi.helsinki.cs.tmc.utilities.http;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
 import java.util.Map;
+import org.apache.http.NameValuePair;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
 import org.apache.http.entity.mime.content.StringBody;
+import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
 /**
@@ -34,12 +38,25 @@ public class HttpTasks {
         return new HttpRequestExecutor(request).setCredentials(credentials);
     }
     
-    public CancellableCallable<byte[]> downloadBinaryFile(String url) {
+    public CancellableCallable<byte[]> getForBinary(String url) {
         return downloadToBinary(createExecutor(url));
     }
     
-    public CancellableCallable<String> downloadTextFile(String url) {
+    public CancellableCallable<String> getForText(String url) {
         return downloadToText(createExecutor(url));
+    }
+    
+    public CancellableCallable<byte[]> postForBinary(String url, Map<String, String> params) {
+        return downloadToBinary(createExecutor(makePostRequest(url, params)));
+    }
+    
+    public CancellableCallable<String> postForText(String url, Map<String, String> params) {
+        return downloadToText(createExecutor(makePostRequest(url, params)));
+    }
+    
+    public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
+        HttpPost request = makeFileUploadRequest(url, params, fileField, data);
+        return downloadToText(createExecutor(request));
     }
 
     private CancellableCallable<byte[]> downloadToBinary(final HttpRequestExecutor download) {
@@ -70,12 +87,24 @@ public class HttpTasks {
         };
     }
     
-    public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
-        HttpPost request = makeFileUploadRequest(url, params, fileField, data);
-        return downloadToText(createExecutor(request));
+    private HttpPost makePostRequest(String url, Map<String, String> params) {
+        HttpPost request = new HttpPost(url);
+        
+        ArrayList<NameValuePair> pairs = new ArrayList<NameValuePair>(params.size());
+        for (Map.Entry<String, String> param : params.entrySet()) {
+            pairs.add(new BasicNameValuePair(param.getKey(), param.getValue()));
+        }
+        
+        try {
+            UrlEncodedFormEntity entity = new UrlEncodedFormEntity(pairs, "UTF-8");
+            request.setEntity(entity);
+            return request;
+        } catch (UnsupportedEncodingException ex) {
+            throw new RuntimeException(ex);
+        }
     }
 
-    private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) throws RuntimeException {
+    private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = new HttpPost(url);
         MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
         for (Map.Entry<String, String> e : params.entrySet()) {

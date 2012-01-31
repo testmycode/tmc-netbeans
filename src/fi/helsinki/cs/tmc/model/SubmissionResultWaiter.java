@@ -6,10 +6,8 @@ import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.ui.SubmissionProgressView;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import java.net.URI;
 import java.util.logging.Logger;
 import org.openide.util.Cancellable;
-import org.openide.util.Exceptions;
 
 /**
  * Sends a submission to the server and polls for results for a time.
@@ -21,7 +19,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     
     private final long DEFAULT_POLL_DELAY = 3 * 1000;
     
-    private final URI submissionUrl;
+    private final String submissionUrl;
     private final SubmissionProgressView view;
     
     private final SubmissionResultParser resultParser;
@@ -34,7 +32,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     private Cancellable cancellableDownloadTask = null;
     private Thread sleepingThread = null;
 
-    public SubmissionResultWaiter(URI submissionUrl, SubmissionProgressView view) {
+    public SubmissionResultWaiter(String submissionUrl, SubmissionProgressView view) {
         this.submissionUrl = submissionUrl;
         this.view = view;
         this.resultParser = new SubmissionResultParser();

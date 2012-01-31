@@ -85,7 +85,7 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
         final BgTaskListener<URI> submissionUriListener = new BgTaskListener<URI>() {
             @Override
             public void bgTaskReady(URI submissionUri) {
-                final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(submissionUri, dialog);
+                final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(submissionUri.toString(), dialog);
                 dialog.setTask(waitingTask);
                 
                 BgTask.start("Waiting for results from server.", waitingTask, new BgTaskListener<SubmissionResult>() {

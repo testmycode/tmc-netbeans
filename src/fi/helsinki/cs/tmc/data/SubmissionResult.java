@@ -13,18 +13,29 @@ public class SubmissionResult {
     }
     
     private Status status;
+    
     private String error; // e.g. compile error
+    
     @SerializedName("test_cases")
     private List<TestCaseResult> testCases;
+    
     @SerializedName("solution_url")
     private String solutionUrl;
+    
     private List<String> points;
+    
+    @SerializedName("feedback_questions")
+    private List<FeedbackQuestion> feedbackQuestions;
+    
+    @SerializedName("feedback_answer_url")
+    private String feedbackAnswerUrl;
     
     public SubmissionResult() {
         status = Status.ERROR;
         error = null;
         testCases = Collections.emptyList();
         points = Collections.emptyList();
+        feedbackQuestions = Collections.emptyList();
     }
 
     public Status getStatus() {
@@ -65,6 +76,22 @@ public class SubmissionResult {
 
     public void setPoints(List<String> points) {
         this.points = points;
+    }
+
+    public List<FeedbackQuestion> getFeedbackQuestions() {
+        return feedbackQuestions;
+    }
+
+    public void setFeedbackQuestions(List<FeedbackQuestion> feedbackQuestions) {
+        this.feedbackQuestions = feedbackQuestions;
+    }
+
+    public String getFeedbackAnswerUrl() {
+        return feedbackAnswerUrl;
+    }
+
+    public void setFeedbackAnswerUrl(String feedbackAnswerUrl) {
+        this.feedbackAnswerUrl = feedbackAnswerUrl;
     }
     
     public boolean allTestCasesFailed() {

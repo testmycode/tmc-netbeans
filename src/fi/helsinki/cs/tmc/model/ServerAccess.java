@@ -4,6 +4,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -11,6 +12,7 @@ import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -67,7 +69,7 @@ public class ServerAccess {
     }
     
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
-        final CancellableCallable<String> download = createHttpTasks().downloadTextFile(getCourseListUrl());
+        final CancellableCallable<String> download = createHttpTasks().getForText(getCourseListUrl());
         return new CancellableCallable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
@@ -88,7 +90,7 @@ public class ServerAccess {
     
     public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {
         String zipUrl = exercise.getDownloadUrl();
-        return createHttpTasks().downloadBinaryFile(zipUrl);
+        return createHttpTasks().getForBinary(zipUrl);
     }
     
     public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip) {
@@ -129,8 +131,38 @@ public class ServerAccess {
         };
     }
     
-    public CancellableCallable<String> getSubmissionFetchJob(URI submissionUrl) {
-        return createHttpTasks().downloadTextFile(submissionUrl.toString());
+    public CancellableCallable<String> getSubmissionFetchJob(String submissionUrl) {
+        return createHttpTasks().getForText(submissionUrl);
+    }
+    
+    public CancellableCallable<String> getFeedbackAnsweringJob(String answerUrl, List<FeedbackAnswer> answers) {
+        final String submitUrl = addApiCallQueryParameters(answerUrl);
+        
+        Map<String, String> params = new HashMap<String, String>();
+        for (int i = 0; i < answers.size(); ++i) {
+            String keyPrefix = "answers[" + i + "]";
+            FeedbackAnswer answer = answers.get(i);
+            params.put(keyPrefix + "[question_id]", "" + answer.getQuestion().getId());
+            params.put(keyPrefix + "[answer]", answer.getAnswer());
+        }
+        
+        final CancellableCallable<String> upload = createHttpTasks().postForText(submitUrl, params);
+        
+        return new CancellableCallable<String>() {
+            @Override
+            public String call() throws Exception {
+                try {
+                    return upload.call();
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
+            }
+
+            @Override
+            public boolean cancel() {
+                return upload.cancel();
+            }
+        };
     }
     
     private <T> T checkForObsoleteClient(FailedHttpResponseException ex) throws ObsoleteClientException, FailedHttpResponseException {

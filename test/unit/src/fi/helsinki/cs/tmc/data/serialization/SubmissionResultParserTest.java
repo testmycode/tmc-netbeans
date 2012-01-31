@@ -85,6 +85,30 @@ public class SubmissionResultParserTest {
         assertEquals(123, trace[0].getLineNumber());
     }
     
+    @Test
+    public void testFeedbackQuestions() {
+        String questions = "[{id: 4, question: \"foo?\", kind: \"intrange[1..5]\"}, {id: 7, question: \"bar?\", kind: \"text\"}]";
+        String input = "{status: \"ok\", feedback_questions: " + questions + ", feedback_answer_url: \"http://example.com/foo\"}";
+        
+        SubmissionResult result = parse(input);
+        
+        assertEquals(2, result.getFeedbackQuestions().size());
+        
+        assertEquals(4, result.getFeedbackQuestions().get(0).getId());
+        assertEquals("foo?", result.getFeedbackQuestions().get(0).getQuestion());
+        assertTrue(result.getFeedbackQuestions().get(0).isIntRange());
+        assertFalse(result.getFeedbackQuestions().get(0).isText());
+        assertEquals(1, result.getFeedbackQuestions().get(0).getIntRangeMin());
+        assertEquals(5, result.getFeedbackQuestions().get(0).getIntRangeMax());
+        
+        assertEquals(7, result.getFeedbackQuestions().get(1).getId());
+        assertEquals("bar?", result.getFeedbackQuestions().get(1).getQuestion());
+        assertFalse(result.getFeedbackQuestions().get(1).isIntRange());
+        assertTrue(result.getFeedbackQuestions().get(1).isText());
+        
+        assertEquals("http://example.com/foo", result.getFeedbackAnswerUrl());
+    }
+    
     @Test(expected=IllegalArgumentException.class)
     public void itShouldThrowAnIllegalArgumentExceptionWhenGivenAnEmptyInput() {
         parse("   ");

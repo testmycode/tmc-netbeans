@@ -1,23 +1,27 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+import java.awt.Dialog;
 import java.awt.event.ActionEvent;
-import java.net.URL;
+import java.awt.event.ActionListener;
 import java.util.List;
-import javax.swing.AbstractAction;
-import javax.swing.BorderFactory;
-import javax.swing.BoxLayout;
-import javax.swing.JButton;
-import javax.swing.JLabel;
-import javax.swing.JPanel;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.NotifyDescriptor;
-import org.openide.awt.HtmlBrowser;
 
 public class TestResultDisplayer {
+    private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
+    
     private static TestResultDisplayer instance;
     
     public static TestResultDisplayer getInstance() {
@@ -50,38 +54,39 @@ public class TestResultDisplayer {
         }
     }
 
-    private void displaySuccessfulSubmissionMsg(Exercise exercise, SubmissionResult result) {
-        String msg = "Exercise " + exercise.getName() + " completed!";
-        if (!result.getPoints().isEmpty()) {
-            msg += "\nPoints permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".";
-        }
-        msg = "<html>" + StringEscapeUtils.escapeHtml4(msg).replace("\n", "<br />\n") + "</html>";
+    private void displaySuccessfulSubmissionMsg(Exercise exercise, final SubmissionResult result) {
+        final SuccessfulSubmissionDialog dialog = new SuccessfulSubmissionDialog(exercise, result);
         
-        JPanel dialog = new JPanel();
-        dialog.setLayout(new BoxLayout(dialog, BoxLayout.PAGE_AXIS));
-        JLabel label = new JLabel(msg);
-        label.setIcon(dialogs.getSmileyIcon());
-        label.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        dialog.add(label);
-        
-        if (result.getSolutionUrl() != null) {
-            final String solutionUrl = result.getSolutionUrl();
-            JButton solutionButton = new JButton(new AbstractAction("View model solution") {
-                @Override
-                public void actionPerformed(ActionEvent ev) {
-                    try {
-                        HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(solutionUrl));
-                    } catch (Exception ex) {
-                        dialogs.displayError("Failed to open browser.\n" + ex.getMessage());
-                    }
+        dialog.addOkListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                List<FeedbackAnswer> answers = dialog.getFeedbackAnswers();
+                if (!answers.isEmpty()) {
+                    CancellableCallable<String> task = new ServerAccess().getFeedbackAnsweringJob(result.getFeedbackAnswerUrl(), answers);
+                    BgTask.start("Sending feedback", task, new BgTaskListener<String>() {
+                        @Override
+                        public void bgTaskReady(String result) {
+                        }
+
+                        @Override
+                        public void bgTaskCancelled() {
+                        }
+
+                        @Override
+                        public void bgTaskFailed(Throwable ex) {
+                            String msg = "Failed to send feedback :-(\n" + ex.getMessage();
+                            String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
+                            log.log(Level.INFO, msgWithBacktrace);
+                            dialogs.displayError(msg);
+                        }
+                    });
                 }
-            });
-            dialog.add(solutionButton);
-        }
+            }
+        });
         
-        dialog.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
-        
-        dialogs.showDialog(dialog, NotifyDescriptor.PLAIN_MESSAGE, "Success.", true);
+        dialog.setModalityType(Dialog.ModalityType.MODELESS);
+        dialog.setLocationRelativeTo(null);
+        dialog.setVisible(true);
     }
     
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
