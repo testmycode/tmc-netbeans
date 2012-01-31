@@ -17,7 +17,7 @@ import org.openide.util.Cancellable;
 public class SubmissionResultWaiter implements CancellableCallable<SubmissionResult> {
     private static final Logger log = Logger.getLogger(SubmissionResultWaiter.class.getName());
     
-    private final long DEFAULT_POLL_DELAY = 3 * 1000;
+    private final long DEFAULT_POLL_DELAY = 2 * 1000;
     
     private final String submissionUrl;
     private final SubmissionProgressView view;
