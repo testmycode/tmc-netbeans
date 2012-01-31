@@ -123,9 +123,9 @@ public class SuccessfulSubmissionDialog extends JDialog {
     }
 
     private void addFeedbackQuestions(SubmissionResult result) {
+        this.feedbackQuestionPanels = new ArrayList<FeedbackQuestionPanel>();
+        
         if (!result.getFeedbackQuestions().isEmpty() && result.getFeedbackAnswerUrl() != null) {
-            
-            this.feedbackQuestionPanels = new ArrayList<FeedbackQuestionPanel>();
             for (FeedbackQuestion question : result.getFeedbackQuestions()) {
                 try {
                     FeedbackQuestionPanel panel = FeedbackQuestionPanelFactory.getPanelForQuestion(question);
