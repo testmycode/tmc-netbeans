@@ -6,11 +6,16 @@ import java.awt.Dimension;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.prefs.BackingStoreException;
+import java.util.prefs.Preferences;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JCheckBox;
 import javax.swing.JScrollPane;
 import javax.swing.ScrollPaneConstants;
+import org.openide.util.NbPreferences;
 import org.openide.windows.TopComponent;
 import org.openide.windows.WindowManager;
 
@@ -18,6 +23,8 @@ import org.openide.windows.WindowManager;
 @TopComponent.Registration(mode="output", openAtStartup=false)
 class TestResultWindow extends TopComponent {
     public static final String PREFERRED_ID = "TestResultWindow";
+    
+    private static final Logger log = Logger.getLogger(TestResultWindow.class.getName());
     
     private final JCheckBox showAllCheckbox;
     private final TestColorBar testColorBar;
@@ -35,6 +42,7 @@ class TestResultWindow extends TopComponent {
             public void itemStateChanged(ItemEvent e) {
                 resultPanel.setAllFailuresVisible(showAllCheckbox.isSelected());
                 resultPanel.setPassedTestsVisible(showAllCheckbox.isSelected());
+                saveWindowPreferences();
             }
         });
         
@@ -59,6 +67,8 @@ class TestResultWindow extends TopComponent {
         
         this.add(topPanel);
         this.add(useMaxHeight(scrollPane));
+        
+        loadWindowPreferences();
     }
     
     private Component useMaxHeight(Component c) {
@@ -97,5 +107,20 @@ class TestResultWindow extends TopComponent {
             }
         }
         return count;
+    }
+    
+    private void saveWindowPreferences() {
+        Preferences prefs = NbPreferences.forModule(TestResultWindow.class);
+        prefs.putBoolean("showAllTests", showAllCheckbox.isSelected());
+        try {
+            prefs.flush();
+        } catch (BackingStoreException ex) {
+            log.log(Level.WARNING, "Failed to save TestResultWindow preferences", ex);
+        }
+    }
+    
+    private void loadWindowPreferences() {
+        Preferences prefs = NbPreferences.forModule(TestResultWindow.class);
+        showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
     }
 }
