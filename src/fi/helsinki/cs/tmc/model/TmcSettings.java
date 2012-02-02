@@ -93,7 +93,13 @@ public class TmcSettings {
     }
     
     public String getProjectRootDir() {
-        return settings.get(PREF_PROJECT_ROOT_DIR, ProjectMediator.getDefaultProjectRootDir());
+        String path = settings.get(PREF_PROJECT_ROOT_DIR, null);
+        if (path != null) {
+            return path;
+        } else {
+            // Can sometimes take a while. That's why we don't pass it as a default above.
+            return ProjectMediator.getDefaultProjectRootDir();
+        }
     }
     
     public void setProjectRootDir(String value) {
