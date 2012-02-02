@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -27,6 +28,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     private ChangeSupport changeSupport;
     private CourseDb courses;
     private ProjectMediator projectMediator;
+    private HashMap<String, Image> iconCache;
 
     @SuppressWarnings("LeakingThisInConstructor")
     public ExerciseIconAnnotator() {
@@ -34,6 +36,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         this.changeSupport = new ChangeSupport(this);
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
+        this.iconCache = new HashMap<String, Image>();
         
         eventBus.subscribe(new TmcEventListener() {
             public void receive(CourseDb.SavedEvent event) {
@@ -68,7 +71,11 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     
     private Image imageForExericse(Exercise exercise) throws IOException {
         String name = imageNameForExercise(exercise);
-        return ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
+        if (!iconCache.containsKey(name)) {
+            Image img = ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
+            iconCache.put(name, img);
+        }
+        return iconCache.get(name);
     }
     
     private String imageNameForExercise(Exercise exercise) {
