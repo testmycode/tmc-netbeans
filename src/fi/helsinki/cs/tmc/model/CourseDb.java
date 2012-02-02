@@ -43,7 +43,7 @@ public class CourseDb {
     private Map<ExerciseKey, String> downloadedExerciseChecksums;
 
     public CourseDb() {
-        this(TmcEventBus.getInstance(), new ConfigFile("CourseDb.json"));
+        this(TmcEventBus.getDefault(), new ConfigFile("CourseDb.json"));
     }
     
     public CourseDb(TmcEventBus eventBus, ConfigFile configFile) {

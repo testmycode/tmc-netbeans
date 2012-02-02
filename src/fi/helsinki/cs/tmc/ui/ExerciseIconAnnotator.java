@@ -30,7 +30,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
 
     @SuppressWarnings("LeakingThisInConstructor")
     public ExerciseIconAnnotator() {
-        this.eventBus = new TmcEventBus();
+        this.eventBus = TmcEventBus.getDefault();
         this.changeSupport = new ChangeSupport(this);
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -40,8 +40,6 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                 updateAllIcons();
             }
         });
-
-        //TODO: also update on project open!
     }
 
     @Override

@@ -9,13 +9,18 @@ public class TmcEventBus {
     private static final Logger log = Logger.getLogger(TmcEventBus.class.getName());
     private static final TmcEventBus instance = new TmcEventBus();
 
-    public static TmcEventBus getInstance() {
+    public static TmcEventBus getDefault() {
         return instance;
+    }
+    
+    // Factory method to avoid accidental creation when getDefault was meant.
+    public static TmcEventBus createNewInstance() {
+        return new TmcEventBus();
     }
 
     private List<TmcEventListener> listeners;
 
-    public TmcEventBus() {
+    private TmcEventBus() {
         this.listeners = new ArrayList<TmcEventListener>();
     }
 

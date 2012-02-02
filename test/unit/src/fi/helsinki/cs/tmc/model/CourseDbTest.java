@@ -30,7 +30,7 @@ public class CourseDbTest {
         oldLogLevel = CourseDb.logger.getLevel();
         CourseDb.logger.setLevel(Level.OFF);
 
-        eventBus = new TmcEventBus();
+        eventBus = TmcEventBus.createNewInstance();
         file = new ConfigFile("CourseDbTest.json");
         db = new CourseDb(eventBus, file);
     }
