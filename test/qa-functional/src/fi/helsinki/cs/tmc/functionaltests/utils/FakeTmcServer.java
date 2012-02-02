@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.testing.AdHocHttpServer;
 import java.io.UnsupportedEncodingException;
 import org.apache.http.entity.StringEntity;
@@ -21,7 +22,7 @@ import static org.junit.Assert.*;
 
 public class FakeTmcServer extends AdHocHttpServer {
 
-    private int expectedApiVersion = 2;
+    private int expectedApiVersion = ServerAccess.API_VERSION;
     private String expectedUsername;
     private String expectedPassword;
     private String coursesJson = "{}";

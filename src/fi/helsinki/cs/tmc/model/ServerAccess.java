@@ -20,7 +20,7 @@ import java.util.Map;
  * A frontend for the server.
  */
 public class ServerAccess {
-    private static final int API_VERSION = 2;
+    public static final int API_VERSION = 3;
     
     private TmcSettings settings;
     private CourseListParser courseListParser;

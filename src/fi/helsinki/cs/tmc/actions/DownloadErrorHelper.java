@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.model.ObsoleteClientException;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 
 class DownloadErrorHelper {
