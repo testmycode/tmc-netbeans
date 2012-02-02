@@ -65,7 +65,7 @@ public class UpdateExercisesAction implements ActionListener {
                     }
                     
                     TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
-                    if (project != null) {
+                    if (project != null && !project.isOpen()) {
                         projectMediator.openProject(project);
                     }
                 }
