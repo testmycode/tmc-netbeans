@@ -151,12 +151,18 @@ public class ProjectMediator {
     }
     
     public void openProjects(Collection<TmcProjectInfo> projects) {
-        TmcProjectInfo[] projectInfos = projects.toArray(new TmcProjectInfo[projects.size()]);
-        Project[] nbProjects = new Project[projects.size()];
-        for (int i = 0; i < nbProjects.length; ++i) {
-            nbProjects[i] = projectInfos[i].getProject();
+        final Project[] nbProjects = new Project[projects.size()];
+        int i = 0;
+        for (TmcProjectInfo projectInfo : projects) {
+            nbProjects[i++] = projectInfo.getProject();
         }
-        openProjects.open(nbProjects, true, true);
+        
+        new Thread("Project opener") {
+            @Override
+            public void run() {
+                openProjects.open(nbProjects, true, true);
+            }
+        }.start();
     }
     
     public boolean isProjectOpen(TmcProjectInfo project) {
