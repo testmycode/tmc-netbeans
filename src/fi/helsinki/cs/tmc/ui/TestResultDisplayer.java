@@ -86,6 +86,7 @@ public class TestResultDisplayer {
         
         dialog.setModalityType(Dialog.ModalityType.MODELESS);
         dialog.setLocationRelativeTo(null);
+        dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
     }
     
