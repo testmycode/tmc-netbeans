@@ -69,6 +69,8 @@ class TestResultPanel extends JPanel {
     private static class TestCaseResultCell extends JPanel {
         private static final Color FAIL_COLOR = new Color(0xED0000);
         private static final Color PASS_COLOR = new Color(0x6FD06D);
+        private static final Color FAIL_TEXT_COLOR = FAIL_COLOR.darker();
+        private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
         
         private final TestCaseResult result;
         private final JButton backtraceButton;
@@ -83,6 +85,7 @@ class TestResultPanel extends JPanel {
             String passFail = result.isSuccessful() ? "PASS: " : "FAIL: ";
             JLabel titleLabel = new JLabel(passFail + result.getName());
             titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize2D() + 2));
+            titleLabel.setForeground(getResultTextColor());
             this.add(titleLabel);
             
             if (result.getMessage() != null) {
@@ -96,8 +99,6 @@ class TestResultPanel extends JPanel {
             } else {
                 this.backtraceButton = null;
             }
-            
-            this.setBackground(getBgColor());
             
             this.setBorder(this.createBorder());
         }
@@ -161,7 +162,7 @@ class TestResultPanel extends JPanel {
             }
         };
         
-        private Color getBgColor() {
+        private Color getResultColor() {
             if (result.isSuccessful()) {
                 return PASS_COLOR;
             } else {
@@ -169,11 +170,19 @@ class TestResultPanel extends JPanel {
             }
         }
         
+        private Color getResultTextColor() {
+            if (result.isSuccessful()) {
+                return PASS_TEXT_COLOR;
+            } else {
+                return FAIL_TEXT_COLOR;
+            }
+        }
+        
         private Border createBorder() {
-            Border innerPadding = BorderFactory.createEmptyBorder(5, 5, 5, 5);
-            Border deco = BorderFactory.createLineBorder(getBgColor().darker());
+            Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
+            Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, getResultColor());
             
-            return BorderFactory.createCompoundBorder(deco, innerPadding);
+            return BorderFactory.createCompoundBorder(leftColorBar, innerPadding);
         }
     }
     
