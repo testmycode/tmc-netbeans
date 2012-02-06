@@ -41,6 +41,9 @@ public class ProjectMediator {
     }
     
     public TmcProjectInfo wrapProject(Project p) {
+        if (p == null) {
+            throw new NullPointerException();
+        }
         return new TmcProjectInfo(p);
     }
     

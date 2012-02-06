@@ -64,7 +64,10 @@ public abstract class AbstractTmcRunAction extends NodeAction {
     private static List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
         ArrayList<Project> result = new ArrayList<Project>();
         for (DataObject dataObj : dataObjects) {
-            result.add(projectFromDataObject(dataObj));
+            Project project = projectFromDataObject(dataObj);
+            if (project != null) {
+                result.add(project);
+            }
         }
         return result;
     }
