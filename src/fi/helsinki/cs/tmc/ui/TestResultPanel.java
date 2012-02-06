@@ -1,12 +1,18 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
@@ -16,16 +22,30 @@ import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+import javax.swing.text.StyledDocument;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.openide.cookies.EditorCookie;
+import org.openide.cookies.LineCookie;
+import org.openide.filesystems.FileObject;
+import org.openide.loaders.DataObject;
+import org.openide.loaders.DataObjectNotFoundException;
+import org.openide.text.Line;
+import org.openide.text.Line.ShowOpenType;
+import org.openide.text.Line.ShowVisibilityType;
 
 class TestResultPanel extends JPanel {
     private static final int PADDING_BETWEEN_BOXES = 4;
+    
+    private static final Logger log = Logger.getLogger(TestResultPanel.class.getName());
+    
+    private final SourceFileLookup sourceFileLookup;
     
     private boolean passedTestsVisible = false;
     private boolean allFailuresVisible = false;
     private List<TestCaseResult> storedResults = new ArrayList<TestCaseResult>();
     
     public TestResultPanel() {
+        this.sourceFileLookup = SourceFileLookup.getDefault();
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
     }
     
@@ -39,7 +59,7 @@ class TestResultPanel extends JPanel {
         this.removeAll();
         for (TestCaseResult result : storedResults) {
             if (!result.isSuccessful() || passedTestsVisible) {
-                this.add(new TestCaseResultCell(result));
+                this.add(new TestCaseResultCell(result, sourceFileLookup));
                 this.add(Box.createVerticalStrut(PADDING_BETWEEN_BOXES));
                 if (!allFailuresVisible && !result.isSuccessful()) {
                     break;
@@ -73,10 +93,12 @@ class TestResultPanel extends JPanel {
         private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
         
         private final TestCaseResult result;
+        private final SourceFileLookup sourceFileLookup;
         private final JButton backtraceButton;
 
-        public TestCaseResultCell(TestCaseResult result) {
+        public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
             this.result = result;
+            this.sourceFileLookup = sourceFileLookup;
             
             this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
             
@@ -141,24 +163,54 @@ class TestResultPanel extends JPanel {
                 
                 JLabel mainLineLabel = new JLabel(mainLine);
                 mainLineLabel.setFont(mainLineLabel.getFont().deriveFont(Font.BOLD));
-                JLabel stackTraceLabel = new JLabel(stackTraceToHtml(ex.stackTrace));
-                
                 add(mainLineLabel);
-                add(stackTraceLabel);
+                
+                addStackTraceLabels(ex.stackTrace);
                 
                 if (ex.cause != null) {
                     addException(ex.cause, true);
                 }
             }
             
-            private String stackTraceToHtml(StackTraceElement[] stackTrace) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("<html>");
-                for (StackTraceElement ste : stackTrace) {
-                    sb.append(escapeHtml(ste.toString())).append("<br/>");
+            private void addStackTraceLabels(StackTraceElement[] stackTrace) {
+                for (final StackTraceElement ste : stackTrace) {
+                    final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
+                    
+                    if (sourceFile != null && ste.getLineNumber() > 0) {
+                        HyperlinkLabel label = new HyperlinkLabel(ste.toString());
+                        label.addActionListener(new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openAtLine(sourceFile, ste.getLineNumber());
+                            }
+                        });
+                        add(label);
+                    } else {
+                        add(new JLabel(ste.toString()));
+                    }
                 }
-                sb.append("</html>");
-                return sb.toString();
+            }
+            
+            private void openAtLine(FileObject sourceFile, final int lineNum) {
+                try {
+                    if (sourceFile.isValid()) {
+                        DataObject dataObject = DataObject.find(sourceFile);
+
+                        EditorCookie editorCookie = dataObject.getLookup().lookup(EditorCookie.class);
+                        if (editorCookie != null) {
+                            editorCookie.open(); // Asynchronous
+
+                            LineCookie lineCookie = dataObject.getCookie(LineCookie.class);
+                            if (lineCookie != null) {
+                                Line line = lineCookie.getLineSet().getCurrent(lineNum - 1);
+                                line.show(ShowOpenType.OPEN, ShowVisibilityType.FOCUS);
+                            }
+                        }
+                    }
+                } catch (Exception ex) {
+                    ExceptionUtils.logException(ex, log, Level.WARNING);
+                    return;
+                }
             }
         };
         
