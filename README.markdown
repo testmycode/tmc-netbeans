@@ -1,11 +1,11 @@
 # Test My Code NetBeans plugin #
 
-This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading and submitting exercises directly from the IDE.
+This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading, testing and submitting exercises directly from the IDE.
 
 
 ## Credits ##
 
-The project started as a Software Engineering Lab project at the [University of Helsinki CS Dept.](http://cs.helsinki.fi/). The original authors of the server component were
+The project started as a Software Engineering Lab project at the [University of Helsinki CS Dept.](http://cs.helsinki.fi/). The original authors of the NetBeans plugin were
 
 - Kirsi Kaltiainen
 - Timo Koivisto
