@@ -29,6 +29,8 @@ import org.apache.http.util.EntityUtils;
 /*package*/ class HttpRequestExecutor implements CancellableCallable<BufferedHttpEntity> {
     private static final int DEFAULT_TIMEOUT = 30 * 1000;
     
+    private final Object shutdownLock = new Object();
+    
     private int timeout = DEFAULT_TIMEOUT;
     private HttpUriRequest request;
     private CookieStore cookieStore;
@@ -69,7 +71,10 @@ import org.apache.http.util.EntityUtils;
         try {
             return executeRequest(httpClient);
         } finally {
-            disposeOfHttpClient(httpClient);
+            synchronized (shutdownLock) {
+                request = null;
+                disposeOfHttpClient(httpClient);
+            }
         }
     }
     
@@ -139,7 +144,11 @@ import org.apache.http.util.EntityUtils;
      */
     @Override
     public boolean cancel() {
-        request.abort();
+        synchronized (shutdownLock) {
+            if (request != null) {
+                request.abort();
+            }
+        }
         return true;
     }
 }

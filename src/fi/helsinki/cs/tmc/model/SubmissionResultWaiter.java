@@ -106,7 +106,8 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
             canceled = true;
             if (cancellableDownloadTask != null) {
                 cancellableDownloadTask.cancel();
-            } else if (sleepingThread != null) {
+            }
+            if (sleepingThread != null) {
                 sleepingThread.interrupt();
             }
         }
