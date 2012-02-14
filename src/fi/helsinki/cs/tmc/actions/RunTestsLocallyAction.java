@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -24,6 +25,7 @@ import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.module.api.support.ActionUtils;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.platform.JavaPlatform;
@@ -140,13 +142,19 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         }
         
         try {
-            final int argsBeforeMethods = 3;
-            String[] args = new String[argsBeforeMethods + testMethods.size()];
-            args[0] = "-Dtmc.test_class_dir=" + FileUtil.toFile(testDir).getAbsolutePath();
-            args[1] = "-Dtmc.results_file=" + tempFile.getAbsolutePath();
-            args[2] = "fi.helsinki.cs.tmc.testrunner.Main";
+            ArrayList<String> args = new ArrayList<String>();
+            args.add("-Dtmc.test_class_dir=" + FileUtil.toFile(testDir).getAbsolutePath());
+            args.add("-Dtmc.results_file=" + tempFile.getAbsolutePath());
+            
+            Integer memoryLimit = getMemoryLimit(project);
+            if (memoryLimit != null) {
+                args.add("-Xmx" + memoryLimit + "M");
+            }
+            
+            args.add("fi.helsinki.cs.tmc.testrunner.Main");
+            
             for (int i = 0; i < testMethods.size(); ++i) {
-                args[argsBeforeMethods + i] = testMethods.get(i).toString();
+                args.add(testMethods.get(i).toString());
             }
 
             InputOutput inOut = IOProvider.getDefault().getIO("test output", false);
@@ -230,7 +238,7 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
         return results;
     }
     
-    private void runJavaProcessInProject(Project project, String taskName, String[] args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
+    private void runJavaProcessInProject(Project project, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
         FileObject projectDir = project.getProjectDirectory();
         
         JavaPlatform platform = JavaPlatform.getDefault(); // Should probably use project's configured platform instead
@@ -248,12 +256,13 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
             classPath = ClassPathSupport.createProxyClassPath(classPath, testRunnerClassPath);
         }
         
-        String[] command = new String[3 + args.length];
+        String[] command = new String[3 + args.size()];
         command[0] = FileUtil.toFile(javaExe).getAbsolutePath();
         command[1] = "-cp";
         command[2] = classPath.toString(ClassPath.PathConversionMode.WARN);
-        System.arraycopy(args, 0, command, 3, args.length);
+        System.arraycopy(args.toArray(new String[args.size()]), 0, command, 3, args.size());
         
+        log.info(StringUtils.join(command, ' '));
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
         BgTask.start(taskName, runner, listener);
     }
@@ -282,6 +291,15 @@ public class RunTestsLocallyAction extends AbstractTmcRunAction {
                 }
             }
             return ClassPathSupport.createClassPath(urls.toArray(new URL[0]));
+        } else {
+            return null;
+        }
+    }
+    
+    private Integer getMemoryLimit(Project project) {
+        Exercise ex = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(project), courseDb);
+        if (ex != null) {
+            return ex.getMemoryLimit();
         } else {
             return null;
         }

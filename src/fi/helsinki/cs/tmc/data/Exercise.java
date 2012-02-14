@@ -32,6 +32,9 @@ public class Exercise implements Serializable {
     private boolean completed;
     private boolean returnable;
     private String checksum;
+    
+    @SerializedName("memory_limit")
+    private Integer memoryLimit;
 
     public Exercise() {
     }
@@ -153,6 +156,14 @@ public class Exercise implements Serializable {
 
     public void setChecksum(String checksum) {
         this.checksum = checksum;
+    }
+
+    public Integer getMemoryLimit() {
+        return memoryLimit;
+    }
+
+    public void setMemoryLimit(Integer memoryLimit) {
+        this.memoryLimit = memoryLimit;
     }
     
     @Override
