@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import javax.swing.JLabel;
+import java.awt.Component;
 import org.netbeans.jemmy.operators.JPasswordFieldOperator;
 import org.netbeans.jemmy.operators.JTextFieldOperator;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
@@ -11,6 +13,7 @@ import javax.swing.JComboBox;
 import javax.swing.JPasswordField;
 import javax.swing.JTextField;
 import org.netbeans.jellytools.actions.Action;
+import org.netbeans.jemmy.ComponentChooser;
 import org.netbeans.jemmy.operators.JCheckBoxOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.jemmy.operators.JFileChooserOperator;
@@ -113,8 +116,25 @@ public class SettingsOperator {
     }
     
     @SuppressWarnings("unchecked")
-    protected <T> T waitByLabel(Class<T> cls, String text) {
-        JLabelOperator label = new JLabelOperator(dialog, text);
+    protected <T> T waitByLabel(Class<T> cls, final String text) {
+        JLabelOperator label = new JLabelOperator(dialog, new ComponentChooser() {
+            @Override
+            public boolean checkComponent(Component c) {
+                if (c instanceof JLabel) {
+                    return ((JLabel)c).getText().equals(text);
+                } else {
+                    return false;
+                }
+            }
+
+            @Override
+            public String getDescription() {
+                return "JLabel with text \"" + text + "\"";
+            }
+        });
+        if (label.getLabelFor() == null) {
+            fail("JLabel with text \"" + text + "\" is not set as a label for any other component.");
+        }
         return (T)label.getLabelFor();
     }
 }

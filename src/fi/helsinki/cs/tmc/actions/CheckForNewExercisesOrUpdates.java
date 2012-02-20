@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -33,7 +34,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public static void startTimer() {
         int interval = 20*60*1000; // 20 mintues
-        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true));
+        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
         timer.setRepeats(true);
         timer.start();
     }
@@ -43,18 +44,20 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private ServerAccess serverAccess;
     private NotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
-    private boolean beSubtle;
+    private boolean beQuiet;
+    private boolean regular;
 
     public CheckForNewExercisesOrUpdates() {
-        this(false);
+        this(false, false);
     }
     
-    public CheckForNewExercisesOrUpdates(boolean beSubtle) {
+    public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean regular) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
         this.notifier = NotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
-        this.beSubtle = beSubtle;
+        this.beQuiet = beQuiet;
+        this.regular = regular;
     }
 
     @Override
@@ -64,46 +67,54 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     
     public void run() {
         final Course currentCourse = courseDb.getCurrentCourse();
-        if (currentCourse != null) {
-            BgTask.start("Checking for new exercises", serverAccess.getDownloadingCourseListTask(), new BgTaskListener<List<Course>>() {
-                @Override
-                public void bgTaskReady(List<Course> receivedCourseList) {
-                    Course receivedCourse = CourseListUtils.getCourseByName(receivedCourseList, currentCourse.getName());
-                    if (receivedCourse != null) {
-                        courseDb.setAvailableCourses(receivedCourseList);
-
-                        final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                        if (status.thereIsSomethingToDownload()) {
-                            if (beSubtle) {
-                                displayNotification(status, new ActionListener() {
-                                    @Override
-                                    public void actionPerformed(ActionEvent e) {
-                                        DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
-                                    }
-                                });
-                            } else {
-                                DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
-                            }
-                        } else if (!beSubtle) {
-                            dialogs.displayMessage("No new exercises or updates to download.");
-                        }
-                    }
-                }
-
-                @Override
-                public void bgTaskCancelled() {
-                }
-
-                @Override
-                public void bgTaskFailed(Throwable ex) {
-                    dialogs.displayError("Failed to check for new exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
-                }
-            });
-        } else {
-            if (!beSubtle) {
+        
+        if (regular && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
+            return;
+        }
+        
+        if (currentCourse == null) {
+            if (!beQuiet) {
                 dialogs.displayMessage("Please select a course in TMC -> Settings.");
             }
+            return;
         }
+        
+        BgTask.start("Checking for new exercises", serverAccess.getDownloadingCourseListTask(), new BgTaskListener<List<Course>>() {
+            @Override
+            public void bgTaskReady(List<Course> receivedCourseList) {
+                Course receivedCourse = CourseListUtils.getCourseByName(receivedCourseList, currentCourse.getName());
+                if (receivedCourse != null) {
+                    courseDb.setAvailableCourses(receivedCourseList);
+
+                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                    if (status.thereIsSomethingToDownload()) {
+                        if (beQuiet) {
+                            displayNotification(status, new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                                }
+                            });
+                        } else {
+                            DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                        }
+                    } else if (!beQuiet) {
+                        dialogs.displayMessage("No new exercises or updates to download.");
+                    }
+                }
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                if (!beQuiet) {
+                    dialogs.displayError("Failed to check for new exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
+                }
+            }
+        });
     }
 
     private void displayNotification(LocalExerciseStatus status, ActionListener action) {

@@ -11,6 +11,7 @@ public class TmcSettings {
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
     private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
+    private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
     
     private static final TmcSettings defaultInstance =
             new TmcSettings(
@@ -106,4 +107,11 @@ public class TmcSettings {
         settings.put(PREF_PROJECT_ROOT_DIR, value);
     }
     
+    public boolean isCheckingForUpdatesInTheBackground() {
+        return settings.get(PREF_CHECK_FOR_UPDATES_IN_BACKGROUND, "1").equals("1");
+    }
+    
+    public void setCheckingForUpdatesInTheBackground(boolean value) {
+        settings.put(PREF_CHECK_FOR_UPDATES_IN_BACKGROUND, value ? "1" : "0");
+    }
 }

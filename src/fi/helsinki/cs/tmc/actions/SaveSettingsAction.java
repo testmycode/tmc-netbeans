@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
-import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import java.awt.event.ActionEvent;
 import javax.swing.AbstractAction;
@@ -12,11 +11,9 @@ import javax.swing.AbstractAction;
 public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
-    private ConvenientDialogDisplayer dialogs;
     
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
-        this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
 
     @Override
@@ -36,6 +33,7 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setSavingPassword(prefUi.getShouldSavePassword());
         settings.setServerBaseUrl(prefUi.getServerBaseUrl());
         settings.setProjectRootDir(prefUi.getProjectDir());
+        settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();

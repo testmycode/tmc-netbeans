@@ -97,4 +97,13 @@ public class TmcSettingsTest {
         assertEquals("", newSettings().getPassword());
         assertFalse(newSettings().isSavingPassword());
     }
+    
+    @Test
+    public void itSavesWhetherToCheckUpdatesInTheBackground() {
+        assertTrue(settings.isCheckingForUpdatesInTheBackground());
+        settings.setCheckingForUpdatesInTheBackground(false);
+        assertFalse(newSettings().isCheckingForUpdatesInTheBackground());
+        settings.setCheckingForUpdatesInTheBackground(true);
+        assertTrue(newSettings().isCheckingForUpdatesInTheBackground());
+    }
 }

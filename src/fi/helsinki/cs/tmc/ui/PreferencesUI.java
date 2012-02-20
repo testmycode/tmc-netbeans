@@ -18,6 +18,8 @@ public interface PreferencesUI {
     boolean getShouldSavePassword();
 
     public List<Course> getAvailableCourses();
+    
+    boolean getCheckForUpdatesInTheBackground();
 
     void setAvailableCourses(List<Course> courses);
     
@@ -34,4 +36,6 @@ public interface PreferencesUI {
     void setPassword(String password);
     
     void setShouldSavePassword(boolean shouldSavePassword);
+    
+    void setCheckForUpdatesInTheBackground(boolean shouldCheck);
 }
