@@ -6,10 +6,13 @@ import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.awt.Color;
 import java.awt.Font;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -17,18 +20,19 @@ import javax.swing.AbstractAction;
 import javax.swing.Action;
 import javax.swing.BorderFactory;
 import javax.swing.Box;
-import javax.swing.BoxLayout;
 import javax.swing.JButton;
-import javax.swing.JLabel;
+import javax.swing.JEditorPane;
 import javax.swing.JPanel;
+import javax.swing.SwingUtilities;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
-import javax.swing.text.StyledDocument;
+import javax.swing.event.HyperlinkEvent;
+import javax.swing.event.HyperlinkListener;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
-import org.openide.loaders.DataObjectNotFoundException;
 import org.openide.text.Line;
 import org.openide.text.Line.ShowOpenType;
 import org.openide.text.Line.ShowVisibilityType;
@@ -46,7 +50,7 @@ class TestResultPanel extends JPanel {
     
     public TestResultPanel() {
         this.sourceFileLookup = SourceFileLookup.getDefault();
-        this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+        this.setLayout(new GridBagLayout());
     }
     
     public void setTestCaseResults(List<TestCaseResult> results) {
@@ -57,17 +61,41 @@ class TestResultPanel extends JPanel {
     
     private void rebuildCells() {
         this.removeAll();
+        
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.gridx = 0;
+        gbc.gridy = GridBagConstraints.RELATIVE;
+        gbc.fill = GridBagConstraints.NONE;
+        gbc.anchor = GridBagConstraints.NORTHWEST;
+        gbc.weightx = 1.0;
+        gbc.weighty = 0.0;
+        gbc.insets.bottom = PADDING_BETWEEN_BOXES;
+        
         for (TestCaseResult result : storedResults) {
             if (!result.isSuccessful() || passedTestsVisible) {
-                this.add(new TestCaseResultCell(result, sourceFileLookup));
-                this.add(Box.createVerticalStrut(PADDING_BETWEEN_BOXES));
+                this.add(new TestCaseResultCell(result, sourceFileLookup), gbc);
+                
                 if (!allFailuresVisible && !result.isSuccessful()) {
                     break;
                 }
             }
         }
+        gbc.weighty = 1.0;
+        this.add(Box.createVerticalGlue(), gbc); // Minimize component heights
+        
         this.revalidate();
         this.repaint();
+        
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                scrollToTop();
+            }
+        });
+    }
+    
+    private void scrollToTop() {
+        scrollRectToVisible(new Rectangle(0, 0, 1, 1));
     }
     
     public void clear() {
@@ -95,98 +123,155 @@ class TestResultPanel extends JPanel {
         private final TestCaseResult result;
         private final SourceFileLookup sourceFileLookup;
         private final JButton backtraceButton;
+        private final GridBagConstraints gbc = new GridBagConstraints();
 
         public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
             
-            this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
+            this.setLayout(new GridBagLayout());
+            gbc.gridx = 0;
+            gbc.gridy = GridBagConstraints.RELATIVE;
+            gbc.fill = GridBagConstraints.NONE;
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.weightx = 1.0;
+            gbc.weighty = 0.0;
             
-            this.add(Box.createHorizontalGlue()); // Maximize component width
-            
-            String passFail = result.isSuccessful() ? "PASS: " : "FAIL: ";
-            JLabel titleLabel = new JLabel(passFail + result.getName());
+            String passOrFail = result.isSuccessful() ? "PASS: " : "FAIL: ";
+            SelectableText titleLabel = new SelectableText(passOrFail + result.getName());
             titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize2D() + 2));
             titleLabel.setForeground(getResultTextColor());
-            this.add(titleLabel);
+            
+            this.add(titleLabel, gbc);
             
             if (result.getMessage() != null) {
-                this.add(new JLabel(messageToHtml(result.getMessage())));
+                this.add(new SelectableText(result.getMessage()), gbc);
             }
             
             if (result.getException() != null) {
+                add(Box.createVerticalStrut(16), gbc);
                 this.backtraceButton = new JButton(backtraceAction);
-                add(Box.createVerticalStrut(16));
-                this.add(backtraceButton);
+                gbc.weighty = 1.0; // Leave it so for the backtrace
+                this.add(backtraceButton, gbc);
             } else {
                 this.backtraceButton = null;
             }
             
             this.setBorder(this.createBorder());
         }
-        
-        private String messageToHtml(String message) {
-            return "<html>" + nlToBr(message) + "</html>";
-        }
 
-        private String nlToBr(String message) {
-            StringBuilder sb = new StringBuilder();
-            for (String line : message.split("\n")) {
-                sb.append(escapeHtml(line.toString())).append("<br/>");
+        private static class BacktraceDisplay extends JEditorPane {
+            private StringBuilder htmlBuilder;
+            private HashMap<String, ActionListener> linkHandlers;
+            private int nextLinkId;
+            
+            public BacktraceDisplay() {
+                this.htmlBuilder = new StringBuilder().append("<html><body>");
+                this.linkHandlers = new HashMap<String, ActionListener>();
+                this.nextLinkId = 1;
+                
+                this.setEditable(false);
+                this.setContentType("text/html");
+                this.setBackground(UIManager.getColor("Label.background"));
+                
+                this.addHyperlinkListener(new HyperlinkListener() {
+                    @Override
+                    public void hyperlinkUpdate(HyperlinkEvent e) {
+                        if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
+                            ActionListener listener = linkHandlers.get(e.getDescription());
+                            if (listener != null) {
+                                ActionEvent ae = new ActionEvent(BacktraceDisplay.this, ActionEvent.ACTION_PERFORMED, "link clicked");
+                                listener.actionPerformed(ae);
+                            }
+                        }
+                    }
+                });
             }
-            return sb.toString();
-        }
-        
-        private String escapeHtml(String s) {
-            return StringEscapeUtils.escapeHtml3(s);
+            
+            private String htmlText(String text) {
+                return nlToBr(escapeHtml(text.trim()));
+            }
+
+            private static String escapeHtml(String s) {
+                return StringEscapeUtils.escapeHtml3(s);
+            }
+            
+            private static String nlToBr(String message) {
+                StringBuilder sb = new StringBuilder();
+                String[] lines = message.split("\n");
+                for (int i = 0; i < lines.length - 1; ++i) {
+                    sb.append(lines[i].toString()).append("<br/>");
+                }
+                sb.append(lines[lines.length - 1].toString());
+                return sb.toString();
+            }
+            
+            public void addTextLine(String text) {
+                htmlBuilder.append(htmlText(text)).append("<br />");
+            }
+            
+            public void addBoldTextLine(String text) {
+                htmlBuilder.append("<b>").append(htmlText(text)).append("</b>").append("<br />");
+            }
+            
+            public void addLink(String text, ActionListener listener) {
+                htmlBuilder.append("<a href=\"#link").append(nextLinkId).append("\">").append(htmlText(text)).append("</a>").append("<br />");
+                linkHandlers.put("#link" + nextLinkId, listener);
+                nextLinkId += 1;
+            }
+            
+            public void finish() {
+                htmlBuilder.append("</body></html>");
+                this.setText(htmlBuilder.toString());
+                htmlBuilder = new StringBuilder();
+            }
         }
         
         private Action backtraceAction = new AbstractAction("Show backtrace") {
             @Override
             public void actionPerformed(ActionEvent e) {
                 remove(backtraceButton);
-                addException(result.getException(), false);
+                
+                BacktraceDisplay display = new BacktraceDisplay();
+                addException(display, result.getException(), false);
+                display.finish();
+                add(display, gbc);
+                
                 revalidate();
             }
             
-            private void addException(CaughtException ex, boolean isCause) {
+            private void addException(BacktraceDisplay display, CaughtException ex, boolean isCause) {
                 String mainLine;
                 if (ex.message != null) {
-                    mainLine = escapeHtml(ex.className) + ": " + nlToBr(ex.message);
+                    mainLine = ex.className + ": " + ex.message;
                 } else {
-                    mainLine = escapeHtml(ex.className);
+                    mainLine = ex.className;
                 }
                 if (isCause) {
                     mainLine = "Caused by: " + mainLine;
                 }
-                mainLine = "<html>" + mainLine + "</html>";
+                display.addBoldTextLine(mainLine);
                 
-                JLabel mainLineLabel = new JLabel(mainLine);
-                mainLineLabel.setFont(mainLineLabel.getFont().deriveFont(Font.BOLD));
-                add(mainLineLabel);
-                
-                addStackTraceLabels(ex.stackTrace);
+                addStackTraceLines(display, ex.stackTrace);
                 
                 if (ex.cause != null) {
-                    addException(ex.cause, true);
+                    addException(display, ex.cause, true);
                 }
             }
             
-            private void addStackTraceLabels(StackTraceElement[] stackTrace) {
+            private void addStackTraceLines(BacktraceDisplay display, StackTraceElement[] stackTrace) {
                 for (final StackTraceElement ste : stackTrace) {
                     final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
                     
                     if (sourceFile != null && ste.getLineNumber() > 0) {
-                        HyperlinkLabel label = new HyperlinkLabel(ste.toString());
-                        label.addActionListener(new ActionListener() {
+                        display.addLink(ste.toString(), new ActionListener() {
                             @Override
                             public void actionPerformed(ActionEvent e) {
                                 openAtLine(sourceFile, ste.getLineNumber());
                             }
                         });
-                        add(label);
                     } else {
-                        add(new JLabel(ste.toString()));
+                        display.addTextLine(ste.toString());
                     }
                 }
             }

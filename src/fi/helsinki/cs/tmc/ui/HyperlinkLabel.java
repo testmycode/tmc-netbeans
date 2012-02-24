@@ -17,6 +17,9 @@ import javax.swing.JLabel;
 
 /**
  * A clickable JLabel that looks like a link.
+ * 
+ * <p>
+ * As of 2012-02-24 this is unused but left in since it may yet be useful.
  */
 public class HyperlinkLabel extends JLabel {
 

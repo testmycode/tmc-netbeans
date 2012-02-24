@@ -66,12 +66,12 @@ class TestResultWindow extends TopComponent {
         scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
         
         this.add(topPanel);
-        this.add(useMaxHeight(scrollPane));
+        this.add(usingMaxHeight(scrollPane));
         
         loadWindowPreferences();
     }
     
-    private Component useMaxHeight(Component c) {
+    private Component usingMaxHeight(Component c) {
         Box box = Box.createHorizontalBox();
         box.add(Box.createVerticalGlue());
         box.add(c);
