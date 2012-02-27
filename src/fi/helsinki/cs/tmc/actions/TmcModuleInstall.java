@@ -26,7 +26,9 @@ public class TmcModuleInstall extends ModuleInstall {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(true, false));
                 } else {
                     new CheckForNewExercisesOrUpdates(true, false).run();
-                    new CheckForUnopenedExercises().run();
+                    if (CheckForUnopenedExercises.shouldRunOnStartup()) {
+                        new CheckForUnopenedExercises().run();
+                    }
                 }
                 
                 CheckForNewExercisesOrUpdates.startTimer();

@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -13,6 +14,10 @@ import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
 
 public class CheckForUnopenedExercises implements ActionListener {
+    public static boolean shouldRunOnStartup() {
+        return TmcSettings.getDefault().isCheckingForUnopenedAtStartup();
+    }
+    
     private ProjectMediator projects;
     private CourseDb courseDb;
     private NotificationDisplayer notifier;

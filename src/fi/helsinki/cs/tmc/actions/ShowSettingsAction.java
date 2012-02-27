@@ -57,6 +57,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setServerBaseUrl(settings.getServerBaseUrl());
         prefUI.setProjectDir(settings.getProjectRootDir());
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
+        prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
         prefUI.setAvailableCourses(courseDb.getAvailableCourses());
         prefUI.setSelectedCourse(courseDb.getCurrentCourse());
         prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());

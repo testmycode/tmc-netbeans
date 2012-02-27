@@ -12,6 +12,7 @@ public class TmcSettings {
     private static final String PREF_PASSWORD = "password";
     private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
     private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
+    private static final String PREF_CHECK_FOR_UNOPENED_AT_STARTUP = "checkForUnopenedAtStartup";
     
     private static final TmcSettings defaultInstance =
             new TmcSettings(
@@ -113,5 +114,13 @@ public class TmcSettings {
     
     public void setCheckingForUpdatesInTheBackground(boolean value) {
         settings.put(PREF_CHECK_FOR_UPDATES_IN_BACKGROUND, value ? "1" : "0");
+    }
+    
+    public boolean isCheckingForUnopenedAtStartup() {
+        return settings.get(PREF_CHECK_FOR_UNOPENED_AT_STARTUP, "1").equals("1");
+    }
+    
+    public void setCheckingForUnopenedAtStartup(boolean value) {
+        settings.put(PREF_CHECK_FOR_UNOPENED_AT_STARTUP, value ? "1" : "0");
     }
 }

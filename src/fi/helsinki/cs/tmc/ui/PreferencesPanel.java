@@ -197,6 +197,16 @@ import org.apache.commons.lang3.StringUtils;
     public void setCheckForUpdatesInTheBackground(boolean shouldCheck) {
         checkForUpdatesInBackgroundCheckbox.setSelected(shouldCheck);
     }
+
+    @Override
+    public boolean getCheckForUnopenedExercisesAtStartup() {
+        return checkForUnopenedExercisesCheckbox.isSelected();
+    }
+
+    @Override
+    public void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck) {
+        checkForUnopenedExercisesCheckbox.setSelected(shouldCheck);
+    }
     
     private TmcSettings getTransientSettingsForRefresh() {
         TmcSettings settings = TmcSettings.getTransient();
@@ -204,7 +214,6 @@ import org.apache.commons.lang3.StringUtils;
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
         settings.setProjectRootDir(getProjectDir());
-        settings.setCheckingForUpdatesInTheBackground(getCheckForUpdatesInTheBackground());
         return settings;
     }
     
@@ -386,8 +395,8 @@ import org.apache.commons.lang3.StringUtils;
         courseListReloadingLabel = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         checkForUpdatesInBackgroundCheckbox = new javax.swing.JCheckBox();
+        checkForUnopenedExercisesCheckbox = new javax.swing.JCheckBox();
 
-        usernameLabel.setLabelFor(usernameTextField);
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
         org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, usernameTextField, org.jdesktop.beansbinding.ObjectProperty.create(), usernameLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
@@ -396,7 +405,6 @@ import org.apache.commons.lang3.StringUtils;
         usernameTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameTextField.text")); // NOI18N
         usernameTextField.setPreferredSize(new java.awt.Dimension(150, 27));
 
-        serverAddressLabel.setLabelFor(serverAddressTextField);
         serverAddressLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressLabel.text")); // NOI18N
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, serverAddressTextField, org.jdesktop.beansbinding.ObjectProperty.create(), serverAddressLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
@@ -432,7 +440,6 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
 
-        coursesLabel.setLabelFor(coursesComboBox);
         coursesLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.coursesLabel.text")); // NOI18N
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, coursesComboBox, org.jdesktop.beansbinding.ObjectProperty.create(), coursesLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
@@ -443,7 +450,6 @@ import org.apache.commons.lang3.StringUtils;
         adviceLabel.setForeground(new java.awt.Color(255, 102, 0));
         adviceLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.adviceLabel.text")); // NOI18N
 
-        passwordLabel.setLabelFor(passwordField);
         passwordLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.passwordLabel.text")); // NOI18N
 
         binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, passwordField, org.jdesktop.beansbinding.ObjectProperty.create(), passwordLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
@@ -460,6 +466,10 @@ import org.apache.commons.lang3.StringUtils;
         checkForUpdatesInBackgroundCheckbox.setSelected(true);
         checkForUpdatesInBackgroundCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUpdatesInBackgroundCheckbox.text")); // NOI18N
 
+        checkForUnopenedExercisesCheckbox.setSelected(true);
+        checkForUnopenedExercisesCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.text")); // NOI18N
+        checkForUnopenedExercisesCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.toolTipText")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -467,6 +477,7 @@ import org.apache.commons.lang3.StringUtils;
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addComponent(checkForUnopenedExercisesCheckbox)
                     .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
                     .addComponent(checkForUpdatesInBackgroundCheckbox)
                     .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
@@ -532,6 +543,8 @@ import org.apache.commons.lang3.StringUtils;
                     .addComponent(projectFolderLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addComponent(checkForUpdatesInBackgroundCheckbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(checkForUnopenedExercisesCheckbox)
                 .addContainerGap())
         );
 
@@ -570,6 +583,7 @@ import org.apache.commons.lang3.StringUtils;
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel adviceLabel;
+    private javax.swing.JCheckBox checkForUnopenedExercisesCheckbox;
     private javax.swing.JCheckBox checkForUpdatesInBackgroundCheckbox;
     private javax.swing.JLabel courseListReloadingLabel;
     private javax.swing.JComboBox coursesComboBox;

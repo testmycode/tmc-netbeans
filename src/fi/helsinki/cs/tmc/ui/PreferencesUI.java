@@ -20,6 +20,8 @@ public interface PreferencesUI {
     public List<Course> getAvailableCourses();
     
     boolean getCheckForUpdatesInTheBackground();
+    
+    boolean getCheckForUnopenedExercisesAtStartup();
 
     void setAvailableCourses(List<Course> courses);
     
@@ -38,4 +40,6 @@ public interface PreferencesUI {
     void setShouldSavePassword(boolean shouldSavePassword);
     
     void setCheckForUpdatesInTheBackground(boolean shouldCheck);
+    
+    void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck);
 }
