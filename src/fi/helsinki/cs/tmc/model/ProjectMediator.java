@@ -1,11 +1,13 @@
 package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectManager;
 import org.netbeans.api.project.ui.OpenProjects;
@@ -166,6 +168,25 @@ public class ProjectMediator {
                 openProjects.open(nbProjects, true, true);
             }
         }.start();
+    }
+    
+    /**
+     * Waits for projects to be fully opened and then calls the given runnable in the EDT.
+     */
+    public void callWhenProjectsCompletelyOpened(final Runnable whenOpen) {
+        Thread waitingThread = new Thread("callWhenProjectsCompletelyOpened() thread") {
+            @Override
+            public void run() {
+                try {
+                    openProjects.openProjects().get();
+                } catch (Exception ex) {
+                    throw ExceptionUtils.toRuntimeException(ex);
+                }
+                SwingUtilities.invokeLater(whenOpen);
+            }
+        };
+        waitingThread.setDaemon(true);
+        waitingThread.start();
     }
     
     public boolean isProjectOpen(TmcProjectInfo project) {
