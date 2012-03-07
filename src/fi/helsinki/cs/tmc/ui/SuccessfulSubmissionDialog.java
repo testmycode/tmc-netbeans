@@ -48,9 +48,9 @@ public class SuccessfulSubmissionDialog extends JDialog {
         addPointsLabel(result);
         addVSpace(10);
         addModelSolutionButton(result);
-        addVSpace(30);
-        addFeedbackQuestions(result); //TODO: maybe put in box
         addVSpace(20);
+        addFeedbackQuestions(result); //TODO: maybe put in box
+        addVSpace(10);
         addOkButton();
         
         pack();
