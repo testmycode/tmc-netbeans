@@ -53,15 +53,15 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return origImg;
         }
         
-        Image img;
+        Image img = origImg;
         try {
-            img = imageForExericse(exercise);
+            Image annotation = annotationIconForExericse(exercise);
+            if (annotation != null) {
+                img = ImageUtilities.mergeImages(img, annotation, 0, 0);
+            }
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to load exercise icon annotation", e);
-            return origImg;
         }
-        
-        img = ImageUtilities.mergeImages(origImg, img, 0, 0);
         
         String tooltip = tooltipForExercise(exercise);
         img = ImageUtilities.assignToolTipToImage(img, tooltip);
@@ -69,17 +69,23 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         return img;
     }
     
-    private Image imageForExericse(Exercise exercise) throws IOException {
-        String name = imageNameForExercise(exercise);
-        if (!iconCache.containsKey(name)) {
-            Image img = ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
-            iconCache.put(name, img);
+    private Image annotationIconForExericse(Exercise exercise) throws IOException {
+        String name = annotationIconNameForExercise(exercise);
+        if (name != null) {
+            if (!iconCache.containsKey(name)) {
+                Image img = ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
+                iconCache.put(name, img);
+            }
+            return iconCache.get(name);
+        } else {
+            return null;
         }
-        return iconCache.get(name);
     }
     
-    private String imageNameForExercise(Exercise exercise) {
-        if (exercise.isAttempted() && exercise.isCompleted()) {
+    private String annotationIconNameForExercise(Exercise exercise) {
+        if (exercise.hasDeadlinePassed()) {
+            return null;
+        } else if (exercise.isAttempted() && exercise.isCompleted()) {
             return "green-project-dot.png";
         } else if (exercise.isAttempted()) {
             return "red-project-dot.png";
