@@ -44,7 +44,7 @@ public abstract class AbstractTmcRunAction extends NodeAction {
         
         for (Project p : projects) {
             Exercise exercise = getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(p), getCourseDb());
-            if (exercise != null && exercise.isReturnable()) {
+            if (exercise != null && exercise.isReturnable() && !exercise.hasDeadlinePassed()) {
                 return true;
             }
         }
