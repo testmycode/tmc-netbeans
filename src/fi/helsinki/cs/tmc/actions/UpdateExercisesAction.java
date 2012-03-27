@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.ExerciseUpdateOverwritingDecider;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -16,7 +17,6 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
@@ -31,7 +31,6 @@ public class UpdateExercisesAction implements ActionListener {
     private ProjectMediator projectMediator;
     private ServerAccess serverAccess;
     private ConvenientDialogDisplayer dialogDisplayer;
-    private NbProjectUnzipper unzipper;
     
     public UpdateExercisesAction(List<Exercise> exercisesToUpdate) {
         this.exercisesToUpdate = exercisesToUpdate;
@@ -39,7 +38,6 @@ public class UpdateExercisesAction implements ActionListener {
         this.projectMediator = ProjectMediator.getInstance();
         this.serverAccess = new ServerAccess();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.unzipper = NbProjectUnzipper.getDefault();
     }
 
     @Override
@@ -93,7 +91,9 @@ public class UpdateExercisesAction implements ActionListener {
                     TmcProjectInfo project = null;
                     try {
                         try {
-                            NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir, exercise.getName(), overwritingDecider);
+                            ExerciseUpdateOverwritingDecider overwriter = new ExerciseUpdateOverwritingDecider(projectDir);
+                            NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriter);
+                            NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir, exercise.getName());
                             log.info("== Exercise unzip result ==\n" + result);
                         } catch (IOException ex) {
                             dialogDisplayer.displayError("Failed to update project.", ex);
@@ -120,26 +120,4 @@ public class UpdateExercisesAction implements ActionListener {
             });
         }
     }
-    
-    private final NbProjectUnzipper.OverwritingDecider overwritingDecider = new NbProjectUnzipper.OverwritingDecider() {
-        private final String s = File.separator;
-        
-        @Override
-        public boolean mayOverwrite(String relPath) {
-            return mayBothOverwriteOrDelete(relPath) ||
-                    !relPath.contains(s); // i.e. a file in the project's root dir
-        }
-
-        @Override
-        public boolean mayDelete(String relPath) {
-            return mayBothOverwriteOrDelete(relPath);
-        }
-        
-        private boolean mayBothOverwriteOrDelete(String relPath) {
-            return relPath.startsWith("test") ||
-                    relPath.startsWith("lib") ||
-                    (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private"));
-        }
-    };
-    
 }

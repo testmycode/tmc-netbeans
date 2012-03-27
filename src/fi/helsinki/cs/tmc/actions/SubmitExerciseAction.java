@@ -32,7 +32,6 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
     
     private ServerAccess serverAccess;
     private CourseDb courseDb;
-    private NbProjectZipper zipper;
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
@@ -40,7 +39,6 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
     public SubmitExerciseAction() {
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
-        this.zipper = NbProjectZipper.getDefault();
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
@@ -131,7 +129,8 @@ public final class SubmitExerciseAction extends AbstractTmcRunAction {
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
-                return zipper.zipProjectSources(FileUtil.toFile(project.getProjectDir()));
+                NbProjectZipper zipper = new NbProjectZipper(FileUtil.toFile(project.getProjectDir()));
+                return zipper.zipProjectSources();
             }
         }, new BgTaskListener<byte[]>() {
             @Override

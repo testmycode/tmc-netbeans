@@ -117,28 +117,22 @@ public class NbProjectUnzipper {
         }
     };
     
-    private static NbProjectUnzipper instance;
+    private OverwritingDecider overwriting;
+
     
-    public static NbProjectUnzipper getDefault() {
-        if (instance == null) {
-            instance = new NbProjectUnzipper();
-        }
-        return instance;
-    }
-
     public NbProjectUnzipper() {
+        this(neverAllowOverwrites);
     }
-
+    
+    public NbProjectUnzipper(OverwritingDecider overwriting) {
+        this.overwriting = overwriting;
+    }
     
     public Result unzipProject(byte[] data, File projectDir, String projectName) throws IOException {
-        return unzipProject(data, projectDir, projectName, neverAllowOverwrites);
+        return unzipProject(data, projectDir, projectName, true);
     }
     
-    public Result unzipProject(byte[] data, File projectDir, String projectName, OverwritingDecider overwriting) throws IOException {
-        return unzipProject(data, projectDir, projectName, overwriting, true);
-    }
-    
-    public Result unzipProject(byte[] data, File projectDir, String projectName, OverwritingDecider overwriting, boolean reallyWriteFiles) throws IOException {
+    public Result unzipProject(byte[] data, File projectDir, String projectName, boolean reallyWriteFiles) throws IOException {
         Result result = new Result(projectDir);
         Set<String> pathsInZip = new HashSet<String>();
         
@@ -170,7 +164,7 @@ public class NbProjectUnzipper {
                     boolean shouldWrite;
                     if (destFile.exists()) {
                         if (fileContentEquals(destFile, entryData)) {
-                            shouldWrite = true;
+                            shouldWrite = false;
                             result.unchangedFiles.add(destFileRelativePath);
                         } else if (overwriting.mayOverwrite(destFileRelativePath)) {
                             shouldWrite = true;

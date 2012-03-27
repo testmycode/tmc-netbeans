@@ -8,6 +8,7 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
+import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -16,12 +17,20 @@ import static org.junit.Assert.*;
 public class NbProjectZipperTest {
     private static final String SLASH = File.separator;
     private TempTestDir tempDir;
-    private NbProjectZipper zipper;
+    private String mainDir;
     
     @Before
     public void setUp() throws IOException {
         tempDir = new TempTestDir();
-        zipper = new NbProjectZipper();
+        
+        mainDir = tempDir.getPath() + SLASH + "MyExercise";
+        new File(mainDir + SLASH + "src" + SLASH + "subdir").mkdirs();
+        new File(mainDir + SLASH + "src" + SLASH + "Included1.txt").createNewFile();
+        new File(mainDir + SLASH + "src" + SLASH + "subdir" + SLASH + "Included2.txt").createNewFile();
+        
+        new File(mainDir + SLASH + "Excluded.txt").createNewFile();
+        new File(mainDir + SLASH + "test").mkdir();
+        new File(mainDir + SLASH + "test" + SLASH + "Excluded.txt").createNewFile();
     }
     
     @After
@@ -31,17 +40,7 @@ public class NbProjectZipperTest {
     
     @Test
     public void itShouldZipUpTheSrcSubdirectoryOfTheGivenDirectory() throws IOException {
-        String mainDir = tempDir.getPath() + SLASH + "MyExercise";
-        new File(mainDir + SLASH + "src" + SLASH + "subdir").mkdirs();
-        new File(mainDir + SLASH + "src" + SLASH + "Included1.txt").createNewFile();
-        new File(mainDir + SLASH + "src" + SLASH + "subdir" + SLASH + "Included2.txt").createNewFile();
-        
-        new File(mainDir + SLASH + "Excluded.txt").createNewFile();
-        new File(mainDir + SLASH + "test").mkdir();
-        new File(mainDir + SLASH + "test" + SLASH + "Excluded.txt").createNewFile();
-        
-        byte[] zipData = zipper.zipProjectSources(new File(mainDir));
-        List<String> entries = zipEntryNames(zipData);
+        List<String> entries = getZipEntries();
         
         if (!entries.contains("MyExercise/src/Included1.txt")) {
             fail("Expected file not in zip.");
@@ -55,9 +54,24 @@ public class NbProjectZipperTest {
         if (entries.contains("MyExercise/test/Excluded.txt")) {
             fail("File that was supposed to be excluded was found in the zip.");
         }
-        if (entries.contains("MyExercise/test/")) {
-            fail("Subdirectory that was supposed to be excluded was found in the zip.");
-        }
+    }
+    
+    @Test
+    public void itShouldIncludeTestFilesThatAreSpecifiedInTheProjectFile() throws IOException {
+        new File(mainDir + SLASH + "test").mkdir();
+        new File(mainDir + SLASH + "test" + SLASH + "IncludedTest.txt").createNewFile();
+        
+        FileUtils.write(new File(mainDir + SLASH + ".tmcproject.yml"), "extra_student_files:\n  - test/IncludedTest.txt", "UTF-8");
+        
+        List<String> entries = getZipEntries();
+        assertTrue(entries.contains("MyExercise/test/IncludedTest.txt"));
+        assertFalse(entries.contains("MyExercise/test/Excluded.txt"));
+    }
+
+    private List<String> getZipEntries() throws IOException {
+        NbProjectZipper zipper = new NbProjectZipper(new File(mainDir));
+        byte[] zipData = zipper.zipProjectSources();
+        return zipEntryNames(zipData);
     }
     
     private List<String> zipEntryNames(byte[] zipData) throws IOException {

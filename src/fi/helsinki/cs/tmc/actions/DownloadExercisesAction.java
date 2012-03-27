@@ -25,7 +25,6 @@ public class DownloadExercisesAction {
 
     private ServerAccess serverAccess;
     private CourseDb courseDb;
-    private NbProjectUnzipper unzipper;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
 
@@ -34,7 +33,6 @@ public class DownloadExercisesAction {
     public DownloadExercisesAction(List<Exercise> exercisesToOpen) {
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
-        this.unzipper = NbProjectUnzipper.getDefault();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
@@ -57,6 +55,7 @@ public class DownloadExercisesAction {
                 BgTask.start("Extracting project", new Callable<TmcProjectInfo>() {
                     @Override
                     public TmcProjectInfo call() throws Exception {
+                        NbProjectUnzipper unzipper = new NbProjectUnzipper();
                         unzipper.unzipProject(zipData, projectMediator.getProjectDirForExercise(exercise), exercise.getName());
                         TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
                         if (proj == null) {
