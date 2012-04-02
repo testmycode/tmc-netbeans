@@ -100,8 +100,12 @@ public class SuccessfulSubmissionDialog extends JDialog {
     }
     
     private String getPointsMsg(SubmissionResult result) {
-        String msg = "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".";
-        return "<html>" + StringEscapeUtils.escapeHtml4(msg).replace("\n", "<br />\n") + "</html>";
+        if (!result.getPoints().isEmpty()) {
+            String msg = "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".";
+            return "<html>" + StringEscapeUtils.escapeHtml4(msg).replace("\n", "<br />\n") + "</html>";
+        } else {
+            return "";
+        }
     }
 
     private void addModelSolutionButton(SubmissionResult result) {
