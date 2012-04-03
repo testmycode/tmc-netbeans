@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
+import fi.helsinki.cs.tmc.model.ObsoleteClientException;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
@@ -110,7 +111,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                if (!beQuiet) {
+                if (!beQuiet || ex instanceof ObsoleteClientException) {
                     dialogs.displayError("Failed to check for new exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
                 }
             }
