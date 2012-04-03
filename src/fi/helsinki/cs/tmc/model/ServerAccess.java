@@ -93,6 +93,11 @@ public class ServerAccess {
         return createHttpTasks().getForBinary(zipUrl);
     }
     
+    public CancellableCallable<byte[]> getDownloadingExerciseSolutionZipTask(Exercise exercise) {
+        String zipUrl = exercise.getSolutionDownloadUrl();
+        return createHttpTasks().getForBinary(zipUrl);
+    }
+    
     public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
         

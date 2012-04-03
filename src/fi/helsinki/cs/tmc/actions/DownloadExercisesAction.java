@@ -56,7 +56,7 @@ public class DownloadExercisesAction {
                     @Override
                     public TmcProjectInfo call() throws Exception {
                         NbProjectUnzipper unzipper = new NbProjectUnzipper();
-                        unzipper.unzipProject(zipData, projectMediator.getProjectDirForExercise(exercise), exercise.getName());
+                        unzipper.unzipProject(zipData, projectMediator.getProjectDirForExercise(exercise));
                         TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
                         if (proj == null) {
                             throw new RuntimeException("Failed to open project for exercise " + exercise.getName());

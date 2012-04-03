@@ -41,7 +41,7 @@ import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
-public class RunTestsLocallyAction extends AbstractTmcRunAction {
+public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
     

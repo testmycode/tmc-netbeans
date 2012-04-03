@@ -128,11 +128,11 @@ public class NbProjectUnzipper {
         this.overwriting = overwriting;
     }
     
-    public Result unzipProject(byte[] data, File projectDir, String projectName) throws IOException {
-        return unzipProject(data, projectDir, projectName, true);
+    public Result unzipProject(byte[] data, File projectDir) throws IOException {
+        return unzipProject(data, projectDir, true);
     }
     
-    public Result unzipProject(byte[] data, File projectDir, String projectName, boolean reallyWriteFiles) throws IOException {
+    public Result unzipProject(byte[] data, File projectDir, boolean reallyWriteFiles) throws IOException {
         Result result = new Result(projectDir);
         Set<String> pathsInZip = new HashSet<String>();
         

@@ -5,9 +5,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -17,7 +15,7 @@ import org.openide.util.HelpCtx;
 import org.openide.util.Lookup;
 import org.openide.util.actions.NodeAction;
 
-public abstract class AbstractTmcRunAction extends NodeAction {
+public abstract class AbstractExerciseSensitiveAction extends NodeAction {
     
     protected abstract ProjectMediator getProjectMediator();
     protected abstract CourseDb getCourseDb();
@@ -42,17 +40,21 @@ public abstract class AbstractTmcRunAction extends NodeAction {
             return false;
         }
         
-        for (Project p : projects) {
-            Exercise exercise = getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(p), getCourseDb());
-            if (exercise != null && exercise.isReturnable() && !exercise.hasDeadlinePassed()) {
+        for (Project project : projects) {
+            Exercise exercise = exerciseForProject(project);
+            if (exercise != null && enabledFor(exercise)) {
                 return true;
             }
         }
         return false;
     }
     
-    protected static Set<Project> projectsFromNodes(Node[] nodes) {
-        HashSet<Project> result = new HashSet<Project>();
+    protected boolean enabledFor(Exercise exercise) {
+        return (exercise.isReturnable() && !exercise.hasDeadlinePassed());
+    }
+    
+    protected List<Project> projectsFromNodes(Node[] nodes) {
+        ArrayList<Project> result = new ArrayList<Project>();
         for (Node node : nodes) {
             Lookup lkp = node.getLookup();
             result.addAll(lkp.lookupAll(Project.class));
@@ -61,7 +63,7 @@ public abstract class AbstractTmcRunAction extends NodeAction {
         return result;
     }
     
-    private static List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
+    private List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
         ArrayList<Project> result = new ArrayList<Project>();
         for (DataObject dataObj : dataObjects) {
             Project project = projectFromDataObject(dataObj);
@@ -72,8 +74,12 @@ public abstract class AbstractTmcRunAction extends NodeAction {
         return result;
     }
     
-    private static Project projectFromDataObject(DataObject dataObj) {
+    private Project projectFromDataObject(DataObject dataObj) {
         FileObject fileObj = dataObj.getPrimaryFile();
         return FileOwnerQuery.getOwner(fileObj);
+    }
+    
+    protected Exercise exerciseForProject(Project project) {
+        return getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(project), getCourseDb());
     }
 }

@@ -17,10 +17,8 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.logging.Logger;
-import org.openide.filesystems.FileSystem;
 
 public class UpdateExercisesAction implements ActionListener {
     
@@ -55,17 +53,7 @@ public class UpdateExercisesAction implements ActionListener {
                 while (result.remove(null)) {
                 }
                 
-                // Refresh NB's file cache like "Source -> Scan for External Changes".
-                HashSet<FileSystem> filesystems = new HashSet<FileSystem>();
-                for (TmcProjectInfo project : result) {
-                    try {
-                        filesystems.add(project.getProjectDir().getFileSystem());
-                    } catch (Exception e) {
-                    }
-                }
-                for (FileSystem fs : filesystems) { // Probably just one
-                    fs.refresh(true);
-                }
+                projectMediator.scanForExternalChanges(result);
                 
                 // Open all at once. This is much faster.
                 projectMediator.openProjects(result);
@@ -93,7 +81,7 @@ public class UpdateExercisesAction implements ActionListener {
                         try {
                             ExerciseUpdateOverwritingDecider overwriter = new ExerciseUpdateOverwritingDecider(projectDir);
                             NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriter);
-                            NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir, exercise.getName());
+                            NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir);
                             log.info("== Exercise unzip result ==\n" + result);
                         } catch (IOException ex) {
                             dialogDisplayer.displayError("Failed to update project.", ex);

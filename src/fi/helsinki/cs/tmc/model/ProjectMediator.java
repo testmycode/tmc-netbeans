@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.io.File;
 import java.io.IOException;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -14,6 +15,7 @@ import org.netbeans.api.project.ui.OpenProjects;
 import org.netbeans.spi.project.ui.support.ProjectChooser;
 import org.openide.LifecycleManager;
 import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileSystem;
 import org.openide.filesystems.FileUtil;
 
 /**
@@ -192,5 +194,30 @@ public class ProjectMediator {
     public boolean isProjectOpen(TmcProjectInfo project) {
         return openProjects.isProjectOpen(project.getProject());
     }
+
+    /**
+     * Refreshes NB's file cache like "Source -> Scan for External Changes".
+     */
+    public void scanForExternalChanges(TmcProjectInfo project) {
+        try {
+            project.getProjectDir().getFileSystem().refresh(true);
+        } catch (Exception ex) {
+        }
+    }
     
+    /**
+     * Refreshes NB's file cache like "Source -> Scan for External Changes".
+     */
+    public void scanForExternalChanges(Collection<TmcProjectInfo> projects) {
+        HashSet<FileSystem> filesystems = new HashSet<FileSystem>();
+        for (TmcProjectInfo project : projects) {
+            try {
+                filesystems.add(project.getProjectDir().getFileSystem());
+            } catch (Exception e) {
+            }
+        }
+        for (FileSystem fs : filesystems) { // Probably just one
+            fs.refresh(true);
+        }
+    }
 }

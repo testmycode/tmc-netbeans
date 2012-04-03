@@ -21,6 +21,12 @@ public class Exercise implements Serializable {
     private String downloadUrl;
     
     /**
+     * The URL the solution can be downloaded from (admins only).
+     */
+    @SerializedName("solution_zip_url")
+    private String solutionDownloadUrl;
+    
+    /**
      * The URL where this exercise should be posted for review.
      */
     @SerializedName("return_url")
@@ -106,6 +112,14 @@ public class Exercise implements Serializable {
 
     public String getReturnUrl() {
         return this.returnUrl;
+    }
+
+    public void setSolutionDownloadUrl(String solutionDownloadUrl) {
+        this.solutionDownloadUrl = solutionDownloadUrl;
+    }
+
+    public String getSolutionDownloadUrl() {
+        return solutionDownloadUrl;
     }
 
     public void setReturnUrl(String returnAddress) {

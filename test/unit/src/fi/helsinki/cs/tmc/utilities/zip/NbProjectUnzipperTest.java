@@ -70,7 +70,7 @@ public class NbProjectUnzipperTest {
         zipOut.close();
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper();
-        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"), "my-project");
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"));
         
         assertEquals(1, tempDir.get().listFiles().length);
         String contents = FileUtils.readFileToString(new File(tempDir.getPath() + File.separator + "my-project/nbproject/project.xml"));
@@ -91,7 +91,7 @@ public class NbProjectUnzipperTest {
         zipOut.close();
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper();
-        unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"), "my-project");
+        unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("my-project"));
     }
     
     @Test
@@ -118,7 +118,7 @@ public class NbProjectUnzipperTest {
         when(overwriting.mayOverwrite("two.txt")).thenReturn(true);
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriting);
-        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest");
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"));
         
         verify(overwriting).mayOverwrite("one.txt");
         verify(overwriting).mayOverwrite("two.txt");
@@ -160,7 +160,7 @@ public class NbProjectUnzipperTest {
         when(overwriting.mayDelete("three.txt")).thenReturn(false);
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriting);
-        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest");
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"));
         
         verify(overwriting).mayDelete("two.txt");
         verify(overwriting).mayDelete("three.txt");
@@ -203,7 +203,7 @@ public class NbProjectUnzipperTest {
         when(overwriting.mayDelete("stuff/preserved")).thenReturn(false);
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriting);
-        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest");
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"));
         
         verify(overwriting).mayDelete("stuff/deleted/two.txt");
         verify(overwriting).mayDelete("stuff/deleted");
@@ -246,7 +246,7 @@ public class NbProjectUnzipperTest {
         when(overwriting.mayDelete("stuff/three.txt")).thenReturn(true);
         
         NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriting);
-        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), "dest", false);
+        Result result = unzipper.unzipProject(zipBuffer.toByteArray(), inTempDir("dest"), false);
         
         verify(overwriting).mayOverwrite("one.txt");
         verify(overwriting).mayOverwrite("two.txt");

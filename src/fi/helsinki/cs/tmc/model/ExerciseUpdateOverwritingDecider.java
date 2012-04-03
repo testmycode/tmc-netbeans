@@ -14,8 +14,7 @@ public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.Overw
 
     @Override
     public boolean mayOverwrite(String relPath) {
-        return mayBothOverwriteAndDelete(relPath) ||
-                !relPath.contains(s); // i.e. a file in the project's root dir
+        return mayBothOverwriteAndDelete(relPath) || isInProjectRootDir(relPath);
     }
 
     @Override
@@ -32,6 +31,10 @@ public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.Overw
                 );
     }
 
+    private boolean isInProjectRootDir(String relPath) {
+        return !relPath.contains(s);
+    }
+    
     private boolean isNotAnExtraFile(String relPath) {
         String normalized = FilenameUtils.normalizeNoEndSeparator(relPath, true);
         return !projectFile.getExtraStudentFiles().contains(normalized);

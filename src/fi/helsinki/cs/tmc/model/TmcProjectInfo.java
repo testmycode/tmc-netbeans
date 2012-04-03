@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
-import java.io.IOException;
+import java.io.File;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ui.OpenProjects;
 import org.openide.filesystems.FileObject;
@@ -22,6 +22,10 @@ public class TmcProjectInfo {
     
     public FileObject getProjectDir() {
         return project.getProjectDirectory();
+    }
+    
+    public File getProjectDirAsFile() {
+        return FileUtil.toFile(getProjectDir());
     }
     
     public boolean isOpen() {

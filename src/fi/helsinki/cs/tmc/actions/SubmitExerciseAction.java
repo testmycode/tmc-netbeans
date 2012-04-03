@@ -26,7 +26,7 @@ import org.openide.util.NbBundle.Messages;
 // The action annotations don't work properly with NodeAction (NB 7.0)
 // so this action is declared manually in layer.xml.
 @Messages("CTL_SubmitExerciseAction=Su&bmit")
-public final class SubmitExerciseAction extends AbstractTmcRunAction {
+public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
     
