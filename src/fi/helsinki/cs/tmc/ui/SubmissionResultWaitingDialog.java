@@ -31,7 +31,7 @@ public class SubmissionResultWaitingDialog extends JDialog implements Submission
             @Override
             public void run() {
                 if (position > 1) {
-                    queueLabel.setText("Server is busy. Place in queue: " + position);
+                    queueLabel.setText("Place in queue: " + position);
                     queueLabel.setVisible(true);
                 } else {
                     queueLabel.setVisible(false);
