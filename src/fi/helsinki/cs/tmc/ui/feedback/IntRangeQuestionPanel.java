@@ -28,7 +28,7 @@ public class IntRangeQuestionPanel extends FeedbackQuestionPanel {
         valueSlider.setMinimum(naValue);
         valueSlider.setMaximum(question.getIntRangeMax());
         
-        Hashtable labelTable = new Hashtable();
+        Hashtable<Integer, JLabel> labelTable = new Hashtable<Integer, JLabel>();
         
         JLabel naLabel = new JLabel("-");
         naLabel.setFont(naLabel.getFont().deriveFont(Font.PLAIN));
