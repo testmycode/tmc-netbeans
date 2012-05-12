@@ -10,4 +10,6 @@ public interface Tailoring {
     public String getDefaultServerUrl();
     public String getDefaultUsername();
     public String getUsernameFieldName();
+    public boolean isSpywareEnabledByDefault();
+    public boolean isSpywareSettingVisible();
 }

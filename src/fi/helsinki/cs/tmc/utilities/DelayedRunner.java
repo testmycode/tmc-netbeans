@@ -10,8 +10,16 @@ public class DelayedRunner {
     public static final int DEFAULT_DELAY = 1500;
     
     private javax.swing.Timer swingTimer;
-    private int delay = DEFAULT_DELAY; // milliseconds
+    private int delay; // milliseconds
 
+    public DelayedRunner() {
+        this(DEFAULT_DELAY);
+    }
+    
+    public DelayedRunner(int delay) {
+        this.delay = delay;
+    }
+    
     public int getDelay() {
         return delay;
     }

@@ -35,6 +35,7 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
+        settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         
         if (prefUi.getSelectedCourse() != null) {
             String courseName = prefUi.getSelectedCourse().getName();

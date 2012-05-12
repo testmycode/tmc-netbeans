@@ -7,11 +7,13 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
+import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import java.net.URI;
 import java.util.Collections;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,6 +170,67 @@ public class ServerAccess {
                 return upload.cancel();
             }
         };
+    }
+    
+    public CancellableCallable<Object> getSendEventLogJob(List<LoggableEvent> events) {
+        Map<String, String> params = eventsToParams(events);
+        byte[] data = concatData(events);
+        final CancellableCallable<String> upload = createHttpTasks().uploadFileForTextDownload(getSendEventLogUrl(), params, "data", data);
+        
+        return new CancellableCallable<Object>() {
+            @Override
+            public Object call() throws Exception {
+                upload.call();
+                return null;
+            }
+
+            @Override
+            public boolean cancel() {
+                return upload.cancel();
+            }
+        };
+    }
+    
+    private String getSendEventLogUrl() {
+        return addApiCallQueryParameters(settings.getServerBaseUrl() + "/student_events.json");
+    }
+    
+    private Map<String, String> eventsToParams(List<LoggableEvent> events) {
+        Map<String, String> result = new HashMap<String, String>();
+        int dataOffset = 0;
+        for (int i = 0; i < events.size(); ++i) {
+            LoggableEvent ev = events.get(i);
+            String prefix = "events[" + i + "]";
+            result.put(prefix + "[course_name]", ev.getCourseName());
+            result.put(prefix + "[exercise_name]", ev.getExerciseName());
+            result.put(prefix + "[event_type]", ev.getEventType());
+            result.put(prefix + "[happened_at]", fmtDate(ev.getHappenedAt()));
+            
+            result.put(prefix + "[data_offset]", ""+dataOffset);
+            result.put(prefix + "[data_length]", ""+ev.getData().length);
+            dataOffset += ev.getData().length;
+        }
+        return result;
+    }
+    
+    private byte[] concatData(List<LoggableEvent> events) {
+        int size = 0;
+        for (LoggableEvent ev : events) {
+            size += ev.getData().length;
+        }
+        
+        byte[] result = new byte[size];
+        int i = 0;
+        for (LoggableEvent ev : events) {
+            System.arraycopy(ev.getData(), 0, result, i, ev.getData().length);
+            i += ev.getData().length;
+        }
+        
+        return result;
+    }
+    
+    private String fmtDate(Date date) {
+        return new java.sql.Timestamp(date.getTime()).toString();
     }
     
     private <T> T checkForObsoleteClient(FailedHttpResponseException ex) throws ObsoleteClientException, FailedHttpResponseException {

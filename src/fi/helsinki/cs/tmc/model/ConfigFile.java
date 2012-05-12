@@ -48,8 +48,11 @@ public class ConfigFile {
     
     public void writeContents(String s) throws IOException {
         Writer w = getWriter();
-        w.write(s);
-        w.close();
+        try {
+            w.write(s);
+        } finally {
+            w.close();
+        }
     }
     
     public String readContents() throws IOException {

@@ -32,6 +32,36 @@ public class BgTask<V> implements CancellableCallable<V> {
         return new BgTask<V>(label, callable, listener).start();
     }
     
+    public static Future<Object> start(String label, Runnable runnable, BgTaskListener<Object> listener) {
+        Callable<Object> callable = runnableToCallable(runnable);
+        return start(label, callable, listener);
+    }
+    
+    private static Callable<Object> runnableToCallable(final Runnable runnable) {
+        if (runnable instanceof Cancellable) {
+            return new CancellableCallable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    runnable.run();
+                    return null;
+                }
+
+                @Override
+                public boolean cancel() {
+                    return ((Cancellable)runnable).cancel();
+                }
+            };
+        } else {
+            return new Callable<Object>() {
+                @Override
+                public Object call() throws Exception {
+                    runnable.run();
+                    return null;
+                }
+            };
+        }
+    }
+    
     public BgTask(String label, Callable<V> callable, BgTaskListener<V> listener) {
         this.label = label;
         this.listener = listener;

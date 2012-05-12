@@ -22,6 +22,8 @@ public interface PreferencesUI {
     boolean getCheckForUpdatesInTheBackground();
     
     boolean getCheckForUnopenedExercisesAtStartup();
+    
+    boolean getSpywareEnabled();
 
     void setAvailableCourses(List<Course> courses);
     
@@ -42,4 +44,6 @@ public interface PreferencesUI {
     void setCheckForUpdatesInTheBackground(boolean shouldCheck);
     
     void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck);
+    
+    void setSpywareEnabled(boolean enabled);
 }

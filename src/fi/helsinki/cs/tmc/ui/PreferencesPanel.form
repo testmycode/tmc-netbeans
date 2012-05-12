@@ -1,4 +1,4 @@
-<?xml version="1.1" encoding="UTF-8" ?>
+<?xml version="1.0" encoding="UTF-8" ?>
 
 <Form version="1.5" maxVersion="1.7" type="org.netbeans.modules.form.forminfo.JPanelFormInfo">
   <AuxValues>
@@ -19,10 +19,8 @@
           <Group type="102" alignment="0" attributes="0">
               <EmptySpace max="-2" attributes="0"/>
               <Group type="103" groupAlignment="0" attributes="0">
-                  <Component id="checkForUnopenedExercisesCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="adviceLabel" alignment="0" pref="667" max="32767" attributes="0"/>
-                  <Component id="checkForUpdatesInBackgroundCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
-                  <Component id="jSeparator1" alignment="0" pref="667" max="32767" attributes="0"/>
+                  <Component id="adviceLabel" alignment="0" max="32767" attributes="0"/>
+                  <Component id="jSeparator1" alignment="0" max="32767" attributes="0"/>
                   <Group type="102" alignment="0" attributes="0">
                       <Group type="103" groupAlignment="0" attributes="0">
                           <Component id="usernameLabel" alignment="0" min="-2" max="-2" attributes="0"/>
@@ -32,9 +30,9 @@
                       </Group>
                       <EmptySpace min="-2" pref="78" max="-2" attributes="0"/>
                       <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="serverAddressTextField" alignment="0" pref="481" max="32767" attributes="1"/>
+                          <Component id="serverAddressTextField" alignment="0" max="32767" attributes="1"/>
                           <Group type="102" alignment="1" attributes="0">
-                              <Component id="coursesComboBox" pref="276" max="32767" attributes="1"/>
+                              <Component id="coursesComboBox" max="32767" attributes="1"/>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="refreshCoursesBtn" min="-2" pref="115" max="-2" attributes="0"/>
                               <EmptySpace max="-2" attributes="0"/>
@@ -42,8 +40,8 @@
                           </Group>
                           <Group type="102" alignment="1" attributes="0">
                               <Group type="103" groupAlignment="1" attributes="0">
-                                  <Component id="usernameTextField" alignment="0" pref="346" max="32767" attributes="1"/>
-                                  <Component id="passwordField" alignment="1" pref="346" max="32767" attributes="1"/>
+                                  <Component id="usernameTextField" alignment="0" max="32767" attributes="1"/>
+                                  <Component id="passwordField" alignment="1" max="32767" attributes="1"/>
                               </Group>
                               <EmptySpace max="-2" attributes="0"/>
                               <Component id="savePasswordCheckBox" min="-2" max="-2" attributes="0"/>
@@ -52,10 +50,18 @@
                   </Group>
                   <Group type="102" alignment="0" attributes="0">
                       <Component id="projectFolderLabel" min="-2" max="-2" attributes="0"/>
-                      <EmptySpace pref="56" max="32767" attributes="0"/>
+                      <EmptySpace max="32767" attributes="0"/>
                       <Component id="projectFolderTextField" min="-2" pref="387" max="-2" attributes="1"/>
                       <EmptySpace max="-2" attributes="0"/>
                       <Component id="folderChooserBtn" min="-2" max="-2" attributes="0"/>
+                  </Group>
+                  <Group type="102" attributes="0">
+                      <Group type="103" groupAlignment="0" attributes="0">
+                          <Component id="spywareEnabledCheckbox" min="-2" max="-2" attributes="0"/>
+                          <Component id="checkForUnopenedExercisesCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                          <Component id="checkForUpdatesInBackgroundCheckbox" alignment="0" min="-2" max="-2" attributes="0"/>
+                      </Group>
+                      <EmptySpace min="0" pref="0" max="32767" attributes="0"/>
                   </Group>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
@@ -102,6 +108,8 @@
               <Component id="checkForUpdatesInBackgroundCheckbox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
               <Component id="checkForUnopenedExercisesCheckbox" min="-2" max="-2" attributes="0"/>
+              <EmptySpace max="-2" attributes="0"/>
+              <Component id="spywareEnabledCheckbox" min="-2" max="-2" attributes="0"/>
               <EmptySpace max="-2" attributes="0"/>
           </Group>
       </Group>
@@ -278,6 +286,16 @@
         </Property>
         <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
           <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.checkForUnopenedExercisesCheckbox.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+      </Properties>
+    </Component>
+    <Component class="javax.swing.JCheckBox" name="spywareEnabledCheckbox">
+      <Properties>
+        <Property name="text" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.spywareEnabledCheckbox.text" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
+        </Property>
+        <Property name="toolTipText" type="java.lang.String" editor="org.netbeans.modules.i18n.form.FormI18nStringEditor">
+          <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PreferencesPanel.spywareEnabledCheckbox.toolTipText" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
         </Property>
       </Properties>
     </Component>

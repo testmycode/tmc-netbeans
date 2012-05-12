@@ -1,0 +1,164 @@
+package fi.helsinki.cs.tmc.spyware.eventsources;
+
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.spyware.EventReceiver;
+import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
+import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
+import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
+import java.io.Closeable;
+import java.io.File;
+import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectManager;
+import org.openide.filesystems.*;
+
+public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
+    private static final Logger log = Logger.getLogger(SourceSnapshotEventSource.class.getName());
+    
+    private SpywareSettings settings;
+    private EventReceiver receiver;
+    private ActiveThreadSet snapshotterThreads;
+
+    public SourceSnapshotEventSource(SpywareSettings settings, EventReceiver receiver) {
+        this.settings = settings;
+        this.receiver = receiver;
+        
+        this.snapshotterThreads = new ActiveThreadSet();
+    }
+    
+    public void startListeningToFileChanges() {
+        FileUtil.addFileChangeListener(this);
+    }
+    
+    /**
+     * Waits for all pending events to be sent.
+     */
+    @Override
+    public void close() {
+        try {
+            snapshotterThreads.joinAll();
+        } catch (InterruptedException ex) {
+        }
+    }
+    
+    @Override
+    public void fileFolderCreated(FileEvent fe) {
+        reactToChange(fe.getFile());
+    }
+
+    @Override
+    public void fileDataCreated(FileEvent fe) {
+        reactToChange(fe.getFile());
+    }
+
+    @Override
+    public void fileChanged(FileEvent fe) {
+        reactToChange(fe.getFile());
+    }
+
+    @Override
+    public void fileDeleted(FileEvent fe) {
+        reactToChange(fe.getFile());
+    }
+
+    @Override
+    public void fileRenamed(FileRenameEvent fre) {
+        reactToChange(fre.getFile());
+    }
+
+    @Override
+    public void fileAttributeChanged(FileAttributeEvent fae) {
+    }
+    
+    public void takeSnapshotOfProjectIncludingFile(FileObject file) {
+        reactToChange(file);
+    }
+    
+    // I have no idea what thread FileUtil callbacks are made in,
+    // so I'll go to the EDT to safely read the global state.
+    private synchronized void reactToChange(final FileObject changedFile) {
+        TmcSwingUtilities.ensureEdt(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    startSnapshotThread(changedFile);
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "Failed to start snapshot thread", e);
+                }
+            }
+        });
+    }
+    
+    private void startSnapshotThread(FileObject changedFile) {
+        if (!settings.isSpywareEnabled()) {
+            return;
+        }
+        
+        log.log(Level.FINE, "Changed file: {0}", changedFile);
+        final Project project = findProjectOwningFile(changedFile);
+        log.log(Level.FINE, "Project: {0}", project);
+        if (project != null) {
+            ProjectMediator pm = ProjectMediator.getInstance();
+            CourseDb courseDb = CourseDb.getInstance();
+            Exercise exercise = pm.tryGetExerciseForProject(pm.wrapProject(project), courseDb);
+            
+            if (exercise != null) {
+                log.log(Level.FINER, "Exercise: {0}", exercise);
+                File projectDir = FileUtil.toFile(project.getProjectDirectory());
+                
+                SnapshotThread thread = new SnapshotThread(receiver, exercise, projectDir);
+                snapshotterThreads.addThread(thread);
+                thread.setDaemon(false);
+                thread.start();
+            }
+        }
+    }
+    
+    private Project findProjectOwningFile(FileObject fo) {
+        while (fo != null) {
+            if (fo.isFolder()) {
+                try {
+                    Project proj = ProjectManager.getDefault().findProject(fo);
+                    if (proj != null) {
+                        return proj;
+                    }
+                } catch (Exception ex) {
+                    log.log(Level.WARNING, "Error finding project owning file: " + fo, ex);
+                }
+            }
+            fo = fo.getParent();
+        }
+        return null;
+    }
+    
+    private static class SnapshotThread extends Thread {
+        private final EventReceiver receiver;
+        private final Exercise exercise;
+        private final File projectDir;
+
+        private SnapshotThread(EventReceiver receiver, Exercise exercise, File projectDir) {
+            super("Source snapshot");
+            this.receiver = receiver;
+            this.exercise = exercise;
+            this.projectDir = projectDir;
+        }
+
+        @Override
+        public void run() {
+            NbProjectZipper zipper = new NbProjectZipper(projectDir);
+            try {
+                byte[] data = zipper.zipProjectSources();
+                LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data);
+                receiver.receiveEvent(event);
+            } catch (IOException ex) {
+                log.log(Level.WARNING, "Error zipping project sources in: " + projectDir, ex);
+            }
+        }
+    }
+}

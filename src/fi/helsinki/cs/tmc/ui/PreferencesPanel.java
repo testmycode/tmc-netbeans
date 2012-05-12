@@ -207,6 +207,16 @@ import org.apache.commons.lang3.StringUtils;
     public void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck) {
         checkForUnopenedExercisesCheckbox.setSelected(shouldCheck);
     }
+
+    @Override
+    public boolean getSpywareEnabled() {
+        return spywareEnabledCheckbox.isSelected();
+    }
+
+    @Override
+    public void setSpywareEnabled(boolean enabled) {
+        spywareEnabledCheckbox.setSelected(enabled);
+    }
     
     private TmcSettings getTransientSettingsForRefresh() {
         TmcSettings settings = TmcSettings.getTransient();
@@ -396,6 +406,7 @@ import org.apache.commons.lang3.StringUtils;
         jSeparator1 = new javax.swing.JSeparator();
         checkForUpdatesInBackgroundCheckbox = new javax.swing.JCheckBox();
         checkForUnopenedExercisesCheckbox = new javax.swing.JCheckBox();
+        spywareEnabledCheckbox = new javax.swing.JCheckBox();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -470,6 +481,9 @@ import org.apache.commons.lang3.StringUtils;
         checkForUnopenedExercisesCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.text")); // NOI18N
         checkForUnopenedExercisesCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.toolTipText")); // NOI18N
 
+        spywareEnabledCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.text")); // NOI18N
+        spywareEnabledCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.toolTipText")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -477,10 +491,8 @@ import org.apache.commons.lang3.StringUtils;
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(checkForUnopenedExercisesCheckbox)
-                    .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
-                    .addComponent(checkForUpdatesInBackgroundCheckbox)
-                    .addComponent(jSeparator1, javax.swing.GroupLayout.DEFAULT_SIZE, 667, Short.MAX_VALUE)
+                    .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                    .addComponent(jSeparator1)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(usernameLabel)
@@ -489,25 +501,31 @@ import org.apache.commons.lang3.StringUtils;
                             .addComponent(passwordLabel))
                         .addGap(78, 78, 78)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, 481, Short.MAX_VALUE)
+                            .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(coursesComboBox, 0, 276, Short.MAX_VALUE)
+                                .addComponent(coursesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(refreshCoursesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(courseListReloadingLabel))
                             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE)
-                                    .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 346, Short.MAX_VALUE))
+                                    .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(savePasswordCheckBox))))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(projectFolderLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 56, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                         .addComponent(projectFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 387, javax.swing.GroupLayout.PREFERRED_SIZE)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(folderChooserBtn)))
+                        .addComponent(folderChooserBtn))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(spywareEnabledCheckbox)
+                            .addComponent(checkForUnopenedExercisesCheckbox)
+                            .addComponent(checkForUpdatesInBackgroundCheckbox))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -545,6 +563,8 @@ import org.apache.commons.lang3.StringUtils;
                 .addComponent(checkForUpdatesInBackgroundCheckbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkForUnopenedExercisesCheckbox)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(spywareEnabledCheckbox)
                 .addContainerGap())
         );
 
@@ -598,6 +618,7 @@ import org.apache.commons.lang3.StringUtils;
     private javax.swing.JCheckBox savePasswordCheckBox;
     private javax.swing.JLabel serverAddressLabel;
     private javax.swing.JTextField serverAddressTextField;
+    private javax.swing.JCheckBox spywareEnabledCheckbox;
     private javax.swing.JLabel usernameLabel;
     private javax.swing.JTextField usernameTextField;
     private org.jdesktop.beansbinding.BindingGroup bindingGroup;
