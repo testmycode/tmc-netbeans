@@ -24,6 +24,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     private SpywareSettings settings;
     private EventReceiver receiver;
     private ActiveThreadSet snapshotterThreads;
+    private boolean closed;
 
     public SourceSnapshotEventSource(SpywareSettings settings, EventReceiver receiver) {
         this.settings = settings;
@@ -41,10 +42,17 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
      */
     @Override
     public void close() {
-        try {
-            snapshotterThreads.joinAll();
-        } catch (InterruptedException ex) {
-        }
+        TmcSwingUtilities.ensureEdt(new Runnable() {
+            @Override
+            public void run() {
+                try {
+                    closed = true;
+                    FileUtil.removeFileChangeListener(SourceSnapshotEventSource.this);
+                    snapshotterThreads.joinAll();
+                } catch (InterruptedException ex) {
+                }
+            }
+        });
     }
     
     @Override
@@ -77,15 +85,21 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
     
     public void takeSnapshotOfProjectIncludingFile(FileObject file) {
+        if (closed) {
+            throw new IllegalStateException(this.getClass().getName() + " closed");
+        }
         reactToChange(file);
     }
     
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
-    private synchronized void reactToChange(final FileObject changedFile) {
+    private void reactToChange(final FileObject changedFile) {
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
+                if (closed) {
+                    return;
+                }
                 try {
                     startSnapshotThread(changedFile);
                 } catch (Exception e) {
@@ -114,7 +128,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 
                 SnapshotThread thread = new SnapshotThread(receiver, exercise, projectDir);
                 snapshotterThreads.addThread(thread);
-                thread.setDaemon(false);
+                thread.setDaemon(true);
                 thread.start();
             }
         }
