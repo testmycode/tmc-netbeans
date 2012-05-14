@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.utilities;
 
 import java.util.Iterator;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * A set of active or unstarted threads.
@@ -12,14 +11,14 @@ import java.util.List;
  * spawns another thread T2 then T2 will <em>not</em> be in the thread set.
  */
 public class ActiveThreadSet {
-
-    private List<Thread> threads;
+    private LinkedList<Thread> threads;
     
     public ActiveThreadSet() {
         this.threads = new LinkedList<Thread>();
     }
     
     public void addThread(Thread thread) {
+        cleanUp();
         threads.add(thread);
     }
     
@@ -31,6 +30,16 @@ public class ActiveThreadSet {
             Thread thread = cleanUpToFirstUnterminated();
             if (thread != null) {
                 thread.join();
+            }
+        }
+    }
+    
+    private void cleanUp() {
+        Iterator<Thread> i = threads.iterator();
+        while (i.hasNext()) {
+            Thread t = i.next();
+            if (t.getState() == Thread.State.TERMINATED) {
+                i.remove();
             }
         }
     }
