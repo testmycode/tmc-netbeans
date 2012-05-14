@@ -6,4 +6,4 @@ OpenIDE-Module-Requires:
   org.openide.windows.IOProvider,
   org.openide.windows.WindowManager
 OpenIDE-Module-Install: fi/helsinki/cs/tmc/actions/TmcModuleInstall.class
-OpenIDE-Module-Specification-Version: 0.2.20
+OpenIDE-Module-Specification-Version: 0.2.21
