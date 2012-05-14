@@ -39,6 +39,10 @@ public class EventSender implements EventReceiver {
         this.sendTimer.schedule(sendTask, delay, delay);
     }
     
+    public synchronized void sendNow() {
+        sendTask.run();
+    }
+    
     @Override
     public synchronized void receiveEvent(LoggableEvent event) {
         buffer.add(event);
@@ -66,8 +70,9 @@ public class EventSender implements EventReceiver {
         private final Object doneCondVar = new Object();
         private volatile boolean running = false;
         
+        // run() is synchronized because it may be called by the timer as well as sendNow().
         @Override
-        public void run() {
+        public synchronized void run() {
             synchronized (doneCondVar) {
                 running = true;
             }

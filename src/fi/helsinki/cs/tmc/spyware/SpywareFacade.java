@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.lookup.ServiceProvider;
-import org.openide.windows.WindowManager;
 
 @ServiceProvider(service=SpywareFacade.class)
 public class SpywareFacade implements SpywareSettings {
@@ -27,7 +26,10 @@ public class SpywareFacade implements SpywareSettings {
         
         store = new EventStore();
         sender = new EventSender();
-        loadEvents();
+        int loadedEventCount = loadEvents();
+        if (loadedEventCount > 0) {
+            sender.sendNow();
+        }
         
         dedup = new EventDeduplicater(sender);
         
@@ -35,13 +37,15 @@ public class SpywareFacade implements SpywareSettings {
         sourceSnapshotSource.startListeningToFileChanges();
     }
     
-    private void loadEvents() {
+    private int loadEvents() {
         try {
             List<LoggableEvent> events = store.load();
             store.clear();
             sender.prependEvents(events);
-        } catch (IOException ex) {
-            log.log(Level.WARNING, "Failed to load events on startup", ex);
+            return events.size();
+        } catch (Exception ex) {
+            log.log(Level.INFO, "Failed to load events on startup", ex);
+            return 0;
         }
     }
     
@@ -51,21 +55,19 @@ public class SpywareFacade implements SpywareSettings {
         dedup.close();
         sender.close();
         
-        if (settings.isSpywareEnabled()) {
-            saveEvents();
-        }
+        saveEvents();
     }
     
     private void saveEvents() {
         try {
             store.save(sender.takeBuffer());
         } catch (IOException ex) {
-            log.log(Level.WARNING, "Failed to save events on shutdown", ex);
+            log.log(Level.INFO, "Failed to save events on shutdown", ex);
         }
     }
     
     @Override
     public boolean isSpywareEnabled() {
-        return TmcSettings.getDefault().isSpywareEnabled();
+        return settings.isSpywareEnabled();
     }
 }
