@@ -64,7 +64,7 @@ public class EventSender implements EventReceiver {
     
     private class SendTask extends TimerTask {
         private final Object doneCondVar = new Object();
-        private boolean running;
+        private volatile boolean running = false;
         
         @Override
         public void run() {
