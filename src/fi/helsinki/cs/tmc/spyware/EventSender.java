@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -32,11 +31,11 @@ public class EventSender implements EventReceiver {
     private int maxEvents = DEFAULT_MAX_EVENTS;
     
     private ArrayList<LoggableEvent> buffer;
-    private Timer sendTimer;
+    private java.util.Timer sendTimer;
     
     public EventSender() {
         this.buffer = new ArrayList<LoggableEvent>();
-        this.sendTimer = new Timer("EventSender timer", true);
+        this.sendTimer = new java.util.Timer("EventSender timer", true);
         this.sendTimer.schedule(sendTask, delay, delay);
     }
     
@@ -57,7 +56,7 @@ public class EventSender implements EventReceiver {
         removeIfOverLimit();
     }
     
-    private synchronized void removeIfOverLimit() {
+    private void removeIfOverLimit() {
         if (buffer.size() > maxEvents) {
             buffer.subList(0, buffer.size() - maxEvents).clear();
         }

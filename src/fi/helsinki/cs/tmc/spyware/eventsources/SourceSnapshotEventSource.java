@@ -84,13 +84,6 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     public void fileAttributeChanged(FileAttributeEvent fae) {
     }
     
-    public void takeSnapshotOfProjectIncludingFile(FileObject file) {
-        if (closed) {
-            throw new IllegalStateException(this.getClass().getName() + " closed");
-        }
-        reactToChange(file);
-    }
-    
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
     private void reactToChange(final FileObject changedFile) {

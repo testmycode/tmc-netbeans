@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 import org.openide.util.lookup.ServiceProvider;
 import org.openide.windows.WindowManager;
 
@@ -34,20 +33,6 @@ public class SpywareFacade implements SpywareSettings {
         
         sourceSnapshotSource = new SourceSnapshotEventSource(this, dedup);
         sourceSnapshotSource.startListeningToFileChanges();
-        
-        // We can't seem to reliably catch saves done during IDE shutdown,
-        // so we'll always send a snapshot of all projects with open files
-        // during startup.
-        snapshotProjectsWithOpenFiles();
-    }
-    
-    private void snapshotProjectsWithOpenFiles() {
-        WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
-            @Override
-            public void run() {
-                
-            }
-        });
     }
     
     private void loadEvents() {
