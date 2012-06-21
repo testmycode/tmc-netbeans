@@ -23,7 +23,7 @@ import org.openide.modules.Modules;
  * A frontend for the server.
  */
 public class ServerAccess {
-    public static final int API_VERSION = 4;
+    public static final int API_VERSION = 5;
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
