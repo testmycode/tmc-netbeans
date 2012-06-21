@@ -32,9 +32,4 @@ public class DefaultTailoring implements Tailoring {
     public boolean isSpywareEnabledByDefault() {
         return false;
     }
-    
-    @Override
-    public boolean isSpywareSettingVisible() {
-        return true;
-    }
 }
