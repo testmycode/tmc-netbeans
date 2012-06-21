@@ -17,6 +17,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import org.openide.modules.Modules;
 
 /**
  * A frontend for the server.
@@ -26,6 +27,7 @@ public class ServerAccess {
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
+    private String clientVersion;
 
     public ServerAccess() {
         this(TmcSettings.getDefault());
@@ -38,6 +40,11 @@ public class ServerAccess {
     public ServerAccess(TmcSettings settings, CourseListParser courseListParser) {
         this.settings = settings;
         this.courseListParser = courseListParser;
+        this.clientVersion = getClientVersion();
+    }
+    
+    private static String getClientVersion() {
+        return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
     }
     
     public void setSettings(TmcSettings settings) {
@@ -49,7 +56,10 @@ public class ServerAccess {
     }
     
     private String addApiCallQueryParameters(String url) {
-        return UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
+        url = UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
+        url = UriUtils.withQueryParam(url, "client", "netbeans_plugin");
+        url = UriUtils.withQueryParam(url, "client_version", clientVersion);
+        return url;
     }
     
     private HttpTasks createHttpTasks() {
