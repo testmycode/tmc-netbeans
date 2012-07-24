@@ -46,19 +46,19 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private NotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
-    private boolean regular;
+    private boolean backgroundCheck;
 
     public CheckForNewExercisesOrUpdates() {
         this(false, false);
     }
     
-    public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean regular) {
+    public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
         this.notifier = NotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
-        this.regular = regular;
+        this.backgroundCheck = backgroundCheck;
     }
 
     @Override
@@ -69,7 +69,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public void run() {
         final Course currentCourse = courseDb.getCurrentCourse();
         
-        if (regular && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
+        if (backgroundCheck && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
             return;
         }
         
