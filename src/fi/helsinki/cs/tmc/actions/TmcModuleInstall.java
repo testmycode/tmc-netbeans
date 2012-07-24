@@ -25,7 +25,7 @@ public class TmcModuleInstall extends ModuleInstall {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
                 } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
-                    LoginDialog.display(new CheckForNewExercisesOrUpdates(true, false));
+                    LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     new CheckForNewExercisesOrUpdates(true, false).run();
                     if (CheckForUnopenedExercises.shouldRunOnStartup()) {
