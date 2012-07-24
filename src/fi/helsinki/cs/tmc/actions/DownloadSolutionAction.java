@@ -120,7 +120,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
             @Override
             public void bgTaskFailed(Throwable ex) {
                 logger.log(Level.INFO, "Failed to download solution.", ex);
-                dialogs.displayError("Failed to download solution.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
+                dialogs.displayError("Failed to download solution.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });
     }
@@ -148,7 +148,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
             @Override
             public void bgTaskFailed(Throwable ex) {
                 logger.log(Level.INFO, "Failed to extract solution.", ex);
-                dialogs.displayError("Failed to extract solution.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
+                dialogs.displayError("Failed to extract solution.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });
     }

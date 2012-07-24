@@ -107,7 +107,8 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     @Override
                     public void bgTaskFailed(Throwable ex) {
                         log.log(Level.INFO, "Error waiting for results from server.", ex);
-                        dialogDisplayer.displayError("Error trying to get test results.", ex);
+                        String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                        dialogDisplayer.displayError("Error trying to get test results.\n" + msg, ex);
                         dialog.close();
                     }
                 });
@@ -121,7 +122,8 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
             @Override
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Error submitting exercise.", ex);
-                dialogDisplayer.displayError("Error submitting exercise.", ex);
+                String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                dialogDisplayer.displayError("Error submitting exercise.\n" + msg, ex);
                 dialog.close();
             }
         };

@@ -103,7 +103,8 @@ public class UpdateExercisesAction implements ActionListener {
                 @Override
                 public void bgTaskFailed(Throwable ex) {
                     projectOpener.bgTaskReady(null);
-                    dialogDisplayer.displayError("Failed to download updated exercises", ex);
+                    String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                    dialogDisplayer.displayError("Failed to download updated exercises.\n" + msg, ex);
                 }
             });
         }

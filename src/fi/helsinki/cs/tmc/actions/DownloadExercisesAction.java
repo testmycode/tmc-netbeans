@@ -100,7 +100,7 @@ public class DownloadExercisesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             logger.log(Level.INFO, "Failed to download exercise file.", ex);
-            dialogs.displayError("Failed to download exercises.\n" + DownloadErrorHelper.getDownloadExceptionMsg(ex));
+            dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
         }
     };
 }
