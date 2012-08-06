@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
@@ -60,7 +61,21 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
             result.addAll(lkp.lookupAll(Project.class));
             result.addAll(projectsFromDataObjects(lkp.lookupAll(DataObject.class)));
         }
+        removeDuplicates(result);
         return result;
+    }
+    
+    private <T> void removeDuplicates(List<T> list) {
+        int n = 0;
+        Iterator<T> i = list.iterator();
+        while (i.hasNext()) {
+            T x = i.next();
+            if (list.lastIndexOf(x) > n) {
+                i.remove();
+            } else {
+                n++;
+            }
+        }
     }
     
     private List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
