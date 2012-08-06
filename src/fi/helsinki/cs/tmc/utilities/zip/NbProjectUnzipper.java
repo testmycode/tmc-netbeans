@@ -233,7 +233,8 @@ public class NbProjectUnzipper {
         ZipInputStream zis = readZip(data);
         ZipEntry zent;
         while ((zent = zis.getNextEntry()) != null) {
-            if (zent.getName().endsWith("/nbproject/")) {
+            String name = zent.getName();
+            if (name.endsWith("/nbproject/") || name.endsWith("/pom.xml")) {
                 return dirname(zent.getName());
             }
         }

@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import fi.helsinki.cs.tmc.testrunner.TestCaseList;
@@ -15,6 +16,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
@@ -24,6 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
 import java.util.concurrent.Callable;
+import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.module.api.support.ActionUtils;
@@ -32,11 +35,15 @@ import org.netbeans.api.java.platform.JavaPlatform;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
+import org.netbeans.spi.project.ActionProgress;
+import org.netbeans.spi.project.ActionProvider;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
+import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
+import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
@@ -79,16 +86,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private void performAction(Project ... projects) {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
-            BgTask.start("Compiling project", new Callable<Integer>() {
-                @Override
-                public Integer call() throws Exception {
-                    return startCompilingProject(project).result();
-                }
-            }, new BgTaskListener<Integer>() {
+            final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
+            BgTask.start("Compiling project", startCompilingProject(projectInfo), new BgTaskListener<Integer>() {
                 @Override
                 public void bgTaskReady(Integer result) {
                     if (result == 0) {
-                        startRunningTests(project);
+                        startRunningTests(projectInfo);
                     } else {
                         dialogDisplayer.displayError("The code did not compile.");
                     }
@@ -106,33 +109,119 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
     
-    private ExecutorTask startCompilingProject(Project project) throws IOException {
+    private Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
+        return new Callable<Integer>() {
+            @Override
+            public Integer call() throws Exception {
+                return et.result();
+            }
+        };
+    }
+    
+    private Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+        switch (projectInfo.getProjectType()) {
+            case JAVA_SIMPLE: return startCompilingAntProject(projectInfo);
+            case JAVA_MAVEN: return startCompilingMavenProject(projectInfo);
+            default: throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
+        }
+    }
+    
+    private Callable<Integer> startCompilingAntProject(TmcProjectInfo projectInfo) {
+        Project project = projectInfo.getProject();
         FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
         if (buildScript == null) {
             throw new RuntimeException("Project has no build.xml");
         }
-        return ActionUtils.runTarget(buildScript, new String[] { "compile-test" }, null);
+        ExecutorTask task;
+        try {
+            task = ActionUtils.runTarget(buildScript, new String[] { "compile-test" }, null);
+            return executorTaskToCallable(task);
+        } catch (IOException ex) {
+            throw ExceptionUtils.toRuntimeException(ex);
+        }
     }
     
-    private List<TestMethod> findProjectTests(Project project, FileObject testDir) {
-        TestScanner scanner = new TestScanner();
-        scanner.setClassPath(getTestClassPath(project).toString(ClassPath.PathConversionMode.WARN));
-        scanner.addSource(FileUtil.toFile(testDir));
-        return scanner.findTests();
+    private Callable<Integer> startCompilingMavenProject(TmcProjectInfo projectInfo) {
+        final Project project = projectInfo.getProject();
+        
+        // Ideal implementation, if the Maven Project API were public:
+        //File projectDir = projectInfo.getProjectDirAsFile();
+        //List<String> goals = Arrays.asList("test-compile");
+        //RunConfig cfg = RunUtils.createRunConfig(projectDir, project, projectInfo.getProjectName(), goals);
+        //return RunUtils.executeMaven(cfg);*/
+        
+        // Alternative implementation using ActionProgress, introduced in NB 7.2.
+        // This calls the default maven goal, install.
+        // This way we end up running our tests twice, but we can live with that for now.
+        final ActionProvider actionProvider = project.getLookup().lookup(ActionProvider.class);
+        
+        return new Callable<Integer>() {
+            @Override
+            public Integer call() throws InterruptedException {
+                final Semaphore semaphore = new Semaphore(0);
+                ActionProgress progress = new ActionProgress() {
+                    @Override
+                    protected void started() {
+                    }
+                    @Override
+                    public void finished(boolean success) {
+                        // success is always true, even if the build fails (NB 7.2).
+                        // It would be useless anyway since the tests can fail
+                        // even if they compiled fine.
+                        semaphore.release();
+                    }
+                };
+                
+                Lookup lookup = Lookups.singleton(progress);
+                actionProvider.invokeAction(ActionProvider.COMMAND_BUILD, lookup);
+                
+                semaphore.acquire();
+                return 0;
+            }
+        };
     }
     
-    private void startRunningTests(Project project) {
-        FileObject testDir = project.getProjectDirectory().getFileObject("test");
+    private void startRunningTests(TmcProjectInfo projectInfo) {
+        FileObject testDir = findTestDir(projectInfo);
         if (testDir == null) {
             dialogDisplayer.displayError("No test directory in project");
             return;
         }
 
-        List<TestMethod> tests = findProjectTests(project, testDir);
-        startRunningTests(project, testDir, tests);
+        List<TestMethod> tests = findProjectTests(projectInfo, testDir);
+        startRunningTests(projectInfo, testDir, tests);
     }
     
-    private void startRunningTests(final Project project, FileObject testDir, List<TestMethod> testMethods) {
+    private List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
+        TestScanner scanner = new TestScanner();
+        scanner.setClassPath(getTestClassPath(projectInfo, testDir).toString(ClassPath.PathConversionMode.WARN));
+        scanner.addSource(FileUtil.toFile(testDir));
+        return scanner.findTests();
+    }
+    
+    private FileObject findTestDir(TmcProjectInfo projectInfo) {
+        // Ideally we'd get these paths from NB, but let's assume the conventional ones for now.
+        FileObject root = projectInfo.getProjectDir();
+        switch (projectInfo.getProjectType()) {
+            case JAVA_SIMPLE: return root.getFileObject("test");
+            case JAVA_MAVEN: return getSubdir(root, "src", "test", "java");
+            default: throw new IllegalArgumentException("Unknown project type");
+        }
+    }
+    
+    private FileObject getSubdir(FileObject fo, String ... subdirs) {
+        for (String s : subdirs) {
+            if (fo == null) {
+                return null;
+            }
+            fo = fo.getFileObject(s);
+        }
+        return fo;
+    }
+    
+    private void startRunningTests(TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
+        final Project project = projectInfo.getProject();
+        
         File tempFile;
         try {
             tempFile = File.createTempFile("tmc_test_results", ".txt");
@@ -163,7 +252,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             }
 
             final File tempFileAsFinal = tempFile;
-            runJavaProcessInProject(project, "Running tests", args, inOut, new BgTaskListener<ProcessResult>() {
+            ClassPath classPath = getTestClassPath(projectInfo, testDir);
+            runJavaProcessInProject(projectInfo, classPath, "Running tests", args, inOut, new BgTaskListener<ProcessResult>() {
                 @Override
                 public void bgTaskReady(ProcessResult result) {
                     log.info("Test run standard output:");
@@ -238,19 +328,19 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return results;
     }
     
-    private void runJavaProcessInProject(Project project, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
-        FileObject projectDir = project.getProjectDirectory();
+    private void runJavaProcessInProject(TmcProjectInfo projectInfo, ClassPath classPath, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
+        FileObject projectDir = projectInfo.getProjectDir();
         
         JavaPlatform platform = JavaPlatform.getDefault(); // Should probably use project's configured platform instead
-        ClassPath classPath = getTestClassPath(project);
         
         FileObject javaExe = platform.findTool("java");
         if (javaExe == null) {
             throw new IllegalArgumentException();
         }
         
-        // TMC server packages this with every exercise for our convenience
-        ClassPath testRunnerClassPath = getTestRunnerClassPath(project);
+        // TMC server packages this with every exercise for our convenience.
+        // True even for Maven exercises, at least until NB's Maven API is published.
+        ClassPath testRunnerClassPath = getTestRunnerClassPath(projectInfo);
         
         if (testRunnerClassPath != null) {
             classPath = ClassPathSupport.createProxyClassPath(classPath, testRunnerClassPath);
@@ -267,19 +357,18 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         BgTask.start(taskName, runner, listener);
     }
     
-    private ClassPath getTestClassPath(Project project) {
-        FileObject projectDir = project.getProjectDirectory();
-        ClassPathProvider classPathProvider = project.getLookup().lookup(ClassPathProvider.class);
+    private ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
+        ClassPathProvider classPathProvider = projectInfo.getProject().getLookup().lookup(ClassPathProvider.class);
         
-        ClassPath cp = classPathProvider.findClassPath(projectDir.getFileObject("test"), ClassPath.EXECUTE);
+        ClassPath cp = classPathProvider.findClassPath(testDir, ClassPath.EXECUTE);
         if (cp == null) {
             throw new RuntimeException("Failed to get 'execute' classpath for project's tests");
         }
         return cp;
     }
     
-    private ClassPath getTestRunnerClassPath(Project project) {
-        FileObject projectDir = project.getProjectDirectory();
+    private ClassPath getTestRunnerClassPath(TmcProjectInfo projectInfo) {
+        FileObject projectDir = projectInfo.getProjectDir();
         FileObject testrunnerDir = projectDir.getFileObject("lib/testrunner");
         if (testrunnerDir != null) {
             FileObject[] files = testrunnerDir.getChildren();

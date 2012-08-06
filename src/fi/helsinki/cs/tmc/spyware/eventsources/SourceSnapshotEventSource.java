@@ -3,12 +3,13 @@ package fi.helsinki.cs.tmc.spyware.eventsources;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
+import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -118,9 +119,9 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             
             if (exercise != null) {
                 log.log(Level.FINER, "Exercise: {0}", exercise);
-                File projectDir = FileUtil.toFile(project.getProjectDirectory());
+                TmcProjectInfo projectInfo = pm.wrapProject(project);
                 
-                SnapshotThread thread = new SnapshotThread(receiver, exercise, projectDir);
+                SnapshotThread thread = new SnapshotThread(receiver, exercise, projectInfo);
                 snapshotterThreads.addThread(thread);
                 thread.setDaemon(true);
                 thread.start();
@@ -148,18 +149,19 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     private static class SnapshotThread extends Thread {
         private final EventReceiver receiver;
         private final Exercise exercise;
-        private final File projectDir;
+        private final TmcProjectInfo projectInfo;
 
-        private SnapshotThread(EventReceiver receiver, Exercise exercise, File projectDir) {
+        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo) {
             super("Source snapshot");
             this.receiver = receiver;
             this.exercise = exercise;
-            this.projectDir = projectDir;
+            this.projectInfo = projectInfo;
         }
 
         @Override
         public void run() {
-            NbProjectZipper zipper = new NbProjectZipper(projectDir);
+            File projectDir = projectInfo.getProjectDirAsFile();
+            RecursiveZipper zipper = new RecursiveZipper(projectDir, projectInfo.getZippingDecider());
             try {
                 byte[] data = zipper.zipProjectSources();
                 LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data);

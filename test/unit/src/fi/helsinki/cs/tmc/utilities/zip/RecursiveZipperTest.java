@@ -8,13 +8,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
-import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
-public class NbProjectZipperTest {
+public class RecursiveZipperTest {
     private static final String SLASH = File.separator;
     private TempTestDir tempDir;
     private String mainDir;
@@ -31,6 +30,9 @@ public class NbProjectZipperTest {
         new File(mainDir + SLASH + "Excluded.txt").createNewFile();
         new File(mainDir + SLASH + "test").mkdir();
         new File(mainDir + SLASH + "test" + SLASH + "Excluded.txt").createNewFile();
+        new File(mainDir + SLASH + "test").mkdir();
+        new File(mainDir + SLASH + "excluded").mkdir();
+        new File(mainDir + SLASH + "excluded" + SLASH + "Foo.txt").createNewFile();
     }
     
     @After
@@ -39,8 +41,16 @@ public class NbProjectZipperTest {
     }
     
     @Test
-    public void itShouldZipUpTheSrcSubdirectoryOfTheGivenDirectory() throws IOException {
-        List<String> entries = getZipEntries();
+    public void itShouldZipRecursivelyFilesThatZipDeciderSelects() throws IOException {
+        RecursiveZipper.ZippingDecider decider = new RecursiveZipper.ZippingDecider() {
+            @Override
+            public boolean shouldZip(String relativeZipPath) {
+                return !relativeZipPath.equals("MyExercise/Excluded.txt") &&
+                        !relativeZipPath.equals("MyExercise/src/Excluded.txt") &&
+                        !relativeZipPath.equals("MyExercise/excluded/");
+            }
+        };
+        List<String> entries = getZipEntries(decider);
         
         if (!entries.contains("MyExercise/src/Included1.txt")) {
             fail("Expected file not in zip.");
@@ -51,25 +61,16 @@ public class NbProjectZipperTest {
         if (entries.contains("MyExercise/Excluded.txt")) {
             fail("File that was supposed to be excluded was found in the zip.");
         }
-        if (entries.contains("MyExercise/test/Excluded.txt")) {
+        if (entries.contains("MyExercise/src/Excluded.txt")) {
+            fail("File that was supposed to be excluded was found in the zip.");
+        }
+        if (entries.contains("MyExercise/excluded/Foo.txt")) {
             fail("File that was supposed to be excluded was found in the zip.");
         }
     }
-    
-    @Test
-    public void itShouldIncludeTestFilesThatAreSpecifiedInTheProjectFile() throws IOException {
-        new File(mainDir + SLASH + "test").mkdir();
-        new File(mainDir + SLASH + "test" + SLASH + "IncludedTest.txt").createNewFile();
-        
-        FileUtils.write(new File(mainDir + SLASH + ".tmcproject.yml"), "extra_student_files:\n  - test/IncludedTest.txt", "UTF-8");
-        
-        List<String> entries = getZipEntries();
-        assertTrue(entries.contains("MyExercise/test/IncludedTest.txt"));
-        assertFalse(entries.contains("MyExercise/test/Excluded.txt"));
-    }
 
-    private List<String> getZipEntries() throws IOException {
-        NbProjectZipper zipper = new NbProjectZipper(new File(mainDir));
+    private List<String> getZipEntries(RecursiveZipper.ZippingDecider decider) throws IOException {
+        RecursiveZipper zipper = new RecursiveZipper(new File(mainDir), decider);
         byte[] zipData = zipper.zipProjectSources();
         return zipEntryNames(zipData);
     }

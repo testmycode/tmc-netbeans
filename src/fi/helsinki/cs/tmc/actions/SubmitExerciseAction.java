@@ -13,7 +13,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectZipper;
+import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.net.URI;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
@@ -131,7 +131,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
-                NbProjectZipper zipper = new NbProjectZipper(FileUtil.toFile(project.getProjectDir()));
+                RecursiveZipper zipper = new RecursiveZipper(project.getProjectDirAsFile(), project.getZippingDecider());
                 return zipper.zipProjectSources();
             }
         }, new BgTaskListener<byte[]>() {
