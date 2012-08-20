@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.io.File;
+import java.util.regex.Pattern;
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.ui.OpenProjects;
@@ -110,13 +111,15 @@ public class TmcProjectInfo {
     }
     
     private static class MavenZippingDecider extends AbstractZippingDecider {
+        private static final Pattern rejectPattern = Pattern.compile("^[^/]+/(target|lib/testrunner)/.*");
+        
         public MavenZippingDecider(TmcProjectFile projectFile) {
             super(projectFile);
         }
         
         @Override
         public boolean shouldZip(String zipPath) {
-            return true; // Zip all the things!
+            return !rejectPattern.matcher(zipPath).matches();
         }
     }
 }
