@@ -2,6 +2,10 @@
 
 This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading, testing and submitting exercises directly from the IDE.
 
+## Temporary build hax ##
+
+Due to http://jira.codehaus.org/browse/MNBMODULE-138 we include a local copy of `org.codehaus.mojo:nbm-maven-plugin:3.9-SNAPSHOT`
+in `nbm-maven-tmp-copy/`. Currently it must be `mvn install`'ed before the main project can build.
 
 ## Credits ##
 
