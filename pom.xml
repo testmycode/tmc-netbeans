@@ -96,6 +96,7 @@
         <module>application</module>
         <module>tmc-netbeans-plugin</module>
         <module>tmc-netbeans-test-utils</module>
+        <module>maven-api</module>
     </modules>
 
     <properties>
