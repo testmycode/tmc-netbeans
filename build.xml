@@ -6,17 +6,17 @@
     <description>Builds the module suite tmc-netbeans.</description>
     <import file="nbproject/build-impl.xml"/>
     
-    <property name="mavenmodules-builddir" value="tmc-maven-api/target/nbm/netbeans/extra"/>
+    <property name="mavenmodules-builddir" value="maven-wrapper/target/nbm/netbeans/extra"/>
     
     <target name="-check-mavenmodules">
         <uptodate property="mavenmodules.uptodate"
-                  srcfile="tmc-maven-api/target/nbm/tmc-maven-api-1.0-SNAPSHOT.nbm"
+                  srcfile="maven-wrapper/target/nbm/maven-wrapper-1.0-SNAPSHOT.nbm"
                   targetfile="mavenmodules"/>
     </target>
     
     <target name="-build-mavenmodules" depends="-check-mavenmodules" unless="mavenmodules.uptodate">
         <echo>Building the mavenmodules cluster</echo>
-        <exec dir="tmc-maven-api" executable="mvn" failonerror="true">
+        <exec dir="maven-wrapper" executable="mvn" failonerror="true">
             <arg value="nbm:nbm"/>
         </exec>
         <delete dir="mavenmodules"/>

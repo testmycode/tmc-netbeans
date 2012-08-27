@@ -17,17 +17,19 @@ import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+import fi.helsinki.cs.tmc.utilities.maven.MavenRunBuilder;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Scanner;
+import java.util.Map;
 import java.util.concurrent.Callable;
-import java.util.concurrent.Semaphore;
 import java.util.logging.Logger;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.module.api.support.ActionUtils;
 import org.netbeans.api.java.classpath.ClassPath;
@@ -35,21 +37,18 @@ import org.netbeans.api.java.platform.JavaPlatform;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
-import org.netbeans.spi.project.ActionProgress;
-import org.netbeans.spi.project.ActionProvider;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
-import org.openide.util.Lookup;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.lookup.Lookups;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
-
+    private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.2:test";
+    
     private static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
     
     private CourseDb courseDb;
@@ -142,46 +141,48 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
     
     private Callable<Integer> startCompilingMavenProject(TmcProjectInfo projectInfo) {
-        final Project project = projectInfo.getProject();
+        File projectDir = projectInfo.getProjectDirAsFile();
         
-        // Ideal implementation, if the Maven Project API were public:
-        //File projectDir = projectInfo.getProjectDirAsFile();
-        //List<String> goals = Arrays.asList("test-compile");
-        //RunConfig cfg = RunUtils.createRunConfig(projectDir, project, projectInfo.getProjectName(), goals);
-        //return RunUtils.executeMaven(cfg);*/
+        String goal = "test-compile";
+        final InputOutput inOut = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
         
-        // Alternative implementation using ActionProgress, introduced in NB 7.2.
-        // This calls the default maven goal, install.
-        // This way we end up running our tests twice, but we can live with that for now.
-        final ActionProvider actionProvider = project.getLookup().lookup(ActionProvider.class);
+        final ProcessRunner runner = new MavenRunBuilder()
+                .setProjectDir(projectDir)
+                .addGoal(goal)
+                .setIO(inOut)
+                .createProcessRunner();
         
         return new Callable<Integer>() {
             @Override
-            public Integer call() throws InterruptedException {
-                final Semaphore semaphore = new Semaphore(0);
-                ActionProgress progress = new ActionProgress() {
-                    @Override
-                    protected void started() {
+            public Integer call() throws Exception {
+                try {
+                    ProcessResult result = runner.call();
+                    int ret = result.statusCode;
+                    if (ret != 0) {
+                        inOut.select();
                     }
-                    @Override
-                    public void finished(boolean success) {
-                        // success is always true, even if the build fails (NB 7.2).
-                        // It would be useless anyway since the tests can fail
-                        // even if they compiled fine.
-                        semaphore.release();
-                    }
-                };
-                
-                Lookup lookup = Lookups.singleton(progress);
-                actionProvider.invokeAction(ActionProvider.COMMAND_BUILD, lookup);
-                
-                semaphore.acquire();
-                return 0;
+                    return ret;
+                } catch (Exception ex) {
+                    inOut.select();
+                    throw ex;
+                }
             }
         };
     }
     
     private void startRunningTests(TmcProjectInfo projectInfo) {
+        switch (projectInfo.getProjectType()) {
+            case JAVA_SIMPLE:
+                startRunningSimpleProjectTests(projectInfo);
+                break;
+            case JAVA_MAVEN:
+                startRunningMavenProjectTests(projectInfo);
+                break;
+            default: throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
+        }
+    }
+    
+    private void startRunningSimpleProjectTests(TmcProjectInfo projectInfo) {
         FileObject testDir = findTestDir(projectInfo);
         if (testDir == null) {
             dialogDisplayer.displayError("No test directory in project");
@@ -189,7 +190,59 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
 
         List<TestMethod> tests = findProjectTests(projectInfo, testDir);
-        startRunningTests(projectInfo, testDir, tests);
+        startRunningSimpleProjectTests(projectInfo, testDir, tests);
+    }
+    
+    private void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
+        final File projectDir = projectInfo.getProjectDirAsFile();
+        String goal = MAVEN_TEST_RUN_GOAL;
+        Map<String, String> props = new HashMap<String, String>();
+        InputOutput inOut = getIoTab();
+        
+        Integer memLimit = getMemoryLimit(projectInfo.getProject());
+        if (memLimit != null) {
+            props.put("tmc.test.jvmOpts", "-Xmx" + memLimit + "m");
+        }
+        
+        final ProcessRunner runner = new MavenRunBuilder()
+                .setProjectDir(projectDir)
+                .addGoal(goal)
+                .setProperties(props)
+                .setIO(inOut)
+                .createProcessRunner();
+        
+        BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
+            @Override
+            public void bgTaskReady(ProcessResult processResult) {
+                File resultPath = new File(
+                        projectDir.getPath() + File.separator +
+                        "target" + File.separator +
+                        "test_output.txt"
+                        );
+                
+                List<TestCaseResult> results;
+                try {
+                    String resultJson = FileUtils.readFileToString(resultPath);
+                    results = parseTestResults(resultJson);
+                } catch (Exception ex) {
+                    dialogDisplayer.displayError("Failed to read test results", ex);
+                    return;
+                }
+                
+                if (resultDisplayer.showLocalRunResult(results)) {
+                    submitAction.performAction(projectInfo.getProject());
+                }
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
+            }
+        });
     }
     
     private List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
@@ -219,7 +272,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return fo;
     }
     
-    private void startRunningTests(TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
+    private void startRunningSimpleProjectTests(TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
         final Project project = projectInfo.getProject();
         
         File tempFile;
@@ -245,11 +298,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             for (int i = 0; i < testMethods.size(); ++i) {
                 args.add(testMethods.get(i).toString());
             }
-
-            InputOutput inOut = IOProvider.getDefault().getIO("test output", false);
-            if (inOut.isClosed()) {
-                inOut.select();
-            }
+            InputOutput inOut = getIoTab();
 
             final File tempFileAsFinal = tempFile;
             ClassPath classPath = getTestClassPath(projectInfo, testDir);
@@ -264,15 +313,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                     if (result.statusCode != 0) {
                         log.info("Failed to run tests. Status code: " + result.statusCode);
                         dialogDisplayer.displayError("Failed to run tests.\n" + result.errorOutput);
+                        tempFileAsFinal.delete();
                         return;
                     }
                     
-                    String resultJson = "";
+                    String resultJson;
                     try {
-                        Scanner reader = new Scanner(tempFileAsFinal, "UTF-8");
-                        while (reader.hasNextLine()) {
-                            resultJson += reader.nextLine();
-                        }
+                        resultJson = FileUtils.readFileToString(tempFileAsFinal, "UTF-8");
                     } catch (IOException ex) {
                         dialogDisplayer.displayError("Failed to read test results", ex);
                         return;
@@ -280,18 +327,15 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                         tempFileAsFinal.delete();
                     }
                     
-                    TestCaseList testCaseRecords;
+                    List<TestCaseResult> results;
                     try {
-                        testCaseRecords = parseTestResults(resultJson);
-                    } catch (IllegalArgumentException ex) {
-                        log.info("Empty result from test runner");
-                        dialogDisplayer.displayError("Failed to read test results");
+                        results = parseTestResults(resultJson);
+                        if (resultDisplayer.showLocalRunResult(results)) {
+                            submitAction.performAction(project);
+                        }
+                    } catch (Exception e) {
+                        dialogDisplayer.displayError("Failed to read test results:\n" + e.getMessage());
                         return;
-                    }
-                    
-                    List<TestCaseResult> results = new ArrayList<TestCaseResult>();
-                    for (TestCase tc : testCaseRecords) {
-                        results.add(TestCaseResult.fromTestCaseRecord(tc));
                     }
                     
                     if (resultDisplayer.showLocalRunResult(results)) {
@@ -317,13 +361,21 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
     
-    private TestCaseList parseTestResults(String json) {
+    private List<TestCaseResult> parseTestResults(String json) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
                 .create();
-        TestCaseList results = gson.fromJson(json, TestCaseList.class);
-        if (results == null) {
-            throw new IllegalArgumentException("Invalid test results");
+        
+        TestCaseList testCaseRecords = gson.fromJson(json, TestCaseList.class);
+        if (testCaseRecords == null) {
+            String msg = "Empty result from test runner";
+            log.warning(msg);
+            throw new IllegalArgumentException(msg);
+        }
+        
+        List<TestCaseResult> results = new ArrayList<TestCaseResult>();
+        for (TestCase tc : testCaseRecords) {
+            results.add(TestCaseResult.fromTestCaseRecord(tc));
         }
         return results;
     }
@@ -403,5 +455,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     protected String iconResource() {
         // The setting in layer.xml doesn't work with NodeAction
         return "org/netbeans/modules/project/ui/resources/testProject.png";
+    }
+
+    private InputOutput getIoTab() {
+        InputOutput inOut = IOProvider.getDefault().getIO("Test output", false);
+        if (inOut.isClosed()) {
+            inOut.select();
+        }
+        return inOut;
     }
 }

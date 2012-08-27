@@ -7,7 +7,7 @@
             <suite-component/>
             <module-dependencies>
                 <dependency>
-                    <code-name-base>fi.helsinki.cs.tmc.tmc.maven.api</code-name-base>
+                    <code-name-base>fi.helsinki.cs.tmc.maven.wrapper</code-name-base>
                     <build-prerequisite/>
                     <compile-dependency/>
                     <run-dependency>

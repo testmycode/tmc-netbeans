@@ -17,6 +17,9 @@ import org.openide.windows.InputOutput;
 
 /**
  * Used to run subprocesses with a timeout and capture their output.
+ * 
+ * <p>
+ * TODO: make cancellable
  */
 public class ProcessRunner implements Callable<ProcessResult> {
     private static final String PROCESS_TREE_IDENTIFIER_NAME = "PROCESS_TREE_IDENTIFIER_FOR_NB";
