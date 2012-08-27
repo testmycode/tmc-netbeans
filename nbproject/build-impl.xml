@@ -3,7 +3,7 @@
 *** GENERATED FROM project.xml - DO NOT EDIT  ***
 ***         EDIT ../build.xml INSTEAD         ***
 -->
-<project name="fi.helsinki.cs.tmc-impl" basedir="..">
+<project name="tmc-netbeans-impl" basedir=".." xmlns:sproject="http://www.netbeans.org/ns/nb-module-suite-project/1">
     <fail message="Please build using Ant 1.7.1 or higher.">
         <condition>
             <not>
@@ -13,14 +13,14 @@
     </fail>
     <property file="nbproject/private/platform-private.properties"/>
     <property file="nbproject/platform.properties"/>
-    <macrodef name="property" uri="http://www.netbeans.org/ns/nb-module-project/2">
+    <macrodef name="property" uri="http://www.netbeans.org/ns/nb-module-suite-project/1">
         <attribute name="name"/>
         <attribute name="value"/>
         <sequential>
             <property name="@{name}" value="${@{value}}"/>
         </sequential>
     </macrodef>
-    <macrodef name="evalprops" uri="http://www.netbeans.org/ns/nb-module-project/2">
+    <macrodef name="evalprops" uri="http://www.netbeans.org/ns/nb-module-suite-project/1">
         <attribute name="property"/>
         <attribute name="value"/>
         <sequential>
@@ -28,9 +28,9 @@
         </sequential>
     </macrodef>
     <property file="${user.properties.file}"/>
-    <nbmproject2:property name="harness.dir" value="nbplatform.${nbplatform.active}.harness.dir" xmlns:nbmproject2="http://www.netbeans.org/ns/nb-module-project/2"/>
-    <nbmproject2:property name="nbplatform.active.dir" value="nbplatform.${nbplatform.active}.netbeans.dest.dir" xmlns:nbmproject2="http://www.netbeans.org/ns/nb-module-project/2"/>
-    <nbmproject2:evalprops property="cluster.path.evaluated" value="${cluster.path}" xmlns:nbmproject2="http://www.netbeans.org/ns/nb-module-project/2"/>
+    <sproject:property name="harness.dir" value="nbplatform.${nbplatform.active}.harness.dir"/>
+    <sproject:property name="nbplatform.active.dir" value="nbplatform.${nbplatform.active}.netbeans.dest.dir"/>
+    <sproject:evalprops property="cluster.path.evaluated" value="${cluster.path}"/>
     <fail message="Path to 'platform' cluster missing in $${cluster.path} property or using corrupt Netbeans Platform (missing harness).">
         <condition>
             <not>
@@ -38,5 +38,13 @@
             </not>
         </condition>
     </fail>
-    <import file="${harness.dir}/build.xml"/>
+    <ant antfile="nbproject/platform.xml"/>
+    <fail message="Cannot find NetBeans build harness. ${line.separator}Check that nbplatform.${nbplatform.active}.netbeans.dest.dir and nbplatform.${nbplatform.active}.harness.dir are defined. ${line.separator}On a developer machine these are normally defined in ${user.properties.file}=${netbeans.user}/build.properties ${line.separator}but for automated builds you should pass these properties to Ant explicitly. ${line.separator}You may instead download the harness and platform: -Dbootstrap.url=.../tasks.jar -Dautoupdate.catalog.url=.../updates.xml">
+        <condition>
+            <not>
+                <available file="${harness.dir}/suite.xml"/>
+            </not>
+        </condition>
+    </fail>
+    <import file="${harness.dir}/suite.xml"/>
 </project>
