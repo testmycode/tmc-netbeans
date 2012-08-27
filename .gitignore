@@ -1,2 +1,4 @@
-/build/**
-/nbproject/private/**
+/build
+/nbproject/private
+/tmp
+/mavenmodules
