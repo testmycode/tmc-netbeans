@@ -18,7 +18,7 @@
         <echo>Building the mavenmodules cluster.</echo>
         <echo>NOTE: you may need to restart NetBeans for the editor to notice.</echo>
         <exec dir="maven-wrapper" executable="mvn" failonerror="true">
-            <arg value="nbm:nbm"/>
+            <arg value="package"/>
         </exec>
         <delete dir="mavenmodules"/>
         <copy todir="mavenmodules">
