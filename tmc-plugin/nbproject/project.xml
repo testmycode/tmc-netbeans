@@ -276,54 +276,6 @@
                 </test-type>
             </test-dependencies>
             <public-packages/>
-            <class-path-extension>
-                <runtime-relative-path>ext/httpclient-4.1.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/httpclient-4.1.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-logging-1.1.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-logging-1.1.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/junit-4.10.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/junit-4.10.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/gson-2.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/gson-2.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-lang3-3.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-lang3-3.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/httpmime-4.1.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/httpmime-4.1.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/httpcore-4.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/httpcore-4.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-codec-1.4.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-codec-1.4.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/snakeyaml-1.10.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/snakeyaml-1.10.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/mockito-all-1.9.0.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/mockito-all-1.9.0.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/commons-io-2.0.1.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/commons-io-2.0.1.jar</binary-origin>
-            </class-path-extension>
-            <class-path-extension>
-                <runtime-relative-path>ext/tmc-junit-runner.jar</runtime-relative-path>
-                <binary-origin>release/modules/ext/tmc-junit-runner.jar</binary-origin>
-            </class-path-extension>
         </data>
     </configuration>
 </project>

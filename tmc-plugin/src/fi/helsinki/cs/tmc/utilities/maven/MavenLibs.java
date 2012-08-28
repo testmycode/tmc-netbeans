@@ -17,17 +17,16 @@ public class MavenLibs {
         if (mavenClassPath == null) {
             File mavenJarsBase = InstalledFileLocator.getDefault().locate("modules/ext", "fi.helsinki.cs.tmc.maven.wrapper", false);
 
+            // We get some extra stuff like this but don't care
             Collection<File> files = FileUtils.listFiles(mavenJarsBase, new String[] {"jar"}, true);
             ArrayList<URL> urls = new ArrayList<URL>();
             for (File file : files) {
                 URL url = FileUtil.urlForArchiveOrDir(file);
-System.out.println(">>>>>>>>>>> " + url);
                 if (url != null) {
                     urls.add(url);
                 }
             }
             mavenClassPath = ClassPathSupport.createClassPath(urls.toArray(new URL[urls.size()]));
-System.out.println("============== " + mavenClassPath.toString(ClassPath.PathConversionMode.WARN));
         }
         return mavenClassPath;
     }
