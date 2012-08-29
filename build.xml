@@ -6,7 +6,7 @@
     <description>Builds the module suite tmc-netbeans.</description>
     <import file="nbproject/build-impl.xml"/>
     
-    <property name="mavenmodules-builddir" value="maven-wrapper/target/nbm/netbeans/extra"/>
+    <!-- Pull maven wrapper into the 'mavenmodules' cluster. Build it first if needed. -->
     
     <target name="-check-mavenmodules">
         <uptodate property="mavenmodules.uptodate"
@@ -22,7 +22,7 @@
         </exec>
         <delete dir="mavenmodules"/>
         <copy todir="mavenmodules">
-            <fileset dir="${mavenmodules-builddir}"/>
+            <fileset dir="maven-wrapper/target/nbm/netbeans/extra"/>
         </copy>
     </target>
     
@@ -32,4 +32,15 @@
     
     <target name="build" depends="-build-mavenmodules,suite.build"/>
     <target name="clean" depends="suite.clean,-clean-mavenmodules"/>
+    
+    <!-- Include maven-wrapper NBM in autoupdate site. -->
+    <target name="nbms" depends="-init,branding,release,-hide-excluded-modules" description="Build NBMs and an Auto Update site descriptor for all modules in the suite.">
+        <mkdir dir="${suite.build.dir}/updates"/>
+        <copy todir="${suite.build.dir}/updates">
+            <fileset dir="maven-wrapper/target/nbm">
+                <include name="*.nbm"/>
+            </fileset>
+        </copy>
+        <antcall target="suite.nbms"/>
+    </target>
 </project>

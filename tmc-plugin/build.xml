@@ -5,21 +5,4 @@
 <project name="tmc-netbeans" default="netbeans" basedir=".">
     <description>Builds, tests, and runs the project.</description>
     <import file="nbproject/build-impl.xml"/>
-    
-    <property file="update_site.properties" />
-    <target name="update-site" description="Make an update site" depends="nbm">
-        <fail unless="updates.base.url">Please set updates.base.url in update_site.properties</fail>
-        <pathfileset id="updater.jar">
-            <path refid="cluster.path.id"/>
-            <filename name="modules/ext/updater.jar"/>
-        </pathfileset>
-        <makeupdatedesc desc="${build.dir}/updates.xml" distbase="${updates.base.url}" automaticgrouping="true" uselicenseurl="false">
-            <fileset dir="${build.dir}">
-                <include name="*.nbm"/>
-            </fileset>
-            <updaterjar>
-                <resources refid="updater.jar"/>
-            </updaterjar>
-        </makeupdatedesc>
-    </target>
 </project>
