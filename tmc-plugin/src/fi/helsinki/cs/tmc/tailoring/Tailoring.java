@@ -11,4 +11,7 @@ public interface Tailoring {
     public String getDefaultUsername();
     public String getUsernameFieldName();
     public boolean isSpywareEnabledByDefault();
+    
+    public String getUpdateCenterTitle();
+    public String getUpdateCenterUrl();
 }

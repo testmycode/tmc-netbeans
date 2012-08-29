@@ -32,4 +32,14 @@ public class DefaultTailoring implements Tailoring {
     public boolean isSpywareEnabledByDefault() {
         return false;
     }
+
+    @Override
+    public String getUpdateCenterTitle() {
+        return "TMC Updates";
+    }
+
+    @Override
+    public String getUpdateCenterUrl() {
+        return "http://update.testmycode.net/tmc-netbeans/updates.xml";
+    }
 }

@@ -48,19 +48,4 @@
             </file>
         </folder>
     </folder>
-    <folder name="Services">
-        <!-- Autoupdate settings may be declared here. -->
-        <!-- The declaration would look something like this: -->
-        <!--
-        <folder name="AutoupdateType">
-            <file name="fi_helsinki_cs_tmc_update_center.instance">
-                <attr name="displayName" stringvalue="TMC Netbeans Plugin Update Center"/>
-                <attr name="enabled" boolvalue="true"/>
-                <attr name="instanceCreate" methodvalue="org.netbeans.modules.autoupdate.updateprovider.AutoupdateCatalogFactory.createUpdateProvider"/>
-                <attr name="instanceOf" stringvalue="org.netbeans.spi.autoupdate.UpdateProvider"/>
-                <attr name="url" stringvalue="http://example.com/update.xml"/>
-            </file>
-        </folder>
-        -->
-    </folder>
 </filesystem>
