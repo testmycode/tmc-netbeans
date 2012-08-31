@@ -330,9 +330,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                     List<TestCaseResult> results;
                     try {
                         results = parseTestResults(resultJson);
-                        if (resultDisplayer.showLocalRunResult(results)) {
-                            submitAction.performAction(project);
-                        }
                     } catch (Exception e) {
                         dialogDisplayer.displayError("Failed to read test results:\n" + e.getMessage());
                         return;
