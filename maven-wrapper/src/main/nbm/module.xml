@@ -2,8 +2,10 @@
 <nbm>
     <moduleType>autoload</moduleType>
     <codeNameBase>fi.helsinki.cs.tmc.maven/1</codeNameBase>
-    <!--
-    <licenseName>Apache License, Version 2.0</licenseName>
-    <licenseFile>license.txt</licenseFile>
-    -->
+    
+    <!-- Having the same license file as the main plugin hides this module in
+         the update manager. We get a warning about a missing licenseName but
+         it doesn't matter.
+         Should we include the licenses of the dependencies in the license file? -->
+    <licenseFile>../LICENSE</licenseFile>
 </nbm>

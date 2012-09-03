@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.0-SNAPSHOT</version>
+    <version>1.1</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -297,6 +297,7 @@
                 <version>3.7</version>
                 <extensions>true</extensions>
                 <configuration>
+                    <cluster>tmc_netbeans</cluster>
                     <publicPackages>
                         <publicPackage>fi.helsinki.cs.tmc.maven.wrapper</publicPackage>
                         <publicPackage>com.google.*</publicPackage>
