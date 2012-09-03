@@ -28,6 +28,9 @@
     
     <target name="-clean-mavenmodules">
         <delete dir="mavenmodules"/>
+        <exec dir="maven-wrapper" executable="mvn" failonerror="true">
+            <arg value="clean"/>
+        </exec>
     </target>
     
     <target name="build" depends="-build-mavenmodules,suite.build"/>
