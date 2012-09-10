@@ -456,6 +456,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     private InputOutput getIoTab() {
         InputOutput inOut = IOProvider.getDefault().getIO("Test output", false);
+        try {
+            inOut.getOut().reset();
+        } catch (IOException e) {
+            // Ignore
+        }
         if (inOut.isClosed()) {
             inOut.select();
         }
