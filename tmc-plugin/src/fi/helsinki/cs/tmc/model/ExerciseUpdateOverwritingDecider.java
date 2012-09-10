@@ -25,6 +25,8 @@ public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.Overw
     private boolean mayBothOverwriteAndDelete(String relPath) {
         return isNotAnExtraFile(relPath) && (
                 relPath.startsWith("test") ||
+                relPath.startsWith("src" + s + "test" + s + "java") ||
+                relPath.startsWith("src" + s + "test" + s + "resources") ||
                 relPath.startsWith("lib") ||
                 (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private")) ||
                 relPath.equals(".tmcproject.yml")
