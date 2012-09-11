@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.tailoring;
 
+import java.util.Locale;
+
 /**
  * Provides for minor modifications in default settings, text labels etc.
  * to suit customized installations.
@@ -11,6 +13,9 @@ public interface Tailoring {
     public String getDefaultUsername();
     public String getUsernameFieldName();
     public boolean isSpywareEnabledByDefault();
+    
+    public Locale[] getAvailableErrorMsgLocales();
+    public Locale getDefaultErrorMsgLocale();
     
     public String getUpdateCenterTitle();
     public String getUpdateCenterUrl();

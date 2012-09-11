@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import fi.helsinki.cs.tmc.testrunner.TestCaseList;
@@ -48,9 +49,11 @@ import org.openide.windows.InputOutput;
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.4:test";
+    private static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
     
     private static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
     
+    private TmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
@@ -58,6 +61,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private SubmitExerciseAction submitAction;
 
     public RunTestsLocallyAction() {
+        this.settings = TmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
@@ -199,10 +203,16 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         Map<String, String> props = new HashMap<String, String>();
         InputOutput inOut = getIoTab();
         
+        List<String> jvmOpts = new ArrayList<String>();
+        
         Integer memLimit = getMemoryLimit(projectInfo.getProject());
         if (memLimit != null) {
-            props.put("tmc.test.jvmOpts", "-Xmx" + memLimit + "m");
+            jvmOpts.add("-Xmx" + memLimit + "m");
         }
+        
+        jvmOpts.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
+        
+        props.put("tmc.test.jvm_opts", StringUtils.join(jvmOpts, ' '));
         
         final ProcessRunner runner = new MavenRunBuilder()
                 .setProjectDir(projectDir)
@@ -287,6 +297,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             ArrayList<String> args = new ArrayList<String>();
             args.add("-Dtmc.test_class_dir=" + FileUtil.toFile(testDir).getAbsolutePath());
             args.add("-Dtmc.results_file=" + tempFile.getAbsolutePath());
+            args.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
             
             Integer memoryLimit = getMemoryLimit(project);
             if (memoryLimit != null) {

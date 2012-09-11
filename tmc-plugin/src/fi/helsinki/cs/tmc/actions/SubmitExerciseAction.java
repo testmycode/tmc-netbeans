@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -15,6 +16,8 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.net.URI;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -29,6 +32,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
     
+    private TmcSettings settings;
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
@@ -36,6 +40,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     private ConvenientDialogDisplayer dialogDisplayer;
 
     public SubmitExerciseAction() {
+        this.settings = TmcSettings.getDefault();
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -136,7 +141,10 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         }, new BgTaskListener<byte[]>() {
             @Override
             public void bgTaskReady(byte[] zipData) {
-                CancellableCallable<URI> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData);
+                Map<String, String> extraParams = new HashMap<String, String>();
+                extraParams.put("error_msg_locale", settings.getErrorMsgLocale().toString());
+                
+                CancellableCallable<URI> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData, extraParams);
                 dialog.setTask(submitTask);
                 BgTask.start("Sending " + exercise.getName(), submitTask, submissionUriListener);
             }

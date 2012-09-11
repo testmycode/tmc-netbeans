@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
+import java.util.Locale;
 
 /**
  * A transient saveable collection of all settings of the TMC plugin.
@@ -14,6 +15,7 @@ public class TmcSettings {
     private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
     private static final String PREF_CHECK_FOR_UNOPENED_AT_STARTUP = "checkForUnopenedAtStartup";
     private static final String PREF_SPYWARE_ENABLED = "spywareEnabled";
+    private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     
     private static final TmcSettings defaultInstance =
             new TmcSettings(
@@ -133,4 +135,31 @@ public class TmcSettings {
     public void setIsSpywareEnabled(boolean value) {
         settings.put(PREF_SPYWARE_ENABLED, value ? "1" : "0");
     }
+    
+    public Locale getErrorMsgLocale() {
+        Locale dflt = tailoring.getDefaultErrorMsgLocale();
+        return parseLocale(settings.get(PREF_ERROR_MSG_LOCALE, ""), dflt);
+    }
+    
+    public void setErrorMsgLocale(Locale locale) {
+        settings.put(PREF_ERROR_MSG_LOCALE, locale.toString());
+    }
+    
+    private Locale parseLocale(String s, Locale dflt) {
+        if (s.isEmpty()) {
+            return dflt;
+        }
+        String[] parts = s.split("_");
+        switch (parts.length) {
+            case 1:
+                return new Locale(parts[0]);
+            case 2:
+                return new Locale(parts[0], parts[1]);
+            case 3:
+                return new Locale(parts[0], parts[1], parts[2]);
+            default:
+                return dflt;
+        }
+    }
+    
 }

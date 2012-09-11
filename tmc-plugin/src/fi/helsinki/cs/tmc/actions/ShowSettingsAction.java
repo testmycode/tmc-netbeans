@@ -62,6 +62,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setSelectedCourse(courseDb.getCurrentCourse());
         prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
+        prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
 
         ActionListener listener = new ActionListener() {
             @Override

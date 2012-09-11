@@ -110,12 +110,11 @@ public class ServerAccess {
         return createHttpTasks().getForBinary(zipUrl);
     }
     
-    public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip) {
+    public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
         
-        Map<String, String> params = Collections.emptyMap();
         final CancellableCallable<String> upload =
-                createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
+                createHttpTasks().uploadFileForTextDownload(submitUrl, extraParams, "submission[file]", sourceZip);
         
         return new CancellableCallable<URI>() {
             @Override

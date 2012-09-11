@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
+import java.util.Locale;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -105,5 +106,12 @@ public class TmcSettingsTest {
         assertFalse(newSettings().isCheckingForUpdatesInTheBackground());
         settings.setCheckingForUpdatesInTheBackground(true);
         assertTrue(newSettings().isCheckingForUpdatesInTheBackground());
+    }
+    
+    @Test
+    public void localeToStringBehavesAsExpected() {
+        assertEquals("fi", new Locale("fi").toString());
+        assertEquals("fi_FI", new Locale("fi", "FI").toString());
+        assertEquals("fi_FI_foo", new Locale("fi", "FI", "foo").toString());
     }
 }

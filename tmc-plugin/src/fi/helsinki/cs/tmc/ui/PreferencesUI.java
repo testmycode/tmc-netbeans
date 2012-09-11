@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Course;
 import java.util.List;
+import java.util.Locale;
 
 public interface PreferencesUI {
 
@@ -24,6 +25,8 @@ public interface PreferencesUI {
     boolean getCheckForUnopenedExercisesAtStartup();
     
     boolean getSpywareEnabled();
+    
+    Locale getErrorMsgLocale();
 
     void setAvailableCourses(List<Course> courses);
     
@@ -46,4 +49,6 @@ public interface PreferencesUI {
     void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck);
     
     void setSpywareEnabled(boolean enabled);
+    
+    void setErrorMsgLocale(Locale locale);
 }
