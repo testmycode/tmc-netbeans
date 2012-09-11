@@ -14,12 +14,18 @@
                   targetfile="mavenmodules"/>
     </target>
     
+    <condition property="mvn.exe" value="mvn.bat" else="mvn">
+        <os family="windows"/>
+    </condition>
+    
     <target name="-build-mavenmodules" depends="-check-mavenmodules" unless="mavenmodules.uptodate">
         <echo>Building the mavenmodules cluster.</echo>
         <echo>NOTE: you may need to restart NetBeans for the editor to notice.</echo>
-        <exec dir="maven-wrapper" executable="mvn" failonerror="true">
+        
+        <exec dir="maven-wrapper" executable="${mvn.exe}" failonerror="true">
             <arg value="package"/>
         </exec>
+        
         <delete dir="mavenmodules"/>
         <copy todir="mavenmodules">
             <fileset dir="maven-wrapper/target/nbm/netbeans/tmc_netbeans"/>
@@ -28,7 +34,8 @@
     
     <target name="-clean-mavenmodules">
         <delete dir="mavenmodules"/>
-        <exec dir="maven-wrapper" executable="mvn" failonerror="true">
+        
+        <exec dir="maven-wrapper" executable="${mvn.exe}" failonerror="true">
             <arg value="clean"/>
         </exec>
     </target>
