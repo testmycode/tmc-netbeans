@@ -25,6 +25,12 @@ public class TempTestDir {
     }
     
     public void destroy() throws IOException {
-        FileUtils.forceDelete(dir);
+        try {
+            FileUtils.forceDelete(dir);
+        } catch (IOException e) {
+            throw new IOException("Failed to delete temporary dir: " +
+                        e.getMessage() +
+                        ". If you're on Windows, ensure your test closes all open file handles.");
+        }
     }
 }

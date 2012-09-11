@@ -255,6 +255,9 @@ public class NbProjectUnzipper {
     private boolean fileContentEquals(File file, byte[] data) throws IOException {
         InputStream fileIs = new BufferedInputStream(new FileInputStream(file));
         InputStream dataIs = new ByteArrayInputStream(data);
-        return IOUtils.contentEquals(fileIs, dataIs);
+        boolean eq = IOUtils.contentEquals(fileIs, dataIs);
+        fileIs.close();
+        dataIs.close();
+        return eq;
     }
 }
