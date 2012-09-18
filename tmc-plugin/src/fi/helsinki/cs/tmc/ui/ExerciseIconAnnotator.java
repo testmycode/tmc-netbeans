@@ -59,6 +59,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return origImg;
         }
         
+        //TODO: use ImageUtilities.createDisabledImage for expired exercises.
+        //Had some very weird problems with that. Try again some day.
+        
         Image img = origImg;
         try {
             Image annotation = annotationIconForExericse(exercise);
