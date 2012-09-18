@@ -12,6 +12,7 @@ import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectIconAnnotator;
@@ -40,7 +41,12 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         
         eventBus.subscribe(new TmcEventListener() {
             public void receive(CourseDb.SavedEvent event) {
-                updateAllIcons();
+                SwingUtilities.invokeLater(new Runnable() {
+                    @Override
+                    public void run() {
+                        updateAllIcons();
+                    }
+                });
             }
         });
     }
