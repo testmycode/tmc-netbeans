@@ -26,9 +26,11 @@
             
             <file name="fi-helsinki-cs-tmc-actions-RunTestsLocallyAction.instance">
                 <attr name="position" intvalue="10"/>
+                <attr name="lazy" boolvalue="false" />
             </file>
             <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
                 <attr name="position" intvalue="20"/>
+                <attr name="lazy" boolvalue="false" />
             </file>
         </folder>
     </folder>
@@ -39,12 +41,15 @@
             <file name="org-netbeans-modules-project-ui-RunProject.instance">
                 <attr name="position" intvalue="100"/>
                 <attr name="instanceCreate" methodvalue="org.netbeans.modules.project.ui.actions.Actions.runProject"/>
+                <attr name="lazy" boolvalue="false" />
             </file>
             <file name="fi-helsinki-cs-tmc-actions-RunTestsLocallyAction.instance">
                 <attr name="position" intvalue="110"/>
+                <attr name="lazy" boolvalue="false" />
             </file>
             <file name="fi-helsinki-cs-tmc-actions-SubmitExerciseAction.instance">
                 <attr name="position" intvalue="120"/>
+                <attr name="lazy" boolvalue="false" />
             </file>
         </folder>
     </folder>
