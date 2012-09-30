@@ -34,7 +34,7 @@ id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
 public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public static void startTimer() {
-        int interval = 20*60*1000; // 20 mintues
+        int interval = 20*60*1000; // 20 minutes
         javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
         timer.setRepeats(true);
         timer.start();

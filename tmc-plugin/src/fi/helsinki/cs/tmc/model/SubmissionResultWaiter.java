@@ -43,7 +43,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     @Override
     public SubmissionResult call() throws Exception {
         while (true) {
-            CancellableCallable<String> downloadTask = serverAccess.getSubmissionFetchJob(submissionUrl);
+            CancellableCallable<String> downloadTask = serverAccess.getSubmissionFetchTask(submissionUrl);
             
             synchronized (lock) {
                 if (canceled) {

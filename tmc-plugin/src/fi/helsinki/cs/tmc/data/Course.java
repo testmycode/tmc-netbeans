@@ -1,11 +1,17 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.gson.annotations.SerializedName;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Course {
 
     private String name;
+    
+    @SerializedName("reviews_url")
+    private String reviewsUrl;
+    @SerializedName("comet_url")
+    private String cometUrl;
     
     private List<Exercise> exercises;
     
@@ -24,10 +30,23 @@ public class Course {
     }
 
     public void setName(String name) {
-        if(name == null) throw new NullPointerException("name was null at Course.setName");
-        if(name.isEmpty()) throw new IllegalArgumentException("Name cannot be empty at Course.setName");
-        
         this.name = name;
+    }
+
+    public String getReviewsUrl() {
+        return reviewsUrl;
+    }
+
+    public void setReviewsUrl(String reviewsUrl) {
+        this.reviewsUrl = reviewsUrl;
+    }
+
+    public String getCometUrl() {
+        return cometUrl;
+    }
+
+    public void setCometUrl(String cometUrl) {
+        this.cometUrl = cometUrl;
     }
 
     public List<Exercise> getExercises() {

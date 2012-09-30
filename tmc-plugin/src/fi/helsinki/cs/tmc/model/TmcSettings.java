@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import java.util.Locale;
@@ -20,34 +22,45 @@ public class TmcSettings {
     private static final TmcSettings defaultInstance =
             new TmcSettings(
                     PersistableSettings.forModule(TmcSettings.class),
-                    SelectedTailoring.get()
+                    SelectedTailoring.get(),
+                    TmcEventBus.getDefault()
                     );
     
     private PersistableSettings settings;
     private Tailoring tailoring;
+    private TmcEventBus eventBus;
     
     private String unsavedPassword;
+    
+    public static class SavedEvent implements TmcEvent {}
 
     public static TmcSettings getDefault() {
         return defaultInstance;
     }
     
     public static TmcSettings getTransient() {
-        return new TmcSettings(PersistableSettings.forModule(TmcSettings.class), SelectedTailoring.get());
+        return new TmcSettings(
+                PersistableSettings.forModule(TmcSettings.class),
+                SelectedTailoring.get(),
+                TmcEventBus.getDefault()
+                );
     }
     
-    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring) {
+    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
         this.settings = settings;
         this.tailoring = tailoring;
+        this.eventBus = eventBus;
         
         this.unsavedPassword = settings.get(PREF_PASSWORD, "");
     }
     
     public void save() {
         if (this != defaultInstance) {
-            throw new IllegalStateException("May only safe the default instance of TmcSettings.");
+            throw new IllegalStateException("May only save the default instance of TmcSettings.");
         }
         settings.saveAll();
+        eventBus.post(new SavedEvent());
+        
     }
 
     public String getServerBaseUrl() {

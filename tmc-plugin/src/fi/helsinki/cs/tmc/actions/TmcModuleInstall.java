@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
@@ -52,6 +53,8 @@ public class TmcModuleInstall extends ModuleInstall {
                 }
                 
                 CheckForNewExercisesOrUpdates.startTimer();
+                CheckForNewReviews.start();
+                PushEventListener.start();
                 
                 Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited
             }

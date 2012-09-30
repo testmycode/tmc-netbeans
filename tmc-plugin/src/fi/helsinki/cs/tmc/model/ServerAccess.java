@@ -5,12 +5,14 @@ import com.google.gson.JsonParser;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
+import fi.helsinki.cs.tmc.data.Review;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
+import fi.helsinki.cs.tmc.data.serialization.ReviewListParser;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
+import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import java.net.URI;
 import java.util.Collections;
 import java.util.Date;
@@ -27,6 +29,7 @@ public class ServerAccess {
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
+    private ReviewListParser reviewListParser;
     private String clientVersion;
 
     public ServerAccess() {
@@ -34,12 +37,13 @@ public class ServerAccess {
     }
 
     public ServerAccess(TmcSettings settings) {
-        this(settings, new CourseListParser());
+        this(settings, new CourseListParser(), new ReviewListParser());
     }
 
-    public ServerAccess(TmcSettings settings, CourseListParser courseListParser) {
+    public ServerAccess(TmcSettings settings, CourseListParser courseListParser, ReviewListParser reviewListParser) {
         this.settings = settings;
         this.courseListParser = courseListParser;
+        this.reviewListParser = reviewListParser;
         this.clientVersion = getClientVersion();
     }
     
@@ -147,8 +151,54 @@ public class ServerAccess {
         };
     }
     
-    public CancellableCallable<String> getSubmissionFetchJob(String submissionUrl) {
+    public CancellableCallable<String> getSubmissionFetchTask(String submissionUrl) {
         return createHttpTasks().getForText(submissionUrl);
+    }
+    
+    public CancellableCallable<List<Review>> getDownloadingReviewListTask(Course course) {
+        String url = addApiCallQueryParameters(course.getReviewsUrl());
+        final CancellableCallable<String> download = createHttpTasks().getForText(url);
+        return new CancellableCallable<List<Review>>() {
+            @Override
+            public List<Review> call() throws Exception {
+                try {
+                    String text = download.call();
+                    return reviewListParser.parseFromJson(text);
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
+            }
+
+            @Override
+            public boolean cancel() {
+                return download.cancel();
+            }
+        };
+    }
+    
+    public CancellableCallable<Void> getMarkingReviewAsReadTask(Review review, boolean read) {
+        String url = addApiCallQueryParameters(review.getUpdateUrl() + ".json");
+        Map<String, String> params = new HashMap<String, String>();
+        params.put("_method", "put");
+        if (read) {
+            params.put("mark_as_read", "1");
+        } else {
+            params.put("mark_as_unread", "1");
+        }
+        
+        final CancellableCallable<String> task = createHttpTasks().postForText(url, params);
+        return new CancellableCallable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                task.call();
+                return null;
+            }
+
+            @Override
+            public boolean cancel() {
+                return task.cancel();
+            }
+        };
     }
     
     public CancellableCallable<String> getFeedbackAnsweringJob(String answerUrl, List<FeedbackAnswer> answers) {

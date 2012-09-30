@@ -24,7 +24,7 @@ import java.util.logging.Logger;
  */
 public class CourseDb {
 
-    public static class SavedEvent implements TmcEvent {}
+    public static class ChangedEvent implements TmcEvent {}
     
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;
@@ -42,7 +42,7 @@ public class CourseDb {
     private String currentCourseName;
     private Map<ExerciseKey, String> downloadedExerciseChecksums;
 
-    public CourseDb() {
+    private CourseDb() {
         this(TmcEventBus.getDefault(), new ConfigFile("CourseDb.json"));
     }
     
@@ -143,7 +143,7 @@ public class CourseDb {
         } catch (Exception e) {
             logger.log(Level.WARNING, "Failed to save course database", e);
         }
-        eventBus.post(new SavedEvent());
+        eventBus.post(new ChangedEvent());
     }
     
     private static class StoredStuff {

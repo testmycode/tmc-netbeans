@@ -8,12 +8,15 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
+import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectIconAnnotator;
 import org.openide.util.ChangeSupport;
@@ -40,7 +43,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         this.iconCache = new HashMap<String, Image>();
         
         eventBus.subscribe(new TmcEventListener() {
-            public void receive(CourseDb.SavedEvent event) {
+            public void receive(CourseDb.ChangedEvent event) {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
                     public void run() {
@@ -94,8 +97,10 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     private String annotationIconNameForExercise(Exercise exercise) {
         if (exercise.hasDeadlinePassed()) {
             return null;
-        } else if (exercise.isAttempted() && exercise.isCompleted()) {
+        } else if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
             return "green-project-dot.png";
+        } else if (exercise.isAttempted() && exercise.isCompleted()) {
+            return "yellow-project-dot.png";
         } else if (exercise.isAttempted()) {
             return "red-project-dot.png";
         } else {
@@ -104,13 +109,29 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     }
     
     private String tooltipForExercise(Exercise exercise) {
-        if (exercise.isAttempted() && exercise.isCompleted()) {
-            return "Exercise submitted - all tests successful";
-        } else if (exercise.isAttempted()) {
-            return "Exercise submitted - all tests not completed";
+        List<String> parts = new ArrayList<String>();
+        if (exercise.isAttempted()) {
+            parts.add("exercise submitted");
+            if (exercise.isCompleted()) {
+                parts.add("all tests successful");
+            } else {
+                parts.add("all tests not completed");
+            }
+            if (exercise.requiresReview()) {
+                if (exercise.isAllReviewPointsGiven()) {
+                    parts.add("code review done");
+                } else if (exercise.isReviewed()) {
+                    parts.add("code review done, not accepted");
+                } else {
+                    parts.add("code review not yet done");
+                }
+            }
+            
         } else {
-            return "Exercise not yet submitted";
+            parts.add("exercise not yet submitted");
         }
+        
+        return StringUtils.capitalize(StringUtils.join(parts, " - "));
     }
     
     public void updateAllIcons() {

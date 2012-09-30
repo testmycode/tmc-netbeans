@@ -24,15 +24,15 @@ public class TmcEventBus {
         this.listeners = new ArrayList<TmcEventListener>();
     }
 
-    public void subscribe(TmcEventListener listener) {
+    public synchronized void subscribe(TmcEventListener listener) {
         this.listeners.add(listener);
     }
 
-    public void unsubscribe(TmcEventListener listener) {
+    public synchronized void unsubscribe(TmcEventListener listener) {
         this.listeners.remove(listener);
     }
 
-    public void post(TmcEvent event) {
+    public synchronized void post(TmcEvent event) {
         for (TmcEventListener listener : this.listeners) {
             try {
                 listener.receive(event);

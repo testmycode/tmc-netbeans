@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.model;
 
-import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.List;
 import fi.helsinki.cs.tmc.data.Course;
@@ -9,7 +8,7 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import java.io.IOException;
-import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import java.util.logging.Level;
 import org.junit.Before;
@@ -139,16 +138,20 @@ public class CourseDbTest {
     }
     
     @Test
-    public void itShouldPostAnEventWhenSaved() {
-        final AtomicBoolean received = new AtomicBoolean(false);
+    public void itShouldPostAnEventWhenChanged() {
+        final AtomicInteger received = new AtomicInteger(0);
         eventBus.subscribe(new TmcEventListener() {
-            public void receive(CourseDb.SavedEvent ev) {
-                received.set(true);
+            public void receive(CourseDb.ChangedEvent ev) {
+                received.incrementAndGet();
             }
         });
         
-        db.save();
+        List<Course> courses = new ArrayList<Course>();
+        courses.add(new Course("one"));
+        courses.add(new Course("two"));
+        db.setAvailableCourses(courses);
+        db.setCurrentCourseName("one");
         
-        assertTrue(received.get());
+        assertEquals(2, received.get());
     }
 }

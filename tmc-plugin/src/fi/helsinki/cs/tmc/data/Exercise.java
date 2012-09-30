@@ -4,12 +4,10 @@ import com.google.gson.annotations.SerializedName;
 import java.io.Serializable;
 import java.util.Date;
 
-/**
- * A single exercise holds various information concerning an exercise,
- * such as the name and download address.
- */
 public class Exercise implements Serializable {
 
+    private int id;
+    
     private String name;
     
     private String courseName;
@@ -34,9 +32,13 @@ public class Exercise implements Serializable {
     
     private Date deadline;
     
+    private boolean returnable;
+    private boolean requiresReview;
     private boolean attempted;
     private boolean completed;
-    private boolean returnable;
+    private boolean reviewed;
+    @SerializedName("all_review_points_given")
+    private boolean allReviewPointsGiven;
     private String checksum;
     
     @SerializedName("memory_limit")
@@ -52,6 +54,28 @@ public class Exercise implements Serializable {
     public Exercise(String name, String courseName) {
         this.name = name;
         this.courseName = courseName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
+    public String getName() {
+        return this.name;
+    }
+
+    public void setName(String name) {
+        if (name == null) {
+            throw new NullPointerException("name was null at Exercise.setName");
+        }
+        if (name.isEmpty()) {
+            throw new IllegalArgumentException("Name cannot be empty at Exercise.setName");
+        }
+        this.name = name;
     }
 
     public boolean hasDeadlinePassed() {
@@ -71,20 +95,6 @@ public class Exercise implements Serializable {
     
     public ExerciseKey getKey() {
         return new ExerciseKey(courseName, name);
-    }
-
-    public String getName() {
-        return this.name;
-    }
-
-    public void setName(String name) {
-        if (name == null) {
-            throw new NullPointerException("name was null at Exercise.setName");
-        }
-        if (name.isEmpty()) {
-            throw new IllegalArgumentException("Name cannot be empty at Exercise.setName");
-        }
-        this.name = name;
     }
 
     public String getCourseName() {
@@ -139,6 +149,22 @@ public class Exercise implements Serializable {
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
+    
+    public boolean isReturnable() {
+        return returnable;
+    }
+
+    public void setReturnable(boolean returnable) {
+        this.returnable = returnable;
+    }
+
+    public boolean requiresReview() {
+        return requiresReview;
+    }
+
+    public void setRequiresReview(boolean requiresReview) {
+        this.requiresReview = requiresReview;
+    }
 
     public boolean isAttempted() {
         return attempted;
@@ -156,12 +182,20 @@ public class Exercise implements Serializable {
         this.completed = completed;
     }
 
-    public boolean isReturnable() {
-        return returnable;
+    public boolean isReviewed() {
+        return reviewed;
     }
 
-    public void setReturnable(boolean returnable) {
-        this.returnable = returnable;
+    public void setReviewed(boolean reviewed) {
+        this.reviewed = reviewed;
+    }
+
+    public boolean isAllReviewPointsGiven() {
+        return allReviewPointsGiven;
+    }
+
+    public void setAllReviewPointsGiven(boolean allReviewPointsGiven) {
+        this.allReviewPointsGiven = allReviewPointsGiven;
     }
 
     public String getChecksum() {

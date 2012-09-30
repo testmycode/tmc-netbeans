@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.1</version>
+    <version>1.2</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -287,6 +287,16 @@
             <artifactId>tmc-junit-runner</artifactId>
             <version>0.2.2</version>
         </dependency>
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>cometd-java-client</artifactId>
+            <version>2.5.0-beta3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.cometd.java</groupId>
+            <artifactId>cometd-websocket-jetty</artifactId>
+            <version>2.5.0-beta3</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -306,6 +316,9 @@
                         <publicPackage>org.apache.commons.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
+                        <publicPackage>org.cometd.*</publicPackage>
+                        <publicPackage>org.eclipse.jetty.*</publicPackage>
+                        <publicPackage>org.slf4j.*</publicPackage>
                     </publicPackages>
                 </configuration>
             </plugin>

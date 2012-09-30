@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import java.util.Locale;
 import org.junit.After;
@@ -13,6 +14,7 @@ import static org.mockito.Mockito.*;
 public class TmcSettingsTest {
     private PersistableSettings store;
     @Mock private Tailoring tailoring;
+    private TmcEventBus eventBus;
     
     private TmcSettings settings;
     
@@ -21,6 +23,7 @@ public class TmcSettingsTest {
         MockitoAnnotations.initMocks(this);
         store = PersistableSettings.forModule(this.getClass());
         settings = newSettings();
+        eventBus = TmcEventBus.createNewInstance();
         
         when(tailoring.getDefaultServerUrl()).thenReturn("http://default.example.com");
     }
@@ -31,7 +34,7 @@ public class TmcSettingsTest {
     }
     
     private TmcSettings newSettings() {
-        return new TmcSettings(store, tailoring);
+        return new TmcSettings(store, tailoring, eventBus);
     }
     
     @Test

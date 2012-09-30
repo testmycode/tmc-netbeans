@@ -1,12 +1,12 @@
 package fi.helsinki.cs.tmc.ui;
 
+import java.awt.Component;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
-import java.awt.Component;
-import org.openide.DialogDescriptor;
 
 public class ConvenientDialogDisplayer {
     private static ConvenientDialogDisplayer defaultDisplayer;
