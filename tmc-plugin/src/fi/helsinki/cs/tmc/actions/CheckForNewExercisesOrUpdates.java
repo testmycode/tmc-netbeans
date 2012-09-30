@@ -28,7 +28,7 @@ import org.openide.util.NbBundle.Messages;
 id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
 @ActionRegistration(displayName = "#CTL_CheckForNewExercisesOrUpdates")
 @ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -50, separatorAfter = -40)
+    @ActionReference(path = "Menu/TM&C", position = -50)
 })
 @Messages("CTL_CheckForNewExercisesOrUpdates=&Check for new exercises / updates")
 public class CheckForNewExercisesOrUpdates extends AbstractAction {

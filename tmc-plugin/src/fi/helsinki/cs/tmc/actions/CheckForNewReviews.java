@@ -23,9 +23,21 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
+import org.openide.awt.ActionRegistration;
 import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
+import org.openide.util.NbBundle;
 
+@ActionID(category = "TMC",
+id = "fi.helsinki.cs.tmc.actions.CheckForNewReviews")
+@ActionRegistration(displayName = "#CTL_CheckForNewReviews")
+@ActionReferences({
+    @ActionReference(path = "Menu/TM&C", position = -40)
+})
+@NbBundle.Messages("CTL_CheckForNewReviews=Check for new code &reviews")
 public class CheckForNewReviews implements ActionListener {
     private static final Logger log = Logger.getLogger(CheckForNewReviews.class.getName());
     

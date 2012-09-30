@@ -31,7 +31,7 @@ import org.openide.util.NbBundle.Messages;
 id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
 @ActionRegistration(displayName = "#CTL_DownloadSolutionAction", lazy = true)
 @ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -45)
+    @ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)
 })
 @Messages("CTL_DownloadSolutionAction=Download suggested &solution")
 public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
