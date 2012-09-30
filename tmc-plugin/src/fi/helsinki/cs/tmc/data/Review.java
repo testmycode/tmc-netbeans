@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.Date;
 
 public class Review {
+    @SerializedName("id")
+    private int id;
     @SerializedName("submission_id")
     private int submissionId;
     @SerializedName("exercise_name")
@@ -28,6 +30,14 @@ public class Review {
     @SerializedName("updated_at")
     private Date updatedAt;
 
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+    
     public int getSubmissionId() {
         return submissionId;
     }

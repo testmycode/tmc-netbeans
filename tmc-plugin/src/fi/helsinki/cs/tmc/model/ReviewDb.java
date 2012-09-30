@@ -52,10 +52,10 @@ public class ReviewDb {
      * Updates the review store and fires an event if there is a new unread review.
      */
     public void setReviews(List<Review> newReviews) {
-        Set<Integer> submissionIdsOfReviews = getSubmissionIdsOfReviews();
+        Set<Integer> reviewIds = getReviewIds();
         
         for (Review review : newReviews) {
-            if (!review.isMarkedAsRead() && !submissionIdsOfReviews.contains(review.getSubmissionId())) {
+            if (!review.isMarkedAsRead() && !reviewIds.contains(review.getId())) {
                 notifyAboutNewReview(review);
             }
         }
@@ -64,10 +64,10 @@ public class ReviewDb {
         this.reviews.addAll(newReviews);
     }
     
-    private Set<Integer> getSubmissionIdsOfReviews() {
+    private Set<Integer> getReviewIds() {
         Set<Integer> result = new HashSet<Integer>();
         for (Review review : reviews) {
-            result.add(review.getSubmissionId());
+            result.add(review.getId());
         }
         return result;
     }

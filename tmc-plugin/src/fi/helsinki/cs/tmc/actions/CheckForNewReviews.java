@@ -103,6 +103,11 @@ public class CheckForNewReviews implements ActionListener {
                 @Override
                 public void run() {
                     CheckForNewReviews.this.run();
+                    
+                    // Exercise properties have probably changed
+                    RefreshCoursesAction refresher = new RefreshCoursesAction();
+                    refresher.addDefaultListener(false, true);
+                    refresher.run();
                 }
             });
         }

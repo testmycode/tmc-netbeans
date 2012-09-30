@@ -33,6 +33,7 @@ public class Exercise implements Serializable {
     private Date deadline;
     
     private boolean returnable;
+    @SerializedName("requires_review")
     private boolean requiresReview;
     private boolean attempted;
     private boolean completed;
