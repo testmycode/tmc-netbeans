@@ -28,7 +28,12 @@ public class ReviewEventListener extends TmcEventListener {
     private static ReviewEventListener instance;
     
     public static void start() {
-        TmcEventBus.getDefault().subscribe(new ReviewEventListener());
+        if (instance == null) {
+            instance = new ReviewEventListener();
+            TmcEventBus.getDefault().subscribe(instance);
+        } else {
+            log.warning("ReviewEventListener.start() called twice");
+        }
     }
 
     private ServerAccess serverAccess;
@@ -43,12 +48,7 @@ public class ReviewEventListener extends TmcEventListener {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                new CheckForNewReviews(true, false).run();
-
-                // Exercise properties have probably changed
-                RefreshCoursesAction refresher = new RefreshCoursesAction();
-                refresher.addDefaultListener(false, true);
-                refresher.run();
+                new CheckForNewReviews(true, false, false).run();
             }
         });
     }
@@ -58,6 +58,8 @@ public class ReviewEventListener extends TmcEventListener {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                refreshCourseDb();
+                
                 String title = "Code review";
                 String msg = "Code review for " + review.getExerciseName() + " ready.";
                 Image img;
@@ -76,6 +78,13 @@ public class ReviewEventListener extends TmcEventListener {
                 });
             }
         });
+    }
+    
+    private void refreshCourseDb() {
+        // Exercise properties have probably changed
+        RefreshCoursesAction refresher = new RefreshCoursesAction();
+        refresher.addDefaultListener(false, true);
+        refresher.run();
     }
     
     private void showReviewDialog(final Review review) {
@@ -105,7 +114,7 @@ public class ReviewEventListener extends TmcEventListener {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                log.log(Level.WARNING, "Failed to mark review as read.", ex);
+                log.log(Level.INFO, "Failed to mark review as read.", ex);
             }
         });
     }

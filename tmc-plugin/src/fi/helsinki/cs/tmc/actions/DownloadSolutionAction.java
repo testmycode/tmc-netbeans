@@ -29,7 +29,7 @@ import org.openide.util.NbBundle.Messages;
 
 @ActionID(category = "TMC",
 id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
-@ActionRegistration(displayName = "#CTL_DownloadSolutionAction", lazy = true)
+@ActionRegistration(displayName = "#CTL_DownloadSolutionAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)
 })

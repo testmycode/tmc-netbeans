@@ -112,7 +112,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     public void bgTaskFailed(Throwable ex) {
                         log.log(Level.INFO, "Error waiting for results from server.", ex);
                         String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                        dialogDisplayer.displayError("Error trying to get test results.\n" + msg, ex);
+                        dialogDisplayer.displayError("Error trying to get test results.", ex);
                         dialog.close();
                     }
                 });
@@ -127,11 +127,13 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Error submitting exercise.", ex);
                 String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                dialogDisplayer.displayError("Error submitting exercise.\n" + msg, ex);
+                dialogDisplayer.displayError("Error submitting exercise.", ex);
                 dialog.close();
             }
         };
 
+        final String errorMsgLocale = settings.getErrorMsgLocale().toString();
+        
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
@@ -142,7 +144,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
             @Override
             public void bgTaskReady(byte[] zipData) {
                 Map<String, String> extraParams = new HashMap<String, String>();
-                extraParams.put("error_msg_locale", settings.getErrorMsgLocale().toString());
+                extraParams.put("error_msg_locale", errorMsgLocale);
                 
                 CancellableCallable<URI> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData, extraParams);
                 dialog.setTask(submitTask);

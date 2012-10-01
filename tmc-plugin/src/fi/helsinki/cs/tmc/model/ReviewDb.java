@@ -52,16 +52,21 @@ public class ReviewDb {
     
     /**
      * Updates the review store and fires an event if there is a new unread review.
+     * 
+     * @return whether there were any new unread reviews (for which events were fired).
      */
-    public void setReviews(List<Review> newReviews) {
+    public boolean setReviews(List<Review> newReviews) {
+        boolean newUnreadReviewsSeen = false;
         for (Review review : newReviews) {
             if (!review.isMarkedAsRead() && !reviewIdsNotifiedAbout.contains(review.getId())) {
+                newUnreadReviewsSeen = true;
                 notifyAboutNewReview(review);
             }
         }
         
         this.reviews.clear();
         this.reviews.addAll(newReviews);
+        return newUnreadReviewsSeen;
     }
     
     /**

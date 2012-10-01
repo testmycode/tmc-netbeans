@@ -13,7 +13,6 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -34,7 +33,7 @@ public class CheckForNewReviews implements ActionListener {
     
     public static void startTimer() {
         if (instance == null) {
-            instance = new CheckForNewReviews(true, false);
+            instance = new CheckForNewReviews(true, false, false);
             int interval = 20*60*1000; // 20 minutes
             javax.swing.Timer timer = new javax.swing.Timer(interval, instance);
             timer.setRepeats(true);
@@ -51,18 +50,20 @@ public class CheckForNewReviews implements ActionListener {
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
     private boolean resetNotifications;
+    private boolean notifyAboutNoNewReviews;
     
     CheckForNewReviews() {
-        this(false, true);
+        this(false, true, true);
     }
 
-    CheckForNewReviews(boolean beQuiet, boolean resetNotifications) {
+    CheckForNewReviews(boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.reviewDb = ReviewDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
         this.resetNotifications = resetNotifications;
+        this.notifyAboutNoNewReviews = notifyAboutNoNewReviews;
     }
 
     @Override
@@ -78,12 +79,7 @@ public class CheckForNewReviews implements ActionListener {
         Course course = courseDb.getCurrentCourse();
         if (course == null) {
             if (!beQuiet) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        dialogs.displayError("Please select a course in TMC->Settings");
-                    }
-                });
+                dialogs.displayError("Please select a course in TMC->Settings");
             }
             return;
         }
@@ -91,7 +87,10 @@ public class CheckForNewReviews implements ActionListener {
         BgTask.start("Checking for code reviews", serverAccess.getDownloadingReviewListTask(course), new BgTaskListener<List<Review>>() {
             @Override
             public void bgTaskReady(List<Review> result) {
-                reviewDb.setReviews(result);
+                boolean newReviews = reviewDb.setReviews(result);
+                if (!newReviews && notifyAboutNoNewReviews) {
+                    dialogs.displayMessage("You have no unread code reviews.");
+                }
             }
 
             @Override
@@ -99,12 +98,7 @@ public class CheckForNewReviews implements ActionListener {
                 final String msg = "Failed to check for code reviews";
                 log.log(Level.INFO, msg, ex);
                 if (!beQuiet) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            dialogs.displayError(msg, ex);
-                        }
-                    });
+                    dialogs.displayError(msg, ex);
                 }
             }
 
