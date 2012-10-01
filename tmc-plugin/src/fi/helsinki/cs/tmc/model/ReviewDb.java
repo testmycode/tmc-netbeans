@@ -38,10 +38,12 @@ public class ReviewDb {
     
     
     private ArrayList<Review> reviews;
+    private HashSet<Integer> reviewIdsNotifiedAbout;
     
     private ReviewDb() {
         this(TmcEventBus.getDefault());
         this.reviews = new ArrayList<Review>();
+        this.reviewIdsNotifiedAbout = new HashSet<Integer>();
     }
 
     public ReviewDb(TmcEventBus eventBus) {
@@ -52,10 +54,8 @@ public class ReviewDb {
      * Updates the review store and fires an event if there is a new unread review.
      */
     public void setReviews(List<Review> newReviews) {
-        Set<Integer> reviewIds = getReviewIds();
-        
         for (Review review : newReviews) {
-            if (!review.isMarkedAsRead() && !reviewIds.contains(review.getId())) {
+            if (!review.isMarkedAsRead() && !reviewIdsNotifiedAbout.contains(review.getId())) {
                 notifyAboutNewReview(review);
             }
         }
@@ -64,15 +64,16 @@ public class ReviewDb {
         this.reviews.addAll(newReviews);
     }
     
-    private Set<Integer> getReviewIds() {
-        Set<Integer> result = new HashSet<Integer>();
-        for (Review review : reviews) {
-            result.add(review.getId());
-        }
-        return result;
+    /**
+     * Makes it so that all unread reviews cause a notification again.
+     * Normally an unread review is not notified about twice.
+     */
+    public void forgetReviewsNotifiedAbout() {
+        reviewIdsNotifiedAbout.clear();
     }
-
+    
     private void notifyAboutNewReview(Review review) {
+        reviewIdsNotifiedAbout.add(review.getId());
         eventBus.post(new NewUnreadReviewEvent(review));
     }
 }

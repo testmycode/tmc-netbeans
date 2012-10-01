@@ -53,7 +53,8 @@ public class TmcModuleInstall extends ModuleInstall {
                 }
                 
                 CheckForNewExercisesOrUpdates.startTimer();
-                CheckForNewReviews.start();
+                CheckForNewReviews.startTimer();
+                ReviewEventListener.start();
                 PushEventListener.start();
                 
                 Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited
