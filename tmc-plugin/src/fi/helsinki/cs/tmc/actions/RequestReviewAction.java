@@ -6,11 +6,14 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -74,12 +77,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             TmcProjectInfo projectInfo = projectMediator.wrapProject(project.get(0));
             Exercise exercise = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
             if (exercise != null) {
-                //TODO TODO: prompt the user for an optional message to the reviewer
-                String question = "Request code review for " + exercise.getName() + "?";
-                String title = "Confirm code review request";
-                if (ConvenientDialogDisplayer.getDefault().askYesNo(question, title)) {
-                    requestCodeReviewFor(projectInfo, exercise);
-                }
+                showReviewRequestDialog(projectInfo, exercise);
             } else {
                 log.log(Level.WARNING, "RequestReviewAction called in a context without a valid TMC project.");
             }
@@ -88,7 +86,19 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
         }
     }
     
-    private void requestCodeReviewFor(final TmcProjectInfo project, final Exercise exercise) {
+    private void showReviewRequestDialog(final TmcProjectInfo projectInfo, final Exercise exercise) {
+        final CodeReviewRequestDialog dialog = new CodeReviewRequestDialog(exercise);
+        dialog.setOkListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                String message = dialog.getMessageForReviewer().trim();
+                requestCodeReviewFor(projectInfo, exercise, message);
+            }
+        });
+        dialog.setVisible(true);
+    }
+    
+    private void requestCodeReviewFor(final TmcProjectInfo projectInfo, final Exercise exercise, final String messageForReviewer) {
         projectMediator.saveAllFiles();
         
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
@@ -96,7 +106,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
-                RecursiveZipper zipper = new RecursiveZipper(project.getProjectDirAsFile(), project.getZippingDecider());
+                RecursiveZipper zipper = new RecursiveZipper(projectInfo.getProjectDirAsFile(), projectInfo.getZippingDecider());
                 return zipper.zipProjectSources();
             }
         }, new BgTaskListener<byte[]>() {
@@ -105,6 +115,9 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                 Map<String, String> extraParams = new HashMap<String, String>();
                 extraParams.put("error_msg_locale", errorMsgLocale);
                 extraParams.put("request_review", "1");
+                if (!messageForReviewer.isEmpty()) {
+                    extraParams.put("message_for_reviewer", messageForReviewer);
+                }
                 
                 CancellableCallable<URI> submitTask = new ServerAccess().getSubmittingExerciseTask(exercise, zipData, extraParams);
                 BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<URI>() {
