@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import java.util.ArrayList;
@@ -17,6 +19,15 @@ import org.openide.util.Lookup;
 import org.openide.util.actions.NodeAction;
 
 public abstract class AbstractExerciseSensitiveAction extends NodeAction {
+
+    public AbstractExerciseSensitiveAction() {
+        TmcEventBus.getDefault().subscribeDependent(new TmcEventListener() {
+            public void receive(CourseDb.ChangedEvent event) throws Throwable {
+                boolean enable = AbstractExerciseSensitiveAction.this.enable(getActivatedNodes());
+                setEnabled(enable);
+            }
+        }, this);
+    }
     
     protected abstract ProjectMediator getProjectMediator();
     protected abstract CourseDb getCourseDb();
