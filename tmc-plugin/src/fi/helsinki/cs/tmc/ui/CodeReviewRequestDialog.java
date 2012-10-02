@@ -9,7 +9,7 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
     
     public CodeReviewRequestDialog(Exercise exercise) {
         initComponents();
-        this.leaveMessageLabel.setText("Requesting code review for " + exercise.getName());
+        this.titleLabel.setText("Requesting code review for " + exercise.getName());
     }
 
     public void setOkListener(ActionListener okListener) {
