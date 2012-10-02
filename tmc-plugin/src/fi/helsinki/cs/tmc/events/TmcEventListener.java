@@ -33,4 +33,11 @@ public abstract class TmcEventListener {
             }
         }
     }
+    
+    /**
+     * Whether this listener may be unsubscribed at any point by the event bus.
+     */
+    public boolean mayBeUnsubscribed() {
+        return false;
+    }
 }

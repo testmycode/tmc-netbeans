@@ -30,7 +30,7 @@ public class ReviewEventListener extends TmcEventListener {
     public static void start() {
         if (instance == null) {
             instance = new ReviewEventListener();
-            TmcEventBus.getDefault().subscribe(instance);
+            TmcEventBus.getDefault().subscribeStrongly(instance);
         } else {
             log.warning("ReviewEventListener.start() called twice");
         }

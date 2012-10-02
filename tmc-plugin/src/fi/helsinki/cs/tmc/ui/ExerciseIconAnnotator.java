@@ -42,7 +42,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         this.projectMediator = ProjectMediator.getInstance();
         this.iconCache = new HashMap<String, Image>();
         
-        eventBus.subscribe(new TmcEventListener() {
+        eventBus.subscribeDependent(new TmcEventListener() {
             public void receive(CourseDb.ChangedEvent event) {
                 SwingUtilities.invokeLater(new Runnable() {
                     @Override
@@ -51,7 +51,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                     }
                 });
             }
-        });
+        }, this);
     }
 
     @Override

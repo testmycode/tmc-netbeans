@@ -140,7 +140,7 @@ public class CourseDbTest {
     @Test
     public void itShouldPostAnEventWhenChanged() {
         final AtomicInteger received = new AtomicInteger(0);
-        eventBus.subscribe(new TmcEventListener() {
+        eventBus.subscribeStrongly(new TmcEventListener() {
             public void receive(CourseDb.ChangedEvent ev) {
                 received.incrementAndGet();
             }

@@ -18,6 +18,9 @@ import org.cometd.websocket.client.WebSocketTransport;
 import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.cometd.bayeux.client.ClientSessionChannel.MessageListener;
 
+/**
+ * Receives HTTP push events and fires the appropriate events.
+ */
 public class PushEventListener {
     private static final Logger log = Logger.getLogger(PushEventListener.class.getName());
     private static final long CONNECTION_CHECK_INTERVAL = 120*1000;
@@ -55,7 +58,7 @@ public class PushEventListener {
         client = createDummyClient(); // To avoid client ever being null
         initClientIfPossible();
         
-        this.eventBus.subscribe(new TmcEventListener() {
+        this.eventBus.subscribeDependent(new TmcEventListener() {
             public void receive(TmcSettings.SavedEvent e) {
                 reconnect();
             }
@@ -63,7 +66,7 @@ public class PushEventListener {
             public void receive(CourseDb.ChangedEvent e) {
                 reconnect();
             }
-        });
+        }, this);
         
         java.util.Timer timer = new java.util.Timer("PushEventListener reconnect", true);
         timer.schedule(new TimerTask() {
