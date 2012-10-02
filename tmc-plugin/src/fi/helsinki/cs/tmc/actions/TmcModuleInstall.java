@@ -30,6 +30,13 @@ public class TmcModuleInstall extends ModuleInstall {
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
             public void run() {
+                CheckForNewExercisesOrUpdates.startTimer();
+                CheckForNewReviews.startTimer();
+                ReviewEventListener.start();
+                PushEventListener.start();
+                
+                Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited. FIXME: ugly. maybe do a start() as above.
+                
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
                 
                 SpecificationVersion currentVersion = getCurrentModuleVersion();
@@ -55,13 +62,6 @@ public class TmcModuleInstall extends ModuleInstall {
                         new CheckForUnopenedExercises().run();
                     }
                 }
-                
-                CheckForNewExercisesOrUpdates.startTimer();
-                CheckForNewReviews.startTimer();
-                ReviewEventListener.start();
-                PushEventListener.start();
-                
-                Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited. FIXME: ugly. maybe do a start() as above.
             }
         });
     }
