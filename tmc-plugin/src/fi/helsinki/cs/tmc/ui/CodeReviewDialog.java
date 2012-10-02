@@ -6,7 +6,6 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.JDialog;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.awt.HtmlBrowser;
 
@@ -19,7 +18,6 @@ public class CodeReviewDialog extends javax.swing.JDialog {
     public CodeReviewDialog(Review review) {
         this.review = review;
         this.okListener = null;
-        this.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
         
         initComponents();
         
@@ -31,8 +29,6 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         reviewArea.setText(review.getReviewBody());
         markAsReadCheckBox.setSelected(true);
         pointsLabel.setText(getPointsAwardedText(review));
-        
-        pack();
     }
     
     public void setOkListener(ActionListener okListener) {
@@ -80,6 +76,9 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         reviewArea = new javax.swing.JTextArea();
         titleLabel = new javax.swing.JLabel();
 
+        setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
+        setLocationByPlatform(true);
+
         org.openide.awt.Mnemonics.setLocalizedText(pointsLabel, org.openide.util.NbBundle.getMessage(CodeReviewDialog.class, "CodeReviewDialog.pointsLabel.text")); // NOI18N
 
         org.openide.awt.Mnemonics.setLocalizedText(okButton, org.openide.util.NbBundle.getMessage(CodeReviewDialog.class, "CodeReviewDialog.okButton.text")); // NOI18N
@@ -106,7 +105,7 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         reviewArea.setRows(5);
         reviewScrollPane.setViewportView(reviewArea);
 
-        titleLabel.setFont(new java.awt.Font("Dialog", 1, 14)); // NOI18N
+        titleLabel.setFont(titleLabel.getFont().deriveFont(titleLabel.getFont().getStyle() | java.awt.Font.BOLD, titleLabel.getFont().getSize()+1));
         org.openide.awt.Mnemonics.setLocalizedText(titleLabel, org.openide.util.NbBundle.getMessage(CodeReviewDialog.class, "CodeReviewDialog.titleLabel.text")); // NOI18N
 
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
@@ -122,14 +121,14 @@ public class CodeReviewDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 208, Short.MAX_VALUE)
                         .addComponent(markAsReadCheckBox))
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(openInBrowserButton)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(okButton))
-                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(pointsLabel)
                             .addComponent(titleLabel))
-                        .addGap(0, 0, Short.MAX_VALUE)))
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(openInBrowserButton)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                        .addComponent(okButton, javax.swing.GroupLayout.PREFERRED_SIZE, 70, javax.swing.GroupLayout.PREFERRED_SIZE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -149,8 +148,10 @@ public class CodeReviewDialog extends javax.swing.JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(openInBrowserButton)
                     .addComponent(okButton))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap(14, Short.MAX_VALUE))
         );
+
+        pack();
     }// </editor-fold>//GEN-END:initComponents
 
     private void okButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_okButtonActionPerformed
@@ -158,7 +159,6 @@ public class CodeReviewDialog extends javax.swing.JDialog {
             okListener.actionPerformed(evt);
         }
         this.setVisible(false);
-        this.dispose();
     }//GEN-LAST:event_okButtonActionPerformed
 
     private void openInBrowserButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_openInBrowserButtonActionPerformed
