@@ -35,7 +35,11 @@ public class TmcModuleInstall extends ModuleInstall {
                 SpecificationVersion currentVersion = getCurrentModuleVersion();
                 SpecificationVersion prevVersion = new SpecificationVersion(prefs.get(PREF_MODULE_VERSION, "0.0.0"));
                 if (!currentVersion.equals(prevVersion)) {
-                    doUpdateFromPreviousVersion(prevVersion);
+                    try {
+                        doUpdateFromPreviousVersion(prevVersion);
+                    } catch (Exception ex) {
+                        log.log(Level.WARNING, "Error while upgrading from previous version", ex);
+                    }
                     prefs.put(PREF_MODULE_VERSION, currentVersion.toString());
                 }
                 
@@ -57,7 +61,7 @@ public class TmcModuleInstall extends ModuleInstall {
                 ReviewEventListener.start();
                 PushEventListener.start();
                 
-                Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited
+                Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited. FIXME: ugly. maybe do a start() as above.
             }
         });
     }
@@ -88,6 +92,9 @@ public class TmcModuleInstall extends ModuleInstall {
     private void removeOldUpdateCenterFromBefore031() {
         ArrayList<UpdateUnitProvider> providersToRemove = new ArrayList<UpdateUnitProvider>();
         for (UpdateUnitProvider provider : UpdateUnitProviderFactory.getDefault().getUpdateUnitProviders(false)) {
+            if (provider == null || provider.getProviderURL() == null) {
+                continue; // Users have had NPEs here :(
+            }
             String url = provider.getProviderURL().toString();
             if (url.startsWith("http://tmc.mooc.fi/updates") && !url.contains("tmc-netbeans-author")) {
                 log.log(Level.INFO, "Removing obsolete update center: {0}", provider.getDisplayName());
