@@ -29,6 +29,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -224,24 +225,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult processResult) {
-                File resultPath = new File(
+                File resultsFile = new File(
                         projectDir.getPath() + File.separator +
                         "target" + File.separator +
                         "test_output.txt"
                         );
                 
-                List<TestCaseResult> results;
-                try {
-                    String resultJson = FileUtils.readFileToString(resultPath);
-                    results = parseTestResults(resultJson);
-                } catch (Exception ex) {
-                    dialogDisplayer.displayError("Failed to read test results", ex);
-                    return;
-                }
-                
-                if (resultDisplayer.showLocalRunResult(results)) {
-                    submitAction.performAction(projectInfo.getProject());
-                }
+                handleTestResults(projectInfo, resultsFile);
             }
 
             @Override
@@ -282,9 +272,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return fo;
     }
     
-    private void startRunningSimpleProjectTests(TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
-        final Project project = projectInfo.getProject();
-        
+    private void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
         File tempFile;
         try {
             tempFile = File.createTempFile("tmc_test_results", ".txt");
@@ -299,7 +287,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             args.add("-Dtmc.results_file=" + tempFile.getAbsolutePath());
             args.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
             
-            Integer memoryLimit = getMemoryLimit(project);
+            Integer memoryLimit = getMemoryLimit(projectInfo.getProject());
             if (memoryLimit != null) {
                 args.add("-Xmx" + memoryLimit + "M");
             }
@@ -322,32 +310,16 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                     log.info(result.errorOutput);
                     
                     if (result.statusCode != 0) {
-                        log.info("Failed to run tests. Status code: " + result.statusCode);
+                        log.log(Level.INFO, "Failed to run tests. Status code: {0}", result.statusCode);
                         dialogDisplayer.displayError("Failed to run tests.\n" + result.errorOutput);
                         tempFileAsFinal.delete();
                         return;
                     }
                     
-                    String resultJson;
                     try {
-                        resultJson = FileUtils.readFileToString(tempFileAsFinal, "UTF-8");
-                    } catch (IOException ex) {
-                        dialogDisplayer.displayError("Failed to read test results", ex);
-                        return;
+                        handleTestResults(projectInfo, tempFileAsFinal);
                     } finally {
                         tempFileAsFinal.delete();
-                    }
-                    
-                    List<TestCaseResult> results;
-                    try {
-                        results = parseTestResults(resultJson);
-                    } catch (Exception e) {
-                        dialogDisplayer.displayError("Failed to read test results:\n" + e.getMessage());
-                        return;
-                    }
-                    
-                    if (resultDisplayer.showLocalRunResult(results)) {
-                        submitAction.performAction(project);
                     }
                 }
 
@@ -366,6 +338,22 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         } catch (Exception ex) {
             tempFile.delete();
             dialogDisplayer.displayError("Failed to run tests", ex);
+        }
+    }
+    
+    private void handleTestResults(TmcProjectInfo projectInfo, File resultsFile) {
+        List<TestCaseResult> results;
+        try {
+            String resultJson = FileUtils.readFileToString(resultsFile);
+            results = parseTestResults(resultJson);
+        } catch (Exception ex) {
+            dialogDisplayer.displayError("Failed to read test results", ex);
+            return;
+        }
+        boolean canSubmit = submitAction.enable(projectInfo.getProject());
+        boolean shouldSubmit = resultDisplayer.showLocalRunResult(results, canSubmit);
+        if (shouldSubmit) {
+            submitAction.performAction(projectInfo.getProject());
         }
     }
     
@@ -463,6 +451,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     protected String iconResource() {
         // The setting in layer.xml doesn't work with NodeAction
         return "org/netbeans/modules/project/ui/resources/testProject.png";
+    }
+    
+    @Override
+    protected boolean enabledFor(Exercise exercise) {
+        // Overridden to not care about the deadline
+        return exercise.isReturnable();
     }
 
     private InputOutput getIoTab() {

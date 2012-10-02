@@ -118,7 +118,7 @@ public class TestResultDisplayer {
     /**
      * Shows local results and returns whether a submission should be started.
      */
-    public boolean showLocalRunResult(List<TestCaseResult> results) {
+    public boolean showLocalRunResult(List<TestCaseResult> results, boolean canSubmit) {
         int numFailed = 0;
         for (TestCaseResult result : results) {
             if (!result.isSuccessful()) {
@@ -126,7 +126,7 @@ public class TestResultDisplayer {
             }
         }
         
-        if (numFailed == 0) {
+        if (numFailed == 0 && canSubmit) {
             displayTestCases(results, false);
             return dialogs.askYesNo("All tests passed. Submit to server?", "Submit?");
         } else {
