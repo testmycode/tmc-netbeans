@@ -14,7 +14,6 @@ import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import java.net.URI;
-import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;

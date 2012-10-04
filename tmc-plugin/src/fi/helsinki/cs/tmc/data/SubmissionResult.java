@@ -12,8 +12,10 @@ public class SubmissionResult {
         ERROR
     }
     
+    @SerializedName("status")
     private Status status;
     
+    @SerializedName("error")
     private String error; // e.g. compile error
     
     @SerializedName("test_cases")
@@ -22,7 +24,11 @@ public class SubmissionResult {
     @SerializedName("solution_url")
     private String solutionUrl;
     
+    @SerializedName("points")
     private List<String> points;
+    
+    @SerializedName("missing_review_points")
+    private List<String> missingReviewPoints;
     
     @SerializedName("feedback_questions")
     private List<FeedbackQuestion> feedbackQuestions;
@@ -35,6 +41,7 @@ public class SubmissionResult {
         error = null;
         testCases = Collections.emptyList();
         points = Collections.emptyList();
+        missingReviewPoints = Collections.emptyList();
         feedbackQuestions = Collections.emptyList();
     }
 
@@ -76,6 +83,14 @@ public class SubmissionResult {
 
     public void setPoints(List<String> points) {
         this.points = points;
+    }
+
+    public List<String> getMissingReviewPoints() {
+        return missingReviewPoints;
+    }
+
+    public void setMissingReviewPoints(List<String> missingReviewPoints) {
+        this.missingReviewPoints = missingReviewPoints;
     }
 
     public List<FeedbackQuestion> getFeedbackQuestions() {

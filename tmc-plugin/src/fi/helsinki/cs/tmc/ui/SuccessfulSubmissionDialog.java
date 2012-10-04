@@ -43,7 +43,11 @@ public class SuccessfulSubmissionDialog extends JDialog {
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
         
-        addYayLabel();
+        addYayLabel(exercise, result);
+        addVSpace(6);
+        if (exercise.requiresReview() && !result.getMissingReviewPoints().isEmpty()) {
+            addRequiresReviewLabels();
+        }
         addVSpace(6);
         addPointsLabel(result);
         addVSpace(10);
@@ -79,7 +83,7 @@ public class SuccessfulSubmissionDialog extends JDialog {
         return hbox(component, hglue());
     }
     
-    private void addYayLabel() {
+    private void addYayLabel(Exercise exercise, SubmissionResult result) {
         JLabel yayLabel = new JLabel("All tests passed on the server.");
         
         Font font = yayLabel.getFont();
@@ -90,6 +94,13 @@ public class SuccessfulSubmissionDialog extends JDialog {
         yayLabel.setIcon(ConvenientDialogDisplayer.getDefault().getSmileyIcon());
         
         getContentPane().add(leftAligned(yayLabel));
+    }
+    
+    private void addRequiresReviewLabels() {
+        JLabel lbl1 = new JLabel("This exercise requires a code review.");
+        JLabel lbl2 = new JLabel("It will have a yellow marker until it's accepted by an instructor.");
+        getContentPane().add(leftAligned(lbl1));
+        getContentPane().add(leftAligned(lbl2));
     }
     
     private void addPointsLabel(SubmissionResult result) {
