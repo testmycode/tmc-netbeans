@@ -43,7 +43,7 @@ public class SuccessfulSubmissionDialog extends JDialog {
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
         
-        addYayLabel(exercise, result);
+        addYayLabel();
         addVSpace(6);
         if (exercise.requiresReview() && !result.getMissingReviewPoints().isEmpty()) {
             addRequiresReviewLabels();
@@ -83,7 +83,7 @@ public class SuccessfulSubmissionDialog extends JDialog {
         return hbox(component, hglue());
     }
     
-    private void addYayLabel(Exercise exercise, SubmissionResult result) {
+    private void addYayLabel() {
         JLabel yayLabel = new JLabel("All tests passed on the server.");
         
         Font font = yayLabel.getFont();
