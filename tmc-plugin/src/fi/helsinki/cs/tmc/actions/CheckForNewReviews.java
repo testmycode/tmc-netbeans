@@ -13,6 +13,7 @@ import java.awt.event.ActionListener;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -26,7 +27,7 @@ id = "fi.helsinki.cs.tmc.actions.CheckForNewReviews")
     @ActionReference(path = "Menu/TM&C", position = -40)
 })
 @NbBundle.Messages("CTL_CheckForNewReviews=Check for new code &reviews")
-public class CheckForNewReviews implements ActionListener {
+public class CheckForNewReviews implements ActionListener, Runnable {
     private static final Logger log = Logger.getLogger(CheckForNewReviews.class.getName());
     
     private static CheckForNewReviews instance;
@@ -38,7 +39,7 @@ public class CheckForNewReviews implements ActionListener {
             javax.swing.Timer timer = new javax.swing.Timer(interval, instance);
             timer.setRepeats(true);
             timer.start();
-            instance.run();
+            SwingUtilities.invokeLater(instance);
         } else {
             log.warning("CheckForNewReviews.startTimer() called twice");
         }
@@ -71,6 +72,7 @@ public class CheckForNewReviews implements ActionListener {
         run();
     }
     
+    @Override
     public void run() {
         if (resetNotifications) {
             reviewDb.forgetReviewsNotifiedAbout();
@@ -81,6 +83,9 @@ public class CheckForNewReviews implements ActionListener {
             if (!beQuiet) {
                 dialogs.displayError("Please select a course in TMC->Settings");
             }
+            return;
+        }
+        if (course.getReviewsUrl() == null) {
             return;
         }
         
