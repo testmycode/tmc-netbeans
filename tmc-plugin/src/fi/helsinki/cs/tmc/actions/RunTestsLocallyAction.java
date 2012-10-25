@@ -408,6 +408,10 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
         ClassPathProvider classPathProvider = projectInfo.getProject().getLookup().lookup(ClassPathProvider.class);
         
+        if (classPathProvider == null) {
+            throw new RuntimeException("Project's class path not (yet) initialized");
+        }
+        
         ClassPath cp = classPathProvider.findClassPath(testDir, ClassPath.EXECUTE);
         if (cp == null) {
             throw new RuntimeException("Failed to get 'execute' classpath for project's tests");
