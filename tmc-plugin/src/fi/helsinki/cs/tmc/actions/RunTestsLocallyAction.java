@@ -4,6 +4,8 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -54,12 +56,20 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     
     private static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
     
+    public static class InvokedEvent implements TmcEvent {
+        public final TmcProjectInfo projectInfo;
+        public InvokedEvent(TmcProjectInfo projectInfo) {
+            this.projectInfo = projectInfo;
+        }
+    }
+    
     private TmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
     private SubmitExerciseAction submitAction;
+    private TmcEventBus eventBus;
 
     public RunTestsLocallyAction() {
         this.settings = TmcSettings.getDefault();
@@ -68,6 +78,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         this.submitAction = new SubmitExerciseAction();
+        this.eventBus = TmcEventBus.getDefault();
         
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -91,6 +102,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
+            eventBus.post(new InvokedEvent(projectInfo));
             BgTask.start("Compiling project", startCompilingProject(projectInfo), new BgTaskListener<Integer>() {
                 @Override
                 public void bgTaskReady(Integer result) {

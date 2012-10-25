@@ -1,9 +1,11 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.SourceSnapshotEventSource;
+import fi.helsinki.cs.tmc.spyware.eventsources.TmcEventBusEventSource;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import java.io.IOException;
 import java.util.List;
@@ -38,6 +40,7 @@ public class SpywareFacade implements SpywareSettings {
     
     private SourceSnapshotEventSource sourceSnapshotSource;
     private ProjectActionEventSource projectActionSource;
+    private TmcEventBusEventSource tmcEventBusSource;
     
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
@@ -55,10 +58,12 @@ public class SpywareFacade implements SpywareSettings {
         sourceSnapshotSource.startListeningToFileChanges();
         
         projectActionSource = new ProjectActionEventSource(sender);
+        tmcEventBusSource = new TmcEventBusEventSource(sender);
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
                 ProjectActionCaptor.addListener(projectActionSource);
+                TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
             }
         });
     }
@@ -81,6 +86,7 @@ public class SpywareFacade implements SpywareSettings {
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
+                TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
                 ProjectActionCaptor.removeListener(projectActionSource);
             }
         });

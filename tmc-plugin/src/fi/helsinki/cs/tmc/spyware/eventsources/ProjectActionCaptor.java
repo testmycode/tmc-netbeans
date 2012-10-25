@@ -13,7 +13,6 @@ import org.netbeans.spi.project.LookupProvider.Registration.ProjectType;
 // Hmm, we could eventually override the default test action on a project,
 // so there would no longer be a non-TMC and a TMC test action for TMC projects.
 
-// Note: the @ProjectServiceProvider annotation modifies the project's layer.xml file.
 /**
  * Acts as a proxy to a project's default ActionProvider and provides
  * a simple interface for listeners.

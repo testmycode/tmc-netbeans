@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -32,12 +34,20 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
     
+    public static class InvokedEvent implements TmcEvent {
+        public final TmcProjectInfo projectInfo;
+        public InvokedEvent(TmcProjectInfo projectInfo) {
+            this.projectInfo = projectInfo;
+        }
+    }
+    
     private TmcSettings settings;
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
+    private TmcEventBus eventBus;
 
     public SubmitExerciseAction() {
         this.settings = TmcSettings.getDefault();
@@ -46,6 +56,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
         
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -68,6 +79,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     /*package (for tests)*/ void performAction(Project ... projects) {
         for (Project nbProject : projects) {
             TmcProjectInfo tmcProject = projectMediator.wrapProject(nbProject);
+            eventBus.post(new InvokedEvent(tmcProject));
             submitProject(tmcProject);
         }
     }
