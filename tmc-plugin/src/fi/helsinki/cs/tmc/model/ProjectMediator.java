@@ -4,8 +4,11 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -49,6 +52,14 @@ public class ProjectMediator {
             throw new NullPointerException();
         }
         return new TmcProjectInfo(p);
+    }
+    
+    public List<TmcProjectInfo> wrapProjects(List<Project> projects) {
+        List<TmcProjectInfo> result = new ArrayList<TmcProjectInfo>();
+        for (Project p : projects) {
+            result.add(wrapProject(p));
+        }
+        return result;
     }
     
     public String getProjectRootDir() {
@@ -170,6 +181,11 @@ public class ProjectMediator {
                 openProjects.open(nbProjects, true, true);
             }
         }.start();
+    }
+    
+    public Collection<TmcProjectInfo> getOpenProjects() {
+        Project[] projects = openProjects.getOpenProjects();
+        return wrapProjects(Arrays.asList(projects));
     }
     
     /**

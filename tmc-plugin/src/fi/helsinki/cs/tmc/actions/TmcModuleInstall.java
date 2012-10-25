@@ -15,7 +15,6 @@ import org.openide.modules.ModuleInfo;
 import org.openide.modules.ModuleInstall;
 import org.openide.modules.Modules;
 import org.openide.modules.SpecificationVersion;
-import org.openide.util.Lookup;
 import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
@@ -34,8 +33,7 @@ public class TmcModuleInstall extends ModuleInstall {
                 CheckForNewReviews.startTimer();
                 ReviewEventListener.start();
                 PushEventListener.start();
-                
-                Lookup.getDefault().lookup(SpywareFacade.class); // Ensure inited. FIXME: ugly. maybe do a start() as above.
+                SpywareFacade.start();
                 
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
                 
@@ -73,7 +71,11 @@ public class TmcModuleInstall extends ModuleInstall {
 
     @Override
     public void close() {
-        Lookup.getDefault().lookup(SpywareFacade.class).close();
+        try {
+            SpywareFacade.close();
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Failed to close SpywareFacade.", e);
+        }
     }
     
     private void doFirstRun() {
