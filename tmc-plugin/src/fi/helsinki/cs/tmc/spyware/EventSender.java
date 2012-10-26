@@ -18,14 +18,10 @@ import java.util.logging.Logger;
 public class EventSender implements EventReceiver {
     private static final Logger log = Logger.getLogger(EventSender.class.getName());
     
-    private static EventSender instance;
-
-    public static EventSender getInstance() {
-        return instance;
-    }
-    
     public static long DEFAULT_DELAY = 5*60*1000;
     public static int DEFAULT_MAX_EVENTS = 4096;
+    
+    private SpywareSettings settings;
     
     private long delay = DEFAULT_DELAY;
     private int maxEvents = DEFAULT_MAX_EVENTS;
@@ -33,7 +29,8 @@ public class EventSender implements EventReceiver {
     private ArrayList<LoggableEvent> buffer;
     private java.util.Timer sendTimer;
     
-    public EventSender() {
+    public EventSender(SpywareSettings settings) {
+        this.settings = settings;
         this.buffer = new ArrayList<LoggableEvent>();
         this.sendTimer = new java.util.Timer("EventSender timer", true);
         this.sendTimer.schedule(sendTask, delay, delay);
@@ -45,6 +42,9 @@ public class EventSender implements EventReceiver {
     
     @Override
     public synchronized void receiveEvent(LoggableEvent event) {
+        if (!settings.isSpywareEnabled()) {
+            return;
+        }
         buffer.add(event);
         removeIfOverLimit();
     }

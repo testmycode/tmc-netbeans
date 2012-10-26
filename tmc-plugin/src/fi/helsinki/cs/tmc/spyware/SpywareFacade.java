@@ -46,7 +46,7 @@ public class SpywareFacade implements SpywareSettings {
         settings = TmcSettings.getDefault();
         
         store = new EventStore();
-        sender = new EventSender();
+        sender = new EventSender(this);
         int loadedEventCount = loadEvents();
         if (loadedEventCount > 0) {
             sender.sendNow();
