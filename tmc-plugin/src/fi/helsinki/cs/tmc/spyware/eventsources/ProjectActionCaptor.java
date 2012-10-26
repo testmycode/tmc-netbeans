@@ -5,10 +5,8 @@ import java.util.Arrays;
 import java.util.List;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ActionProvider;
-import org.netbeans.spi.project.ProjectServiceProvider;
 import org.openide.util.Lookup;
 import static org.netbeans.spi.project.ActionProvider.*;
-import org.netbeans.spi.project.LookupProvider.Registration.ProjectType;
 
 // Hmm, we could eventually override the default test action on a project,
 // so there would no longer be a non-TMC and a TMC test action for TMC projects.
@@ -16,11 +14,14 @@ import org.netbeans.spi.project.LookupProvider.Registration.ProjectType;
 /**
  * Acts as a proxy to a project's default ActionProvider and provides
  * a simple interface for listeners.
+ * 
+ * <p>
+ * Implementation details:
+ * This is registered in layer.xml instead of with <code>@ProjectServiceProvider</code>,
+ * because the annotation doesn't allow us to specify a position.
+ * We need to be called first, or otherwise we'll be skipped in favor
+ * of the actual action provider.
  */
-@ProjectServiceProvider(projectTypes = {
-    @ProjectType(id="org-netbeans-modules-java-j2seproject"),
-    @ProjectType(id="org-netbeans-modules-maven") // TODO: test
-}, service=ActionProvider.class)
 public class ProjectActionCaptor implements ActionProvider {
     public static interface Listener {
         public void actionInvoked(Project project, String command);
@@ -50,6 +51,23 @@ public class ProjectActionCaptor implements ActionProvider {
     }
     
     @Override
+    public String[] getSupportedActions() {
+        return new String[] {
+            COMMAND_CLEAN,
+            COMMAND_BUILD,
+            COMMAND_REBUILD,
+            COMMAND_RUN,
+            COMMAND_RUN_SINGLE,
+            COMMAND_DEBUG,
+            COMMAND_DEBUG_SINGLE,
+            COMMAND_PROFILE,
+            COMMAND_PROFILE_SINGLE,
+            COMMAND_TEST,
+            COMMAND_TEST_SINGLE,
+        };
+    }
+    
+    @Override
     public boolean isActionEnabled(String command, Lookup context) throws IllegalArgumentException {
         if (beingCalled) {
             return false;
@@ -67,23 +85,6 @@ public class ProjectActionCaptor implements ActionProvider {
         } finally {
             beingCalled = false;
         }
-    }
-
-    @Override
-    public String[] getSupportedActions() {
-        return new String[] {
-            COMMAND_CLEAN,
-            COMMAND_BUILD,
-            COMMAND_REBUILD,
-            COMMAND_RUN,
-            COMMAND_RUN_SINGLE,
-            COMMAND_DEBUG,
-            COMMAND_DEBUG_SINGLE,
-            COMMAND_PROFILE,
-            COMMAND_PROFILE_SINGLE,
-            COMMAND_TEST,
-            COMMAND_TEST_SINGLE,
-        };
     }
 
     @Override

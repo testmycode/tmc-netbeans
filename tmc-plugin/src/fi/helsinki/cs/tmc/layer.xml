@@ -34,6 +34,28 @@
             </file>
         </folder>
     </folder>
+    <folder name="Projects">
+        <folder name="org-netbeans-modules-java-j2seproject">
+            <folder name="Lookup">
+                <file name="fi-helsinki-cs-tmc-spyware-eventsources-ProjectActionCaptor.instance">
+                    <attr methodvalue="org.netbeans.modules.projectapi.LazyLookupProviders.forProjectServiceProvider" name="instanceCreate"/>
+                    <attr name="class" stringvalue="fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor"/>
+                    <attr name="service" stringvalue="org.netbeans.spi.project.ActionProvider"/>
+                    <attr name="position" intvalue="-9999999"/> <!-- Gotta be first -->
+                </file>
+            </folder>
+        </folder>
+        <folder name="org-netbeans-modules-maven">
+            <folder name="Lookup">
+                <file name="fi-helsinki-cs-tmc-spyware-eventsources-ProjectActionCaptor.instance">
+                    <attr methodvalue="org.netbeans.modules.projectapi.LazyLookupProviders.forProjectServiceProvider" name="instanceCreate"/>
+                    <attr name="class" stringvalue="fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor"/>
+                    <attr name="service" stringvalue="org.netbeans.spi.project.ActionProvider"/>
+                    <attr name="position" intvalue="-9999999"/> <!-- Gotta be first -->
+                </file>
+            </folder>
+        </folder>
+    </folder>
     <folder name="Toolbars">
         <folder name="TMC">
             <attr name="position" intvalue="1100"/>
