@@ -16,8 +16,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectManager;
 import org.openide.filesystems.*;
 
 public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
@@ -110,40 +108,23 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         }
         
         log.log(Level.FINE, "Changed file: {0}", changedFile);
-        final Project project = findProjectOwningFile(changedFile);
+        
+        ProjectMediator pm = ProjectMediator.getInstance();
+        TmcProjectInfo project = pm.tryGetProjectOwningFile(changedFile);
         log.log(Level.FINE, "Project: {0}", project);
         if (project != null) {
-            ProjectMediator pm = ProjectMediator.getInstance();
             CourseDb courseDb = CourseDb.getInstance();
-            Exercise exercise = pm.tryGetExerciseForProject(pm.wrapProject(project), courseDb);
+            Exercise exercise = pm.tryGetExerciseForProject(project, courseDb);
             
             if (exercise != null) {
                 log.log(Level.FINER, "Exercise: {0}", exercise);
-                TmcProjectInfo projectInfo = pm.wrapProject(project);
                 
-                SnapshotThread thread = new SnapshotThread(receiver, exercise, projectInfo);
+                SnapshotThread thread = new SnapshotThread(receiver, exercise, project);
                 snapshotterThreads.addThread(thread);
                 thread.setDaemon(true);
                 thread.start();
             }
         }
-    }
-    
-    private Project findProjectOwningFile(FileObject fo) {
-        while (fo != null) {
-            if (fo.isFolder()) {
-                try {
-                    Project proj = ProjectManager.getDefault().findProject(fo);
-                    if (proj != null) {
-                        return proj;
-                    }
-                } catch (Exception ex) {
-                    log.log(Level.WARNING, "Error finding project owning file: " + fo, ex);
-                }
-            }
-            fo = fo.getParent();
-        }
-        return null;
     }
     
     private static class SnapshotThread extends Thread {

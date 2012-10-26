@@ -133,6 +133,26 @@ public class ProjectMediator {
     }
     
     /**
+     * Attempts to find the project owning the given file object.
+     */
+    public TmcProjectInfo tryGetProjectOwningFile(FileObject fo) {
+        while (fo != null) {
+            if (fo.isFolder()) {
+                try {
+                    Project proj = ProjectManager.getDefault().findProject(fo);
+                    if (proj != null) {
+                        return wrapProject(proj);
+                    }
+                } catch (Exception ex) {
+                    logger.log(Level.WARNING, "Error finding project owning file: " + fo, ex);
+                }
+            }
+            fo = fo.getParent();
+        }
+        return null;
+    }
+    
+    /**
      * Returns the project for the exercise, or null if not yet created.
      * 
      * <p>

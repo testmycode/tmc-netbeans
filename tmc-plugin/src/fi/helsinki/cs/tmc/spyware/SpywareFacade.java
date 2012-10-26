@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.SourceSnapshotEventSource;
@@ -41,6 +42,7 @@ public class SpywareFacade implements SpywareSettings {
     private SourceSnapshotEventSource sourceSnapshotSource;
     private ProjectActionEventSource projectActionSource;
     private TmcEventBusEventSource tmcEventBusSource;
+    private TextInsertEventSource textInsertEventSource;
     
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
@@ -64,6 +66,7 @@ public class SpywareFacade implements SpywareSettings {
             public void run() {
                 ProjectActionCaptor.addListener(projectActionSource);
                 TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
+                textInsertEventSource = new TextInsertEventSource(sender);
             }
         });
     }
@@ -86,6 +89,7 @@ public class SpywareFacade implements SpywareSettings {
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
+                textInsertEventSource.close();
                 TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
                 ProjectActionCaptor.removeListener(projectActionSource);
             }
