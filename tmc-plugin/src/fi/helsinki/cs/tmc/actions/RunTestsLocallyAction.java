@@ -356,7 +356,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private void handleTestResults(TmcProjectInfo projectInfo, File resultsFile) {
         List<TestCaseResult> results;
         try {
-            String resultJson = FileUtils.readFileToString(resultsFile);
+            String resultJson = FileUtils.readFileToString(resultsFile, "UTF-8");
             results = parseTestResults(resultJson);
         } catch (Exception ex) {
             dialogDisplayer.displayError("Failed to read test results", ex);
