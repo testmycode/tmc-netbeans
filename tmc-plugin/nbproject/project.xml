@@ -82,7 +82,7 @@
                     <compile-dependency/>
                     <run-dependency>
                         <release-version>3</release-version>
-                        <specification-version>1.63.1.5.20.32</specification-version>
+                        <specification-version>1.63.1.5.19.31</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
@@ -91,7 +91,7 @@
                     <compile-dependency/>
                     <run-dependency>
                         <release-version>1</release-version>
-                        <specification-version>1.61.1.32</specification-version>
+                        <specification-version>1.60.1.31</specification-version>
                     </run-dependency>
                 </dependency>
                 <dependency>
