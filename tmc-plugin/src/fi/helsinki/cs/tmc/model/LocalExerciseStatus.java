@@ -15,11 +15,11 @@ public class LocalExerciseStatus {
     public ArrayList<Exercise> downloadable;
     public ArrayList<Exercise> updateable;
 
-    public static LocalExerciseStatus get(List<Exercise> allExercises) {
-        return new LocalExerciseStatus(CourseDb.getInstance(), ProjectMediator.getInstance(), allExercises);
+    public static LocalExerciseStatus get(List<Exercise> allExercises, boolean getCompleted) {
+        return new LocalExerciseStatus(CourseDb.getInstance(), ProjectMediator.getInstance(), allExercises, getCompleted);
     }
 
-    private LocalExerciseStatus(CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises) {
+    private LocalExerciseStatus(CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises, boolean getCompleted) {
         open = new ArrayList<Exercise>();
         closed = new ArrayList<Exercise>();
         downloadable = new ArrayList<Exercise>();
@@ -27,19 +27,21 @@ public class LocalExerciseStatus {
 
         for (Exercise ex : allExercises) {
             if (!ex.hasDeadlinePassed()) {
-                TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
-                boolean isDownloaded = proj != null;
-                if (!isDownloaded) {
-                    downloadable.add(ex);
-                } else if (projectMediator.isProjectOpen(proj)) {
-                    open.add(ex);
-                } else {
-                    closed.add(ex); // TODO: all projects may end up here if this is queried too early
-                }
+                if (getCompleted || !ex.isCompleted()) {
+                    TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
+                    boolean isDownloaded = proj != null;
+                    if (!isDownloaded) {
+                        downloadable.add(ex);
+                    } else if (projectMediator.isProjectOpen(proj)) {
+                        open.add(ex);
+                    } else {
+                        closed.add(ex); // TODO: all projects may end up here if this is queried too early
+                    }
 
-                String downloadedChecksum = courseDb.getDownloadedExerciseChecksum(ex.getKey());
-                if (isDownloaded && ObjectUtils.notEqual(downloadedChecksum, ex.getChecksum())) {
-                    updateable.add(ex);
+                    String downloadedChecksum = courseDb.getDownloadedExerciseChecksum(ex.getKey());
+                    if (isDownloaded && ObjectUtils.notEqual(downloadedChecksum, ex.getChecksum())) {
+                        updateable.add(ex);
+                    }
                 }
             }
         }
