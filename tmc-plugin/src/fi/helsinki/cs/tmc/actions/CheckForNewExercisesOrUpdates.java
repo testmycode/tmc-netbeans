@@ -11,11 +11,15 @@ import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.Inflector;
+import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import org.apache.commons.lang3.StringUtils;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -93,11 +97,11 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                             displayNotification(status, new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadable, status.updateable);
                                 }
                             });
                         } else {
-                            DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadable, status.updateable);
                         }
                     } else if (!beQuiet) {
                         dialogs.displayMessage("No new exercises or updates to download.");
@@ -119,21 +123,33 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     private void displayNotification(LocalExerciseStatus status, ActionListener action) {
-        String ds = status.downloadable.size() > 1 ? "s" : "";
-        String us = status.updateable.size() > 1 ? "s" : "";
+        ArrayList<String> items = new ArrayList<String>();
+        ArrayList<String> actions = new ArrayList<String>();
         
-        String msg;
-        String prompt;
-        if (status.downloadable.size() > 0 && status.updateable.size() > 0) {
-            msg = status.downloadable.size() + " new exercise" + ds + " and " + status.updateable.size() + " update" + us + " are available.";
-            prompt = "Click here to download and update";
-        } else if (status.downloadable.size() > 0) {
-            msg = status.downloadable.size() + " new exercise" + ds + " are available.";
-            prompt = "Click here to download";
-        } else {
-            msg = status.updateable.size() + " exercise" + us + " can be updated.";
-            prompt = "Click here to update";
+        if (!status.unlockable.isEmpty()) {
+            items.add(Inflector.pluralize(status.unlockable.size(), "an unlockable exercise"));
+            actions.add("unlock");
         }
+        if (!status.downloadable.isEmpty()) {
+            items.add(Inflector.pluralize(status.downloadable.size(), "a new exercise"));
+            actions.add("download");
+        }
+        if (!status.updateable.isEmpty()) {
+            items.add(Inflector.pluralize(status.updateable.size(), "an update"));
+            actions.add("update");
+        }
+        
+        int total =
+                status.unlockable.size() +
+                status.downloadable.size() +
+                status.updateable.size();
+        
+        String msg = TmcStringUtils.joinCommaAnd(items);
+        msg += " " + Inflector.pluralize(total, "is") + " available.";
+        msg = StringUtils.capitalize(msg);
+        
+        String prompt = "Click here to " + TmcStringUtils.joinCommaAnd(actions) + ".";
+        
         notifier.notify(msg, getNotificationIcon(), prompt, action);
     }
 

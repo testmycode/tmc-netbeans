@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import java.net.URI;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
@@ -101,6 +102,31 @@ public class ServerAccess {
                 return download.cancel();
             }
         };
+    }
+    
+    public CancellableCallable<Void> getUnlockingTask(Course course) {
+        Map<String, String> params = Collections.emptyMap();
+        final CancellableCallable<String> download = createHttpTasks().postForText(getUnlockUrl(course), params);
+        return new CancellableCallable<Void>() {
+            @Override
+            public Void call() throws Exception {
+                try {
+                    download.call();
+                    return null;
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
+            }
+
+            @Override
+            public boolean cancel() {
+                return download.cancel();
+            }
+        };
+    }
+    
+    private String getUnlockUrl(Course course) {
+        return addApiCallQueryParameters(course.getUnlockUrl());
     }
     
     public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {

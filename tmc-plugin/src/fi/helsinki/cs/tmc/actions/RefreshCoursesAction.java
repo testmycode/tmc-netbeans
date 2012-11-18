@@ -33,8 +33,9 @@ public final class RefreshCoursesAction {
         this.listeners = new BgTaskListenerList<List<Course>>();
     }
 
-    public void addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
+    public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
         this.listeners.addListener(new DefaultListener(showDialogOnError, updateCourseDb));
+        return this;
     }
 
     public void addListener(BgTaskListener<List<Course>> listener) {

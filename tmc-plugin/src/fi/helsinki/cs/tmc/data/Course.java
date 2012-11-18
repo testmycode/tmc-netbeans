@@ -8,12 +8,16 @@ public class Course {
 
     private String name;
     
+    @SerializedName("unlock_url")
+    private String unlockUrl;
     @SerializedName("reviews_url")
     private String reviewsUrl;
     @SerializedName("comet_url")
     private String cometUrl;
     
     private List<Exercise> exercises;
+    
+    private List<String> unlockables; // Exercise names
     
     
     public Course() {
@@ -32,6 +36,14 @@ public class Course {
     public void setName(String name) {
         this.name = name;
     }
+    
+    public String getUnlockUrl() {
+        return unlockUrl;
+    }
+
+    public void setUnlockUrl(String unlockUrl) {
+        this.unlockUrl = unlockUrl;
+    }
 
     public String getReviewsUrl() {
         return reviewsUrl;
@@ -49,6 +61,14 @@ public class Course {
         this.cometUrl = cometUrl;
     }
 
+    public List<String> getUnlockables() {
+        return unlockables;
+    }
+
+    public void setUnlockables(List<String> unlockables) {
+        this.unlockables = unlockables;
+    }
+    
     public List<Exercise> getExercises() {
         return exercises;
     }

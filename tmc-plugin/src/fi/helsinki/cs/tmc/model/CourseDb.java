@@ -105,7 +105,7 @@ public class CourseDb {
         if (course != null) {
             return course.getExercises();
         } else {
-            return new ArrayList<Exercise>();
+            return Collections.emptyList();
         }
     }
     
@@ -116,6 +116,46 @@ public class CourseDb {
         List<Exercise> result = new ArrayList<Exercise>();
         for (Course course : availableCourses) {
             result.addAll(course.getExercises());
+        }
+        return result;
+    }
+    
+    public Course getCourseByName(String name) {
+        for (Course course : availableCourses) {
+            if (course.getName().equals(name)) {
+                return course;
+            }
+        }
+        return null;
+    }
+    
+    public boolean isUnlockable(Exercise ex) {
+        Course course = getCourseByName(ex.getCourseName());
+        if (course != null) {
+            return course.getUnlockables().contains(ex.getName());
+        } else {
+            return false;
+        }
+    }
+    
+    /**
+     * Returns all exercises from the current course that can be unlocked (and must be unlocked together).
+     */
+    public List<Exercise> getCurrentCourseUnlockableExercises() {
+        List<Exercise> result = new ArrayList<Exercise>();
+        Course course = getCurrentCourse();
+        if (course != null) {
+            List<String> unlockables = course.getUnlockables();
+            if (unlockables == null) {
+                unlockables = Collections.emptyList();
+            }
+            for (String exerciseName : unlockables) {
+                for (Exercise ex : course.getExercises()) {
+                    if (ex.getName().equals(exerciseName)) {
+                        result.add(ex);
+                    }
+                }
+            }
         }
         return result;
     }

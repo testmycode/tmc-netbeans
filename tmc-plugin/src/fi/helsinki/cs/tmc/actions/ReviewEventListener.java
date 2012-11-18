@@ -82,9 +82,7 @@ public class ReviewEventListener extends TmcEventListener {
     
     private void refreshCourseDb() {
         // Exercise properties have probably changed
-        RefreshCoursesAction refresher = new RefreshCoursesAction();
-        refresher.addDefaultListener(false, true);
-        refresher.run();
+        new RefreshCoursesAction().addDefaultListener(false, true).run();
     }
     
     private void showReviewDialog(final Review review) {
@@ -95,6 +93,11 @@ public class ReviewEventListener extends TmcEventListener {
                 if (dialog.getMarkAsRead()) {
                     log.fine("Marking review as read");
                     markAsRead(review);
+                    
+                    // The review might have made new exercises available.
+                    // We already updated the course DB earlier, but this time
+                    // we will also notify the user.
+                    new CheckForNewExercisesOrUpdates(true, false).run();
                 }
             }
         });

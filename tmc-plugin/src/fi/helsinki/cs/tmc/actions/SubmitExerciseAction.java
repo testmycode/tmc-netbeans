@@ -108,11 +108,17 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     public void bgTaskReady(SubmissionResult result) {
                         dialog.close();
                         resultDisplayer.showSubmissionResult(exercise, result);
+                        
+                        // We change exercise state as a first approximation,
+                        // then refresh from the server and potentially notify the user
+                        // as we might have unlocked new exercises.
                         exercise.setAttempted(true);
                         if (result.getStatus() == SubmissionResult.Status.OK) {
                             exercise.setCompleted(true);
                         }
                         courseDb.save();
+                        
+                        new CheckForNewExercisesOrUpdates(true, false).run();
                     }
 
                     @Override

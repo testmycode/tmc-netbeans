@@ -30,6 +30,11 @@ public class Exercise implements Serializable {
     @SerializedName("return_url")
     private String returnUrl;
     
+    private boolean locked;
+    
+    @SerializedName("deadline_description")
+    private String deadlineDescription;
+    
     private Date deadline;
     
     private boolean returnable;
@@ -79,6 +84,22 @@ public class Exercise implements Serializable {
         this.name = name;
     }
 
+    public boolean isLocked() {
+        return locked;
+    }
+
+    public void setLocked(boolean locked) {
+        this.locked = locked;
+    }
+
+    public String getDeadlineDescription() {
+        return deadlineDescription;
+    }
+
+    public void setDeadlineDescription(String deadlineDescription) {
+        this.deadlineDescription = deadlineDescription;
+    }
+    
     public boolean hasDeadlinePassed() {
         return hasDeadlinePassedAt(new Date());
     }

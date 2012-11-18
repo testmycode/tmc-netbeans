@@ -44,7 +44,7 @@ public class SaveSettingsAction extends AbstractAction {
             courseDb.setCurrentCourseName(courseName);
             LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
             if (status.thereIsSomethingToDownload()) {
-                DownloadOrUpdateExercisesDialog.display(status.downloadable, status.updateable);
+                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadable, status.updateable);
             }
         } else {
             courseDb.setCurrentCourseName(null);

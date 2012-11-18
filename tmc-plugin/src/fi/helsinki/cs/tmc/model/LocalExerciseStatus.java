@@ -14,6 +14,7 @@ public class LocalExerciseStatus {
     public ArrayList<Exercise> closed;
     public ArrayList<Exercise> downloadable;
     public ArrayList<Exercise> updateable;
+    public ArrayList<Exercise> unlockable;
 
     public static LocalExerciseStatus get(List<Exercise> allExercises) {
         return new LocalExerciseStatus(CourseDb.getInstance(), ProjectMediator.getInstance(), allExercises);
@@ -24,12 +25,15 @@ public class LocalExerciseStatus {
         closed = new ArrayList<Exercise>();
         downloadable = new ArrayList<Exercise>();
         updateable = new ArrayList<Exercise>();
+        unlockable = new ArrayList<Exercise>();
 
         for (Exercise ex : allExercises) {
             if (!ex.hasDeadlinePassed()) {
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 boolean isDownloaded = proj != null;
-                if (!isDownloaded) {
+                if (courseDb.isUnlockable(ex)) {
+                    unlockable.add(ex);
+                } else if (!isDownloaded) {
                     downloadable.add(ex);
                 } else if (projectMediator.isProjectOpen(proj)) {
                     open.add(ex);
@@ -46,12 +50,13 @@ public class LocalExerciseStatus {
     }
 
     public boolean thereIsSomethingToDownload() {
-        return !downloadable.isEmpty() || !updateable.isEmpty();
+        return !unlockable.isEmpty() || !downloadable.isEmpty() || !updateable.isEmpty();
     }
 
     @Override
     public String toString() {
         return
+                "Unlockable: " + unlockable + "\n" +
                 "Open: " + open + "\n" +
                 "Closed: " + closed + "\n" +
                 "Downloadable: " + downloadable + "\n" +
