@@ -23,10 +23,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
         dialog.setVisible(true);
     }
     
-    
-    private List<Exercise> unlockable;
-    private List<Exercise> downloadable;
-    private List<Exercise> updateable;
+    boolean haveUnlockables;
     
     private List<JCheckBox> unlockableCheckboxes;
     private HashMap<JCheckBox, Exercise> checkBoxToExercise;
@@ -39,11 +36,8 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        this.unlockable = unlockable;
-        this.downloadable = downloadable;
-        this.updateable = updateable;
-
-        if (unlockable.isEmpty()) {
+        haveUnlockables = unlockable.isEmpty();
+        if (!haveUnlockables) {
             remove(unlockCheckbox);
         }
         if (downloadable.isEmpty() && unlockable.isEmpty()) {
@@ -249,7 +243,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
             }
         }
 
-        if (unlockCheckbox.isSelected()) {
+        if (haveUnlockables && unlockCheckbox.isSelected()) {
             UnlockExercisesAction unlockAction = new UnlockExercisesAction();
             unlockAction.setSuccessListener(new ActionListener() {
                 @Override
