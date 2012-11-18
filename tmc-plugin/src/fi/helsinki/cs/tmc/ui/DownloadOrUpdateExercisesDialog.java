@@ -48,11 +48,19 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
         }
 
         for (Exercise ex : downloadable) {
-            ((CheckBoxList)downloadableList).addCheckbox(new JCheckBox(ex.getName(), true));
+            String text = ex.getName();
+            if (ex.isCompleted()) {
+                text += " (completed)";
+            }
+            ((CheckBoxList)downloadableList).addCheckbox(new JCheckBox(text, !ex.isCompleted()));
         }
-
+        
         for (Exercise ex : updateable) {
-            ((CheckBoxList)updateableList).addCheckbox(new JCheckBox(ex.getName(), true));
+            String text = ex.getName();
+            if (ex.isCompleted()) {
+                text += " (completed)";
+            }
+            ((CheckBoxList)updateableList).addCheckbox(new JCheckBox(text, !ex.isCompleted()));
         }
 
         ((CheckBoxList)downloadableList).addItemListener(updateSelectAllButtonStateListener);
