@@ -35,7 +35,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public static void startTimer() {
         int interval = 20*60*1000; // 20 minutes
-        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
+        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true, false));
         timer.setRepeats(true);
         timer.start();
     }
@@ -47,18 +47,20 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
     private boolean backgroundCheck;
+    private boolean getCompleted;
 
     public CheckForNewExercisesOrUpdates() {
-        this(false, false);
+        this(false, false, true);
     }
-    
-    public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
+
+    public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck, boolean getCompleted) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
         this.notifier = NotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
         this.backgroundCheck = backgroundCheck;
+        this.getCompleted = getCompleted;
     }
 
     @Override
@@ -87,7 +89,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                 if (receivedCourse != null) {
                     courseDb.setAvailableCourses(receivedCourseList);
 
-                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises(), getCompleted);
                     if (status.thereIsSomethingToDownload()) {
                         if (beQuiet) {
                             displayNotification(status, new ActionListener() {
