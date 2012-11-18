@@ -34,7 +34,7 @@ id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -50)
 })
-@Messages("CTL_CheckForNewExercisesOrUpdates=&Check for new exercises / updates")
+@Messages("CTL_CheckForNewExercisesOrUpdates=&Download/update exercises")
 public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public static void startTimer() {
