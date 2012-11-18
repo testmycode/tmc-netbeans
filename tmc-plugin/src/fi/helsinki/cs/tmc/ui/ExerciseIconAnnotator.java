@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.awt.Image;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -129,6 +131,11 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             
         } else {
             parts.add("exercise not yet submitted");
+        }
+        
+        if (!exercise.isCompleted() && exercise.getDeadline() != null) {
+            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
+            parts.add("deadline: " + df.format(exercise.getDeadline()));
         }
         
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
