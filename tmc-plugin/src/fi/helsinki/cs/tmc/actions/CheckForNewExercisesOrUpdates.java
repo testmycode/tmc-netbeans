@@ -92,16 +92,16 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                     courseDb.setAvailableCourses(receivedCourseList);
 
                     final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                    if (status.thereIsSomethingToDownload()) {
+                    if (status.thereIsSomethingToDownload(false)) {
                         if (beQuiet) {
                             displayNotification(status, new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadable, status.updateable);
+                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                                 }
                             });
                         } else {
-                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadable, status.updateable);
+                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                         }
                     } else if (!beQuiet) {
                         dialogs.displayMessage("No new exercises or updates to download.");
@@ -130,8 +130,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
             items.add(Inflector.pluralize(status.unlockable.size(), "an unlockable exercise"));
             actions.add("unlock");
         }
-        if (!status.downloadable.isEmpty()) {
-            items.add(Inflector.pluralize(status.downloadable.size(), "a new exercise"));
+        if (!status.downloadableUncompleted.isEmpty()) {
+            items.add(Inflector.pluralize(status.downloadableUncompleted.size(), "a new exercise"));
             actions.add("download");
         }
         if (!status.updateable.isEmpty()) {
@@ -141,7 +141,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         
         int total =
                 status.unlockable.size() +
-                status.downloadable.size() +
+                status.downloadableUncompleted.size() +
                 status.updateable.size();
         
         String msg = TmcStringUtils.joinCommaAnd(items);

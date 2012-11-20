@@ -36,7 +36,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        haveUnlockables = unlockable.isEmpty();
+        haveUnlockables = !unlockable.isEmpty();
         if (!haveUnlockables) {
             remove(unlockCheckbox);
         }
@@ -59,7 +59,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
             if (ex.isCompleted()) {
                 text += " (completed)";
             }
-            JCheckBox cb = new JCheckBox(text, !ex.isCompleted());
+            JCheckBox cb = new JCheckBox(text, true);
             checkBoxToExercise.put(cb, ex);
             ((CheckBoxList)downloadableList).addCheckbox(cb);
         }
@@ -83,7 +83,7 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
             if (ex.isCompleted()) {
                 text += " (completed)";
             }
-            JCheckBox cb = new JCheckBox(text, !ex.isCompleted());
+            JCheckBox cb = new JCheckBox(text, true);
             checkBoxToExercise.put(cb, ex);
             ((CheckBoxList)updateableList).addCheckbox(cb);
         }

@@ -53,7 +53,6 @@ public class CheckForUnopenedExercises implements ActionListener {
     }
 
     private void showNotification(List<Exercise> unopenedExercises) {
-System.out.println(unopenedExercises);
         int count = unopenedExercises.size();
         String msg;
         String prompt;

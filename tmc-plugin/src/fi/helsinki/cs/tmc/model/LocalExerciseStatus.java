@@ -12,7 +12,8 @@ public class LocalExerciseStatus {
 
     public ArrayList<Exercise> open;
     public ArrayList<Exercise> closed;
-    public ArrayList<Exercise> downloadable;
+    public ArrayList<Exercise> downloadableUncompleted;
+    public ArrayList<Exercise> downloadableCompleted;
     public ArrayList<Exercise> updateable;
     public ArrayList<Exercise> unlockable;
 
@@ -23,7 +24,8 @@ public class LocalExerciseStatus {
     private LocalExerciseStatus(CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises) {
         open = new ArrayList<Exercise>();
         closed = new ArrayList<Exercise>();
-        downloadable = new ArrayList<Exercise>();
+        downloadableUncompleted = new ArrayList<Exercise>();
+        downloadableCompleted = new ArrayList<Exercise>();
         updateable = new ArrayList<Exercise>();
         unlockable = new ArrayList<Exercise>();
 
@@ -34,7 +36,11 @@ public class LocalExerciseStatus {
                 if (courseDb.isUnlockable(ex)) {
                     unlockable.add(ex);
                 } else if (!isDownloaded) {
-                    downloadable.add(ex);
+                    if (ex.isCompleted()) {
+                        downloadableCompleted.add(ex);
+                    } else {
+                        downloadableUncompleted.add(ex);
+                    }
                 } else if (projectMediator.isProjectOpen(proj)) {
                     open.add(ex);
                 } else {
@@ -49,8 +55,11 @@ public class LocalExerciseStatus {
         }
     }
 
-    public boolean thereIsSomethingToDownload() {
-        return !unlockable.isEmpty() || !downloadable.isEmpty() || !updateable.isEmpty();
+    public boolean thereIsSomethingToDownload(boolean includeCompleted) {
+        return !unlockable.isEmpty() ||
+                !downloadableUncompleted.isEmpty() ||
+                !updateable.isEmpty() ||
+                (includeCompleted && !downloadableCompleted.isEmpty());
     }
 
     @Override
@@ -59,7 +68,8 @@ public class LocalExerciseStatus {
                 "Unlockable: " + unlockable + "\n" +
                 "Open: " + open + "\n" +
                 "Closed: " + closed + "\n" +
-                "Downloadable: " + downloadable + "\n" +
+                "Downloadable uncompleted: " + downloadableUncompleted + "\n" +
+                "Downloadable completed: " + downloadableCompleted + "\n" +
                 "Updateable: " + updateable + "\n";
     }
 
