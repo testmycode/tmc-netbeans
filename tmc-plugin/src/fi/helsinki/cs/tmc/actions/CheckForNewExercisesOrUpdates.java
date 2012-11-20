@@ -9,6 +9,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.Inflector;
@@ -24,7 +25,6 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
-import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle.Messages;
 
@@ -44,10 +44,11 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         timer.start();
     }
     
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
     
     private CourseDb courseDb;
     private ServerAccess serverAccess;
-    private NotificationDisplayer notifier;
+    private TmcNotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
     private boolean backgroundCheck;
@@ -59,7 +60,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
         this.serverAccess = new ServerAccess();
-        this.notifier = NotificationDisplayer.getDefault();
+        this.notifier = TmcNotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
         this.backgroundCheck = backgroundCheck;
@@ -150,7 +151,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         
         String prompt = "Click here to " + TmcStringUtils.joinCommaAnd(actions) + ".";
         
-        notifier.notify(msg, getNotificationIcon(), prompt, action);
+        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, action);
     }
 
     private Icon getNotificationIcon() {

@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.CodeReviewDialog;
+import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -19,11 +20,12 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
-import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
 
 public class ReviewEventListener extends TmcEventListener {
     private static final Logger log = Logger.getLogger(ReviewEventListener.class.getName());
+    
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
     
     private static ReviewEventListener instance;
     
@@ -37,11 +39,11 @@ public class ReviewEventListener extends TmcEventListener {
     }
 
     private ServerAccess serverAccess;
-    private NotificationDisplayer notifier;
+    private TmcNotificationDisplayer notifier;
     
     ReviewEventListener() {
         this.serverAccess = new ServerAccess();
-        this.notifier = NotificationDisplayer.getDefault();
+        this.notifier = TmcNotificationDisplayer.getDefault();
     }
     
     public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
@@ -70,7 +72,7 @@ public class ReviewEventListener extends TmcEventListener {
                 }
                 Icon icon = ImageUtilities.image2Icon(img);
 
-                notifier.notify(title, icon, msg, new ActionListener() {
+                notifier.notify(notifierToken, title, icon, msg, new ActionListener() {
                     @Override
                     public void actionPerformed(ActionEvent e) {
                         showReviewDialog(review);

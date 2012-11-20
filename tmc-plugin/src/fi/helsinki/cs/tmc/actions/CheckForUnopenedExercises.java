@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
@@ -18,14 +19,16 @@ public class CheckForUnopenedExercises implements ActionListener {
         return TmcSettings.getDefault().isCheckingForUnopenedAtStartup();
     }
     
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    
     private ProjectMediator projects;
     private CourseDb courseDb;
-    private NotificationDisplayer notifier;
+    private TmcNotificationDisplayer notifier;
 
     public CheckForUnopenedExercises() {
         this.projects = ProjectMediator.getInstance();
         this.courseDb = CourseDb.getInstance();
-        this.notifier = NotificationDisplayer.getDefault();
+        this.notifier = TmcNotificationDisplayer.getDefault();
     }
     
     @Override
@@ -63,7 +66,7 @@ public class CheckForUnopenedExercises implements ActionListener {
             msg = "There are " + count + " exercises that are downloaded but not opened.";
             prompt = "Click here to open them.";
         }
-        notifier.notify(msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
+        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
     }
     
     private ActionListener openAction(final List<Exercise> exercises) {
