@@ -284,6 +284,18 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return fo;
     }
     
+    private boolean endorsedLibsExist(final TmcProjectInfo projectInfo){
+        File endorsedDir = endorsedLibsPath(projectInfo);
+        return endorsedDir.exists() && endorsedDir.isDirectory();
+    }
+    
+    private File  endorsedLibsPath(final TmcProjectInfo projectInfo) {
+        String path = FileUtil.toFile(projectInfo.getProjectDir()).getAbsolutePath() + File.separatorChar +
+                "lib" + File.separatorChar +
+                "endorsed";
+        return new File(path);
+    }
+    
     private void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
         File tempFile;
         try {
@@ -298,6 +310,10 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             args.add("-Dtmc.test_class_dir=" + FileUtil.toFile(testDir).getAbsolutePath());
             args.add("-Dtmc.results_file=" + tempFile.getAbsolutePath());
             args.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
+            
+            if (endorsedLibsExist(projectInfo)) {
+                args.add("-Djava.endorsed.dirs=" + endorsedLibsPath(projectInfo));
+            }
             
             Integer memoryLimit = getMemoryLimit(projectInfo.getProject());
             if (memoryLimit != null) {
