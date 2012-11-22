@@ -283,6 +283,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
         return fo;
     }
+    private boolean endorsedDirInLib(final TmcProjectInfo projectInfo){
+        String endorsedPath = FileUtil.toFile(projectInfo.getProjectDir()).getAbsolutePath()+"/lib/endorsed/";
+        File endorsedDir = new File(endorsedPath);
+        return endorsedDir.exists() && endorsedDir.isDirectory();
+    }
     
     private void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
         File tempFile;
@@ -298,6 +303,10 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             args.add("-Dtmc.test_class_dir=" + FileUtil.toFile(testDir).getAbsolutePath());
             args.add("-Dtmc.results_file=" + tempFile.getAbsolutePath());
             args.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
+            
+            if (endorsedDirInLib(projectInfo)){
+                args.add("-Djava.endorsed.dirs="+ FileUtil.toFile(projectInfo.getProjectDir()).getAbsolutePath() + "/lib/endorsed/");
+            }
             
             Integer memoryLimit = getMemoryLimit(projectInfo.getProject());
             if (memoryLimit != null) {
