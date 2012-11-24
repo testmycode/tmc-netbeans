@@ -27,6 +27,7 @@ public class Course {
     public Course(String name) {
         this.name = name;
         this.exercises = new ArrayList<Exercise>();
+        this.unlockables = new ArrayList<String>();
     }
 
     public String getName() {
