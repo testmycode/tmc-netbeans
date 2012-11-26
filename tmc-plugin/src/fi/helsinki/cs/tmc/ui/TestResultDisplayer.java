@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
@@ -116,9 +117,9 @@ public class TestResultDisplayer {
     }
     
     /**
-     * Shows local results and returns whether a submission should be started.
+     * Shows local results and calls the callback if a submission should be started.
      */
-    public boolean showLocalRunResult(List<TestCaseResult> results, boolean canSubmit) {
+    public void showLocalRunResult(List<TestCaseResult> results, boolean canSubmit, final Runnable submissionCallback) {
         int numFailed = 0;
         for (TestCaseResult result : results) {
             if (!result.isSuccessful()) {
@@ -128,10 +129,17 @@ public class TestResultDisplayer {
         
         if (numFailed == 0 && canSubmit) {
             displayTestCases(results, false);
-            return dialogs.askYesNo("All tests passed. Submit to server?", "Submit?");
+            dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
+                @Override
+                public Void apply(Boolean yes) {
+                    if (yes) {
+                        submissionCallback.run();
+                    }
+                    return null;
+                }
+            });
         } else {
             displayTestCases(results, true);
-            return false;
         }
     }
     

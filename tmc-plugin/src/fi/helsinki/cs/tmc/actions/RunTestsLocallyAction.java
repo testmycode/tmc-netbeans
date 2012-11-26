@@ -369,7 +369,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
     
-    private void handleTestResults(TmcProjectInfo projectInfo, File resultsFile) {
+    private void handleTestResults(final TmcProjectInfo projectInfo, File resultsFile) {
         List<TestCaseResult> results;
         try {
             String resultJson = FileUtils.readFileToString(resultsFile, "UTF-8");
@@ -379,10 +379,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             return;
         }
         boolean canSubmit = submitAction.enable(projectInfo.getProject());
-        boolean shouldSubmit = resultDisplayer.showLocalRunResult(results, canSubmit);
-        if (shouldSubmit) {
-            submitAction.performAction(projectInfo.getProject());
-        }
+        resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
+            @Override
+            public void run() {
+                submitAction.performAction(projectInfo.getProject());
+            }
+        });
     }
     
     private List<TestCaseResult> parseTestResults(String json) {

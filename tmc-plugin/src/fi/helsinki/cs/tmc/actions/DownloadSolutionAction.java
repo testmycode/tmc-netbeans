@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -89,8 +90,8 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     protected void performAction(Node[] nodes) {
         projectMediator.saveAllFiles();
         
-        for (Project project : projectsFromNodes(nodes)) {
-            Exercise ex = exerciseForProject(project);
+        for (final Project project : projectsFromNodes(nodes)) {
+            final Exercise ex = exerciseForProject(project);
             if (ex.getSolutionDownloadUrl() == null) {
                 // We shouldn't be visible any more.
                 // See https://github.com/testmycode/tmc-netbeans/issues/45
@@ -98,9 +99,17 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 return;
             }
             
-            if (dialogs.askYesNo("Are you sure you want to OVERWRITE your copy of\n" + ex.getName() + " with the suggested solution?", "Replace with solution?")) {
-                downloadSolution(ex, projectMediator.wrapProject(project));
-            }
+            String question = "Are you sure you want to OVERWRITE your copy of\n" + ex.getName() + " with the suggested solution?";
+            String title = "Replace with solution?";
+            dialogs.askYesNo(question, title, new Function<Boolean, Void>() {
+                @Override
+                public Void apply(Boolean yes) {
+                    if (yes) {
+                        downloadSolution(ex, projectMediator.wrapProject(project));
+                    }
+                    return null;
+                }
+            });
         }
     }
 

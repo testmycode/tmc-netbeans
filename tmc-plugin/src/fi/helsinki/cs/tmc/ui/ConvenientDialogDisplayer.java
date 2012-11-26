@@ -1,6 +1,9 @@
 package fi.helsinki.cs.tmc.ui;
 
+import com.google.common.base.Function;
 import java.awt.Component;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import javax.swing.ImageIcon;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -83,13 +86,19 @@ public class ConvenientDialogDisplayer {
         return new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/smile.gif"));
     }
     
-    public boolean askYesNo(String question, String title) {
+    public void askYesNo(String question, String title, final Function<Boolean, Void> listener) {
         DialogDescriptor desc = new DialogDescriptor(question, title);
-        desc.setModal(true);
+        desc.setModal(false); // Modal would be better but NB or Swing is buggy and sometimes makes non-modal dialogs get in the way
         desc.setOptions(new Object[] { DialogDescriptor.YES_OPTION, DialogDescriptor.NO_OPTION });
         desc.setValue(DialogDescriptor.YES_OPTION);
         desc.setMessageType(DialogDescriptor.QUESTION_MESSAGE);
-        Object response = DialogDisplayer.getDefault().notify(desc);
-        return (response == DialogDescriptor.YES_OPTION);
+        desc.setButtonListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                boolean yes = (e.getSource() == DialogDescriptor.YES_OPTION);
+                listener.apply(yes);
+            }
+        });
+        DialogDisplayer.getDefault().notify(desc);
     }
 }
