@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+AutoUpdate-Show-In-Client: false
+OpenIDE-Module: fi.helsinki.cs.tmc.application
+OpenIDE-Module-Localizing-Bundle: fi/helsinki/cs/tmc/application/Bundle.properties
+OpenIDE-Module-Specification-Version: 1.0
+OpenIDE-Module-Install: fi/helsinki/cs/tmc/application/TmcAppModuleInstall.class

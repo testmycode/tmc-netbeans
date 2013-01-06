@@ -4,9 +4,9 @@ This is a NetBeans plugin for the [Test My Code server](https://github.com/testm
 
 ## Developer setup ##
 
-To ensure compatibility to a specific release, the project is configured to use a fresh unpatched installation of a specific version of NetBeans (currently 7.2). Download the "OS Independent Zip" edition of this version of NetBeans and extract it somewhere.
+To ensure compatibility to a specific release, the project is configured to use a fresh unpatched installation of a specific version of NetBeans (currently 7.2.1). Download the "OS Independent Zip" edition of this version of NetBeans and extract it somewhere.
 Then start your ordinary NetBeans (NOT the one you just extracted, another one). Go to `Tools -> NetBeans Platforms` and
-add the extracted directory as a new platform. It should get automatically named something like "nb72".
+add the extracted directory as a new platform. It should get automatically named something like "nb721".
 
 Now open the plugin's master project in NetBeans and build it. Then right click the project and select `Open Required Projects`. If NB shows errors in the editor, try restarting NB (they should have been eliminated after the first build). Now the project should work as any other NB plugin project.
 

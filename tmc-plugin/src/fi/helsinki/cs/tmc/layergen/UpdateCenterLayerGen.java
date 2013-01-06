@@ -69,7 +69,7 @@ public class UpdateCenterLayerGen extends Repository.LayerProvider {
                 "            <file name=\"fi_helsinki_cs_tmc_update_center.instance\">\n" +
                 "                <attr name=\"displayName\" stringvalue=\"" + tailoring.getUpdateCenterTitle() + "\"/>\n" +
                 "                <attr name=\"enabled\" boolvalue=\"true\"/>\n" +
-                "               <attr name=\"instanceCreate\" methodvalue=\"org.netbeans.modules.autoupdate.updateprovider.AutoupdateCatalogFactory.createUpdateProvider\"/>\n" +
+                "                <attr name=\"instanceCreate\" methodvalue=\"org.netbeans.modules.autoupdate.updateprovider.AutoupdateCatalogFactory.createUpdateProvider\"/>\n" +
                 "                <attr name=\"instanceOf\" stringvalue=\"org.netbeans.spi.autoupdate.UpdateProvider\"/>\n" +
                 "                <attr name=\"url\" stringvalue=\"" + tailoring.getUpdateCenterUrl() + "\"/>\n" +
                 "           </file>\n" +
