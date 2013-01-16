@@ -28,7 +28,7 @@
         
         <delete dir="mavenmodules"/>
         <copy todir="mavenmodules">
-            <fileset dir="maven-wrapper/target/nbm/netbeans/tmc_netbeans"/>
+            <fileset dir="maven-wrapper/target/nbm/netbeans/tmcbeans"/>
         </copy>
     </target>
     

@@ -307,7 +307,7 @@
                 <version>3.7</version>
                 <extensions>true</extensions>
                 <configuration>
-                    <cluster>tmc_netbeans</cluster>
+                    <cluster>tmcbeans</cluster>
                     <publicPackages>
                         <publicPackage>fi.helsinki.cs.tmc.maven.wrapper</publicPackage>
                         <publicPackage>com.google.*</publicPackage>
