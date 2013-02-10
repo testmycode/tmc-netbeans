@@ -47,10 +47,13 @@ public class TmcProjectInfo {
         return TmcProjectFile.forProject(FileUtil.toFile(getProjectDir()));
     }
     
+    //TODO: a more robust/elegant/extensible project type recognition system
     public TmcProjectType getProjectType() {
         String pd = getProjectDirAbsPath();
         if (new File(pd + File.separatorChar + "pom.xml").exists()) {
             return TmcProjectType.JAVA_MAVEN;
+        } else if (new File(pd + File.separatorChar + "Makefile").exists()) {
+            return TmcProjectType.MAKEFILE;
         } else {
             return TmcProjectType.JAVA_SIMPLE;
         }

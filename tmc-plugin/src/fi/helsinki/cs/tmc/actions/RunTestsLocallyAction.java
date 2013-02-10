@@ -142,7 +142,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 return startCompilingAntProject(projectInfo);
             case JAVA_MAVEN:
                 return startCompilingMavenProject(projectInfo);
-            case C_SIMPLE:
+            case MAKEFILE:
                 return startCompilingCheckProject(projectInfo);
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
@@ -173,13 +173,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         if (makeFile == null) {
             throw new RuntimeException("Project has no Makefile");
         }
-        String[] command = {"make", "check"};
+        String[] command = {"make", "tmc-check-example"};
         File workDir = null;
         try {
             workDir = new File(project.getProjectDirectory().asText());
         } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
-            Exceptions.attachMessage(ex, "Bäng Bäng, vituix män"); //TODO: Poista ennen viralliseen TMCeehen mergeämistä
         }
         final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
         final ProcessRunner runner = new ProcessRunner(command, workDir, io);
