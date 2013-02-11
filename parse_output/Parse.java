@@ -175,7 +175,7 @@ public class Parse {
     }
 
     private static void addPoints(File testPoints, HashMap<String, Test> tests, HashMap<String, TestSuite> testSuites) throws FileNotFoundException {
-        Scanner scanner = new Scanner(testPoints);
+        Scanner scanner = new Scanner(testPoints, "UTF-8");
         while (scanner.hasNextLine()) {
             String[] splitLine = scanner.nextLine().split(" ");
             if (splitLine[0].equals("[test]")) {
@@ -201,7 +201,7 @@ public class Parse {
     }
 
     private static void addValgrindOutput(File valgrindOutput, ArrayList<Test> tests) throws FileNotFoundException {
-        Scanner scanner = new Scanner(valgrindOutput);
+        Scanner scanner = new Scanner(valgrindOutput, "UTF-8");
         String parentOutput = ""; // Contains total amount of memory used and such things. Useful if we later want to add support for testing memory usage
         String[] outputs = new String[tests.size()];
         for (int i = 0; i < outputs.length; i++) {
