@@ -1,0 +1,24 @@
+<?xml version="1.0"?>
+<testsuites xmlns="http://check.sourceforge.net/ns">
+  <datetime>2013-02-11 12:43:50</datetime>
+  <suite>
+    <title>test-tmc-check</title>
+    <test result="success">
+      <path>.</path>
+      <fn>tmc-check-example.c:7</fn>
+      <id>test_foo</id>
+      <iteration>0</iteration>
+      <description>test_foo</description>
+      <message>Passed</message>
+    </test>
+    <test result="failure">
+      <path>.</path>
+      <fn>tmc-check-example.c:13</fn>
+      <id>test_bar</id>
+      <iteration>0</iteration>
+      <description>test_bar</description>
+      <message>asdasd</message>
+    </test>
+  </suite>
+  <duration>0.000000</duration>
+</testsuites>
