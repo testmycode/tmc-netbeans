@@ -4,6 +4,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -171,12 +172,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         Project project = projectInfo.getProject();
         FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
         File workDir = projectInfo.getProjectDirAsFile();
-       
+
         if (makeFile == null) {
             throw new RuntimeException("Project has no Makefile");
         }
         String[] command = {"make", "tmc-check-example"};
-        
+
         final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
         final ProcessRunner runner = new ProcessRunner(command, workDir, io);
         return new Callable<Integer>() {
@@ -254,16 +255,41 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         List<TestMethod> tests = findProjectTests(projectInfo, testDir);
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
     }
-    
+
     private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo) {
         File testDir = projectInfo.getProjectDirAsFile();
         String[] command = {"./tmc-check-example"};
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
-        try {
-            runner.call();
-        } catch (Exception ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
+            @Override
+            public void bgTaskReady(ProcessResult result) {
+                CTestResultParser parser = new CTestResultParser(new File("tmc_test_results.xml"),
+                        new File("tmc_available_points.txt"), new File("val.log"));
+                try {
+                    parser.parseTestOutput();
+                } catch (Exception e) {
+                    dialogDisplayer.displayError("Failed to read test results", e);
+                    return;
+                }
+                boolean canSubmit = submitAction.enable(projectInfo.getProject());
+                List<TestCaseResult> results = parser.getTestCaseResults();
+                resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
+                    @Override
+                    public void run() {
+                        submitAction.performAction(projectInfo.getProject());
+                    }
+                });
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
+            }
+        });
     }
 
     private void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
