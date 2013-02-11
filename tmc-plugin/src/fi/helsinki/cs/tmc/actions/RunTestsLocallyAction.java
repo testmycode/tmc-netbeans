@@ -143,7 +143,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             case JAVA_MAVEN:
                 return startCompilingMavenProject(projectInfo);
             case MAKEFILE:
-                return startCompilingCheckProject(projectInfo);
+                return startCompilingMakefileProject(projectInfo);
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
         }
@@ -164,22 +164,19 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private Callable<Integer> startCompilingCheckProject(TmcProjectInfo projectInfo) {
+    private Callable<Integer> startCompilingMakefileProject(TmcProjectInfo projectInfo) {
         /* This solution is pretty much copied from the pre-existing Maven option.
          * I have no idea how well it will work, but this is a start.
          * --kviiri */
         Project project = projectInfo.getProject();
         FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
+        File workDir = projectInfo.getProjectDirAsFile();
+       
         if (makeFile == null) {
             throw new RuntimeException("Project has no Makefile");
         }
         String[] command = {"make", "tmc-check-example"};
-        File workDir = null;
-        try {
-            workDir = new File(project.getProjectDirectory().asText());
-        } catch (IOException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        
         final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
         final ProcessRunner runner = new ProcessRunner(command, workDir, io);
         return new Callable<Integer>() {
@@ -239,6 +236,9 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             case JAVA_MAVEN:
                 startRunningMavenProjectTests(projectInfo);
                 break;
+            case MAKEFILE:
+                startRunningMakefileProjectTests(projectInfo);
+                break;
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
         }
@@ -253,6 +253,17 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
         List<TestMethod> tests = findProjectTests(projectInfo, testDir);
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
+    }
+    
+    private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo) {
+        File testDir = projectInfo.getProjectDirAsFile();
+        String[] command = {"./tmc-check-example"};
+        ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
+        try {
+            runner.call();
+        } catch (Exception ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
     private void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
