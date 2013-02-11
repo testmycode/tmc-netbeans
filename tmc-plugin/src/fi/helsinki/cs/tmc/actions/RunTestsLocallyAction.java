@@ -257,14 +257,15 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
 
     private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo) {
-        File testDir = projectInfo.getProjectDirAsFile();
-        String[] command = {"./tmc-check-example"};
+        final File testDir = projectInfo.getProjectDirAsFile();
+        String[] command = {"valgrind --log-file=val.log ./tmc-check-example"};
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
-                CTestResultParser parser = new CTestResultParser(new File("tmc_test_results.xml"),
-                        new File("tmc_available_points.txt"), new File("val.log"));
+                CTestResultParser parser = new CTestResultParser(new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
+                        new File(testDir.getAbsolutePath() + "/tmc_available_points.txt"), 
+                        new File(testDir.getAbsolutePath() + "/val.log"));
                 try {
                     parser.parseTestOutput();
                 } catch (Exception e) {
