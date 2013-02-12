@@ -11,6 +11,7 @@ import junit.framework.Test;
 import org.netbeans.jellytools.EditorOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
 import org.netbeans.jellytools.actions.Action;
+import org.netbeans.jellytools.actions.ActionNoBlock;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
 import org.netbeans.jemmy.operators.JButtonOperator;
@@ -34,6 +35,7 @@ public class UpdatingExercisesTest extends TmcFunctionalTestCase {
 
         JDialogOperator downloadDialog = new JDialogOperator("Download exercises");
         new JButtonOperator(downloadDialog, "Download").doClick();
+        Thread.sleep(2000);
 
         exercise.checksum = "new checksum";
         exercise.zipData = new ZipFilter() {
@@ -48,11 +50,15 @@ public class UpdatingExercisesTest extends TmcFunctionalTestCase {
         }.filter(exercise.zipData);
         serverFixture.updateServerCourseList();
 
-        new Action("TMC|Check for new exercises / updates", null).perform();
-        Thread.sleep(1000);
+        // No idea why, but if this is a plain Action then it usually (but not always)
+        // clicks the menu item but then hangs and finally fails claiming to not be able to click it.
+        new ActionNoBlock("TMC|Download/update exercises", null).perform();
+        Thread.sleep(2000);
 
         JDialogOperator updateDialog = new JDialogOperator("Update exercises");
+        Thread.sleep(1000);
         new JButtonOperator(updateDialog, "Update").doClick();
+        Thread.sleep(2000);
 
         Node projectNode = ProjectsTabOperator.invoke().getProjectRootNode("TestProject");
         Node sourceFileNode = new Node(projectNode, "Test Packages|<default package>|MainTest.java");
