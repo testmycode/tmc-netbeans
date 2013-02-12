@@ -29,7 +29,7 @@ public class RecursiveZipper {
     }
     
     /**
-     * Zip up a project directory, only including the "src" subdirectory.
+     * Zip up a project directory, only including stuff decided by the {@link ZippingDecider}.
      */
     public byte[] zipProjectSources() throws IOException {
         if (!rootDir.exists() || !rootDir.isDirectory()) {
