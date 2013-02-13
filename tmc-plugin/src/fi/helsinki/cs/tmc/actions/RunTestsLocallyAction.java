@@ -176,7 +176,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         if (makeFile == null) {
             throw new RuntimeException("Project has no Makefile");
         }
-        String[] command = {"make"};
+        String[] command = {"make", "test"};
 
         final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
         final ProcessRunner runner = new ProcessRunner(command, workDir, io);
@@ -258,14 +258,14 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo) {
         final File testDir = projectInfo.getProjectDirAsFile();
-        String[] command = {"valgrind", "--log-file=val.log", "./tmc-check-example"};
+        String[] command = {"valgrind", "--log-file=valgrind.log", "./test/test"};
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
                 CTestResultParser parser = new CTestResultParser(new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
                         new File(testDir.getAbsolutePath() + "/tmc_available_points.txt"), 
-                        new File(testDir.getAbsolutePath() + "/val.log"));
+                        new File(testDir.getAbsolutePath() + "/valgrind.log"));
                 try {
                     parser.parseTestOutput();
                 } catch (Exception e) {
