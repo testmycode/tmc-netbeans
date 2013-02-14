@@ -25,6 +25,7 @@ import org.xml.sax.SAXException;
  * @author rase
  */
 public class CTestResultParser {
+
     private File testResults;
     private File valgrindOutput;
     private ArrayList<CTestCase> tests;
@@ -36,7 +37,10 @@ public class CTestResultParser {
     }
 
     public void parseTestOutput() throws SAXException, IOException, ParserConfigurationException {
-        this.tests = parseTestCases(testResults);
+        try {
+            this.tests = parseTestCases(testResults);
+        } catch (Exception e) {
+        }
         if (valgrindOutput != null) {
             addValgrindOutput();
         }
