@@ -122,6 +122,11 @@ class Test {
 public class Parse {
 
     public static void main(String[] args) {
+        String cmd = "make; valgrind ./test/test";
+        Runtime rt = Runtime.getRuntime();
+        Process pr = rt.exec(cmd);
+        pr.waitFor();
+        
         File testOutput = new File("tmc_test_results.xml");
         File testPoints = new File("tmc_available_points.txt");
         File valgrindTraces = new File("val.log");
