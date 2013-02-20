@@ -1,3 +1,0 @@
-[suite] test-tmc-check 2.5 2.6 2.7
-[test] test_bar 1.2
-[test] test_foo 1.1 1.2
