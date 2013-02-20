@@ -25,4 +25,13 @@ public class RunningTestsLocallyWhenTestsSucceedTest extends TmcFunctionalTestCa
         // It should succeed and display the "Submit to server?" dialog
         new NbDialogOperator("Submit?").btNo().doClick();
     }
+    
+     public void testRunningTestsForCProjectLocallyWhenTestsSucceed() throws Exception {
+        arrangeForCourseToBeDownloaded("TestCourse");
+
+        ProjectsTabOperator.invoke().getProjectRootNode("TestProject").select();
+        new Action("TMC|Run tests locally", null).performMenu();
+        // It should succeed and display the "Submit to server?" dialog
+        new NbDialogOperator("Submit?").btNo().doClick();
+    }
 }
