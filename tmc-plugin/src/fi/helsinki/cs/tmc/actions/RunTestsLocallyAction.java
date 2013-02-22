@@ -268,7 +268,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 try {
                     parser.parseTestOutput();
                 } catch (Exception e) {
-                    dialogDisplayer.displayError("Failed to read test results:\n" + e.getMessage());
+                    dialogDisplayer.displayError("Failed to read test results:\n" + e.getClass() + " " + e.getMessage());
                     return;
                 }
                 boolean canSubmit = submitAction.enable(projectInfo.getProject());

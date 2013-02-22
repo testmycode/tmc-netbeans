@@ -78,6 +78,7 @@ public class CTestResultParser {
         Scanner scanner = new Scanner(valgrindOutput, "UTF-8");
         String parentOutput = ""; // Contains total amount of memory used and such things. Useful if we later want to add support for testing memory usage
         String[] outputs = new String[tests.size()];
+        int[] pids = new int[tests.size()];
         for (int i = 0; i < outputs.length; i++) {
             outputs[i] = "";
         }
@@ -94,8 +95,7 @@ public class CTestResultParser {
             if (pid == firstPID) {
                 parentOutput += "\n" + line;
             } else {
-                int index = pid - firstPID - 1;
-                outputs[index] += "\n" + line;
+                outputs[findIndex(pid, pids)] += "\n" + line;
             }
         }
         scanner.close();
@@ -104,7 +104,18 @@ public class CTestResultParser {
             tests.get(i).setValgrindTrace(outputs[i]);
         }
     }
-
+    
+    private int findIndex(int pid, int[] pids) {
+        for (int i = 0; i < pids.length; i++) {
+            if (pids[i] == pid) return i;
+            if (pids[i] == 0) {
+                pids[i] = pid;
+                return i;
+            }
+        }
+        return 0;
+    }
+    
     private int parsePID(String line) {
         try {
             return Integer.parseInt(line.split(" ")[0].replaceAll("(==|--)", ""));
