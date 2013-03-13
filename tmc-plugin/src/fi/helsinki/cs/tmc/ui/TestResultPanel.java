@@ -153,6 +153,11 @@ class TestResultPanel extends JPanel {
                 this.backtraceButton = new JButton(backtraceAction);
                 gbc.weighty = 1.0; // Leave it so for the backtrace
                 this.add(backtraceButton, gbc);
+            } else if (result.getValgrindTrace() != null) {
+                add(Box.createVerticalStrut(16), gbc);
+                this.backtraceButton = new JButton(valgrindAction);
+                gbc.weighty = 1.0; // Leave it so for the backtrace
+                this.add(backtraceButton, gbc);
             } else {
                 this.backtraceButton = null;
             }
@@ -226,6 +231,42 @@ class TestResultPanel extends JPanel {
                 htmlBuilder = new StringBuilder();
             }
         }
+        
+        private static class ValgrindDisplay extends JEditorPane {
+            private String content;
+            
+            public ValgrindDisplay() {
+                this.content = "";
+                this.setEditable(false);
+                this.setContentType("text/plain");
+                this.setBackground(UIManager.getColor("Label.background"));
+            }
+
+            public void setContent(String content) {
+                this.content = content;
+            }
+            
+            public void finish() {
+                this.setText(content);
+            }
+        }
+        
+        private Action valgrindAction = new AbstractAction("Show valgrind trace") {
+
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                remove(backtraceButton);
+                
+                ValgrindDisplay display = new ValgrindDisplay();
+                String output = result.getValgrindTrace();
+                display.setContent(output);
+                display.finish();
+                add(display, gbc);
+                
+                revalidate();
+            }
+            
+        };
         
         private Action backtraceAction = new AbstractAction("Show backtrace") {
             @Override

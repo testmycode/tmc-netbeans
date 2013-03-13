@@ -36,10 +36,7 @@ public class CTestCase {
     public TestCaseResult createTestCaseResult() {
         boolean successful = (result.equals("success"));
         String msg = message;
-        if (valgrindTrace != null) {
-            msg += valgrindTrace;
-        }
-        return new TestCaseResult(name, successful, msg);
+        return new TestCaseResult(name, successful, msg, valgrindTrace);
     }
     
     public String getName() {
