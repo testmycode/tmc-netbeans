@@ -163,8 +163,11 @@ public class CTestResultParserTest {
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
         assertEquals("There should be two test results", 2, results.size());
-        assertEquals("Passed\n==2== 1. test", results.get(0).getMessage());
-        assertEquals("This test should've failed\n==3== 2. test", results.get(1).getMessage());
+        int i = 2;
+        for (TestCaseResult r : results) {
+            assertEquals("\n==" + i * 2 + "== " + (i - 1), r.getValgrindTrace());
+            i++;
+        }
     }
     
     public File constructTestOutput(ArrayList<CTestCase> testCases) throws IOException {
@@ -197,14 +200,14 @@ public class CTestResultParserTest {
     public File constructValgrindOutput(ArrayList<CTestCase> testCases) throws IOException {
         File tmp = File.createTempFile("valgrind", ".log");
         PrintWriter pw = new PrintWriter(tmp);
-        pw.println("==1== Main process");
+        pw.println("==" + testCases.size() * 2 + 1 +"== Main process");
         int i = 2;
         for (CTestCase t : testCases) {
-            pw.println("==" + i + "== " + (i - 1) + ". test");
+            pw.println("==" + i * 2 + "== " + (i - 1));
             pw.println("Some crap that should be ignore");
             i++;
         }
-        pw.println("==1== Done");
+        pw.println("==" + testCases.size() * 2 + 1 +"== Done");
         
         pw.flush();
         pw.close();
