@@ -32,17 +32,18 @@ public class ValgrindMemoryTester {
     
     private static void failLeakingTest(CTestCase test) {
         String line = findLine(test.getValgrindTrace(), "definitely lost");
-        Pattern p = Pattern.compile("[0-9]*");
+        Pattern p = Pattern.compile("\\d+");
         Matcher m = p.matcher(line);
         if (m.find()) {
-            String s = m.group(3); // Third group is "bytes allocated"
+            m.find();
+            String s = m.group(); // Second group is lost bytes
             try {
                 int leakedBytes = Integer.parseInt(s);
                 if (leakedBytes > 0 && test.getResult().equals("success")) {
                     test.setResult("failure");
                     test.setMessage("Unit tests passed, but a memory leak was detected. Please refer to the Valgrind trace for more details.");
                 }
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
         }
@@ -50,18 +51,21 @@ public class ValgrindMemoryTester {
     
     private static void failTestUsingExcessMemory(CTestCase test) {
         // This might prove to be challenging. It seems that what you get back from the server is completely different from what you get locally
-        String line = findLine(test.getValgrindTrace(), "allocs used");
-        Pattern p = Pattern.compile("[0-9]*");
+        String line = findLine(test.getValgrindTrace(), "bytes allocated");
+        Pattern p = Pattern.compile("\\d+");
         Matcher m = p.matcher(line);
         if (m.find()) {
-            String s = m.group(1);
+            m.find();
+            m.find();
+            m.find();
+            String s = m.group(); // Fourth group is "bytes allocated"
             try {
                 int usedAllocs = Integer.parseInt(s);
-                if (usedAllocs > test.getMaxAllocations() && test.getResult().equals("success")) {
+                if (usedAllocs > test.getMaxBytesAllocated() && test.getResult().equals("success")) {
                     test.setResult("failure");
-                    test.setMessage("Unit tests passed, but a memory leak was detected. Please refer to the Valgrind trace for more details.");
+                    test.setMessage("Unit tests passed, but too much memory was used. Refer to the exercise description.");
                 }
-            } catch (Exception e) {
+            } catch (NumberFormatException e) {
                 e.printStackTrace();
             }
         }

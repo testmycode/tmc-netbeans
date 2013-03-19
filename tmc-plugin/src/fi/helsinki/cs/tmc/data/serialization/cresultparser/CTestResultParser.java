@@ -5,6 +5,7 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.utilities.valrindmemorytest.ValgrindMemoryTester;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,13 +27,15 @@ import org.xml.sax.SAXException;
  */
 public class CTestResultParser {
 
+    private File memoryOptions;
     private File testResults;
     private File valgrindOutput;
     private ArrayList<CTestCase> tests;
 
-    public CTestResultParser(File testResults, File valgrindOutput) {
+    public CTestResultParser(File testResults, File valgrindOutput, File memoryOptions) {
         this.testResults = testResults;
         this.valgrindOutput = valgrindOutput;
+        this.memoryOptions = memoryOptions;
         this.tests = new ArrayList<CTestCase>();
     }
 
@@ -43,7 +46,17 @@ public class CTestResultParser {
         }
         if (valgrindOutput != null) {
             addValgrindOutput();
+            
+            if (memoryOptions != null) {
+                addMemoryTests();
+                ValgrindMemoryTester.analyzeMemory(tests);
+            }
         }
+
+    }
+
+    public List<CTestCase> getTestCases() {
+        return this.tests;
     }
 
     public List<TestCaseResult> getTestCaseResults() {
@@ -72,6 +85,34 @@ public class CTestResultParser {
         }
 
         return tests;
+    }
+
+    private void addMemoryTests() throws FileNotFoundException {
+        HashMap<String, String> memoryInfoByName = new HashMap<String, String>();
+        Scanner scanner = new Scanner(memoryOptions, "UTF-8");
+        while (scanner.hasNextLine()) {
+            String[] split = scanner.nextLine().split(" ");
+            memoryInfoByName.put(split[0], split[1] + " " + split[2]);
+        }
+        scanner.close();
+
+        for (CTestCase t : tests) {
+            String str = memoryInfoByName.get(t.getName());
+            if (str == null) {
+                continue;
+            }
+            String[] params = str.split(" ");
+            int checkLeaks, maxBytes;
+            try {
+                checkLeaks = Integer.parseInt(params[0]);
+                maxBytes = Integer.parseInt(params[1]);
+            } catch (Exception e) {
+                checkLeaks = 0;
+                maxBytes = -1;
+            }
+            t.setMaxBytesAllocated(maxBytes);
+            t.setCheckedForMemoryLeaks(checkLeaks == 1);
+        }
     }
 
     private void addValgrindOutput() throws FileNotFoundException {
@@ -104,10 +145,12 @@ public class CTestResultParser {
             tests.get(i).setValgrindTrace(outputs[i]);
         }
     }
-    
+
     private int findIndex(int pid, int[] pids) {
         for (int i = 0; i < pids.length; i++) {
-            if (pids[i] == pid) return i;
+            if (pids[i] == pid) {
+                return i;
+            }
             if (pids[i] == 0) {
                 pids[i] = pid;
                 return i;
@@ -115,7 +158,7 @@ public class CTestResultParser {
         }
         return 0;
     }
-    
+
     private int parsePID(String line) {
         try {
             return Integer.parseInt(line.split(" ")[0].replaceAll("(==|--)", ""));

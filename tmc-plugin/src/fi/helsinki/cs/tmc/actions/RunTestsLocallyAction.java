@@ -263,8 +263,10 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
-                CTestResultParser parser = new CTestResultParser(new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
-                        new File(testDir.getAbsolutePath() + "/valgrind.log"));
+                CTestResultParser parser = new CTestResultParser(
+                        new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
+                        new File(testDir.getAbsolutePath() + "/valgrind.log"),
+                        null);
                 try {
                     parser.parseTestOutput();
                 } catch (Exception e) {

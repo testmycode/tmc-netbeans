@@ -17,7 +17,7 @@ public class CTestCase {
     private String points;
     private String valgrindTrace;
     private boolean checkedForMemoryLeaks;
-    private int maxAllocations = -1;
+    private int maxBytesAllocated = -1;
 
     public CTestCase(String name, String result, String message, String points, String valgrindTrace) {
         this(name);
@@ -87,14 +87,19 @@ public class CTestCase {
     }
     
     public boolean isCheckedForMemoryUsage() {
-        return this.maxAllocations >= 0;
+        return this.maxBytesAllocated >= 0;
     }
     
-    public int getMaxAllocations() {
-        return maxAllocations;
+    public int getMaxBytesAllocated() {
+        return maxBytesAllocated;
     }
 
-    public void setMaxAllocations(int maxAllocations) {
-        this.maxAllocations = maxAllocations;
+    public void setMaxBytesAllocated(int maxAllocations) {
+        this.maxBytesAllocated = maxAllocations;
     }
+
+    public void setCheckedForMemoryLeaks(boolean checkedForMemoryLeaks) {
+        this.checkedForMemoryLeaks = checkedForMemoryLeaks;
+    }
+    
 }
