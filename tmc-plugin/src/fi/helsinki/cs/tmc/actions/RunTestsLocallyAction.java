@@ -238,7 +238,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 startRunningMavenProjectTests(projectInfo);
                 break;
             case MAKEFILE:
-                startRunningMakefileProjectTests(projectInfo);
+                startRunningMakefileProjectTests(projectInfo, true);
                 break;
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
@@ -256,16 +256,23 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
     }
 
-    private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo) {
+    private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {
         final File testDir = projectInfo.getProjectDirAsFile();
-        String[] command = {"valgrind", "--log-file=valgrind.log", "./test/test"};
+        String[] command;
+        if (withValgrind) {
+            command = new String[]{"valgrind", "--log-file=valgrind.log", "./test/test"};
+        } else {
+            command = new String[]{"./test/test"};
+        }
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
-        BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
+
+        BgTask.start(
+                "Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
                 CTestResultParser parser = new CTestResultParser(
                         new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
-                        new File(testDir.getAbsolutePath() + "/valgrind.log"),
+                        withValgrind ? new File(testDir.getAbsolutePath() + "/valgrind.log") : null,
                         null);
                 try {
                     parser.parseTestOutput();
@@ -289,9 +296,14 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
+                if (withValgrind) {
+                    startRunningMakefileProjectTests(projectInfo, false);
+                } else {
+                    dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
+                }
             }
         });
+
     }
 
     private void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
@@ -471,6 +483,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 submitAction.performAction(projectInfo.getProject());
             }
         });
+
+
     }
 
     private List<TestCaseResult> parseTestResults(String json) {
@@ -479,12 +493,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 .create();
 
         TestCaseList testCaseRecords = gson.fromJson(json, TestCaseList.class);
-        if (testCaseRecords == null) {
+        if (testCaseRecords
+                == null) {
             String msg = "Empty result from test runner";
             log.warning(msg);
             throw new IllegalArgumentException(msg);
         }
-
         List<TestCaseResult> results = new ArrayList<TestCaseResult>();
         for (TestCase tc : testCaseRecords) {
             results.add(TestCaseResult.fromTestCaseRecord(tc));
@@ -519,17 +533,20 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         log.info(StringUtils.join(command, ' '));
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
         BgTask.start(taskName, runner, listener);
+
+
     }
 
     private ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
         ClassPathProvider classPathProvider = projectInfo.getProject().getLookup().lookup(ClassPathProvider.class);
 
-        if (classPathProvider == null) {
+        if (classPathProvider
+                == null) {
             throw new RuntimeException("Project's class path not (yet) initialized");
         }
-
         ClassPath cp = classPathProvider.findClassPath(testDir, ClassPath.EXECUTE);
-        if (cp == null) {
+        if (cp
+                == null) {
             throw new RuntimeException("Failed to get 'execute' classpath for project's tests");
         }
         return cp;
