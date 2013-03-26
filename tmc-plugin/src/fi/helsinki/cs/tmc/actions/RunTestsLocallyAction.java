@@ -260,9 +260,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
         if (withValgrind) {
-            command = new String[]{"valgrind", "--log-file=valgrind.log", "./test/test"};
+            command = new String[]{"valgrind", "--log-file=valgrind.log", "." +
+                    File.separatorChar + "test" + File.separatorChar + "test"};
         } else {
-            command = new String[]{"./test/test"};
+            //Todo: why does this need testDir.getAbsolutePath()? --kviiri
+            command = new String[]{testDir.getAbsolutePath() +
+                    File.separatorChar + "test" + File.separatorChar + "test"};
         }
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault().getIO(projectInfo.getProjectName(), false));
 
