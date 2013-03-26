@@ -51,7 +51,7 @@ public class CTestResultParser {
                 addMemoryTests();
                 ValgrindMemoryTester.analyzeMemory(tests);
             }
-        }
+        }else addWarningToValgrindOutput();
 
     }
 
@@ -112,6 +112,23 @@ public class CTestResultParser {
             }
             t.setMaxBytesAllocated(maxBytes);
             t.setCheckedForMemoryLeaks(checkLeaks == 1);
+        }
+    }
+    
+    private void addWarningToValgrindOutput(){
+        String message;
+        String platform = System.getProperty("os.name").toLowerCase();
+        if (platform.contains("linux")){
+            message ="Please install valgrind, for debian based distributions run \"apt-get install valgrind\"";
+        }else if (platform.contains("mac")){
+            message ="Please install valgrind, for OS X we recommend useing homebrew (http://mxcl.github.com/homebrew/) and brew install valgrind";
+        } else if (platform.contains("windows")){
+            message ="Windows doesn't support valgrind yet";
+        } else 
+            message = "no instructions available";
+        for (int i = 0; i < tests.size(); i++) {
+            tests.get(i).setValgrindTrace("Warning, no valgrind availabe - unable to run local memtests\n"
+                    + "Follow instructions below or submit to server for memorytesting:\n"+message);
         }
     }
 
