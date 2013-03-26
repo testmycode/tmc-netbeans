@@ -240,6 +240,42 @@ public class CTestResultParserTest {
     }
     
     @Test
+    public void testMemoryErrorsShouldNotFailIfBytesUsedIsGivenMaximum() {
+        CTestResultParser cpar = null;
+        try {
+            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
+            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
+            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
+            test2.setCheckedForMemoryLeaks(true);
+            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
+            test3.setMaxBytesAllocated(-1);
+            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
+            
+            File ttmp = constructTestOutput(tests);
+            File vtmp = constructMemoryFailingValgrindOutput();
+            File mtpm = constructMemoryTestOutput(tests);
+            
+            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
+            cpar.parseTestOutput();
+            vtmp.delete();
+            ttmp.delete();
+        } catch (SAXException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        }
+        List<TestCaseResult> results = cpar.getTestCaseResults();
+        assertEquals("There should be three test results", 3, results.size());
+        
+        assertTrue("Third test should not fail using excess memory", results.get(2).isSuccessful());
+    }
+    
+    @Test
     public void testMemoryLeaksDontFailTestIfNotFollowed() {
         CTestResultParser cpar = null;
         try {
@@ -284,7 +320,43 @@ public class CTestResultParserTest {
             CTestCase test2 = new CTestCase("passing2", "success", "Passed");
             test2.setCheckedForMemoryLeaks(true);
             CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(-1);
+            test3.setMaxBytesAllocated(100);
+            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
+            
+            File ttmp = constructTestOutput(tests);
+            File vtmp = constructMemoryFailingValgrindOutput();
+            File mtpm = constructMemoryTestOutput(tests);
+            
+            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
+            cpar.parseTestOutput();
+            vtmp.delete();
+            ttmp.delete();
+        } catch (SAXException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        } catch (IOException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        } catch (ParserConfigurationException e) {
+            e.printStackTrace();
+            fail("Error creating or parsing mock output file: " + e.getMessage());
+        }
+        List<TestCaseResult> results = cpar.getTestCaseResults();
+        assertEquals("There should be three test results", 3, results.size());
+        
+        assertTrue("Third test should not fail using excess memory", results.get(2).isSuccessful());
+    }
+    
+    @Test
+    public void testShouldNotFailWhenGivenMaximumAllocationsIsHigherThanUsed() {
+        CTestResultParser cpar = null;
+        try {
+            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
+            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
+            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
+            test2.setCheckedForMemoryLeaks(true);
+            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
+            test3.setMaxBytesAllocated(900);
             tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
             
             File ttmp = constructTestOutput(tests);
