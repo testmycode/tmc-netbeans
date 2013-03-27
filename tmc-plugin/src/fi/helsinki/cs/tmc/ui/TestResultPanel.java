@@ -238,12 +238,17 @@ class TestResultPanel extends JPanel {
             public ValgrindDisplay() {
                 this.content = "";
                 this.setEditable(false);
-                this.setContentType("text/plain");
+                this.setContentType("text/html");
                 this.setBackground(UIManager.getColor("Label.background"));
             }
 
             public void setContent(String content) {
-                this.content = content;
+                this.content = "<html>" + 
+                        StringEscapeUtils.escapeHtml3(content)
+                        .replaceAll(" ", "&nbsp;")
+                        .replaceAll("\n", "<br />")
+                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + 
+                        "</html>";
             }
             
             public void finish() {
