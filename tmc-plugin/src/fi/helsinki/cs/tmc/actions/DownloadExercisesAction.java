@@ -58,6 +58,7 @@ public class DownloadExercisesAction {
                         NbProjectUnzipper unzipper = new NbProjectUnzipper();
                         unzipper.unzipProject(zipData, projectMediator.getProjectDirForExercise(exercise));
                         TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(exercise);
+
                         if (proj == null) {
                             throw new RuntimeException("Failed to open project for exercise " + exercise.getName());
                         }
@@ -74,7 +75,7 @@ public class DownloadExercisesAction {
                     }
                 }, listener);
             }
-
+            
             @Override
             public void bgTaskCancelled() {
                 listener.bgTaskCancelled();
