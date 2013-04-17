@@ -52,6 +52,8 @@ public class TmcProjectInfo {
         String pd = getProjectDirAbsPath();
         if (new File(pd + File.separatorChar + "pom.xml").exists()) {
             return TmcProjectType.JAVA_MAVEN;
+        } else if (new File(pd + File.separatorChar + ".universal").exists()) { 
+            return TmcProjectType.UNIVERSAL;
         } else if (new File(pd + File.separatorChar + "Makefile").exists()) {
             return TmcProjectType.MAKEFILE;
         } else {
@@ -120,6 +122,18 @@ public class TmcProjectInfo {
             super(projectFile);
         }
         
+        @Override
+        public boolean shouldZip(String zipPath) {
+            return !rejectPattern.matcher(zipPath).matches();
+        }
+    }
+    
+    private static class UniversalZippingDecider extends AbstractZippingDecider {
+        private static final Pattern rejectPattern = Pattern.compile("^[^/]+/[.].*");
+        
+        public UniversalZippingDecider(TmcProjectFile projectFile) {
+            super(projectFile);
+        }
         @Override
         public boolean shouldZip(String zipPath) {
             return !rejectPattern.matcher(zipPath).matches();
