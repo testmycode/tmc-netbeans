@@ -64,7 +64,10 @@ public class TmcProjectInfo {
     public RecursiveZipper.ZippingDecider getZippingDecider() {
         if (getProjectType() == TmcProjectType.JAVA_MAVEN) {
             return new MavenZippingDecider(getTmcProjectFile());
-        } else {
+        } else if (getProjectType() == TmcProjectType.UNIVERSAL) {
+            return new UniversalZippingDecider(getTmcProjectFile());
+        }
+        else {
             return new DefaultZippingDecider(getTmcProjectFile());
         }
     }
