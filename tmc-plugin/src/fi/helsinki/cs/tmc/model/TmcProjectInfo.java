@@ -129,14 +129,13 @@ public class TmcProjectInfo {
     }
     
     private static class UniversalZippingDecider extends AbstractZippingDecider {
-        private static final Pattern rejectPattern = Pattern.compile("^[^/]+/[.].*");
         
         public UniversalZippingDecider(TmcProjectFile projectFile) {
             super(projectFile);
         }
         @Override
         public boolean shouldZip(String zipPath) {
-            return !rejectPattern.matcher(zipPath).matches();
+            return true;  //for the time being, everything is sent to the server
         }
     }
 }
