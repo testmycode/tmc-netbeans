@@ -168,7 +168,7 @@ public class CTestResultParserTest {
         assertEquals("There should be two test results", 2, results.size());
         int i = 2;
         for (TestCaseResult r : results) {
-            assertEquals("==" + i * 2 + "== " + (i - 1), r.getValgrindTrace().split("\n")[1]);
+            assertEquals("==" + i * 2 + "== " + (i - 1), r.getBacktrace().split("\n")[1]);
             i++;
         }
     }
@@ -191,7 +191,7 @@ public class CTestResultParserTest {
         assertEquals("There should be two test results", 2, results.size());
         int i = 2;
         for (TestCaseResult r : results) {
-            assertEquals("==" + i * 2 + "== " + (i - 1), r.getValgrindTrace().split("\n")[1]);
+            assertEquals("==" + i * 2 + "== " + (i - 1), r.getBacktrace().split("\n")[1]);
             i++;
         }
     }

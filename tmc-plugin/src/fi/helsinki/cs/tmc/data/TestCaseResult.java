@@ -12,8 +12,7 @@ public class TestCaseResult {
     private boolean successful;
     private String message;
     private CaughtException exception;
-    @SerializedName("valgrind_trace")
-    private String valgrindTrace;
+    private String backtrace;
 
     public TestCaseResult() {
     }
@@ -26,7 +25,7 @@ public class TestCaseResult {
     
     public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
         this(name, successful, message);
-        this.valgrindTrace = valgrindTrace;
+        this.backtrace = valgrindTrace;
     }
     
     public String getName() {
@@ -48,8 +47,8 @@ public class TestCaseResult {
     }
     
     @CheckForNull
-    public String getValgrindTrace() {
-        return valgrindTrace;
+    public String getBacktrace() {
+        return backtrace;
     }
     
     /**

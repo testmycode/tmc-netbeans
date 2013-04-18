@@ -153,7 +153,7 @@ class TestResultPanel extends JPanel {
                 this.backtraceButton = new JButton(backtraceAction);
                 gbc.weighty = 1.0; // Leave it so for the backtrace
                 this.add(backtraceButton, gbc);
-            } else if (result.getValgrindTrace() != null) {
+            } else if (result.getBacktrace() != null) {
                 add(Box.createVerticalStrut(16), gbc);
                 this.backtraceButton = new JButton(valgrindAction);
                 gbc.weighty = 1.0; // Leave it so for the backtrace
@@ -165,12 +165,12 @@ class TestResultPanel extends JPanel {
             this.setBorder(this.createBorder());
         }
 
-        private static class BacktraceDisplay extends JEditorPane {
+        private static class ExceptionDisplay extends JEditorPane {
             private StringBuilder htmlBuilder;
             private HashMap<String, ActionListener> linkHandlers;
             private int nextLinkId;
             
-            public BacktraceDisplay() {
+            public ExceptionDisplay() {
                 this.htmlBuilder = new StringBuilder().append("<html><body>");
                 this.linkHandlers = new HashMap<String, ActionListener>();
                 this.nextLinkId = 1;
@@ -185,7 +185,7 @@ class TestResultPanel extends JPanel {
                         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                             ActionListener listener = linkHandlers.get(e.getDescription());
                             if (listener != null) {
-                                ActionEvent ae = new ActionEvent(BacktraceDisplay.this, ActionEvent.ACTION_PERFORMED, "link clicked");
+                                ActionEvent ae = new ActionEvent(ExceptionDisplay.this, ActionEvent.ACTION_PERFORMED, "link clicked");
                                 listener.actionPerformed(ae);
                             }
                         }
@@ -232,10 +232,10 @@ class TestResultPanel extends JPanel {
             }
         }
         
-        private static class ValgrindDisplay extends JEditorPane {
+        private static class BacktraceDisplay extends JEditorPane {
             private String content;
             
-            public ValgrindDisplay() {
+            public BacktraceDisplay() {
                 this.content = "";
                 this.setEditable(false);
                 this.setContentType("text/html");
@@ -262,8 +262,8 @@ class TestResultPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 remove(backtraceButton);
                 
-                ValgrindDisplay display = new ValgrindDisplay();
-                String output = result.getValgrindTrace();
+                BacktraceDisplay display = new BacktraceDisplay();
+                String output = result.getBacktrace();
                 display.setContent(output);
                 display.finish();
                 add(display, gbc);
@@ -278,7 +278,7 @@ class TestResultPanel extends JPanel {
             public void actionPerformed(ActionEvent e) {
                 remove(backtraceButton);
                 
-                BacktraceDisplay display = new BacktraceDisplay();
+                ExceptionDisplay display = new ExceptionDisplay();
                 addException(display, result.getException(), false);
                 display.finish();
                 add(display, gbc);
@@ -286,7 +286,7 @@ class TestResultPanel extends JPanel {
                 revalidate();
             }
             
-            private void addException(BacktraceDisplay display, CaughtException ex, boolean isCause) {
+            private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
                 String mainLine;
                 if (ex.message != null) {
                     mainLine = ex.className + ": " + ex.message;
@@ -305,7 +305,7 @@ class TestResultPanel extends JPanel {
                 }
             }
             
-            private void addStackTraceLines(BacktraceDisplay display, StackTraceElement[] stackTrace) {
+            private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
                 for (final StackTraceElement ste : stackTrace) {
                     final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
                     
