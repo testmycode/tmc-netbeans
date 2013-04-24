@@ -119,7 +119,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                 if (paste) {
                     extraParams.put("paste", "1");
                     if (!messageForReviewer.isEmpty()) {
-                        extraParams.put("message_for_paste", "1");
+                        extraParams.put("message_for_paste", messageForReviewer);
                     }
                 } else {
                     if (!messageForReviewer.isEmpty()) {
@@ -132,7 +132,8 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                 BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<URI>() {
                     @Override
                     public void bgTaskReady(URI result) {
-                        dialogs.displayMessage("Code submitted for review.\nYou will be notified when an instructor has reviewed your code.");
+                        dialogs.displayMessage("Code submitted " + (paste ? "to pastebin." : "for review.\n"
+                                + "You will be notified when an instructor has reviewed your code."));
                     }
 
                     @Override
