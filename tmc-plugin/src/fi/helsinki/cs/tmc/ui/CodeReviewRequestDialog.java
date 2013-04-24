@@ -19,6 +19,10 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
     public String getMessageForReviewer() {
         return messageTextArea.getText();
     }
+    
+    public boolean getPasteCheckbox() {
+        return usePastebinCheckbox.isSelected();
+    }
 
     /**
      * This method is called from within the constructor to initialize the form.
@@ -35,6 +39,7 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
         leaveMessageLabel = new javax.swing.JLabel();
         sendButton = new javax.swing.JButton();
         cancelButton = new javax.swing.JButton();
+        usePastebinCheckbox = new javax.swing.JCheckBox();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.title")); // NOI18N
@@ -63,6 +68,8 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
             }
         });
 
+        org.openide.awt.Mnemonics.setLocalizedText(usePastebinCheckbox, org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.usePastebinCheckbox.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -70,17 +77,18 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(titleLabel)
-                            .addComponent(leaveMessageLabel))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addComponent(usePastebinCheckbox)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 12, Short.MAX_VALUE)
                         .addComponent(sendButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cancelButton)))
+                        .addComponent(cancelButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(leaveMessageLabel)
+                            .addComponent(titleLabel))
+                        .addGap(0, 0, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -95,7 +103,8 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(sendButton)
-                    .addComponent(cancelButton))
+                    .addComponent(cancelButton)
+                    .addComponent(usePastebinCheckbox))
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
@@ -120,5 +129,6 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
     private javax.swing.JTextArea messageTextArea;
     private javax.swing.JButton sendButton;
     private javax.swing.JLabel titleLabel;
+    private javax.swing.JCheckBox usePastebinCheckbox;
     // End of variables declaration//GEN-END:variables
 }

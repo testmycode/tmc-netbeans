@@ -29,7 +29,7 @@ import org.openide.awt.ActionRegistration;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle;
 
-@ActionID(category="TMC", id="fi.helsinki.cs.tmc.actions.RequestReviewAction")
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.RequestReviewAction")
 @ActionRegistration(displayName = "#CTL_RequestReviewAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -5, separatorAfter = 0),
@@ -37,8 +37,8 @@ import org.openide.util.NbBundle;
 })
 @NbBundle.Messages("CTL_RequestReviewAction=Request code review")
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
+
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    
     private TmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
@@ -69,7 +69,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             return super.enable(projects);
         }
     }
-    
+
     @Override
     protected void performAction(Node[] nodes) {
         List<Project> project = projectsFromNodes(nodes);
@@ -85,24 +85,25 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             log.log(Level.WARNING, "RequestReviewAction called in a context with {0} projects", project.size());
         }
     }
-    
+
     private void showReviewRequestDialog(final TmcProjectInfo projectInfo, final Exercise exercise) {
         final CodeReviewRequestDialog dialog = new CodeReviewRequestDialog(exercise);
         dialog.setOkListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String message = dialog.getMessageForReviewer().trim();
-                requestCodeReviewFor(projectInfo, exercise, message);
+                requestCodeReviewFor(projectInfo, exercise, message, dialog.getPasteCheckbox());
             }
         });
         dialog.setVisible(true);
     }
-    
-    private void requestCodeReviewFor(final TmcProjectInfo projectInfo, final Exercise exercise, final String messageForReviewer) {
+
+    private void requestCodeReviewFor(final TmcProjectInfo projectInfo, final Exercise exercise,
+            final String messageForReviewer, final boolean paste) {
         projectMediator.saveAllFiles();
-        
+
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
-        
+
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
@@ -115,10 +116,18 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                 Map<String, String> extraParams = new HashMap<String, String>();
                 extraParams.put("error_msg_locale", errorMsgLocale);
                 extraParams.put("request_review", "1");
-                if (!messageForReviewer.isEmpty()) {
-                    extraParams.put("message_for_reviewer", messageForReviewer);
+                if (paste) {
+                    extraParams.put("paste", "1");
+                    if (!messageForReviewer.isEmpty()) {
+                        extraParams.put("message_for_paste", "1");
+                    }
+                } else {
+                    if (!messageForReviewer.isEmpty()) {
+                        extraParams.put("message_for_reviewer", messageForReviewer);
+                    }
                 }
-                
+
+
                 CancellableCallable<URI> submitTask = new ServerAccess().getSubmittingExerciseTask(exercise, zipData, extraParams);
                 BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<URI>() {
                     @Override
