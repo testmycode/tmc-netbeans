@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.PastebinDialog;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -21,6 +22,10 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -115,25 +120,34 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             public void bgTaskReady(byte[] zipData) {
                 Map<String, String> extraParams = new HashMap<String, String>();
                 extraParams.put("error_msg_locale", errorMsgLocale);
-                extraParams.put("request_review", "1");
                 if (paste) {
                     extraParams.put("paste", "1");
                     if (!messageForReviewer.isEmpty()) {
                         extraParams.put("message_for_paste", messageForReviewer);
                     }
                 } else {
+                    extraParams.put("request_review", "1");
                     if (!messageForReviewer.isEmpty()) {
+
                         extraParams.put("message_for_reviewer", messageForReviewer);
                     }
                 }
 
 
-                CancellableCallable<URI> submitTask = new ServerAccess().getSubmittingExerciseTask(exercise, zipData, extraParams);
+                final ServerAccess sa = new ServerAccess();
+                CancellableCallable<URI> submitTask = sa
+                        .getSubmittingExerciseTask(exercise, zipData, extraParams);
+                
                 BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<URI>() {
                     @Override
                     public void bgTaskReady(URI result) {
-                        dialogs.displayMessage("Code submitted " + (paste ? "to pastebin." : "for review.\n"
-                                + "You will be notified when an instructor has reviewed your code."));
+                        if (!paste) {
+                            dialogs.displayMessage("Code submitted for review.\n"
+                                    + "You will be notified when an instructor has reviewed your code.");
+                        }
+                        else {
+                            new PastebinDialog(sa.getRespJson().get("paste_url").getAsString()).setVisible(true);
+                        }
                     }
 
                     @Override
