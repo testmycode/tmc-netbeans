@@ -64,7 +64,10 @@ public class TmcProjectInfo {
     public RecursiveZipper.ZippingDecider getZippingDecider() {
         if (getProjectType() == TmcProjectType.JAVA_MAVEN) {
             return new MavenZippingDecider(getTmcProjectFile());
-        } else {
+        } else if (getProjectType() == TmcProjectType.UNIVERSAL) {
+            return new UniversalZippingDecider(getTmcProjectFile());
+        }
+        else {
             return new DefaultZippingDecider(getTmcProjectFile());
         }
     }
@@ -129,13 +132,12 @@ public class TmcProjectInfo {
     }
     
     private static class UniversalZippingDecider extends AbstractZippingDecider {
-        
-        public UniversalZippingDecider(TmcProjectFile projectFile) {
+       public UniversalZippingDecider(TmcProjectFile projectFile) {
             super(projectFile);
         }
         @Override
         public boolean shouldZip(String zipPath) {
-            return true;  //for the time being, everything is sent to the server
+            return true;
         }
     }
 }
