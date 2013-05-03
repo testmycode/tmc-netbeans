@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.ui;
 
 import static fi.helsinki.cs.tmc.ui.Boxer.hbox;
@@ -22,10 +18,6 @@ import javax.swing.JPanel;
 import javax.swing.JTextField;
 import org.openide.awt.HtmlBrowser;
 
-/**
- *
- * @author kviiri
- */
 public class PastebinResponseDialog extends JDialog {
 
     private static final Logger log = Logger.getLogger(PastebinResponseDialog.class.getName());
