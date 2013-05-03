@@ -31,6 +31,7 @@ import org.netbeans.api.project.Project;
 import org.openide.cookies.EditorCookie;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
@@ -40,7 +41,10 @@ import org.openide.util.NbBundle.Messages;
         id = "fi.helsinki.cs.tmc.actions.PastebinAction")
 @ActionRegistration(
         displayName = "#CTL_PastebinAction", lazy = false)
-@ActionReference(path = "Menu/TM&C", position = -17)
+@ActionReferences({
+    @ActionReference(path = "Menu/TM&C", position = -17),
+    @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330)
+})
 @Messages("CTL_PastebinAction=Send code to Pastebin")
 //TODO: This is a horribly copypasted, then mangled version of RequestReviewAction
 //plz remove everything that isn't needed here. --kviiri
