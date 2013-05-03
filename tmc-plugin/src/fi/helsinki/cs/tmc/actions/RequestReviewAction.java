@@ -38,7 +38,8 @@ import org.openide.util.NbBundle;
 @ActionRegistration(displayName = "#CTL_RequestReviewAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -5, separatorAfter = 0),
-    @ActionReference(path = "Projects/Actions", position = 1350, separatorAfter = 1360) // Positioning y u no work?
+    @ActionReference(path = "Projects/Actions", position = 1350, separatorBefore = 1330,
+        separatorAfter = 1360) // Positioning y u no work?
 })
 @NbBundle.Messages("CTL_RequestReviewAction=Request code review")
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {

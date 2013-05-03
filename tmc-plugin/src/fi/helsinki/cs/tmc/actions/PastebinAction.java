@@ -43,7 +43,8 @@ import org.openide.util.NbBundle.Messages;
         displayName = "#CTL_PastebinAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -17),
-    @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330)
+    @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330,
+        separatorAfter = 1360)
 })
 @Messages("CTL_PastebinAction=Send code to Pastebin")
 //TODO: This is a horribly copypasted, then mangled version of RequestReviewAction
