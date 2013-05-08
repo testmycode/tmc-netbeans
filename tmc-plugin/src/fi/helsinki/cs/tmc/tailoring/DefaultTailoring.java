@@ -32,7 +32,12 @@ public class DefaultTailoring implements Tailoring {
 
     @Override
     public boolean isSpywareEnabledByDefault() {
-        return false;
+        return true;
+    }
+    
+    @Override
+    public boolean isDetailedSpywareEnabledByDefault() {
+        return true;
     }
     
     @Override
