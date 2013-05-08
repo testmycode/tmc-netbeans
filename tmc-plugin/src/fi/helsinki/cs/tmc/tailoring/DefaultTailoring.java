@@ -36,6 +36,11 @@ public class DefaultTailoring implements Tailoring {
     }
     
     @Override
+    public boolean isDetailedSpywareEnabledByDefault() {
+        return false;
+    }
+    
+    @Override
     public Locale[] getAvailableErrorMsgLocales() {
         return new Locale[] { new Locale("en") };
     }

@@ -17,6 +17,7 @@ public class TmcSettings {
     private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
     private static final String PREF_CHECK_FOR_UNOPENED_AT_STARTUP = "checkForUnopenedAtStartup";
     private static final String PREF_SPYWARE_ENABLED = "spywareEnabled";
+    private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     
     private static final TmcSettings defaultInstance =
@@ -144,9 +145,14 @@ public class TmcSettings {
         String defaultValue = tailoring.isSpywareEnabledByDefault() ? "1" : "0";
         return settings.get(PREF_SPYWARE_ENABLED, defaultValue).equals("1");
     }
-    
+
     public void setIsSpywareEnabled(boolean value) {
         settings.put(PREF_SPYWARE_ENABLED, value ? "1" : "0");
+    }
+    
+    public boolean isDetailedSpywareEnabled() {
+        String defaultValue = tailoring.isDetailedSpywareEnabledByDefault() ? "1" : "0";
+        return settings.get(PREF_DETAILED_SPYWARE_ENABLED, defaultValue).equals("1");
     }
     
     public Locale getErrorMsgLocale() {
