@@ -115,4 +115,9 @@ public class SpywareFacade implements SpywareSettings {
     public boolean isSpywareEnabled() {
         return settings.isSpywareEnabled();
     }
+
+    @Override
+    public boolean isDetailedSpywareEnabled() {
+        return settings.isDetailedSpywareEnabled();
+    }
 }
