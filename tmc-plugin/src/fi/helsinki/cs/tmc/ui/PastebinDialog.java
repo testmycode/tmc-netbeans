@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 
 public class PastebinDialog extends javax.swing.JDialog {
@@ -9,6 +11,8 @@ public class PastebinDialog extends javax.swing.JDialog {
     
     public PastebinDialog(Exercise exercise) {
         initComponents();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
         this.titleLabel.setText("Creating Pastebin item for " + exercise.getName());
     }
 

@@ -122,7 +122,7 @@ class TestResultPanel extends JPanel {
         
         private final TestCaseResult result;
         private final SourceFileLookup sourceFileLookup;
-        private final JButton backtraceButton;
+        private final JButton detailedMessageButton;
         private final GridBagConstraints gbc = new GridBagConstraints();
 
         public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
@@ -150,16 +150,16 @@ class TestResultPanel extends JPanel {
             
             if (result.getException() != null) {
                 add(Box.createVerticalStrut(16), gbc);
-                this.backtraceButton = new JButton(backtraceAction);
-                gbc.weighty = 1.0; // Leave it so for the backtrace
-                this.add(backtraceButton, gbc);
-            } else if (result.getBacktrace() != null) {
+                this.detailedMessageButton = new JButton(detailedMessageAction);
+                gbc.weighty = 1.0; // Leave it so for the detailed message
+                this.add(detailedMessageButton, gbc);
+            } else if (result.getDetailedMessage() != null) {
                 add(Box.createVerticalStrut(16), gbc);
-                this.backtraceButton = new JButton(valgrindAction);
-                gbc.weighty = 1.0; // Leave it so for the backtrace
-                this.add(backtraceButton, gbc);
+                this.detailedMessageButton = new JButton(valgrindAction);
+                gbc.weighty = 1.0; // Leave it so for the detailed message
+                this.add(detailedMessageButton, gbc);
             } else {
-                this.backtraceButton = null;
+                this.detailedMessageButton = null;
             }
             
             this.setBorder(this.createBorder());
@@ -232,10 +232,10 @@ class TestResultPanel extends JPanel {
             }
         }
         
-        private static class BacktraceDisplay extends JEditorPane {
+        private static class DetailedMessageDisplay extends JEditorPane {
             private String content;
             
-            public BacktraceDisplay() {
+            public DetailedMessageDisplay() {
                 this.content = "";
                 this.setEditable(false);
                 this.setContentType("text/html");
@@ -260,10 +260,10 @@ class TestResultPanel extends JPanel {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                remove(backtraceButton);
+                remove(detailedMessageButton);
                 
-                BacktraceDisplay display = new BacktraceDisplay();
-                String output = result.getBacktrace();
+                DetailedMessageDisplay display = new DetailedMessageDisplay();
+                String output = result.getDetailedMessage();
                 display.setContent(output);
                 display.finish();
                 add(display, gbc);
@@ -273,10 +273,10 @@ class TestResultPanel extends JPanel {
             
         };
         
-        private Action backtraceAction = new AbstractAction("Show backtrace") {
+        private Action detailedMessageAction = new AbstractAction("Show detailed message") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                remove(backtraceButton);
+                remove(detailedMessageButton);
                 
                 ExceptionDisplay display = new ExceptionDisplay();
                 addException(display, result.getException(), false);

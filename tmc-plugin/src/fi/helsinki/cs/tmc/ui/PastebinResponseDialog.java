@@ -3,6 +3,10 @@ package fi.helsinki.cs.tmc.ui;
 import static fi.helsinki.cs.tmc.ui.Boxer.hbox;
 import static fi.helsinki.cs.tmc.ui.Boxer.hglue;
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URL;
@@ -25,6 +29,10 @@ public class PastebinResponseDialog extends JDialog {
     public PastebinResponseDialog(final String pasteUrl) {
         setTitle("Pastebin notification");
         
+        // Set location according to screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
+        
         JPanel contentPane = new JPanel();
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
@@ -46,7 +54,7 @@ public class PastebinResponseDialog extends JDialog {
         getContentPane().add(leftAligned(viewPasteButton));
         addVSpace(8);
         
-        JTextField pasteUrlField = new JTextField(pasteUrl);
+        final JTextField pasteUrlField = new JTextField(pasteUrl);
         pasteUrlField.setEditable(false);
         getContentPane().add(leftAligned(pasteUrlField));
         
@@ -61,6 +69,17 @@ public class PastebinResponseDialog extends JDialog {
             }
         });
         getContentPane().add(hbox(hglue(), okButton));
+        
+        JButton copyToClipboardButton = new JButton("Copy to clipboard");
+        copyToClipboardButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                StringSelection stringSelection = new StringSelection(pasteUrl);  
+                Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+                clipboard.setContents(stringSelection, stringSelection);
+            }
+        });
+        getContentPane().add(hbox(hglue(), copyToClipboardButton));
         
         pack();
         

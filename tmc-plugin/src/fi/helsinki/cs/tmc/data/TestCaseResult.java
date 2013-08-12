@@ -12,7 +12,7 @@ public class TestCaseResult {
     private boolean successful;
     private String message;
     private CaughtException exception;
-    private String backtrace;
+    private String detailedMessage;
 
     public TestCaseResult() {
     }
@@ -25,7 +25,7 @@ public class TestCaseResult {
     
     public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
         this(name, successful, message);
-        this.backtrace = valgrindTrace;
+        this.detailedMessage = valgrindTrace;
     }
     
     public String getName() {
@@ -47,8 +47,8 @@ public class TestCaseResult {
     }
     
     @CheckForNull
-    public String getBacktrace() {
-        return backtrace;
+    public String getDetailedMessage() {
+        return detailedMessage;
     }
     
     /**
