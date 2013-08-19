@@ -5,15 +5,15 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 
-public class CodeReviewRequestDialog extends javax.swing.JDialog {
+public class PastebinDialog extends javax.swing.JDialog {
 
     private ActionListener okListener;
     
-    public CodeReviewRequestDialog(Exercise exercise) {
+    public PastebinDialog(Exercise exercise) {
         initComponents();
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
-        this.titleLabel.setText("Requesting code review for " + exercise.getName());
+        this.titleLabel.setText("Creating Pastebin item for " + exercise.getName());
     }
 
     public void setOkListener(ActionListener okListener) {
@@ -41,26 +41,26 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
         cancelButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.title")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.title")); // NOI18N
         setLocationByPlatform(true);
 
         titleLabel.setFont(titleLabel.getFont().deriveFont(titleLabel.getFont().getStyle() | java.awt.Font.BOLD));
-        org.openide.awt.Mnemonics.setLocalizedText(titleLabel, org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.titleLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(titleLabel, org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.titleLabel.text")); // NOI18N
 
         messageTextArea.setColumns(20);
         messageTextArea.setRows(5);
         jScrollPane1.setViewportView(messageTextArea);
 
-        org.openide.awt.Mnemonics.setLocalizedText(leaveMessageLabel, org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.leaveMessageLabel.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(leaveMessageLabel, org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.leaveMessageLabel.text")); // NOI18N
 
-        org.openide.awt.Mnemonics.setLocalizedText(sendButton, org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.sendButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(sendButton, org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.sendButton.text")); // NOI18N
         sendButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 sendButtonActionPerformed(evt);
             }
         });
 
-        org.openide.awt.Mnemonics.setLocalizedText(cancelButton, org.openide.util.NbBundle.getMessage(CodeReviewRequestDialog.class, "CodeReviewRequestDialog.cancelButton.text")); // NOI18N
+        org.openide.awt.Mnemonics.setLocalizedText(cancelButton, org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.cancelButton.text")); // NOI18N
         cancelButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 cancelButtonActionPerformed(evt);
@@ -84,7 +84,7 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(leaveMessageLabel)
                             .addComponent(titleLabel))
-                        .addGap(0, 141, Short.MAX_VALUE)))
+                        .addGap(0, 193, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

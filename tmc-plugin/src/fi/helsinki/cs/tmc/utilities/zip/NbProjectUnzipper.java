@@ -234,7 +234,7 @@ public class NbProjectUnzipper {
         ZipEntry zent;
         while ((zent = zis.getNextEntry()) != null) {
             String name = zent.getName();
-            if (name.endsWith("/nbproject/") || name.endsWith("/pom.xml")) {
+            if (name.endsWith("/nbproject/") || name.endsWith("/pom.xml") || name.endsWith(".universal/")) {
                 return dirname(zent.getName());
             }
         }

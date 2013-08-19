@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.gson.annotations.SerializedName;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import static fi.helsinki.cs.tmc.testrunner.TestCase.Status.*;
@@ -11,6 +12,7 @@ public class TestCaseResult {
     private boolean successful;
     private String message;
     private CaughtException exception;
+    private String detailedMessage;
 
     public TestCaseResult() {
     }
@@ -19,6 +21,11 @@ public class TestCaseResult {
         this.name = name;
         this.successful = successful;
         this.message = message;
+    }
+    
+    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
+        this(name, successful, message);
+        this.detailedMessage = valgrindTrace;
     }
     
     public String getName() {
@@ -37,6 +44,11 @@ public class TestCaseResult {
     @CheckForNull
     public CaughtException getException() {
         return exception;
+    }
+    
+    @CheckForNull
+    public String getDetailedMessage() {
+        return detailedMessage;
     }
     
     /**

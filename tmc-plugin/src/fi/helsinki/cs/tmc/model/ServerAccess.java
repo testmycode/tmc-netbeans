@@ -32,6 +32,8 @@ public class ServerAccess {
     private ReviewListParser reviewListParser;
     private String clientVersion;
 
+    private JsonObject respJson;
+    
     public ServerAccess() {
         this(TmcSettings.getDefault());
     }
@@ -155,7 +157,7 @@ public class ServerAccess {
                     return checkForObsoleteClient(ex);
                 }
                 
-                JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
+                respJson = new JsonParser().parse(response).getAsJsonObject();
                 if (respJson.get("error") != null) {
                     throw new RuntimeException("Server responded with error: " + respJson.get("error"));
                 } else if (respJson.get("submission_url") != null) {
@@ -289,6 +291,7 @@ public class ServerAccess {
             result.put(prefix + "[exercise_name]", ev.getExerciseName());
             result.put(prefix + "[event_type]", ev.getEventType());
             result.put(prefix + "[happened_at]", fmtDate(ev.getHappenedAt()));
+            result.put(prefix + "[system_nano_time]", "" + ev.getSystemNanotime());
             
             result.put(prefix + "[data_offset]", ""+dataOffset);
             result.put(prefix + "[data_length]", ""+ev.getData().length);
@@ -331,5 +334,9 @@ public class ServerAccess {
         }
 
         throw ex;
+    }
+
+    public JsonObject getRespJson() {
+        return respJson;
     }
 }

@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Review;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -20,6 +22,11 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         this.okListener = null;
         
         initComponents();
+        
+        // Set location according to screen dimensions
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
+        
         
         this.setLocationByPlatform(true);
         
