@@ -10,6 +10,7 @@ public class LoggableEvent {
     private String eventType;
     private byte[] data;
     private Date happenedAt;
+    private long systemNanotime;
     
     private transient String key;
     
@@ -23,6 +24,7 @@ public class LoggableEvent {
         this.eventType = eventType;
         this.data = data;
         this.happenedAt = new Date();
+        this.systemNanotime = System.nanoTime();
         
         this.key = courseName + "|" + exerciseName + "|" + eventType;
     }
@@ -56,5 +58,9 @@ public class LoggableEvent {
 
     public void setHappenedAt(Date happenedAt) {
         this.happenedAt = happenedAt;
+    }
+
+    public long getSystemNanotime() {
+        return systemNanotime;
     }
 }

@@ -7,9 +7,14 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import java.awt.HeadlessException;
+import java.awt.Toolkit;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.UnsupportedFlavorException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Closeable;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -89,8 +94,12 @@ public class TextInsertEventSource implements Closeable {
                 return;
             }
             
+            boolean isPasteEvent = detectPasteEvent(text);
+            
             if(TmcSettings.getTransient().isDetailedSpywareEnabled()) {
-                if(e.getType() == EventType.REMOVE) {
+                if(isPasteEvent) {
+                    sendEvent(ex, "text_paste", generateEventDescription(fo, e, text));
+                } else if(e.getType() == EventType.REMOVE) {
                     sendEvent(ex, "text_remove", generateEventDescription(fo, e, text));
                 } else if (e.getType() == EventType.INSERT) {
                     sendEvent(ex, "text_insert", generateEventDescription(fo, e, text));   
@@ -98,7 +107,6 @@ public class TextInsertEventSource implements Closeable {
                 
                 return;
             }
-            
             
             if(isWhiteSpaceOrShortText(text)) {
                 return;
@@ -113,17 +121,9 @@ public class TextInsertEventSource implements Closeable {
             boolean isShortText = text.length() < 3;
             
             // If an insert is just whitespace, it's probably an autoindent
-            boolean isOnlyWhiteSpace = true;
-            for (int i = 0; i < text.length(); ++i) {
-                if (!Character.isWhitespace(text.charAt(i))) {
-                    isOnlyWhiteSpace = false;
-                    break;
-                }
-            }
-            
-            return isOnlyWhiteSpace || isShortText;
+            return isWhiteSpace(text) || isShortText;
         }
-
+       
         private void sendEvent(Exercise ex, String eventType, String text) {
             LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
@@ -131,6 +131,34 @@ public class TextInsertEventSource implements Closeable {
         
         private String generateEventDescription(FileObject fo, DocumentEvent e, String text) {
             return "{file:\""+fo.getName()+"\", offset: " + e.getOffset() + ", length: " + e.getLength() + ", text: \"" + text + "\"}";
+        }
+
+        private boolean detectPasteEvent(String text) throws HeadlessException {
+            if(text.length() <= 2 || isWhiteSpace(text)) {
+                // if a short text or whitespace is inserted,
+                // we skip checking for paste
+                return false;
+            }
+            
+            try {
+                String clipboardData = (String) Toolkit.getDefaultToolkit()
+                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
+                return text.equals(clipboardData);
+            } catch (Exception exp) {
+            }
+            
+            return false;
+        }
+
+        private boolean isWhiteSpace(String text) {
+            // If an insert is just whitespace, it's probably an autoindent
+            for (int i = 0; i < text.length(); ++i) {
+                if (!Character.isWhitespace(text.charAt(i))) {
+                    return false;
+                }
+            }
+            
+            return true;
         }
     };
     
