@@ -35,7 +35,7 @@ public class LocalExerciseStatus {
                 boolean isDownloaded = proj != null;
                 if (courseDb.isUnlockable(ex)) {
                     unlockable.add(ex);
-                } else if (!isDownloaded) {
+                } else if (!isDownloaded && !ex.isLocked()) {
                     if (ex.isCompleted()) {
                         downloadableCompleted.add(ex);
                     } else {
