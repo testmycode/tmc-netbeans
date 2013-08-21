@@ -4,17 +4,13 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import java.awt.HeadlessException;
-import java.awt.Toolkit;
 import java.awt.datatransfer.DataFlavor;
-import java.awt.datatransfer.UnsupportedFlavorException;
 import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Closeable;
-import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -27,6 +23,8 @@ import javax.swing.text.JTextComponent;
 import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Lookup;
+import org.openide.util.datatransfer.ExClipboard;
 
 /**
  * Records large inserts into documents. These are often, but not always,
@@ -74,14 +72,7 @@ public class TextInsertEventSource implements Closeable {
 
         private void handleEvent(DocumentEvent e) {
             Document doc = e.getDocument();
-            String text;
-            try {
-                text = doc.getText(e.getOffset(), e.getLength());
-            } catch (BadLocationException ex) {
-                log.log(Level.WARNING, "Document {0} event with bad location. ", e.getType());
-                return;
-            }
-
+            
             FileObject fo = NbEditorUtilities.getFileObject(doc);
             if (fo == null) {
                 log.log(Level.FINER, "Document has no associated file object");
@@ -93,35 +84,27 @@ public class TextInsertEventSource implements Closeable {
                 log.log(Level.FINER, "Unable to determine exercise for document");
                 return;
             }
-
-            boolean isPasteEvent = detectPasteEvent(text);
-
-            if (TmcSettings.getTransient().isDetailedSpywareEnabled()) {
-                if (isPasteEvent) {
-                    sendEvent(ex, "text_paste", generateEventDescription(fo, e, text));
-                } else if (e.getType() == EventType.REMOVE) {
-                    sendEvent(ex, "text_remove", generateEventDescription(fo, e, text));
-                } else if (e.getType() == EventType.INSERT) {
-                    sendEvent(ex, "text_insert", generateEventDescription(fo, e, text));
-                }
-
+            
+            // if the event type is remove, there is a chance that the
+            // current text is already changed; record only the indexes
+            if (e.getType().equals(EventType.REMOVE)) {
+                sendEvent(ex, "text_remove", generateEventDescription(fo, e, ""));
+                return;
+            }
+            
+            String text;
+            try {
+                text = doc.getText(e.getOffset(), e.getLength());
+            } catch (BadLocationException exp) {
+                log.log(Level.WARNING, "Document {0} event with bad location. ", e.getType());
                 return;
             }
 
-            if (isWhiteSpaceOrShortText(text)) {
-                return;
+            if (isPasteEvent(text)) {
+                sendEvent(ex, "text_paste", generateEventDescription(fo, e, text));
+            } else if (e.getType() == EventType.INSERT) {
+                sendEvent(ex, "text_insert", generateEventDescription(fo, e, text));
             }
-
-            sendEvent(ex, "text_insert", generateEventDescription(fo, e, text));
-        }
-
-        private boolean isWhiteSpaceOrShortText(String text) {
-            // One character inserts are probably not pastes.
-            // We skip 2 character inserts too as a safety margin.
-            boolean isShortText = text.length() < 3;
-
-            // If an insert is just whitespace, it's probably an autoindent
-            return isWhiteSpace(text) || isShortText;
         }
 
         private void sendEvent(Exercise ex, String eventType, String text) {
@@ -133,7 +116,7 @@ public class TextInsertEventSource implements Closeable {
             return "{file:\"" + fo.getName() + "\", offset: " + e.getOffset() + ", length: " + e.getLength() + ", text: \"" + text + "\"}";
         }
 
-        private boolean detectPasteEvent(String text) throws HeadlessException {
+        private boolean isPasteEvent(String text) throws HeadlessException {
             if (text.length() <= 2 || isWhiteSpace(text)) {
                 // if a short text or whitespace is inserted,
                 // we skip checking for paste
@@ -141,12 +124,11 @@ public class TextInsertEventSource implements Closeable {
             }
 
             try {
-                String clipboardData = (String) Toolkit.getDefaultToolkit()
-                        .getSystemClipboard().getData(DataFlavor.stringFlavor);
+                String clipboardData = (String) Lookup.getDefault().lookup(ExClipboard.class).getData(DataFlavor.stringFlavor);
                 return text.equals(clipboardData);
             } catch (Exception exp) {
             }
-
+            
             return false;
         }
 
@@ -170,7 +152,7 @@ public class TextInsertEventSource implements Closeable {
             register();
         }
     };
-
+    
     public TextInsertEventSource(EventReceiver receiver) {
         this.receiver = receiver;
         this.currentComponent = null;
