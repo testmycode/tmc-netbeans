@@ -132,7 +132,8 @@ public class TextInsertEventSource implements Closeable {
             }
 
             try {
-                String clipboardData = (String) Lookup.getDefault().lookup(ExClipboard.class).getData(DataFlavor.stringFlavor);
+                String clipboardData = (String) Lookup.getDefault().
+                        lookup(ExClipboard.class).getData(DataFlavor.stringFlavor);
                 return text.equals(clipboardData);
             } catch (Exception exp) {
             }

@@ -27,8 +27,6 @@ public class LoggableEvent {
         this.systemNanotime = System.nanoTime();
         
         this.key = courseName + "|" + exerciseName + "|" + eventType;
-        
-        System.out.println(this);
     }
 
     public String getCourseName() {
