@@ -12,6 +12,9 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Closeable;
 import java.nio.charset.Charset;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.event.DocumentEvent;
@@ -20,9 +23,12 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import name.fraser.neil.plaintext.diff_match_patch;
+import name.fraser.neil.plaintext.diff_match_patch.Patch;
 import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.filesystems.FileObject;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.datatransfer.ExClipboard;
 
@@ -37,8 +43,10 @@ import org.openide.util.datatransfer.ExClipboard;
 public class TextInsertEventSource implements Closeable {
 
     private static final Logger log = Logger.getLogger(TextInsertEventSource.class.getName());
+    private static final diff_match_patch PATCH_GENERATOR = new diff_match_patch();
     private EventReceiver receiver;
     private JTextComponent currentComponent;
+    private Map<Document, String> documentContent;
     private DocumentListener docListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
@@ -85,10 +93,10 @@ public class TextInsertEventSource implements Closeable {
                 return;
             }
             
-            // if the event type is remove, there is a chance that the
-            // current text is already changed; record only the indexes
+            List<Patch> patches = generatePatches(doc);
+            
             if (e.getType().equals(EventType.REMOVE)) {
-                sendEvent(ex, "text_remove", generateEventDescription(fo, e, ""));
+                sendEvent(ex, "text_remove", generateEventDescription(fo, patches));
                 return;
             }
             
@@ -101,9 +109,9 @@ public class TextInsertEventSource implements Closeable {
             }
 
             if (isPasteEvent(text)) {
-                sendEvent(ex, "text_paste", generateEventDescription(fo, e, text));
+                sendEvent(ex, "text_paste", generateEventDescription(fo, patches));
             } else if (e.getType() == EventType.INSERT) {
-                sendEvent(ex, "text_insert", generateEventDescription(fo, e, text));
+                sendEvent(ex, "text_insert", generateEventDescription(fo, patches));
             }
         }
 
@@ -111,9 +119,9 @@ public class TextInsertEventSource implements Closeable {
             LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
         }
-
-        private String generateEventDescription(FileObject fo, DocumentEvent e, String text) {
-            return "{file:\"" + fo.getName() + "\", offset: " + e.getOffset() + ", length: " + e.getLength() + ", text: \"" + text + "\"}";
+        
+        private String generateEventDescription(FileObject fo, List<Patch> patches) {
+            return "{file:\"" + fo.getName() + "\", patches: \"" + PATCH_GENERATOR.patch_toText(patches) + "\"}";
         }
 
         private boolean isPasteEvent(String text) throws HeadlessException {
@@ -143,7 +151,28 @@ public class TextInsertEventSource implements Closeable {
 
             return true;
         }
-    
+
+        // currently, if a document is not existing, the patch will
+        // contain the full file
+        private List<Patch> generatePatches(Document doc) {
+            String previous = "";
+            if(documentContent.containsKey(doc)) {
+                previous = documentContent.get(doc);
+            }
+            
+            storeDocumentContent(doc);
+            String current = documentContent.get(doc);
+
+            return PATCH_GENERATOR.patch_make(previous, current);
+        }
+        
+        private void storeDocumentContent(Document doc) {           
+            try {
+                documentContent.put(doc, doc.getText(0, doc.getLength()));
+            } catch (BadLocationException ex) {
+                // as we store the full document content, this should not happen
+            }
+        }
     };
     private PropertyChangeListener propListener = new PropertyChangeListener() {
         @Override
@@ -156,6 +185,7 @@ public class TextInsertEventSource implements Closeable {
     public TextInsertEventSource(EventReceiver receiver) {
         this.receiver = receiver;
         this.currentComponent = null;
+        this.documentContent = new HashMap<Document, String>();
         EditorRegistry.addPropertyChangeListener(propListener);
     }
 

@@ -27,6 +27,8 @@ public class LoggableEvent {
         this.systemNanotime = System.nanoTime();
         
         this.key = courseName + "|" + exerciseName + "|" + eventType;
+        
+        System.out.println(this);
     }
 
     public String getCourseName() {
@@ -62,5 +64,10 @@ public class LoggableEvent {
 
     public long getSystemNanotime() {
         return systemNanotime;
+    }
+
+    @Override
+    public String toString() {
+        return "LoggableEvent{" + "courseName=" + courseName + ", exerciseName=" + exerciseName + ", eventType=" + eventType + ", happenedAt=" + happenedAt + ", systemNanotime=" + systemNanotime + ", key=" + key + ", data=" + new String(data) + "}";
     }
 }
