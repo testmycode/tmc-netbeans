@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import java.io.File;
@@ -12,18 +8,11 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import javax.xml.parsers.ParserConfigurationException;
-import org.junit.After;
-import org.junit.AfterClass;
 import org.junit.Before;
-import org.junit.BeforeClass;
 import org.junit.Test;
 import static org.junit.Assert.*;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author rase
- */
 public class CTestResultParserTest {
 
     private ArrayList<CTestCase> oneOfEachTest;
@@ -31,23 +20,11 @@ public class CTestResultParserTest {
     public CTestResultParserTest() {
     }
 
-    @BeforeClass
-    public static void setUpClass() {
-    }
-
-    @AfterClass
-    public static void tearDownClass() {
-    }
-
     @Before
     public void setUp() {
         oneOfEachTest = new ArrayList<CTestCase>();
         oneOfEachTest.add(new CTestCase("passing", "success", "Passed"));
         oneOfEachTest.add(new CTestCase("failing", "failure", "This test should've failed"));
-    }
-
-    @After
-    public void tearDown() {
     }
 
     @Test

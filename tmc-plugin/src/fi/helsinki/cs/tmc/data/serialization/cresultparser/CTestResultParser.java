@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
@@ -21,10 +17,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-/**
- *
- * @author rase
- */
 public class CTestResultParser {
 
     private File memoryOptions;

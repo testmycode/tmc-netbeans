@@ -1,15 +1,7 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 
-/**
- *
- * @author rase
- */
 public class CTestCase {
     private String name;
     private String result;
