@@ -27,16 +27,15 @@ public class CTestResultParserTest {
         oneOfEachTest.add(new CTestCase("failing", "failure", "This test should've failed"));
     }
 
-    @Test
-    public void testParsingWithNoTests() {
+    @Test(expected=SAXException.class)
+    public void testParsingWithNoTests() throws Exception {
         CTestResultParser cpar = null;
+        File tmp = mkTempFile("test_output", ".xml");
         try {
-            File tmp = File.createTempFile("test_output", ".xml");
             cpar = new CTestResultParser(tmp, null, null);
             cpar.parseTestOutput();
+        } finally {
             tmp.delete();
-        } catch (Exception e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         assertTrue(cpar.getTestCaseResults().isEmpty());
     }
@@ -174,7 +173,7 @@ public class CTestResultParserTest {
     }
     
     @Test
-    public void testWithMemoryErrors() {
+    public void testWithMemoryErrors() throws Exception {
         CTestResultParser cpar = null;
         try {
             ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
@@ -194,13 +193,10 @@ public class CTestResultParserTest {
             vtmp.delete();
             ttmp.delete();
         } catch (SAXException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
@@ -217,7 +213,7 @@ public class CTestResultParserTest {
     }
     
     @Test
-    public void testMemoryErrorsShouldNotFailIfBytesUsedIsGivenMaximum() {
+    public void testMemoryErrorsShouldNotFailIfBytesUsedIsGivenMaximum() throws Exception {
         CTestResultParser cpar = null;
         try {
             ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
@@ -237,13 +233,10 @@ public class CTestResultParserTest {
             vtmp.delete();
             ttmp.delete();
         } catch (SAXException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
@@ -253,7 +246,7 @@ public class CTestResultParserTest {
     }
     
     @Test
-    public void testMemoryLeaksDontFailTestIfNotFollowed() {
+    public void testMemoryLeaksDontFailTestIfNotFollowed() throws Exception {
         CTestResultParser cpar = null;
         try {
             ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
@@ -273,13 +266,10 @@ public class CTestResultParserTest {
             vtmp.delete();
             ttmp.delete();
         } catch (SAXException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
@@ -289,7 +279,7 @@ public class CTestResultParserTest {
     }
 
     @Test
-    public void testShouldNotFailForExcessMemoryUseIfNotFollowed() {
+    public void testShouldNotFailForExcessMemoryUseIfNotFollowed() throws Exception {
         CTestResultParser cpar = null;
         try {
             ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
@@ -309,13 +299,10 @@ public class CTestResultParserTest {
             vtmp.delete();
             ttmp.delete();
         } catch (SAXException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
@@ -325,7 +312,7 @@ public class CTestResultParserTest {
     }
     
     @Test
-    public void testShouldNotFailWhenGivenMaximumAllocationsIsHigherThanUsed() {
+    public void testShouldNotFailWhenGivenMaximumAllocationsIsHigherThanUsed() throws Exception {
         CTestResultParser cpar = null;
         try {
             ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
@@ -345,13 +332,10 @@ public class CTestResultParserTest {
             vtmp.delete();
             ttmp.delete();
         } catch (SAXException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (IOException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
             fail("Error creating or parsing mock output file: " + e.getMessage());
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
@@ -361,7 +345,7 @@ public class CTestResultParserTest {
     }
     
     public File constructMemoryTestOutput(ArrayList<CTestCase> testCases) throws IOException {
-        File tmp = File.createTempFile("test_memory", ".txt");
+        File tmp = mkTempFile("test_memory", ".txt");
         PrintWriter pw = new PrintWriter(tmp, "UTF-8");
         for (CTestCase t : testCases) {
             pw.println(t.getName() + " " + (t.isCheckedForMemoryLeaks() ? "1" : "0") + " " + t.getMaxBytesAllocated());
@@ -371,7 +355,7 @@ public class CTestResultParserTest {
     }
     
     public File constructTestOutput(ArrayList<CTestCase> testCases) throws IOException {
-        File tmp = File.createTempFile("test_output", ".xml");
+        File tmp = mkTempFile("test_output", ".xml");
         PrintWriter pw = new PrintWriter(tmp, "UTF-8");
         pw.println("<?xml version=\"1.0\"?>");
         pw.println("<testsuites xmlns=\"http://check.sourceforge.net/ns\">");
@@ -398,13 +382,13 @@ public class CTestResultParserTest {
     }
 
     public File constructNotMemoryFailingValgrindOutput(ArrayList<CTestCase> testCases) throws IOException {
-        File tmp = File.createTempFile("valgrind", ".log");
+        File tmp = mkTempFile("valgrind", ".log");
         PrintWriter pw = new PrintWriter(tmp);
         pw.println("==" + testCases.size() * 2 + 1 + "== Main process");
         int i = 2;
         for (CTestCase t : testCases) {
             pw.println("==" + i * 2 + "== " + (i - 1));
-            pw.println("Some crap that should be ignore");
+            pw.println("Some crap that should be ignored");
             pw.println("==" + i * 2 + "== ERROR SUMMARY: 0 errors from 0 contexts");
             pw.println("==" + i * 2 + "== LEAK SUMMARY:");
             pw.println("==" + i * 2 + "==   definitely lost: 0 bytes in 0 blocks");
@@ -418,7 +402,7 @@ public class CTestResultParserTest {
     }
 
     public File constructMemoryFailingValgrindOutput() throws IOException {
-        File tmp = File.createTempFile("valgrind", ".log");
+        File tmp = mkTempFile("valgrind", ".log");
         PrintWriter pw = new PrintWriter(tmp);
         pw.println("==10== Main process");
         pw.println("==1== 1");
@@ -446,6 +430,12 @@ public class CTestResultParserTest {
 
         pw.flush();
         pw.close();
+        return tmp;
+    }
+
+    private File mkTempFile(String prefix, String suffix) throws IOException {
+        File tmp = File.createTempFile(prefix, suffix);
+        tmp.deleteOnExit();
         return tmp;
     }
 }

@@ -5,6 +5,7 @@
 package fi.helsinki.cs.tmc.utilities.valrindmemorytest;
 
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestCase;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -18,8 +19,12 @@ public class ValgrindMemoryTester {
     public static void analyzeMemory(List<CTestCase> tests) {
         for (CTestCase t : tests) {
             failTestWithMemoryError(t);
-            if (t.isCheckedForMemoryLeaks()) failLeakingTest(t);
-            if (t.isCheckedForMemoryUsage()) failTestUsingExcessMemory(t);
+            if (t.isCheckedForMemoryLeaks()) {
+                failLeakingTest(t);
+            }
+            if (t.isCheckedForMemoryUsage()) {
+                failTestUsingExcessMemory(t);
+            }
         }
     }
 
@@ -44,7 +49,7 @@ public class ValgrindMemoryTester {
                     test.setMessage("Unit tests passed, but a memory leak was detected. Please refer to the Valgrind trace for more details.");
                 }
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                throw ExceptionUtils.toRuntimeException(e);
             }
         }
     }
@@ -66,7 +71,7 @@ public class ValgrindMemoryTester {
                     test.setMessage("Unit tests passed, but too much memory was used. Refer to the exercise description.");
                 }
             } catch (NumberFormatException e) {
-                e.printStackTrace();
+                throw ExceptionUtils.toRuntimeException(e);
             }
         }
     }

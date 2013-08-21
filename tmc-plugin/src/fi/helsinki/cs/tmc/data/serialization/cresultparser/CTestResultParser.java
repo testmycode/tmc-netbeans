@@ -31,11 +31,8 @@ public class CTestResultParser {
         this.tests = new ArrayList<CTestCase>();
     }
 
-    public void parseTestOutput() throws SAXException, IOException, ParserConfigurationException {
-        try {
-            this.tests = parseTestCases(testResults);
-        } catch (Exception e) {
-        }
+    public void parseTestOutput() throws Exception {
+        this.tests = parseTestCases(testResults);
         if (valgrindOutput != null) {
             addValgrindOutput();
             
@@ -43,7 +40,9 @@ public class CTestResultParser {
                 addMemoryTests();
                 ValgrindMemoryTester.analyzeMemory(tests);
             }
-        }else addWarningToValgrindOutput();
+        } else {
+            addWarningToValgrindOutput();
+        }
 
     }
 
@@ -62,21 +61,22 @@ public class CTestResultParser {
     private ArrayList<CTestCase> parseTestCases(File testOutput) throws ParserConfigurationException, SAXException, IOException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
+        dBuilder.setErrorHandler(null); // Silence logging
         Document doc = dBuilder.parse(testOutput);
 
         doc.getDocumentElement().normalize();
 
         NodeList nodeList = doc.getElementsByTagName("test");
-        ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
+        ArrayList<CTestCase> cases = new ArrayList<CTestCase>();
         for (int i = 0; i < nodeList.getLength(); i++) {
             Element node = (Element) nodeList.item(i);
             String result = node.getAttribute("result");
             String name = node.getElementsByTagName("description").item(0).getTextContent();
             String message = node.getElementsByTagName("message").item(0).getTextContent();
-            tests.add(new CTestCase(name, result, message));
+            cases.add(new CTestCase(name, result, message));
         }
 
-        return tests;
+        return cases;
     }
 
     private void addMemoryTests() throws FileNotFoundException {
@@ -111,16 +111,20 @@ public class CTestResultParser {
         String message;
         String platform = System.getProperty("os.name").toLowerCase();
         if (platform.contains("linux")){
-            message ="Please install valgrind, for debian based distributions run \"apt-get install valgrind\"";
+            message = "Please install valgrind. For Debian-based distributions, run `sudo apt-get install valgrind`.";
         }else if (platform.contains("mac")){
-            message ="Please install valgrind, for OS X we recommend useing homebrew (http://mxcl.github.com/homebrew/) and brew install valgrind";
+            message = "Please install valgrind. For OS X we recommend using homebrew (http://mxcl.github.com/homebrew/) and `brew install valgrind`.";
         } else if (platform.contains("windows")){
-            message ="Windows doesn't support valgrind yet";
-        } else 
-            message = "no instructions available";
+            message = "Windows doesn't support valgrind yet.";
+        } else {
+            message = "Please install valgrind if possible.";
+        }
         for (int i = 0; i < tests.size(); i++) {
-            tests.get(i).setValgrindTrace("Warning, no valgrind availabe - unable to run local memtests\n"
-                    + "Follow instructions below or submit to server for memorytesting:\n"+message);
+            tests.get(i).setValgrindTrace(
+                    "Warning, valgrind not available - unable to run local memory tests\n"
+                    + message +
+                    "\nYou may also submit the exercise to the server to have it memory-tested."
+                    );
         }
     }
 
