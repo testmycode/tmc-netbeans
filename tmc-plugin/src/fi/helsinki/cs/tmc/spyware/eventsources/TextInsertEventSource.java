@@ -28,7 +28,6 @@ import name.fraser.neil.plaintext.diff_match_patch.Patch;
 import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.filesystems.FileObject;
-import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.datatransfer.ExClipboard;
 
@@ -41,12 +40,12 @@ import org.openide.util.datatransfer.ExClipboard;
  * pastes.
  */
 public class TextInsertEventSource implements Closeable {
-
+    
     private static final Logger log = Logger.getLogger(TextInsertEventSource.class.getName());
     private static final diff_match_patch PATCH_GENERATOR = new diff_match_patch();
     private EventReceiver receiver;
     private JTextComponent currentComponent;
-    private Map<Document, String> documentContent;
+    private Map<Document, String> documentCache;
     private DocumentListener docListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
@@ -80,7 +79,7 @@ public class TextInsertEventSource implements Closeable {
 
         private void handleEvent(DocumentEvent e) {
             Document doc = e.getDocument();
-            
+
             FileObject fo = NbEditorUtilities.getFileObject(doc);
             if (fo == null) {
                 log.log(Level.FINER, "Document has no associated file object");
@@ -92,14 +91,36 @@ public class TextInsertEventSource implements Closeable {
                 log.log(Level.FINER, "Unable to determine exercise for document");
                 return;
             }
+
+            createAndSendPatchEvent(e, fo, doc, ex);
+        }
+
+        private void createAndSendPatchEvent(DocumentEvent e, FileObject fo, Document doc, Exercise ex) {
+            List<Patch> patches;
             
-            List<Patch> patches = generatePatches(doc);
-            
-            if (e.getType().equals(EventType.REMOVE)) {
-                sendEvent(ex, "text_remove", generateEventDescription(fo, patches));
+            // if the document is not in cache, the patch will
+            // contain the full document
+            boolean patchContainsFullDocument = !documentCache.containsKey(doc);
+
+            try {
+                // generatePatches will cache the current version for future
+                // patches; if the document was not in the cache previously, the patch will
+                // contain the full document content
+                patches = generatePatches(doc);
+            } catch (BadLocationException exp) {
+                log.log(Level.WARNING, "Unable to generate patches from {0}.", fo.getName());
                 return;
             }
-            
+
+            // Remove event is handled here as the getText-method can cause
+            // an error as the document state is the state after the event. As 
+            // the offsets are from the actual event, they may reference content 
+            // that is no longer in the current document.
+            if (e.getType().equals(EventType.REMOVE)) {
+                sendEvent(ex, "text_remove", generatePatchDescription(fo, patches), patchContainsFullDocument);
+                return;
+            }
+
             String text;
             try {
                 text = doc.getText(e.getOffset(), e.getLength());
@@ -107,20 +128,26 @@ public class TextInsertEventSource implements Closeable {
                 log.log(Level.WARNING, "Document {0} event with bad location. ", e.getType());
                 return;
             }
-
+            
             if (isPasteEvent(text)) {
-                sendEvent(ex, "text_paste", generateEventDescription(fo, patches));
+                sendEvent(ex, "text_paste", generatePatchDescription(fo, patches), patchContainsFullDocument);
             } else if (e.getType() == EventType.INSERT) {
-                sendEvent(ex, "text_insert", generateEventDescription(fo, patches));
+                sendEvent(ex, "text_insert", generatePatchDescription(fo, patches), patchContainsFullDocument);
             }
         }
 
-        private void sendEvent(Exercise ex, String eventType, String text) {
-            LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
+        private void sendEvent(Exercise ex, String eventType, String text, boolean patchContainsFullDocument) {
+            LoggableEvent event;
+            if(patchContainsFullDocument) {
+                event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")), "{full_document:true}");
+            } else {
+                event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
+            }
+            
             receiver.receiveEvent(event);
         }
         
-        private String generateEventDescription(FileObject fo, List<Patch> patches) {
+        private String generatePatchDescription(FileObject fo, List<Patch> patches) {
             return "{file:\"" + fo.getName() + "\", patches: \"" + PATCH_GENERATOR.patch_toText(patches) + "\"}";
         }
 
@@ -137,7 +164,7 @@ public class TextInsertEventSource implements Closeable {
                 return text.equals(clipboardData);
             } catch (Exception exp) {
             }
-            
+
             return false;
         }
 
@@ -155,24 +182,16 @@ public class TextInsertEventSource implements Closeable {
 
         // currently, if a document is not existing, the patch will
         // contain the full file
-        private List<Patch> generatePatches(Document doc) {
+        private List<Patch> generatePatches(Document doc) throws BadLocationException {
             String previous = "";
-            if(documentContent.containsKey(doc)) {
-                previous = documentContent.get(doc);
+            if (documentCache.containsKey(doc)) {
+                previous = documentCache.get(doc);
             }
-            
-            storeDocumentContent(doc);
-            String current = documentContent.get(doc);
+
+            documentCache.put(doc, doc.getText(0, doc.getLength()));
+            String current = documentCache.get(doc);
 
             return PATCH_GENERATOR.patch_make(previous, current);
-        }
-        
-        private void storeDocumentContent(Document doc) {           
-            try {
-                documentContent.put(doc, doc.getText(0, doc.getLength()));
-            } catch (BadLocationException ex) {
-                // as we store the full document content, this should not happen
-            }
         }
     };
     private PropertyChangeListener propListener = new PropertyChangeListener() {
@@ -182,11 +201,11 @@ public class TextInsertEventSource implements Closeable {
             register();
         }
     };
-    
+
     public TextInsertEventSource(EventReceiver receiver) {
         this.receiver = receiver;
         this.currentComponent = null;
-        this.documentContent = new HashMap<Document, String>();
+        this.documentCache = new HashMap<Document, String>();
         EditorRegistry.addPropertyChangeListener(propListener);
     }
 
