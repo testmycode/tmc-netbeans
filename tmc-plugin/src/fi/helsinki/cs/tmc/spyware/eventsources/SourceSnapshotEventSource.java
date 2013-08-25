@@ -193,6 +193,9 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
 
         @Override
         public void run() {
+            // Note that, being in a thread, this is inherently prone to races that modify the project.
+            // For now we just accept that. Not sure if the FileObject API would allow some sort of
+            // global locking of the project.
             File projectDir = projectInfo.getProjectDirAsFile();
             RecursiveZipper zipper = new RecursiveZipper(projectDir, projectInfo.getZippingDecider());
             try {
@@ -200,7 +203,10 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data, details);
                 receiver.receiveEvent(event);
             } catch (IOException ex) {
-                log.log(Level.WARNING, "Error zipping project sources in: " + projectDir, ex);
+                // Warning might be also appropriate, but this often races with project closing
+                // during integration tests, and there warning would cause a dialog to appear,
+                // failing the test.
+                log.log(Level.INFO, "Error zipping project sources in: " + projectDir, ex);
             }
         }
     }
