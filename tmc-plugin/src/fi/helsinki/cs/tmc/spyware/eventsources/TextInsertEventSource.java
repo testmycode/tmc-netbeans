@@ -34,10 +34,6 @@ import org.openide.util.datatransfer.ExClipboard;
 /**
  * Records large inserts into documents. These are often, but not always,
  * pastes.
- *
- * <p>
- * NOTE: Unfortunately we currently can't distinguish autocompletes from normal
- * pastes.
  */
 public class TextInsertEventSource implements Closeable {
     
@@ -194,6 +190,7 @@ public class TextInsertEventSource implements Closeable {
             return PATCH_GENERATOR.patch_make(previous, current);
         }
     };
+    
     private PropertyChangeListener propListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {

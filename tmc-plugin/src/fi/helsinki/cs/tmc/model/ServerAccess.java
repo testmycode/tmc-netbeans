@@ -292,8 +292,8 @@ public class ServerAccess {
             result.put(prefix + "[event_type]", ev.getEventType());
             result.put(prefix + "[happened_at]", fmtDate(ev.getHappenedAt()));
             result.put(prefix + "[system_nano_time]", "" + ev.getSystemNanotime());
-            if(ev.getDetails() != null) {
-                result.put(prefix + "[details]", ev.getDetails());
+            if (ev.getMetadata() != null) {
+                result.put(prefix + "[metadata]", ev.getMetadata());
             }
             result.put(prefix + "[data_offset]", ""+dataOffset);
             result.put(prefix + "[data_length]", ""+ev.getData().length);

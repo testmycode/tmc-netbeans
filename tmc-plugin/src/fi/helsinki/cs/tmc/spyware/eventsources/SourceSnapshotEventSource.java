@@ -96,10 +96,10 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
         
-        String details = String.format("{cause:'%s',file:'%s'}",
+        String metadata = String.format("{cause:'%s',file:'%s'}",
                 changeType.name().toLowerCase(),
                 filePath);
-        invokeSnapshotThreadViaEdt(fileObject, details);
+        invokeSnapshotThreadViaEdt(fileObject, metadata);
     }    
     
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
@@ -108,12 +108,12 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
         
-        String details = String.format("{cause:'%s',file:'%s',previous_name:'%s.%s'}",
+        String metadata = String.format("{cause:'%s',file:'%s',previous_name:'%s.%s'}",
                 changeType.name().toLowerCase(),
                 filePath,
                 renameEvent.getName(),
                 renameEvent.getExt());
-        invokeSnapshotThreadViaEdt(renameEvent.getFile(), details);
+        invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
     }
     
     private String getFileObjectPath(FileObject fileObject) {
@@ -134,7 +134,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
-    private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final String details) {
+    private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final String metadata) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -143,7 +143,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 }
                 
                 try {
-                    startSnapshotThread(fileObject, details);
+                    startSnapshotThread(fileObject, metadata);
                 } catch (Exception e) {
                     log.log(Level.WARNING, "Failed to start snapshot thread", e);
                 }
@@ -151,7 +151,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         });
     }
     
-    private void startSnapshotThread(FileObject changedFile, String details) {
+    private void startSnapshotThread(FileObject changedFile, String metadata) {
         if (!settings.isSpywareEnabled()) {
             return;
         }
@@ -169,7 +169,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             if (exercise != null) {
                 log.log(Level.FINER, "Exercise: {0}", exercise);
                 
-                SnapshotThread thread = new SnapshotThread(receiver, exercise, project, details);
+                SnapshotThread thread = new SnapshotThread(receiver, exercise, project, metadata);
                 snapshotterThreads.addThread(thread);
                 thread.setDaemon(true);
                 thread.start();
@@ -181,14 +181,14 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         private final EventReceiver receiver;
         private final Exercise exercise;
         private final TmcProjectInfo projectInfo;
-        private final String details;
+        private final String metadata;
 
-        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo, String details) {
+        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo, String metadata) {
             super("Source snapshot");
             this.receiver = receiver;
             this.exercise = exercise;
             this.projectInfo = projectInfo;
-            this.details = details;
+            this.metadata = metadata;
         }
 
         @Override
@@ -200,7 +200,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             RecursiveZipper zipper = new RecursiveZipper(projectDir, projectInfo.getZippingDecider());
             try {
                 byte[] data = zipper.zipProjectSources();
-                LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data, details);
+                LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data, metadata);
                 receiver.receiveEvent(event);
             } catch (IOException ex) {
                 // Warning might be also appropriate, but this often races with project closing
