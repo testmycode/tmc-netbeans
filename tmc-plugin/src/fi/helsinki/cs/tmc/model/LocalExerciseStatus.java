@@ -41,7 +41,7 @@ public class LocalExerciseStatus {
                     } else {
                         downloadableUncompleted.add(ex);
                     }
-                } else if (projectMediator.isProjectOpen(proj)) {
+                } else if (isDownloaded && projectMediator.isProjectOpen(proj)) {
                     open.add(ex);
                 } else {
                     closed.add(ex); // TODO: all projects may end up here if this is queried too early
