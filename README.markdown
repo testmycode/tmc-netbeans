@@ -30,6 +30,12 @@ The course instructor and current maintainer of the project is Martin Pärtel ([
 - Arto Vihavainen
 - Jaakko Kurhila
 
+The system was improved and C language support was added in another SE lab project by
+
+- Jarmo Isotalo ([jamox](https://github.com/jamox))
+- Tony Kovanen ([rase-](https://github.com/rase-))
+- Kalle Viiri ([Kviiri](https://github.com/Kviiri))
+
 
 ## License ##
 
