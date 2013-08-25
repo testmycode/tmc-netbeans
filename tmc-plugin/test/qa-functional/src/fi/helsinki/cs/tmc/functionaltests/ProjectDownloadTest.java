@@ -19,7 +19,7 @@ public class ProjectDownloadTest extends TmcFunctionalTestCase {
     }
     
     public void testProjectDownloadAndExtraction() throws Exception {
-        serverFixture.addDefaultCourse("TestCourse", getTestProjectZip());
+        serverFixture.addDefaultCourse("TestCourse", "TestProject", getFixtureProjectDir("TestProject"));
         SettingsOperator.setAllSettings(this, "TestCourse");
 
         JDialogOperator downloadDialog = new JDialogOperator("Download exercises");

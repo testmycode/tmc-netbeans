@@ -34,16 +34,16 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
         new JButtonOperator(settingsDialog, "Cancel").doClick();
     }
     
-    protected void arrangeForCourseToBeDownloaded(String courseName) throws Exception {
-        serverFixture.addDefaultCourse(courseName, getTestProjectZip());
+    protected void arrangeForCourseToBeDownloaded(String courseName, String projectName) throws Exception {
+        serverFixture.addDefaultCourse(courseName, projectName, getFixtureProjectDir(projectName));
         SettingsOperator.setAllSettings(this, courseName);
 
         JDialogOperator downloadDialog = new JDialogOperator("Download exercises");
         new JButtonOperator(downloadDialog, "Download").doClick();
     }
     
-    protected File getTestProjectZip() {
-        return new File(getDataDir().getPath() + File.separator + "TestProject.zip");
+    protected File getFixtureProjectDir(String projectName) {
+        return new File(getDataDir().getPath() + File.separator + projectName + "Fixture");
     }
     
 }

@@ -1,14 +1,11 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
-import java.io.ByteArrayOutputStream;
-import java.io.InputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.google.gson.JsonObject;
-import java.io.BufferedInputStream;
-import java.io.FileInputStream;
 import static fi.helsinki.cs.tmc.testing.JsonBuilder.*;
+import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 
 /**
  * Provides a default fixture for functional tests.
@@ -90,19 +87,19 @@ public class FullServerFixture {
         updateServerCourseList();
     }
 
-    public CourseFixture addDefaultCourse(String name, File zipFile) throws IOException {
-        InputStream in = new BufferedInputStream(new FileInputStream(zipFile));
-        return addDefaultCourse(name, MyIOUtils.toByteArray(in));
+    public CourseFixture addDefaultCourse(String name, String exerciseName, File projectDir) throws IOException {
+        byte[] zipData = new RecursiveZipper(projectDir, RecursiveZipper.ZIP_ALL_THE_THINGS).zipProjectSources();
+        return addDefaultCourse(name, exerciseName, zipData);
     }
 
-    public CourseFixture addDefaultCourse(String name, byte[] zipData) {
+    public CourseFixture addDefaultCourse(String name, String exerciseName, byte[] zipData) {
         CourseFixture course = new CourseFixture(name);
         
         ExerciseFixture expiredEx = new ExerciseFixture("ExpiredExercise");
         expiredEx.deadline = "2010-01-01T23:59:59+02:00";
         course.exercises.add(expiredEx);
         
-        ExerciseFixture testEx = new ExerciseFixture("TestExercise");
+        ExerciseFixture testEx = new ExerciseFixture(exerciseName);
         testEx.returnUrl = fakeServer.getBaseUrl() + "/courses/123/exercises/456/submissions.json";
         testEx.zipUrl = fakeServer.getBaseUrl() + "/courses/123/exercises/456.zip";
         testEx.zipData = zipData;

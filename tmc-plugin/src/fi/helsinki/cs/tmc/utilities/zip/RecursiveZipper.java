@@ -23,8 +23,15 @@ public class RecursiveZipper {
         public boolean shouldZip(String zipPath);
     }
     
-    public RecursiveZipper(File projectDir, ZippingDecider zippingDecider) {
-        this.rootDir = projectDir;
+    public static final ZippingDecider ZIP_ALL_THE_THINGS = new ZippingDecider() {
+        @Override
+        public boolean shouldZip(String zipPath) {
+            return true;
+        }
+    };
+    
+    public RecursiveZipper(File rootDir, ZippingDecider zippingDecider) {
+        this.rootDir = rootDir;
         this.zippingDecider = zippingDecider;
     }
     
@@ -33,7 +40,7 @@ public class RecursiveZipper {
      */
     public byte[] zipProjectSources() throws IOException {
         if (!rootDir.exists() || !rootDir.isDirectory()) {
-            throw new FileNotFoundException("Project directory not found for zipping!");
+            throw new FileNotFoundException("Root directory " + rootDir + " not found for zipping!");
         }
         
         ByteArrayOutputStream zipBuffer = new ByteArrayOutputStream();
