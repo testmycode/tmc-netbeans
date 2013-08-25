@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 
 public class CodeReviewRequestDialog extends javax.swing.JDialog {
@@ -9,6 +11,8 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
     
     public CodeReviewRequestDialog(Exercise exercise) {
         initComponents();
+        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
+        this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
         this.titleLabel.setText("Requesting code review for " + exercise.getName());
     }
 
@@ -19,7 +23,7 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
     public String getMessageForReviewer() {
         return messageTextArea.getText();
     }
-
+    
     /**
      * This method is called from within the constructor to initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is always
@@ -70,17 +74,17 @@ public class CodeReviewRequestDialog extends javax.swing.JDialog {
             .addGroup(layout.createSequentialGroup()
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 379, Short.MAX_VALUE)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(titleLabel)
-                            .addComponent(leaveMessageLabel))
-                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addComponent(jScrollPane1)
                     .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                         .addGap(0, 0, Short.MAX_VALUE)
                         .addComponent(sendButton)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
-                        .addComponent(cancelButton)))
+                        .addComponent(cancelButton))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(leaveMessageLabel)
+                            .addComponent(titleLabel))
+                        .addGap(0, 141, Short.MAX_VALUE)))
                 .addContainerGap())
         );
         layout.setVerticalGroup(

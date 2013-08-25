@@ -18,7 +18,7 @@ public class RunningTestsLocallyWhenTestsSucceedTest extends TmcFunctionalTestCa
     }
     
     public void testRunningTestsLocallyWhenTestsSucceed() throws Exception {
-        arrangeForCourseToBeDownloaded("TestCourse");
+        arrangeForCourseToBeDownloaded("TestCourse", "TestProject");
 
         ProjectsTabOperator.invoke().getProjectRootNode("TestProject").select();
         new Action("TMC|Run tests locally", null).performMenu();

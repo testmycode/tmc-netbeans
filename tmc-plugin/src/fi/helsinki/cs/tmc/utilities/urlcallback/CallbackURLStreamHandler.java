@@ -8,7 +8,6 @@ import java.net.URLConnection;
 import java.net.URLStreamHandler;
 import java.util.HashMap;
 import java.util.Map;
-import org.openide.util.Exceptions;
 import org.openide.util.URLStreamHandlerRegistration;
 
 /**

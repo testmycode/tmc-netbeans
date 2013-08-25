@@ -3,14 +3,11 @@ package fi.helsinki.cs.tmc.functionaltests;
 import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import junit.framework.Test;
 import org.netbeans.jellytools.EditorOperator;
-import org.netbeans.jellytools.NbDialogOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
 import org.netbeans.jellytools.TopComponentOperator;
 import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
-import org.netbeans.jemmy.operators.JButtonOperator;
-import org.netbeans.jemmy.operators.JDialogOperator;
 import org.netbeans.junit.NbModuleSuite;
 
 public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase {
@@ -24,7 +21,7 @@ public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase 
     }
 
     public void testRunningTestsLocallyWhenTestsFail() throws Exception {
-        arrangeForCourseToBeDownloaded("TestCourse");
+        arrangeForCourseToBeDownloaded("TestCourse", "TestProject");
 
         Node projectNode = ProjectsTabOperator.invoke().getProjectRootNode("TestProject");
         Node sourceFileNode = new Node(projectNode, "Source Packages|<default package>|Main.java");

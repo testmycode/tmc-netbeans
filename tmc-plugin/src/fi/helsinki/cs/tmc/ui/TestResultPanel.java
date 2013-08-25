@@ -122,7 +122,7 @@ class TestResultPanel extends JPanel {
         
         private final TestCaseResult result;
         private final SourceFileLookup sourceFileLookup;
-        private final JButton backtraceButton;
+        private final JButton detailedMessageButton;
         private final GridBagConstraints gbc = new GridBagConstraints();
 
         public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
@@ -150,22 +150,27 @@ class TestResultPanel extends JPanel {
             
             if (result.getException() != null) {
                 add(Box.createVerticalStrut(16), gbc);
-                this.backtraceButton = new JButton(backtraceAction);
-                gbc.weighty = 1.0; // Leave it so for the backtrace
-                this.add(backtraceButton, gbc);
+                this.detailedMessageButton = new JButton(detailedMessageAction);
+                gbc.weighty = 1.0; // Leave it so for the detailed message
+                this.add(detailedMessageButton, gbc);
+            } else if (result.getDetailedMessage() != null) {
+                add(Box.createVerticalStrut(16), gbc);
+                this.detailedMessageButton = new JButton(valgrindAction);
+                gbc.weighty = 1.0; // Leave it so for the detailed message
+                this.add(detailedMessageButton, gbc);
             } else {
-                this.backtraceButton = null;
+                this.detailedMessageButton = null;
             }
             
             this.setBorder(this.createBorder());
         }
 
-        private static class BacktraceDisplay extends JEditorPane {
+        private static class ExceptionDisplay extends JEditorPane {
             private StringBuilder htmlBuilder;
             private HashMap<String, ActionListener> linkHandlers;
             private int nextLinkId;
             
-            public BacktraceDisplay() {
+            public ExceptionDisplay() {
                 this.htmlBuilder = new StringBuilder().append("<html><body>");
                 this.linkHandlers = new HashMap<String, ActionListener>();
                 this.nextLinkId = 1;
@@ -180,7 +185,7 @@ class TestResultPanel extends JPanel {
                         if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                             ActionListener listener = linkHandlers.get(e.getDescription());
                             if (listener != null) {
-                                ActionEvent ae = new ActionEvent(BacktraceDisplay.this, ActionEvent.ACTION_PERFORMED, "link clicked");
+                                ActionEvent ae = new ActionEvent(ExceptionDisplay.this, ActionEvent.ACTION_PERFORMED, "link clicked");
                                 listener.actionPerformed(ae);
                             }
                         }
@@ -227,12 +232,53 @@ class TestResultPanel extends JPanel {
             }
         }
         
-        private Action backtraceAction = new AbstractAction("Show backtrace") {
+        private static class DetailedMessageDisplay extends JEditorPane {
+            private String content;
+            
+            public DetailedMessageDisplay() {
+                this.content = "";
+                this.setEditable(false);
+                this.setContentType("text/html");
+                this.setBackground(UIManager.getColor("Label.background"));
+            }
+
+            public void setContent(String content) {
+                this.content = "<html>" + 
+                        StringEscapeUtils.escapeHtml3(content)
+                        .replaceAll(" ", "&nbsp;")
+                        .replaceAll("\n", "<br />")
+                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + 
+                        "</html>";
+            }
+            
+            public void finish() {
+                this.setText(content);
+            }
+        }
+        
+        private Action valgrindAction = new AbstractAction("Show valgrind trace") {
+
             @Override
             public void actionPerformed(ActionEvent e) {
-                remove(backtraceButton);
+                remove(detailedMessageButton);
                 
-                BacktraceDisplay display = new BacktraceDisplay();
+                DetailedMessageDisplay display = new DetailedMessageDisplay();
+                String output = result.getDetailedMessage();
+                display.setContent(output);
+                display.finish();
+                add(display, gbc);
+                
+                revalidate();
+            }
+            
+        };
+        
+        private Action detailedMessageAction = new AbstractAction("Show detailed message") {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                remove(detailedMessageButton);
+                
+                ExceptionDisplay display = new ExceptionDisplay();
                 addException(display, result.getException(), false);
                 display.finish();
                 add(display, gbc);
@@ -240,7 +286,7 @@ class TestResultPanel extends JPanel {
                 revalidate();
             }
             
-            private void addException(BacktraceDisplay display, CaughtException ex, boolean isCause) {
+            private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
                 String mainLine;
                 if (ex.message != null) {
                     mainLine = ex.className + ": " + ex.message;
@@ -259,7 +305,7 @@ class TestResultPanel extends JPanel {
                 }
             }
             
-            private void addStackTraceLines(BacktraceDisplay display, StackTraceElement[] stackTrace) {
+            private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
                 for (final StackTraceElement ste : stackTrace) {
                     final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
                     

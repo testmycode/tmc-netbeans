@@ -3,3 +3,5 @@
 /nbproject/private
 /tmp
 /mavenmodules
+/parse_output/*.class
+.DS_Store

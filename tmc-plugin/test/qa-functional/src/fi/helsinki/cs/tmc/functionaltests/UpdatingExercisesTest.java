@@ -10,7 +10,6 @@ import java.util.zip.ZipEntry;
 import junit.framework.Test;
 import org.netbeans.jellytools.EditorOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
-import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jellytools.actions.ActionNoBlock;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
@@ -28,8 +27,8 @@ public class UpdatingExercisesTest extends TmcFunctionalTestCase {
     }
 
     public void testUpdatingExistingExercises() throws Exception {
-        CourseFixture course = serverFixture.addDefaultCourse("TestCourse", getTestProjectZip());
-        ExerciseFixture exercise = course.getExerciseFixture("TestExercise");
+        CourseFixture course = serverFixture.addDefaultCourse("TestCourse", "TestProject", getFixtureProjectDir("TestProject"));
+        ExerciseFixture exercise = course.getExerciseFixture("TestProject");
 
         SettingsOperator.setAllSettings(this, "TestCourse");
 
