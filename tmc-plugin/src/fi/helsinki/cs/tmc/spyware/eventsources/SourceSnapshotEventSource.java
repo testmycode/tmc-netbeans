@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
+import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
@@ -95,9 +96,10 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
         
-        String metadata = String.format("{cause:'%s',file:'%s'}",
-                changeType.name().toLowerCase(),
-                filePath);
+        String metadata = JsonMaker.create()
+                .add("cause", changeType.name().toLowerCase())
+                .add("file", filePath)
+                .toString();
         invokeSnapshotThreadViaEdt(fileObject, metadata);
     }    
     
@@ -107,11 +109,11 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
         
-        String metadata = String.format("{cause:'%s',file:'%s',previous_name:'%s.%s'}",
-                changeType.name().toLowerCase(),
-                filePath,
-                renameEvent.getName(),
-                renameEvent.getExt());
+        String metadata = JsonMaker.create()
+                .add("cause", changeType.name().toLowerCase())
+                .add("file", filePath)
+                .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt())
+                .toString();
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
     }
     

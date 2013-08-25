@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import java.awt.HeadlessException;
 import java.awt.datatransfer.DataFlavor;
@@ -140,11 +141,11 @@ public class TextInsertEventSource implements Closeable {
         }
         
         private String generatePatchDescription(FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
-            JsonObject data = new JsonObject();
-            data.addProperty("file", TmcFileUtils.getPathRelativeToProject(fo));
-            data.addProperty("patches", PATCH_GENERATOR.patch_toText(patches));
-            data.addProperty("full_document", patchContainsFullDocument);
-            return data.toString();
+            return JsonMaker.create()
+                    .add("file", TmcFileUtils.getPathRelativeToProject(fo))
+                    .add("patches", PATCH_GENERATOR.patch_toText(patches))
+                    .add("full_document", patchContainsFullDocument)
+                    .toString();
         }
 
         private boolean isPasteEvent(String text) throws HeadlessException {
