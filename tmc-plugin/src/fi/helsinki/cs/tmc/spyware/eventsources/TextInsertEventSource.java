@@ -1,11 +1,13 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
+import com.google.gson.JsonObject;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import java.awt.HeadlessException;
 import java.awt.datatransfer.DataFlavor;
 import java.beans.PropertyChangeEvent;
@@ -113,7 +115,7 @@ public class TextInsertEventSource implements Closeable {
             // the offsets are from the actual event, they may reference content 
             // that is no longer in the current document.
             if (e.getType().equals(EventType.REMOVE)) {
-                sendEvent(ex, "text_remove", generatePatchDescription(fo, patches), patchContainsFullDocument);
+                sendEvent(ex, "text_remove", generatePatchDescription(fo, patches, patchContainsFullDocument));
                 return;
             }
 
@@ -126,25 +128,23 @@ public class TextInsertEventSource implements Closeable {
             }
             
             if (isPasteEvent(text)) {
-                sendEvent(ex, "text_paste", generatePatchDescription(fo, patches), patchContainsFullDocument);
+                sendEvent(ex, "text_paste", generatePatchDescription(fo, patches, patchContainsFullDocument));
             } else if (e.getType() == EventType.INSERT) {
-                sendEvent(ex, "text_insert", generatePatchDescription(fo, patches), patchContainsFullDocument);
+                sendEvent(ex, "text_insert", generatePatchDescription(fo, patches, patchContainsFullDocument));
             }
         }
 
-        private void sendEvent(Exercise ex, String eventType, String text, boolean patchContainsFullDocument) {
-            LoggableEvent event;
-            if(patchContainsFullDocument) {
-                event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")), "{full_document:true}");
-            } else {
-                event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
-            }
-            
+        private void sendEvent(Exercise ex, String eventType, String text) {
+            LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
         }
         
-        private String generatePatchDescription(FileObject fo, List<Patch> patches) {
-            return "{file:\"" + fo.getName() + "\", patches: \"" + PATCH_GENERATOR.patch_toText(patches) + "\"}";
+        private String generatePatchDescription(FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
+            JsonObject data = new JsonObject();
+            data.addProperty("file", TmcFileUtils.getPathRelativeToProject(fo));
+            data.addProperty("patches", PATCH_GENERATOR.patch_toText(patches));
+            data.addProperty("full_document", patchContainsFullDocument);
+            return data.toString();
         }
 
         private boolean isPasteEvent(String text) throws HeadlessException {
