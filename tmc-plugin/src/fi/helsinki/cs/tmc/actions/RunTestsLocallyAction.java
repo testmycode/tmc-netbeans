@@ -46,7 +46,6 @@ import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
@@ -143,8 +142,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 return startCompilingAntProject(projectInfo);
             case JAVA_MAVEN:
                 return startCompilingMavenProject(projectInfo);
-            case UNIVERSAL:
-                return startCompilingUniversalProject(projectInfo);
             case MAKEFILE:
                 return startCompilingMakefileProject(projectInfo);
             default:
@@ -165,34 +162,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         } catch (IOException ex) {
             throw ExceptionUtils.toRuntimeException(ex);
         }
-    }
-
-    private Callable<Integer> startCompilingUniversalProject(TmcProjectInfo projectInfo) {
-        Project project = projectInfo.getProject();
-        FileObject runScript = project.getProjectDirectory().getFileObject(".universal/controls/run");
-        if (runScript == null) {
-            throw new RuntimeException("Project has no .universal/controls/run script");
-        }
-        File workDir = projectInfo.getProjectDirAsFile();
-        String[] command = {"run"};
-        final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
-        final ProcessRunner runner = new ProcessRunner(command, workDir, io);
-        return new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                try {
-                    ProcessResult result = runner.call();
-                    int ret = result.statusCode;
-                    if (ret != 0) {
-                        io.select();
-                    }
-                    return ret;
-                } catch (Exception ex) {
-                    io.select();
-                    throw ex;
-                }
-            }
-        };
     }
 
     private Callable<Integer> startCompilingMakefileProject(TmcProjectInfo projectInfo) {
@@ -267,8 +236,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             case JAVA_MAVEN:
                 startRunningMavenProjectTests(projectInfo);
                 break;
-            case UNIVERSAL:
-                startRunningUniversalProjectTests(projectInfo);
             case MAKEFILE:
                 startRunningMakefileProjectTests(projectInfo, true);
                 break;
@@ -286,44 +253,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
         List<TestMethod> tests = findProjectTests(projectInfo, testDir);
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
-    }
-
-    private void startRunningUniversalProjectTests(final TmcProjectInfo projectInfo) {
-        final File testDir = new File(projectInfo.getProjectDirAbsPath()
-                + File.separatorChar + ".universal"
-                + File.separatorChar + ".control");
-
-        //TODO: again, is absolute path needed and why? --kviiri
-        String[] command = new String[]{testDir.getAbsolutePath() + File.separatorChar
-            + "universal" + testDir.getAbsolutePath() + ".control"
-            + File.separatorChar + "test"};
-        ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault()
-                .getIO(projectInfo.getProjectName(), false));
-        BgTask.start(
-                "Running tests", runner, new BgTaskListener<ProcessResult>() {
-            @Override
-            public void bgTaskReady(ProcessResult result) {
-
-                boolean canSubmit = submitAction.enable(projectInfo.getProject());
-                List<TestCaseResult> results = new ArrayList<TestCaseResult>();
-                resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
-                    @Override
-                    public void run() {
-                        submitAction.performAction(projectInfo.getProject());
-                    }
-                });
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
-
-            }
-        });
     }
 
     private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {

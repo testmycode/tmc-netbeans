@@ -4,6 +4,5 @@ public enum TmcProjectType {
 
     JAVA_SIMPLE,
     JAVA_MAVEN,
-    MAKEFILE, 
-    UNIVERSAL
+    MAKEFILE
 }
