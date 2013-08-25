@@ -8,6 +8,7 @@ import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
+import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.io.Closeable;
@@ -16,8 +17,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import org.netbeans.api.project.FileOwnerQuery;
-import org.netbeans.api.project.Project;
 import org.openide.filesystems.*;
 
 public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
@@ -91,7 +90,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
     
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
-        String filePath = getFileObjectPath(fileObject);
+        String filePath = TmcFileUtils.getPathRelativeToProject(fileObject);
         if(filePath == null) {
             return;
         }
@@ -103,7 +102,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }    
     
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
-        String filePath = getFileObjectPath(renameEvent.getFile());
+        String filePath = TmcFileUtils.getPathRelativeToProject(renameEvent.getFile());
         if(filePath == null) {
             return;
         }
@@ -114,22 +113,6 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 renameEvent.getName(),
                 renameEvent.getExt());
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
-    }
-    
-    private String getFileObjectPath(FileObject fileObject) {
-        String filePath = fileObject.getPath();
-        
-        try {
-            Project p = FileOwnerQuery.getOwner(fileObject);
-            String projectDirectory = p.getProjectDirectory().getPath();
-            if (filePath.contains(projectDirectory)) {
-                filePath = filePath.substring(filePath.indexOf(projectDirectory) + projectDirectory.length());
-            }
-        } catch (Exception e) {
-            log.log(Level.WARNING, "Unable to determine project path for file {0}.", filePath);
-        }
-        
-        return filePath;
     }
     
     // I have no idea what thread FileUtil callbacks are made in,
