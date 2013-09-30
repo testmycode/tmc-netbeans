@@ -82,7 +82,7 @@ public class EventSender implements EventReceiver {
     
     private class SendTask extends TimerTask {
         // Sending too many at once may go over the server's POST size limit.
-        private static final int MAX_EVENTS_PER_SEND = 100;
+        private static final int MAX_EVENTS_PER_SEND = 500;
 
         private final Object doneCondVar = new Object();
         private volatile boolean running = false;
