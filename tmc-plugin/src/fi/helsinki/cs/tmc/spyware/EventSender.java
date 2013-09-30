@@ -19,18 +19,20 @@ public class EventSender implements EventReceiver {
     private static final Logger log = Logger.getLogger(EventSender.class.getName());
     
     public static long DEFAULT_DELAY = 5*60*1000;
-    public static int DEFAULT_MAX_EVENTS = 4096;
+    public static int DEFAULT_MAX_EVENTS = 16 * 1024;
     
     private SpywareSettings settings;
-    
+    private ServerAccess serverAccess;
+
     private long delay = DEFAULT_DELAY;
     private int maxEvents = DEFAULT_MAX_EVENTS;
     
     private ArrayList<LoggableEvent> buffer;
     private java.util.Timer sendTimer;
     
-    public EventSender(SpywareSettings settings) {
+    public EventSender(SpywareSettings settings, ServerAccess serverAccess) {
         this.settings = settings;
+        this.serverAccess = serverAccess;
         this.buffer = new ArrayList<LoggableEvent>();
         this.sendTimer = new java.util.Timer("EventSender timer", true);
         this.sendTimer.schedule(sendTask, delay, delay);
@@ -39,7 +41,11 @@ public class EventSender implements EventReceiver {
     public synchronized void sendNow() {
         sendTask.run();
     }
-    
+
+    public synchronized void waitUntilCurrentSendingFinished(long timeout) throws InterruptedException {
+        sendTask.waitUntilFinished(timeout);
+    }
+
     @Override
     public synchronized void receiveEvent(LoggableEvent event) {
         if (!settings.isSpywareEnabled()) {
@@ -48,13 +54,21 @@ public class EventSender implements EventReceiver {
         buffer.add(event);
         removeIfOverLimit();
     }
-    
-    public synchronized ArrayList<LoggableEvent> takeBuffer() {
-        ArrayList<LoggableEvent> oldBuf = buffer;
-        buffer = new ArrayList<LoggableEvent>();
-        return oldBuf;
+
+    public synchronized ArrayList<LoggableEvent> takeEvents() {
+        return takeEvents(buffer.size());
     }
-    
+
+    public synchronized ArrayList<LoggableEvent> takeEvents(int limit) {
+        limit = Math.min(limit, buffer.size());
+        ArrayList<LoggableEvent> result = new ArrayList<LoggableEvent>();
+        for (int i = 0; i < limit; ++i) {
+            result.add(buffer.get(i));
+        }
+        buffer.subList(0, limit).clear();
+        return result;
+    }
+
     public synchronized void prependEvents(List<LoggableEvent> events) {
         buffer.addAll(0, events);
         removeIfOverLimit();
@@ -67,8 +81,12 @@ public class EventSender implements EventReceiver {
     }
     
     private class SendTask extends TimerTask {
+        // Sending too many at once may go over the server's POST size limit.
+        private static final int MAX_EVENTS_PER_SEND = 100;
+
         private final Object doneCondVar = new Object();
         private volatile boolean running = false;
+        private boolean moreToSend = false;
         
         // run() is synchronized because it may be called by the timer as well as sendNow().
         @Override
@@ -78,7 +96,9 @@ public class EventSender implements EventReceiver {
             }
             
             try {
-                doSend();
+                do {
+                    doSend();
+                } while (moreToSend);
             } finally {
                 synchronized (doneCondVar) {
                     running = false;
@@ -88,14 +108,14 @@ public class EventSender implements EventReceiver {
         }
         
         private void doSend() {
-            final List<LoggableEvent> events = takeBuffer();
+            final List<LoggableEvent> events = takeEvents(MAX_EVENTS_PER_SEND);
+            moreToSend = events.size() == MAX_EVENTS_PER_SEND;
             if (events.isEmpty()) {
                 return;
             }
             
             log.log(Level.INFO, "Sending {0} events", events.size());
             
-            ServerAccess serverAccess = new ServerAccess();
             CancellableCallable<Object> task = serverAccess.getSendEventLogJob(events);
             // If we fail, we add the events back to be tried again later
             Future<Object> future = BgTask.start("Sending stats", task, new BgTaskListener<Object>() {

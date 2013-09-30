@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
@@ -48,7 +49,7 @@ public class SpywareFacade implements SpywareSettings {
         settings = TmcSettings.getDefault();
         
         store = new EventStore();
-        sender = new EventSender(this);
+        sender = new EventSender(this, new ServerAccess());
         int loadedEventCount = loadEvents();
         if (loadedEventCount > 0) {
             sender.sendNow();
@@ -105,7 +106,7 @@ public class SpywareFacade implements SpywareSettings {
     
     private void saveEvents() {
         try {
-            store.save(sender.takeBuffer());
+            store.save(sender.takeEvents());
         } catch (IOException ex) {
             log.log(Level.INFO, "Failed to save events on shutdown", ex);
         }
