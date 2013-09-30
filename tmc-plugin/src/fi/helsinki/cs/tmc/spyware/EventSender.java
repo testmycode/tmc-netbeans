@@ -19,7 +19,7 @@ public class EventSender implements EventReceiver {
     private static final Logger log = Logger.getLogger(EventSender.class.getName());
     
     public static long DEFAULT_DELAY = 5*60*1000;
-    public static int DEFAULT_MAX_EVENTS = 16 * 1024;
+    public static int DEFAULT_MAX_EVENTS = 64 * 1024;
     
     private SpywareSettings settings;
     private ServerAccess serverAccess;
