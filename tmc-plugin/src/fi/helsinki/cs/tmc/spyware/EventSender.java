@@ -61,10 +61,7 @@ public class EventSender implements EventReceiver {
 
     public synchronized ArrayList<LoggableEvent> takeEvents(int limit) {
         limit = Math.min(limit, buffer.size());
-        ArrayList<LoggableEvent> result = new ArrayList<LoggableEvent>();
-        for (int i = 0; i < limit; ++i) {
-            result.add(buffer.get(i));
-        }
+        ArrayList<LoggableEvent> result = new ArrayList<LoggableEvent>(buffer.subList(0, limit));
         buffer.subList(0, limit).clear();
         return result;
     }
