@@ -53,7 +53,7 @@ import org.openide.windows.InputOutput;
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
-    private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.4:test";
+    private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.6:test";
     private static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
     private static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
 
