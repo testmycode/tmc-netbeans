@@ -86,21 +86,21 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
-    protected CourseDb getCourseDb() {
+    protected synchronized CourseDb getCourseDb() {
         return courseDb;
     }
 
     @Override
-    protected ProjectMediator getProjectMediator() {
+    protected synchronized ProjectMediator getProjectMediator() {
         return projectMediator;
     }
 
     @Override
-    protected void performAction(Node[] nodes) {
+    protected synchronized void performAction(Node[] nodes) {
         performAction(projectsFromNodes(nodes).toArray(new Project[0]));
     }
 
-    private void performAction(Project... projects) {
+    private synchronized void performAction(Project... projects) {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
@@ -127,7 +127,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
+    private synchronized Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
         return new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -136,7 +136,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         };
     }
 
-    private Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+    private synchronized Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
         switch (projectInfo.getProjectType()) {
             case JAVA_SIMPLE:
                 return startCompilingAntProject(projectInfo);
@@ -149,7 +149,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private Callable<Integer> startCompilingAntProject(TmcProjectInfo projectInfo) {
+    private synchronized Callable<Integer> startCompilingAntProject(TmcProjectInfo projectInfo) {
         Project project = projectInfo.getProject();
         FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
         if (buildScript == null) {
@@ -164,7 +164,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private Callable<Integer> startCompilingMakefileProject(TmcProjectInfo projectInfo) {
+    private synchronized Callable<Integer> startCompilingMakefileProject(TmcProjectInfo projectInfo) {
         /* This solution is pretty much copied from the pre-existing Maven option.
          * I have no idea how well it will work, but this is a start.
          * --kviiri */
@@ -181,7 +181,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         final ProcessRunner runner = new ProcessRunner(command, workDir, io);
         return new Callable<Integer>() {
             @Override
-            public Integer call() throws Exception {
+            public synchronized Integer call() throws Exception {
                 try {
                     ProcessResult result = runner.call();
                     int ret = result.statusCode;
@@ -198,7 +198,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     }
 
-    private Callable<Integer> startCompilingMavenProject(TmcProjectInfo projectInfo) {
+    private synchronized Callable<Integer> startCompilingMavenProject(TmcProjectInfo projectInfo) {
         File projectDir = projectInfo.getProjectDirAsFile();
 
         String goal = "test-compile";
@@ -212,7 +212,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
         return new Callable<Integer>() {
             @Override
-            public Integer call() throws Exception {
+            public synchronized Integer call() throws Exception {
                 try {
                     ProcessResult result = runner.call();
                     int ret = result.statusCode;
@@ -228,7 +228,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         };
     }
 
-    private void startRunningTests(TmcProjectInfo projectInfo) {
+    private synchronized void startRunningTests(TmcProjectInfo projectInfo) {
         switch (projectInfo.getProjectType()) {
             case JAVA_SIMPLE:
                 startRunningSimpleProjectTests(projectInfo);
@@ -244,7 +244,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private void startRunningSimpleProjectTests(TmcProjectInfo projectInfo) {
+    private synchronized void startRunningSimpleProjectTests(TmcProjectInfo projectInfo) {
         FileObject testDir = findTestDir(projectInfo);
         if (testDir == null) {
             dialogDisplayer.displayError("No test directory in project");
@@ -255,7 +255,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
     }
 
-    private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {
+    private synchronized void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
         if (withValgrind) {
@@ -294,11 +294,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             }
 
             @Override
-            public void bgTaskCancelled() {
+            public synchronized void bgTaskCancelled() {
             }
 
             @Override
-            public void bgTaskFailed(Throwable ex) {
+            public synchronized void bgTaskFailed(Throwable ex) {
                 if (withValgrind) {
                     startRunningMakefileProjectTests(projectInfo, false);
                 } else {
@@ -309,7 +309,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     }
 
-    private void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
+    private synchronized void startRunningMavenProjectTests(final TmcProjectInfo projectInfo) {
         final File projectDir = projectInfo.getProjectDirAsFile();
         String goal = MAVEN_TEST_RUN_GOAL;
         Map<String, String> props = new HashMap<String, String>();
@@ -335,34 +335,34 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
-            public void bgTaskReady(ProcessResult processResult) {
+            public synchronized void bgTaskReady(ProcessResult processResult) {
                 File resultsFile = new File(
                         projectDir.getPath() + File.separator
                         + "target" + File.separator
                         + "test_output.txt");
-
+                log.log(Level.INFO, "Next calling handleTestResults: projectInfo: {0}, file: {1}", new Object[]{projectInfo.getProjectDirAbsPath(), resultsFile.exists()});
                 handleTestResults(projectInfo, resultsFile);
             }
 
             @Override
-            public void bgTaskCancelled() {
+            public synchronized void bgTaskCancelled() {
             }
 
             @Override
-            public void bgTaskFailed(Throwable ex) {
+            public synchronized void bgTaskFailed(Throwable ex) {
                 dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
             }
         });
     }
 
-    private List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
+    private synchronized List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
         TestScanner scanner = new TestScanner();
         scanner.setClassPath(getTestClassPath(projectInfo, testDir).toString(ClassPath.PathConversionMode.WARN));
         scanner.addSource(FileUtil.toFile(testDir));
         return scanner.findTests();
     }
 
-    private FileObject findTestDir(TmcProjectInfo projectInfo) {
+    private synchronized FileObject findTestDir(TmcProjectInfo projectInfo) {
         // Ideally we'd get these paths from NB, but let's assume the conventional ones for now.
         FileObject root = projectInfo.getProjectDir();
         switch (projectInfo.getProjectType()) {
@@ -375,7 +375,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private FileObject getSubdir(FileObject fo, String... subdirs) {
+    private synchronized FileObject getSubdir(FileObject fo, String... subdirs) {
         for (String s : subdirs) {
             if (fo == null) {
                 return null;
@@ -385,19 +385,19 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return fo;
     }
 
-    private boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
+    private synchronized boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
         File endorsedDir = endorsedLibsPath(projectInfo);
         return endorsedDir.exists() && endorsedDir.isDirectory();
     }
 
-    private File endorsedLibsPath(final TmcProjectInfo projectInfo) {
+    private synchronized File endorsedLibsPath(final TmcProjectInfo projectInfo) {
         String path = FileUtil.toFile(projectInfo.getProjectDir()).getAbsolutePath() + File.separatorChar
                 + "lib" + File.separatorChar
                 + "endorsed";
         return new File(path);
     }
 
-    private void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
+    private synchronized void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
         File tempFile;
         try {
             tempFile = File.createTempFile("tmc_test_results", ".txt");
@@ -432,7 +432,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             ClassPath classPath = getTestClassPath(projectInfo, testDir);
             runJavaProcessInProject(projectInfo, classPath, "Running tests", args, inOut, new BgTaskListener<ProcessResult>() {
                 @Override
-                public void bgTaskReady(ProcessResult result) {
+                public synchronized void bgTaskReady(ProcessResult result) {
                     log.info("Test run standard output:");
                     log.info(result.output);
                     log.info("Test run error output:");
@@ -453,12 +453,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 }
 
                 @Override
-                public void bgTaskCancelled() {
+                public synchronized void bgTaskCancelled() {
                     tempFileAsFinal.delete();
                 }
 
                 @Override
-                public void bgTaskFailed(Throwable ex) {
+                public synchronized void bgTaskFailed(Throwable ex) {
                     tempFileAsFinal.delete();
                     dialogDisplayer.displayError("Failed to run tests", ex);
                 }
@@ -470,19 +470,20 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private void handleTestResults(final TmcProjectInfo projectInfo, File resultsFile) {
+    private synchronized void handleTestResults(final TmcProjectInfo projectInfo, File resultsFile) {
         List<TestCaseResult> results;
         try {
             String resultJson = FileUtils.readFileToString(resultsFile, "UTF-8");
             results = parseTestResults(resultJson);
         } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to read test results: {0}", ex.getStackTrace());
             dialogDisplayer.displayError("Failed to read test results", ex);
             return;
         }
         boolean canSubmit = submitAction.enable(projectInfo.getProject());
         resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
             @Override
-            public void run() {
+            public synchronized void run() {
                 submitAction.performAction(projectInfo.getProject());
             }
         });
@@ -492,7 +493,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     }
 
-    private List<TestCaseResult> parseTestResults(String json) {
+    private synchronized List<TestCaseResult> parseTestResults(String json) {
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
                 .create();
@@ -511,7 +512,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return results;
     }
 
-    private void runJavaProcessInProject(TmcProjectInfo projectInfo, ClassPath classPath, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
+    private synchronized void runJavaProcessInProject(TmcProjectInfo projectInfo, ClassPath classPath, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
         FileObject projectDir = projectInfo.getProjectDir();
 
         JavaPlatform platform = JavaPlatform.getDefault(); // Should probably use project's configured platform instead
@@ -544,7 +545,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     }
 
-    private ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
+    private synchronized ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
         ClassPathProvider classPathProvider = projectInfo.getProject().getLookup().lookup(ClassPathProvider.class);
 
         if (classPathProvider
@@ -559,7 +560,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         return cp;
     }
 
-    private ClassPath getTestRunnerClassPath(TmcProjectInfo projectInfo) {
+    private synchronized ClassPath getTestRunnerClassPath(TmcProjectInfo projectInfo) {
         FileObject projectDir = projectInfo.getProjectDir();
         FileObject testrunnerDir = projectDir.getFileObject("lib/testrunner");
         if (testrunnerDir != null) {
@@ -577,7 +578,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
         }
     }
 
-    private Integer getMemoryLimit(Project project) {
+    private synchronized Integer getMemoryLimit(Project project) {
         Exercise ex = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(project), courseDb);
         if (ex != null) {
             return ex.getMemoryLimit();
@@ -587,23 +588,23 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
-    public String getName() {
+    public synchronized String getName() {
         return "Run &tests locally";
     }
 
     @Override
-    protected String iconResource() {
+    protected synchronized String iconResource() {
         // The setting in layer.xml doesn't work with NodeAction
         return "org/netbeans/modules/project/ui/resources/testProject.png";
     }
 
     @Override
-    protected boolean enabledFor(Exercise exercise) {
+    protected synchronized boolean enabledFor(Exercise exercise) {
         // Overridden to not care about the deadline
         return exercise.isReturnable();
     }
 
-    private InputOutput getIoTab() {
+    private synchronized InputOutput getIoTab() {
         InputOutput inOut = IOProvider.getDefault().getIO("Test output", false);
         try {
             inOut.getOut().reset();
