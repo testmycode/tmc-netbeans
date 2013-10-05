@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.spyware.eventsources;
 import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
+import fi.helsinki.cs.tmc.actions.testRunner.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -29,7 +30,7 @@ public class TmcEventBusEventSource extends TmcEventListener {
     }
     
     
-    public void receive(RunTestsLocallyAction.InvokedEvent event) {
+    public void receive(TestRunHandler.InvokedEvent event) {
         sendProjectActionEvent(event.projectInfo, "tmc.test");
     }
     

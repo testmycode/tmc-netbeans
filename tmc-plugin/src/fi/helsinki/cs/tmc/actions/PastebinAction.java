@@ -71,7 +71,7 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
-    boolean enable(Project... projects) {
+    public boolean enable(Project... projects) {
         if (projects.length > 1) {
             return false; // One at a time please
         } else {
