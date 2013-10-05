@@ -40,6 +40,7 @@ import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Lookup;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
@@ -66,10 +67,25 @@ public abstract class AbstractExerciseTestRunner {
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.submitAction = new SubmitExerciseAction();
+        this.submitAction = getSubmitExerciseActionInstance();
         this.eventBus = TmcEventBus.getDefault();
     }
-
+    
+    public static SubmitExerciseAction getSubmitExerciseActionInstance() {
+        return SubmitExerciseAction.getInstance();
+//        return SubmitExerciseActionHolder.INSTANCE;
+    }
+    
+//    private static class SubmitExerciseActionHolder {
+//
+//        private static final SubmitExerciseAction INSTANCE = new SubmitExerciseAction();
+//    }
+//
+//    
+//    protected SubmitExerciseAction getSubmitExerciseAction(){
+//        return Lookup.getDefault().lookup(fi.helsinki.cs.tmc.actions.SubmitExerciseAction.class);
+//    }
+    
     protected void handleTestResults(final TmcProjectInfo projectInfo, File resultsFile) {
         List<TestCaseResult> results;
         try {

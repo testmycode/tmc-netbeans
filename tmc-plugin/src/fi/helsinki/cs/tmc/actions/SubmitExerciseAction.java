@@ -10,6 +10,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.testRunner.Demo;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -49,7 +50,16 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     private ConvenientDialogDisplayer dialogDisplayer;
     private TmcEventBus eventBus;
 
-    public SubmitExerciseAction() {
+    public static SubmitExerciseAction getInstance() {
+        return SubmitExerciseActionHolder.INSTANCE;
+    }
+    
+    private static class SubmitExerciseActionHolder {
+
+        public static final SubmitExerciseAction INSTANCE = new SubmitExerciseAction();
+    }
+    
+    private SubmitExerciseAction() {
         this.settings = TmcSettings.getDefault();
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();

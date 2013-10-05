@@ -29,6 +29,10 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
 
     private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.6:test";
 
+    public MavenExerciseTestRunner(){
+        super();
+    }
+    
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
         File projectDir = projectInfo.getProjectDirAsFile();

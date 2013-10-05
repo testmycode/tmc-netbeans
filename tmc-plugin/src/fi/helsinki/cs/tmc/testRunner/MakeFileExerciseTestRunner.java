@@ -25,6 +25,9 @@ import org.openide.windows.InputOutput;
  */
 public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
 
+    public MakeFileExerciseTestRunner(){
+        super();
+    }
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
            /* This solution is pretty much copied from the pre-existing Maven option.
