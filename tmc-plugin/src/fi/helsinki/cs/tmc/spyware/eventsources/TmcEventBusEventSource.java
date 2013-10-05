@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.spyware.eventsources;
 import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
-import fi.helsinki.cs.tmc.actions.testRunner.TestRunHandler;
+import fi.helsinki.cs.tmc.testRunner.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
