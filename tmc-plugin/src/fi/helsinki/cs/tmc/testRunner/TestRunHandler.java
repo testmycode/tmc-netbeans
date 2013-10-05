@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.actions.testRunner;
+package fi.helsinki.cs.tmc.testRunner;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
