@@ -15,23 +15,14 @@ import org.openide.util.NbBundle.Messages;
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
-    private TmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
-    private SubmitExerciseAction submitAction;
-    private TmcEventBus eventBus;
     private TestRunHandler testRunHandler;
     
     public RunTestsLocallyAction() {
-        this.settings = TmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
-        this.resultDisplayer = TestResultDisplayer.getInstance();
-        this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.submitAction = new SubmitExerciseAction();
-        this.eventBus = TmcEventBus.getDefault();
         this.testRunHandler = new TestRunHandler();
         putValue("noIconInMenu", Boolean.TRUE);
     }
