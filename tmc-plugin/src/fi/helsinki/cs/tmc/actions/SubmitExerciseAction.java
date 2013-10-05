@@ -76,7 +76,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         performAction(projectsFromNodes(nodes).toArray(new Project[0]));
     }
     
-    /*package (for tests)*/ void performAction(Project ... projects) {
+    /*package (for tests)*/ public void performAction(Project ... projects) {
         for (Project nbProject : projects) {
             TmcProjectInfo tmcProject = projectMediator.wrapProject(nbProject);
             eventBus.post(new InvokedEvent(tmcProject));
