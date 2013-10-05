@@ -28,7 +28,11 @@ import org.openide.windows.InputOutput;
  * @author jamo
  */
 public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
-
+    
+    public AntExerciseTestRunner(){
+        super();
+    }
+    
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
 

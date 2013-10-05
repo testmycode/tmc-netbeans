@@ -32,7 +32,7 @@ public class TestRunHandler {
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
-    private SubmitExerciseAction submitAction;
+//    private SubmitExerciseAction submitAction;
     private TmcEventBus eventBus;
     private AbstractExerciseTestRunner arrt = null;
 
@@ -42,7 +42,7 @@ public class TestRunHandler {
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.submitAction = new SubmitExerciseAction();
+//        this.submitAction = new SubmitExerciseAction();
         this.eventBus = TmcEventBus.getDefault();
     }
 
