@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.testRunner;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -23,16 +19,12 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.windows.InputOutput;
 
-/**
- *
- * @author jamo
- */
 public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
-    
-    public AntExerciseTestRunner(){
+
+    public AntExerciseTestRunner() {
         super();
     }
-    
+
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
 
@@ -60,7 +52,6 @@ public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
 
         List<TestMethod> tests = findProjectTests(projectInfo, testDir);
         startRunningSimpleProjectTests(projectInfo, testDir, tests);
-
     }
 
     private void startRunningSimpleProjectTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods) {
@@ -112,7 +103,7 @@ public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
                     }
 
                     try {
-                        handleTestResults(projectInfo, tempFileAsFinal);
+                        new TestResultsHandler().handleTestResults(projectInfo, tempFileAsFinal);
                     } finally {
                         tempFileAsFinal.delete();
                     }

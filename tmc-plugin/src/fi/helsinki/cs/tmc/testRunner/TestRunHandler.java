@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.testRunner;
 
-import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -15,7 +14,6 @@ import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import org.netbeans.api.project.Project;
-
 
 public class TestRunHandler {
 
@@ -32,7 +30,6 @@ public class TestRunHandler {
     private ProjectMediator projectMediator;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
-//    private SubmitExerciseAction submitAction;
     private TmcEventBus eventBus;
     private AbstractExerciseTestRunner arrt = null;
 
@@ -42,7 +39,6 @@ public class TestRunHandler {
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-//        this.submitAction = new SubmitExerciseAction();
         this.eventBus = TmcEventBus.getDefault();
     }
 

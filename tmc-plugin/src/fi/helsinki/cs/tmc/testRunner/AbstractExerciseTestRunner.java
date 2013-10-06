@@ -1,19 +1,13 @@
 package fi.helsinki.cs.tmc.testRunner;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
-import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
-import fi.helsinki.cs.tmc.testrunner.TestCase;
-import fi.helsinki.cs.tmc.testrunner.TestCaseList;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
 import fi.helsinki.cs.tmc.testscanner.TestScanner;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -28,9 +22,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.platform.JavaPlatform;
@@ -40,7 +32,6 @@ import org.netbeans.spi.java.classpath.support.ClassPathSupport;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Lookup;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
@@ -52,7 +43,6 @@ public abstract class AbstractExerciseTestRunner {
     abstract Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo);
 
     abstract void startRunningTests(TmcProjectInfo projectInfo);
-    
     protected TmcSettings settings;
     protected CourseDb courseDb;
     protected ProjectMediator projectMediator;
@@ -70,12 +60,12 @@ public abstract class AbstractExerciseTestRunner {
         this.submitAction = getSubmitExerciseActionInstance();
         this.eventBus = TmcEventBus.getDefault();
     }
-    
+
     public static SubmitExerciseAction getSubmitExerciseActionInstance() {
         return SubmitExerciseAction.getInstance();
 //        return SubmitExerciseActionHolder.INSTANCE;
     }
-    
+
 //    private static class SubmitExerciseActionHolder {
 //
 //        private static final SubmitExerciseAction INSTANCE = new SubmitExerciseAction();
@@ -86,47 +76,6 @@ public abstract class AbstractExerciseTestRunner {
 //        return Lookup.getDefault().lookup(fi.helsinki.cs.tmc.actions.SubmitExerciseAction.class);
 //    }
     
-    protected void handleTestResults(final TmcProjectInfo projectInfo, File resultsFile) {
-        List<TestCaseResult> results;
-        try {
-            String resultJson = FileUtils.readFileToString(resultsFile, "UTF-8");
-            results = parseTestResults(resultJson);
-        } catch (Exception ex) {
-            log.log(Level.WARNING, "Failed to read test results: {0}", ex.getStackTrace());
-            dialogDisplayer.displayError("Failed to read test results", ex);
-            return;
-        }
-        boolean canSubmit = submitAction.enable(projectInfo.getProject());
-        resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
-            @Override
-            public void run() {
-                submitAction.performAction(projectInfo.getProject());
-            }
-        });
-
-
-
-
-    }
-
-    protected List<TestCaseResult> parseTestResults(String json) {
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
-                .create();
-
-        TestCaseList testCaseRecords = gson.fromJson(json, TestCaseList.class);
-        if (testCaseRecords
-                == null) {
-            String msg = "Empty result from test runner";
-            log.warning(msg);
-            throw new IllegalArgumentException(msg);
-        }
-        List<TestCaseResult> results = new ArrayList<TestCaseResult>();
-        for (TestCase tc : testCaseRecords) {
-            results.add(TestCaseResult.fromTestCaseRecord(tc));
-        }
-        return results;
-    }
 
     protected boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
         File endorsedDir = endorsedLibsPath(projectInfo);
@@ -167,22 +116,16 @@ public abstract class AbstractExerciseTestRunner {
         log.info(StringUtils.join(command, ' '));
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
         BgTask.start(taskName, runner, listener);
-
-
-
-
     }
 
     protected ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
         ClassPathProvider classPathProvider = projectInfo.getProject().getLookup().lookup(ClassPathProvider.class);
 
-        if (classPathProvider
-                == null) {
+        if (classPathProvider == null) {
             throw new RuntimeException("Project's class path not (yet) initialized");
         }
         ClassPath cp = classPathProvider.findClassPath(testDir, ClassPath.EXECUTE);
-        if (cp
-                == null) {
+        if (cp == null) {
             throw new RuntimeException("Failed to get 'execute' classpath for project's tests");
         }
         return cp;
@@ -257,8 +200,8 @@ public abstract class AbstractExerciseTestRunner {
         }
         return fo;
     }
-    
-        protected Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
+
+    protected Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
         return new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -266,5 +209,4 @@ public abstract class AbstractExerciseTestRunner {
             }
         };
     }
-
 }
