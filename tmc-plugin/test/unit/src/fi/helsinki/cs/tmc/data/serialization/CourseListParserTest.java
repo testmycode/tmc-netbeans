@@ -25,7 +25,7 @@ public class CourseListParserTest {
                 "[{" +
                 "name: \"TheExercise\"," +
                 "return_url: \"http://example.com/courses/123/exercises/1/submissions\"," +
-                "deadline: \"2011-06-14T01:30:19+03:00\"," +
+                "deadline: \"2015-06-14T01:30:19+03:00\"," +
                 "zip_url: \"http://example.com/courses/123/exercises/1.zip\"," +
                 "attempted: true," +
                 "completed: false," +
@@ -45,7 +45,7 @@ public class CourseListParserTest {
         
         GregorianCalendar cal = new GregorianCalendar();
         cal.setTime(exercise.getDeadline());
-        assertEquals(2011, cal.get(GregorianCalendar.YEAR));
+        assertEquals(2015, cal.get(GregorianCalendar.YEAR));
         assertEquals(1, cal.get(GregorianCalendar.HOUR_OF_DAY));
         assertEquals(30, cal.get(GregorianCalendar.MINUTE));
         
