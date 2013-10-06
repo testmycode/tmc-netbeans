@@ -1,14 +1,13 @@
-package fi.helsinki.cs.tmc.testRunner;
+package fi.helsinki.cs.tmc.testHandler.TestRunner;
 
-import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.testHandler.testResultsHandler.CTestResultsHandler;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
-import java.util.List;
 import java.util.concurrent.Callable;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -22,7 +21,7 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+    public Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
         Project project = projectInfo.getProject();
         FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
         File workDir = projectInfo.getProjectDirAsFile();
@@ -53,7 +52,7 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    void startRunningTests(final TmcProjectInfo projectInfo) {
+    public void startRunningTests(final TmcProjectInfo projectInfo) {
         startRunningTests(projectInfo, true);
     }
 
@@ -73,24 +72,12 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
         BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
-                CTestResultParser parser = new CTestResultParser(
-                        new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
+
+                CTestResultsHandler ctrh = new CTestResultsHandler(new File(testDir.getAbsolutePath() + "/tmc_test_results.xml"),
                         withValgrind ? new File(testDir.getAbsolutePath() + "/valgrind.log") : null,
                         null);
-                try {
-                    parser.parseTestOutput();
-                } catch (Exception e) {
-                    dialogDisplayer.displayError("Failed to read test results:\n" + e.getClass() + " " + e.getMessage());
-                    return;
-                }
-                boolean canSubmit = submitAction.enable(projectInfo.getProject());
-                List<TestCaseResult> results = parser.getTestCaseResults();
-                resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
-                    @Override
-                    public void run() {
-                        submitAction.performAction(projectInfo.getProject());
-                    }
-                });
+
+                ctrh.handle(projectInfo, testDir);
             }
 
             @Override

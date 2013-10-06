@@ -1,22 +1,20 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
 import com.google.gson.Gson;
-import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
-import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
-import fi.helsinki.cs.tmc.testRunner.TestRunHandler;
+import fi.helsinki.cs.tmc.testHandler.testResultsHandler.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import java.io.Closeable;
 import java.nio.charset.Charset;
 import java.util.Collections;
 
 /**
- * Records TMC action invokations, such as exercise submissions.
+ * Records TMC action invocations, such as exercise submissions.
  */
 public class TmcEventBusEventSource extends TmcEventListener {
     private ProjectMediator projects;
@@ -34,7 +32,7 @@ public class TmcEventBusEventSource extends TmcEventListener {
         sendProjectActionEvent(event.projectInfo, "tmc.test");
     }
     
-    public void receive(SubmitExerciseAction.InvokedEvent event) {
+    public void receive(ExerciseSubmitter.InvokedEvent event) {
         sendProjectActionEvent(event.projectInfo, "tmc.submit");
     }
     
