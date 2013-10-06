@@ -23,7 +23,7 @@ public class CTestResultsHandler extends AbstractTestResultsHandler {
 
     @Override
     public void handle(final TmcProjectInfo projectInfo, File resultsFile) {
-        boolean canSubmit = submitAction.enable(projectInfo.getProject());
+        boolean canSubmit = isReturnable(projectInfo);
 
         List<TestCaseResult> results = parser.getTestCaseResults();
 

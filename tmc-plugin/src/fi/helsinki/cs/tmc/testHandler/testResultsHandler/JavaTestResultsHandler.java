@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.testHandler.testResultsHandler;
 
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ExerciseListUtils;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.io.File;
@@ -11,7 +13,7 @@ import org.apache.commons.io.FileUtils;
 public class JavaTestResultsHandler extends AbstractTestResultsHandler {
 
     private static final Logger log = Logger.getLogger(JavaTestResultsHandler.class.getName());
-    
+
     @Override
     public void handle(final TmcProjectInfo projectInfo, File resultsFile) {
         List<TestCaseResult> results;
@@ -23,7 +25,9 @@ public class JavaTestResultsHandler extends AbstractTestResultsHandler {
             dialogDisplayer.displayError("Failed to read test results", ex);
             return;
         }
-        boolean canSubmit = submitAction.enable(projectInfo.getProject());
+        
+        Exercise ex = getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(projectInfo.getProject()), getCourseDb());
+        boolean canSubmit = ex.isReturnable();
         resultDisplayer.showLocalRunResult(results, canSubmit, new Runnable() {
             @Override
             public void run() {
@@ -31,4 +35,7 @@ public class JavaTestResultsHandler extends AbstractTestResultsHandler {
             }
         });
     }
+
+    
+
 }

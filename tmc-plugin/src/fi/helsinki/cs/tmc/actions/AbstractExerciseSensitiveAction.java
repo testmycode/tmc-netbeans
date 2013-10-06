@@ -47,7 +47,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         return false;
     }
     
-    /*package (for tests)*/ 
+    /*package (for tests)*/
     public boolean enable(Project ... projects) {
         if (projects.length == 0) {
             return false;
