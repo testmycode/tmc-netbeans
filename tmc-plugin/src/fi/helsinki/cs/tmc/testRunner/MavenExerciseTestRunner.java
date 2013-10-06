@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.testRunner;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -21,18 +17,14 @@ import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
-/**
- *
- * @author jamo
- */
 public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
 
     private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.6:test";
 
-    public MavenExerciseTestRunner(){
+    public MavenExerciseTestRunner() {
         super();
     }
-    
+
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
         File projectDir = projectInfo.getProjectDirAsFile();
@@ -97,7 +89,8 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
                         + "target" + File.separator
                         + "test_output.txt");
                 log.log(Level.INFO, "Next calling handleTestResults: projectInfo: {0}, file: {1}", new Object[]{projectInfo.getProjectDirAbsPath(), resultsFile.exists()});
-                handleTestResults(projectInfo, resultsFile);
+                new TestResultsHandler().handleTestResults(projectInfo, resultsFile);
+//                handleTestResults(projectInfo, resultsFile);
             }
 
             @Override

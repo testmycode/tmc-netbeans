@@ -10,7 +10,6 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
-import fi.helsinki.cs.tmc.testRunner.Demo;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -86,7 +85,8 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         performAction(projectsFromNodes(nodes).toArray(new Project[0]));
     }
     
-    /*package (for tests)*/ public void performAction(Project ... projects) {
+    /*package (for tests)*/ 
+    public void performAction(Project ... projects) {
         for (Project nbProject : projects) {
             TmcProjectInfo tmcProject = projectMediator.wrapProject(nbProject);
             eventBus.post(new InvokedEvent(tmcProject));

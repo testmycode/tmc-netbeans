@@ -1,7 +1,3 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.testRunner;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
@@ -19,20 +15,14 @@ import org.openide.filesystems.FileObject;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
-/**
- *
- * @author jamo
- */
 public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
 
-    public MakeFileExerciseTestRunner(){
+    public MakeFileExerciseTestRunner() {
         super();
     }
+
     @Override
     Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
-           /* This solution is pretty much copied from the pre-existing Maven option.
-         * I have no idea how well it will work, but this is a start.
-         * --kviiri */
         Project project = projectInfo.getProject();
         FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
         File workDir = projectInfo.getProjectDirAsFile();
@@ -60,13 +50,13 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
                 }
             }
         };
-
     }
-@Override
+
+    @Override
     void startRunningTests(final TmcProjectInfo projectInfo) {
         startRunningTests(projectInfo, true);
-    
-}
+    }
+
     void startRunningTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
@@ -74,15 +64,13 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
             command = new String[]{"valgrind", "--log-file=valgrind.log", "."
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         } else {
-            //Todo: why does this need testDir.getAbsolutePath()? --kviiri
             command = new String[]{testDir.getAbsolutePath()
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         }
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault()
                 .getIO(projectInfo.getProjectName(), false));
 
-        BgTask.start(
-                "Running tests", runner, new BgTaskListener<ProcessResult>() {
+        BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
             @Override
             public void bgTaskReady(ProcessResult result) {
                 CTestResultParser parser = new CTestResultParser(
@@ -119,5 +107,4 @@ public class MakeFileExerciseTestRunner extends AbstractExerciseTestRunner {
             }
         });
     }
-    
 }
