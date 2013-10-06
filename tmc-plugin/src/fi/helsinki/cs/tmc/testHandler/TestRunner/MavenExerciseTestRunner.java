@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.testRunner;
+package fi.helsinki.cs.tmc.testHandler.TestRunner;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -26,7 +26,7 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+    public Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
         File projectDir = projectInfo.getProjectDirAsFile();
 
         String goal = "test-compile";
@@ -57,7 +57,7 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    void startRunningTests(final TmcProjectInfo projectInfo) {
+    public void startRunningTests(final TmcProjectInfo projectInfo) {
         final File projectDir = projectInfo.getProjectDirAsFile();
         String goal = MAVEN_TEST_RUN_GOAL;
         Map<String, String> props = new HashMap<String, String>();
@@ -89,7 +89,7 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
                         + "target" + File.separator
                         + "test_output.txt");
                 log.log(Level.INFO, "Next calling handleTestResults: projectInfo: {0}, file: {1}", new Object[]{projectInfo.getProjectDirAbsPath(), resultsFile.exists()});
-                new TestResultsHandler().handleTestResults(projectInfo, resultsFile);
+                javaTestResultsHandler.handle(projectInfo, resultsFile);
 //                handleTestResults(projectInfo, resultsFile);
             }
 

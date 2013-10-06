@@ -1,13 +1,13 @@
-package fi.helsinki.cs.tmc.testRunner;
+package fi.helsinki.cs.tmc.testHandler.TestRunner;
 
 import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
-import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.testHandler.testResultsHandler.JavaTestResultsHandler;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
 import fi.helsinki.cs.tmc.testscanner.TestScanner;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -40,16 +40,16 @@ public abstract class AbstractExerciseTestRunner {
     protected static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
     protected static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
 
-    abstract Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo);
+    public abstract Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo);
 
-    abstract void startRunningTests(TmcProjectInfo projectInfo);
+    public abstract void startRunningTests(TmcProjectInfo projectInfo);
     protected TmcSettings settings;
     protected CourseDb courseDb;
     protected ProjectMediator projectMediator;
     protected TestResultDisplayer resultDisplayer;
     protected ConvenientDialogDisplayer dialogDisplayer;
-    protected SubmitExerciseAction submitAction;
     protected TmcEventBus eventBus;
+    protected JavaTestResultsHandler javaTestResultsHandler;
 
     public AbstractExerciseTestRunner() {
         this.settings = TmcSettings.getDefault();
@@ -57,25 +57,9 @@ public abstract class AbstractExerciseTestRunner {
         this.projectMediator = ProjectMediator.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.submitAction = getSubmitExerciseActionInstance();
         this.eventBus = TmcEventBus.getDefault();
+        this.javaTestResultsHandler = new JavaTestResultsHandler();
     }
-
-    public static SubmitExerciseAction getSubmitExerciseActionInstance() {
-        return SubmitExerciseAction.getInstance();
-//        return SubmitExerciseActionHolder.INSTANCE;
-    }
-
-//    private static class SubmitExerciseActionHolder {
-//
-//        private static final SubmitExerciseAction INSTANCE = new SubmitExerciseAction();
-//    }
-//
-//    
-//    protected SubmitExerciseAction getSubmitExerciseAction(){
-//        return Lookup.getDefault().lookup(fi.helsinki.cs.tmc.actions.SubmitExerciseAction.class);
-//    }
-    
 
     protected boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
         File endorsedDir = endorsedLibsPath(projectInfo);

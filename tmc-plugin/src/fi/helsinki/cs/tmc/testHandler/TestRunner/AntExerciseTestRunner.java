@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.testRunner;
+package fi.helsinki.cs.tmc.testHandler.TestRunner;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
@@ -26,7 +26,7 @@ public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+    public Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
 
         Project project = projectInfo.getProject();
         FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
@@ -43,7 +43,7 @@ public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    void startRunningTests(TmcProjectInfo projectInfo) {
+    public void startRunningTests(TmcProjectInfo projectInfo) {
         FileObject testDir = findTestDir(projectInfo);
         if (testDir == null) {
             dialogDisplayer.displayError("No test directory in project");
@@ -103,7 +103,7 @@ public class AntExerciseTestRunner extends AbstractExerciseTestRunner {
                     }
 
                     try {
-                        new TestResultsHandler().handleTestResults(projectInfo, tempFileAsFinal);
+                        javaTestResultsHandler.handle(projectInfo, tempFileAsFinal);
                     } finally {
                         tempFileAsFinal.delete();
                     }
