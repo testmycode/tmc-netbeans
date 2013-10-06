@@ -27,7 +27,7 @@ public class CTestResultParserTest {
         oneOfEachTest.add(new CTestCase("failing", "failure", "This test should've failed"));
     }
 
-    @Test(expected=SAXException.class)
+    @Test
     public void testParsingWithNoTests() throws Exception {
         CTestResultParser cpar = null;
         File tmp = mkTempFile("test_output", ".xml");
