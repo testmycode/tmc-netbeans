@@ -1,12 +1,10 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
-import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.utilities.valrindmemorytest.ValgrindMemoryTester;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -16,11 +14,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
-import javax.imageio.stream.FileImageInputStream;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import org.openide.util.Exceptions;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -83,11 +79,11 @@ public class CTestResultParser {
         InputSource is = new InputSource(reader);
         is.setEncoding("UTF-8");
 
-        boolean saxParseExceptionOcurred = false;
         try {
             doc = dBuilder.parse(is);
+            doc = dBuilder.parse(testOutput);
         } catch (SAXException ex) {
-            saxParseExceptionOcurred = true;
+            log.info("SAX parser error ocurred");
             log.info(ex.toString());
         }
 
