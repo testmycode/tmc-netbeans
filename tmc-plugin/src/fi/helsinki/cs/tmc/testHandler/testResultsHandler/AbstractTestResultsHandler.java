@@ -2,9 +2,11 @@ package fi.helsinki.cs.tmc.testHandler.testResultsHandler;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
+import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
@@ -15,28 +17,24 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import org.openide.util.Lookup;
 
 public abstract class AbstractTestResultsHandler {
 
     protected TestResultDisplayer resultDisplayer;
     protected ConvenientDialogDisplayer dialogDisplayer;
     protected ExerciseSubmitter exerciseSubmitter;
-    protected SubmitExerciseAction submitAction;
     private static final Logger log = Logger.getLogger(AbstractTestResultsHandler.class.getName());
+    protected ProjectMediator projectMediator;
+    protected CourseDb courseDb;
 
     public AbstractTestResultsHandler() {
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         this.exerciseSubmitter = new ExerciseSubmitter();
-        this.submitAction = getMagicallyInstanceOfSubmitActionWithOutCreatingNewInstanceOfIt();
+        this.projectMediator = ProjectMediator.getInstance();
+        this.courseDb = CourseDb.getInstance();
     }
 
-
-    private SubmitExerciseAction getMagicallyInstanceOfSubmitActionWithOutCreatingNewInstanceOfIt(){
-        return Lookup.getDefault().lookup(fi.helsinki.cs.tmc.actions.SubmitExerciseAction.class);
-    }
-    
     abstract public void handle(TmcProjectInfo projectInfo, File resultsFile);
 
     protected List<TestCaseResult> parseTestResults(String json) {
@@ -55,5 +53,18 @@ public abstract class AbstractTestResultsHandler {
             results.add(TestCaseResult.fromTestCaseRecord(tc));
         }
         return results;
+    }
+
+    protected ProjectMediator getProjectMediator() {
+        return this.projectMediator;
+    }
+
+    protected CourseDb getCourseDb() {
+        return this.courseDb;
+    }
+
+    protected boolean isReturnable(TmcProjectInfo projectInfo) {
+        Exercise ex = getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(projectInfo.getProject()), getCourseDb());
+        return ex.isReturnable();
     }
 }
