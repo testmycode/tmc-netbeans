@@ -82,12 +82,12 @@ public class CTestResultParser {
         try {
             doc = dBuilder.parse(is);
         } catch (SAXException ex) {
-            log.info("SAX parser error ocurred, still :(");
+            log.info("SAX parser error ocurred");
             log.info(ex.toString());
         }
 
         if (doc == null) {
-            throw new IllegalStateException("doc cannot be null - can't parse test results");
+            throw new IllegalStateException("doc cannot be null - can't parse test results :(");
         }
 
         doc.getDocumentElement().normalize();
