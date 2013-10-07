@@ -71,7 +71,7 @@ public class CTestResultParser {
 
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
         dBuilder.setErrorHandler(null); // Silence logging
-        dbFactory.setValidating(true);
+        dbFactory.setValidating(false);
         Document doc = null;
 
         InputStream inputStream = new FileInputStream(testOutput);
@@ -81,9 +81,8 @@ public class CTestResultParser {
 
         try {
             doc = dBuilder.parse(is);
-            doc = dBuilder.parse(testOutput);
         } catch (SAXException ex) {
-            log.info("SAX parser error ocurred");
+            log.info("SAX parser error ocurred, still :(");
             log.info(ex.toString());
         }
 
