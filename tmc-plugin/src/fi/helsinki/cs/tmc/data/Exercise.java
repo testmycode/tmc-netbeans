@@ -173,7 +173,7 @@ public class Exercise implements Serializable {
     }
     
     public boolean isReturnable() {
-        return returnable;
+        return returnable && !hasDeadlinePassed();
     }
 
     public void setReturnable(boolean returnable) {
