@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.platform.JavaPlatform;
@@ -156,10 +158,21 @@ public abstract class AbstractExerciseTestRunner {
     }
 
     protected List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
-        TestScanner scanner = new TestScanner();
+        TestScanner scanner = new TestScanner(loadJavaCompiler());
         scanner.setClassPath(getTestClassPath(projectInfo, testDir).toString(ClassPath.PathConversionMode.WARN));
         scanner.addSource(FileUtil.toFile(testDir));
         return scanner.findTests();
+    }
+
+    private JavaCompiler loadJavaCompiler() {
+        // https://netbeans.org/bugzilla/show_bug.cgi?id=203540
+        ClassLoader orig = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(JavaPlatform.class.getClassLoader());
+            return ToolProvider.getSystemJavaCompiler();
+        } finally {
+            Thread.currentThread().setContextClassLoader(orig);
+        }
     }
 
     protected FileObject findTestDir(TmcProjectInfo projectInfo) {
