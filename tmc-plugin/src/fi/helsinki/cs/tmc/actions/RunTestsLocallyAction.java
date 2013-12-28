@@ -34,6 +34,8 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.tools.ant.module.api.support.ActionUtils;
@@ -251,8 +253,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
             return;
         }
 
-        List<TestMethod> tests = findProjectTests(projectInfo, testDir);
-        startRunningSimpleProjectTests(projectInfo, testDir, tests);
+        try {
+            List<TestMethod> tests = findProjectTests(projectInfo, testDir);
+            startRunningSimpleProjectTests(projectInfo, testDir, tests);
+        } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to find tests in project " + projectInfo.getProjectName(), ex);
+            dialogDisplayer.displayError("Failed to find the tests");
+        }
     }
 
     private void startRunningMakefileProjectTests(final TmcProjectInfo projectInfo, final boolean withValgrind) {
@@ -356,10 +363,21 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
 
     private List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
-        TestScanner scanner = new TestScanner();
+        TestScanner scanner = new TestScanner(loadJavaCompiler());
         scanner.setClassPath(getTestClassPath(projectInfo, testDir).toString(ClassPath.PathConversionMode.WARN));
         scanner.addSource(FileUtil.toFile(testDir));
         return scanner.findTests();
+    }
+
+    private JavaCompiler loadJavaCompiler() {
+        // https://netbeans.org/bugzilla/show_bug.cgi?id=203540
+        ClassLoader orig = Thread.currentThread().getContextClassLoader();
+        try {
+            Thread.currentThread().setContextClassLoader(JavaPlatform.class.getClassLoader());
+            return ToolProvider.getSystemJavaCompiler();
+        } finally {
+            Thread.currentThread().setContextClassLoader(orig);
+        }
     }
 
     private FileObject findTestDir(TmcProjectInfo projectInfo) {
@@ -486,10 +504,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
                 submitAction.performAction(projectInfo.getProject());
             }
         });
-
-
-
-
     }
 
     private List<TestCaseResult> parseTestResults(String json) {

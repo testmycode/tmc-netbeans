@@ -11,7 +11,8 @@
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.version>RELEASE72</netbeans.version>
+        <netbeans.version>RELEASE74</netbeans.version>
+        <maven.version>3.0.5</maven.version>
     </properties>
 
     <repositories>
@@ -45,7 +46,7 @@
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>apache-maven</artifactId>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
             <type>pom</type>
         </dependency>
         <dependency>
@@ -88,67 +89,67 @@
             <artifactId>maven-aether-provider</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-artifact</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-compat</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-core</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-embedder</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-model</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-model-builder</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-plugin-api</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-repository-metadata</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-settings</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>maven-settings-builder</artifactId>
             <groupId>org.apache.maven</groupId>
             <type>jar</type>
-            <version>3.0.4</version>
+            <version>${maven.version}</version>
         </dependency>
         <dependency>
             <artifactId>plexus-cipher</artifactId>
@@ -285,7 +286,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tmc-junit-runner</artifactId>
-            <version>0.2.2</version>
+            <version>0.2.5</version>
         </dependency>
         <dependency>
             <groupId>org.cometd.java</groupId>
