@@ -1,9 +1,9 @@
-package fi.helsinki.cs.tmc.testHandler.testResultsHandler;
+package fi.helsinki.cs.tmc.runners;
 
-import fi.helsinki.cs.tmc.testHandler.TestRunner.MavenExerciseTestRunner;
-import fi.helsinki.cs.tmc.testHandler.TestRunner.AbstractExerciseTestRunner;
-import fi.helsinki.cs.tmc.testHandler.TestRunner.AntExerciseTestRunner;
-import fi.helsinki.cs.tmc.testHandler.TestRunner.MakeFileExerciseTestRunner;
+import fi.helsinki.cs.tmc.runners.MavenExerciseTestRunner;
+import fi.helsinki.cs.tmc.runners.AbstractExerciseTestRunner;
+import fi.helsinki.cs.tmc.runners.AntExerciseTestRunner;
+import fi.helsinki.cs.tmc.runners.MakeFileExerciseTestRunner;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;

@@ -1,8 +1,7 @@
-package fi.helsinki.cs.tmc.testHandler.TestRunner;
+package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.testHandler.testResultsHandler.CTestResultsHandler;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;

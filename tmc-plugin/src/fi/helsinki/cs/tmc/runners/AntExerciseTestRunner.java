@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.testHandler.TestRunner;
+package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;

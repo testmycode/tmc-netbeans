@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
 import com.google.gson.Gson;
-import fi.helsinki.cs.tmc.testHandler.testResultsHandler.TestRunHandler;
+import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;

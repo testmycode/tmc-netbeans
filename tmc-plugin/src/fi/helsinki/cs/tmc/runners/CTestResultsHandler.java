@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.testHandler.testResultsHandler;
+package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;

@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.testHandler.TestRunner;
+package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.data.Exercise;
@@ -7,7 +7,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
-import fi.helsinki.cs.tmc.testHandler.testResultsHandler.JavaTestResultsHandler;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
 import fi.helsinki.cs.tmc.testscanner.TestScanner;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
