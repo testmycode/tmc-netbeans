@@ -91,7 +91,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
     
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
-        String filePath = TmcFileUtils.getPathRelativeToProject(fileObject);
+        String filePath = TmcFileUtils.tryGetPathRelativeToProject(fileObject);
         if(filePath == null) {
             return;
         }
@@ -104,7 +104,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }    
     
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
-        String filePath = TmcFileUtils.getPathRelativeToProject(renameEvent.getFile());
+        String filePath = TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile());
         if(filePath == null) {
             return;
         }

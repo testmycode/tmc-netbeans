@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import com.google.gson.JsonObject;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -141,11 +140,16 @@ public class TextInsertEventSource implements Closeable {
         }
         
         private String generatePatchDescription(FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
-            return JsonMaker.create()
-                    .add("file", TmcFileUtils.getPathRelativeToProject(fo))
+            String filePath = TmcFileUtils.tryGetPathRelativeToProject(fo);
+            if (filePath != null) {
+                return JsonMaker.create()
+                    .add("file", filePath)
                     .add("patches", PATCH_GENERATOR.patch_toText(patches))
                     .add("full_document", patchContainsFullDocument)
                     .toString();
+            } else {
+                return "{}";
+            }
         }
 
         private boolean isPasteEvent(String text) throws HeadlessException {

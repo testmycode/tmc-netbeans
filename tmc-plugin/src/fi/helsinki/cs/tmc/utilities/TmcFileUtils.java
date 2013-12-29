@@ -13,9 +13,9 @@ public class TmcFileUtils {
      * If the file object is owned by a project, returns the path of the file
      * relative to the project.
      * 
-     * Otherwise returns the entire path.
+     * Otherwise returns null.
      */
-    public static String getPathRelativeToProject(FileObject fileObject) {
+    public static String tryGetPathRelativeToProject(FileObject fileObject) {
         String filePath = fileObject.getPath();
         
         try {
@@ -25,7 +25,7 @@ public class TmcFileUtils {
                 filePath = filePath.substring(filePath.indexOf(projectDirectory) + projectDirectory.length());
             }
         } catch (Exception e) {
-            log.log(Level.WARNING, "Unable to determine project path for file {0}.", filePath);
+            return null;
         }
         
         return filePath;
