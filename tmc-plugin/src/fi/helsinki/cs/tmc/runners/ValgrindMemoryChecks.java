@@ -1,8 +1,4 @@
-/*
- * To change this template, choose Tools | Templates
- * and open the template in the editor.
- */
-package fi.helsinki.cs.tmc.utilities.valrindmemorytest;
+package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestCase;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
@@ -10,11 +6,7 @@ import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-/**
- *
- * @author rase
- */
-public class ValgrindMemoryTester {
+public class ValgrindMemoryChecks {
 
     public static void analyzeMemory(List<CTestCase> tests) {
         for (CTestCase t : tests) {

@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.utilities.valrindmemorytest.ValgrindMemoryTester;
+import fi.helsinki.cs.tmc.runners.ValgrindMemoryChecks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -24,12 +24,12 @@ import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
 
 public class CTestResultParser {
+    protected static final Logger log = Logger.getLogger(CTestResultParser.class.getName());
 
     private File memoryOptions;
     private File testResults;
     private File valgrindOutput;
     private ArrayList<CTestCase> tests;
-    protected static final Logger log = Logger.getLogger(CTestResultParser.class.getName());
 
     public CTestResultParser(File testResults, File valgrindOutput, File memoryOptions) {
         this.testResults = testResults;
@@ -45,7 +45,7 @@ public class CTestResultParser {
 
             if (memoryOptions != null) {
                 addMemoryTests();
-                ValgrindMemoryTester.analyzeMemory(tests);
+                ValgrindMemoryChecks.analyzeMemory(tests);
             }
         } else {
             addWarningToValgrindOutput();

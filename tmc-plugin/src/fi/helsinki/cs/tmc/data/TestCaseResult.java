@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.data;
 
-import com.google.gson.annotations.SerializedName;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import static fi.helsinki.cs.tmc.testrunner.TestCase.Status.*;

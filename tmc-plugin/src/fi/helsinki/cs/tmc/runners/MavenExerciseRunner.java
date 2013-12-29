@@ -1,8 +1,7 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.maven.MavenRunBuilder;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
@@ -17,16 +16,11 @@ import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
-public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
-
+public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
     private static final String MAVEN_TEST_RUN_GOAL = "fi.helsinki.cs.tmc:tmc-maven-plugin:1.6:test";
 
-    public MavenExerciseTestRunner() {
-        super();
-    }
-
     @Override
-    public Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo) {
+    public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {
         File projectDir = projectInfo.getProjectDirAsFile();
 
         String goal = "test-compile";
@@ -37,7 +31,7 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
                 .addGoal(goal)
                 .setIO(inOut)
                 .createProcessRunner();
-        log.log(Level.INFO, "ERR: {0}", inOut.getErr().toString());
+
         return new Callable<Integer>() {
             @Override
             public Integer call() throws Exception {
@@ -57,7 +51,7 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
     }
 
     @Override
-    public void startRunningTests(final TmcProjectInfo projectInfo) {
+    public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
         final File projectDir = projectInfo.getProjectDirAsFile();
         String goal = MAVEN_TEST_RUN_GOAL;
         Map<String, String> props = new HashMap<String, String>();
@@ -81,26 +75,16 @@ public class MavenExerciseTestRunner extends AbstractExerciseTestRunner {
                 .setIO(inOut)
                 .createProcessRunner();
 
-        BgTask.start("Running tests", runner, new BgTaskListener<ProcessResult>() {
+        return new Callable<TestRunResult>() {
             @Override
-            public void bgTaskReady(ProcessResult processResult) {
+            public TestRunResult call() throws Exception {
+                runner.call();
                 File resultsFile = new File(
                         projectDir.getPath() + File.separator
                         + "target" + File.separator
                         + "test_output.txt");
-                log.log(Level.INFO, "Next calling handleTestResults: projectInfo: {0}, file: {1}", new Object[]{projectInfo.getProjectDirAbsPath(), resultsFile.exists()});
-                javaTestResultsHandler.handle(projectInfo, resultsFile);
-//                handleTestResults(projectInfo, resultsFile);
+                return resultParser.parseTestResults(resultsFile);
             }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogDisplayer.displayError("Failed to run tests:\n" + ex.getMessage());
-            }
-        });
+        };
     }
 }

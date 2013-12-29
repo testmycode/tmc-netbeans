@@ -1,66 +1,30 @@
 package fi.helsinki.cs.tmc.runners;
 
-import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import static fi.helsinki.cs.tmc.runners.AbstractExerciseRunner.log;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
 import fi.helsinki.cs.tmc.testscanner.TestScanner;
-import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
-import java.io.IOException;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.Callable;
-import java.util.logging.Logger;
+import java.util.concurrent.Future;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.java.platform.JavaPlatform;
-import org.netbeans.api.project.Project;
 import org.netbeans.spi.java.classpath.ClassPathProvider;
 import org.netbeans.spi.java.classpath.support.ClassPathSupport;
-import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
-import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
-public abstract class AbstractExerciseTestRunner {
-
-    protected static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
-    protected static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
-
-    public abstract Callable<Integer> startCompilingProject(TmcProjectInfo projectInfo);
-
-    public abstract void startRunningTests(TmcProjectInfo projectInfo);
-    protected TmcSettings settings;
-    protected CourseDb courseDb;
-    protected ProjectMediator projectMediator;
-    protected TestResultDisplayer resultDisplayer;
-    protected ConvenientDialogDisplayer dialogDisplayer;
-    protected TmcEventBus eventBus;
-    protected JavaTestResultsHandler javaTestResultsHandler;
-
-    public AbstractExerciseTestRunner() {
-        this.settings = TmcSettings.getDefault();
-        this.courseDb = CourseDb.getInstance();
-        this.projectMediator = ProjectMediator.getInstance();
-        this.resultDisplayer = TestResultDisplayer.getInstance();
-        this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-        this.eventBus = TmcEventBus.getDefault();
-        this.javaTestResultsHandler = new JavaTestResultsHandler();
-    }
+public abstract class AbstractJavaExerciseRunner extends AbstractExerciseRunner {
 
     protected boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
         File endorsedDir = endorsedLibsPath(projectInfo);
@@ -74,7 +38,7 @@ public abstract class AbstractExerciseTestRunner {
         return new File(path);
     }
 
-    protected void runJavaProcessInProject(TmcProjectInfo projectInfo, ClassPath classPath, String taskName, List<String> args, InputOutput inOut, BgTaskListener<ProcessResult> listener) {
+    protected Future<ProcessResult> runJavaProcessInProject(TmcProjectInfo projectInfo, ClassPath classPath, String taskName, List<String> args, InputOutput inOut, BgTaskListener<? super ProcessResult> listener) {
         FileObject projectDir = projectInfo.getProjectDir();
 
         JavaPlatform platform = JavaPlatform.getDefault(); // Should probably use project's configured platform instead
@@ -100,7 +64,7 @@ public abstract class AbstractExerciseTestRunner {
 
         log.info(StringUtils.join(command, ' '));
         ProcessRunner runner = new ProcessRunner(command, FileUtil.toFile(projectDir), inOut);
-        BgTask.start(taskName, runner, listener);
+        return BgTask.start(taskName, runner, listener);
     }
 
     protected ClassPath getTestClassPath(TmcProjectInfo projectInfo, FileObject testDir) {
@@ -134,28 +98,6 @@ public abstract class AbstractExerciseTestRunner {
         }
     }
 
-    protected Integer getMemoryLimit(Project project) {
-        Exercise ex = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(project), courseDb);
-        if (ex != null) {
-            return ex.getMemoryLimit();
-        } else {
-            return null;
-        }
-    }
-
-    protected InputOutput getIoTab() {
-        InputOutput inOut = IOProvider.getDefault().getIO("Test output", false);
-        try {
-            inOut.getOut().reset();
-        } catch (IOException e) {
-            // Ignore
-        }
-        if (inOut.isClosed()) {
-            inOut.select();
-        }
-        return inOut;
-    }
-
     protected List<TestMethod> findProjectTests(TmcProjectInfo projectInfo, FileObject testDir) {
         TestScanner scanner = new TestScanner(loadJavaCompiler());
         scanner.setClassPath(getTestClassPath(projectInfo, testDir).toString(ClassPath.PathConversionMode.WARN));
@@ -187,7 +129,7 @@ public abstract class AbstractExerciseTestRunner {
         }
     }
 
-    protected FileObject getSubdir(FileObject fo, String... subdirs) {
+    private FileObject getSubdir(FileObject fo, String... subdirs) {
         for (String s : subdirs) {
             if (fo == null) {
                 return null;
@@ -195,14 +137,5 @@ public abstract class AbstractExerciseTestRunner {
             fo = fo.getFileObject(s);
         }
         return fo;
-    }
-
-    protected Callable<Integer> executorTaskToCallable(final ExecutorTask et) {
-        return new Callable<Integer>() {
-            @Override
-            public Integer call() throws Exception {
-                return et.result();
-            }
-        };
     }
 }

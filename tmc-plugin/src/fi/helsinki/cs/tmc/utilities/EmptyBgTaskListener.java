@@ -1,6 +1,10 @@
 package fi.helsinki.cs.tmc.utilities;
 
 public class EmptyBgTaskListener {
+    public static BgTaskListener<Object> get() {
+        return get(Object.class);
+    }
+
     public static <T> BgTaskListener<T> get(Class<T> cls) {
         return new BgTaskListener<T>() {
             @Override
