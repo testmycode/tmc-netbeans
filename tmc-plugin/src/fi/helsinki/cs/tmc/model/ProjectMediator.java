@@ -124,7 +124,7 @@ public class ProjectMediator {
      */
     public Exercise tryGetExerciseForProject(TmcProjectInfo project, CourseDb courseDb) {
         File projectDir = FileUtil.toFile(project.getProjectDir());
-        for (Exercise ex : courseDb.getAllExercises()) {
+        for (Exercise ex : courseDb.getCurrentCourseExercises()) {
             if (getProjectDirForExercise(ex).equals(projectDir)) {
                 return ex;
             }

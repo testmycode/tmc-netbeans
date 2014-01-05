@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.awt.event.ActionEvent;
+import java.util.List;
 import javax.swing.AbstractAction;
 
 public class SaveSettingsAction extends AbstractAction {
@@ -37,17 +40,31 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
         settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
-        
-        if (prefUi.getSelectedCourse() != null) {
-            String courseName = prefUi.getSelectedCourse().getName();
+
+        if (prefUi.getSelectedCourseName() != null) {
             courseDb.setAvailableCourses(prefUi.getAvailableCourses());
-            courseDb.setCurrentCourseName(courseName);
-            LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
-            if (status.thereIsSomethingToDownload(false)) {
-                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-            }
-        } else {
-            courseDb.setCurrentCourseName(null);
+            courseDb.setCurrentCourseName(prefUi.getSelectedCourseName());
+
+            RefreshCoursesAction refresh = new RefreshCoursesAction();
+            refresh.addDefaultListener(true, true);
+            refresh.addListener(new BgTaskListener<List<Course>>() {
+                @Override
+                public void bgTaskReady(List<Course> result) {
+                    LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
+                    if (status.thereIsSomethingToDownload(false)) {
+                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                    }
+                }
+
+                @Override
+                public void bgTaskCancelled() {
+                }
+
+                @Override
+                public void bgTaskFailed(Throwable ex) {
+                }
+            });
+            refresh.run();
         }
         
         settings.save();

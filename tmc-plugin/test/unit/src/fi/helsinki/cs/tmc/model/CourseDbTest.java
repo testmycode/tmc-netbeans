@@ -124,20 +124,6 @@ public class CourseDbTest {
     }
     
     @Test
-    public void itCanConvenientlyReturnTAllExercisesFromAllCourses() {
-        List<Course> courses = new ArrayList<Course>();
-        courses.add(new Course("one"));
-        courses.add(new Course("two"));
-        db.setAvailableCourses(courses);
-        
-        assertTrue(db.getAllExercises().isEmpty());
-        
-        CourseListUtils.getCourseByName(courses, "one").getExercises().add(new Exercise("ex"));
-        CourseListUtils.getCourseByName(courses, "two").getExercises().add(new Exercise("ex"));
-        assertEquals("ex", db.getAllExercises().get(0).getName());
-    }
-    
-    @Test
     public void itShouldPostAnEventWhenChanged() {
         final AtomicInteger received = new AtomicInteger(0);
         eventBus.subscribeStrongly(new TmcEventListener() {

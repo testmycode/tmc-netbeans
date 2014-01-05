@@ -8,7 +8,7 @@ public interface PreferencesUI {
 
     String getProjectDir();
 
-    Course getSelectedCourse();
+    String getSelectedCourseName();
 
     String getServerBaseUrl();
 
@@ -32,7 +32,7 @@ public interface PreferencesUI {
     
     void setProjectDir(String projectDir);
 
-    void setSelectedCourse(Course course);
+    void setSelectedCourseName(String courseName);
 
     void setServerBaseUrl(String baseUrl);
 

@@ -42,13 +42,13 @@ public final class DownloadCompletedExercises implements ActionListener {
             dialogs.displayMessage("Please select a course in TMC -> Settings.");
             return;
         }
-        
-        BgTask.start("Checking for new exercises", serverAccess.getDownloadingCourseListTask(), new BgTaskListener<List<Course>>() {
+
+        RefreshCoursesAction action = new RefreshCoursesAction();
+        action.addDefaultListener(true, true);
+        action.addListener(new BgTaskListener<List<Course>>() {
             @Override
             public void bgTaskReady(List<Course> receivedCourseList) {
-                Course receivedCourse = CourseListUtils.getCourseByName(receivedCourseList, currentCourse.getName());
-                courseDb.setAvailableCourses(receivedCourseList);
-                LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                 if (!status.downloadableCompleted.isEmpty()) {
                     List<Exercise> emptyList = Collections.emptyList();
                     DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
@@ -66,5 +66,6 @@ public final class DownloadCompletedExercises implements ActionListener {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });
+        action.run();
     }
 }

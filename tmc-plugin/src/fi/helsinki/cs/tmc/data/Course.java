@@ -8,15 +8,18 @@ public class Course {
 
     private String name;
     
+    @SerializedName("details_url")
+    private String detailsUrl;
     @SerializedName("unlock_url")
     private String unlockUrl;
     @SerializedName("reviews_url")
     private String reviewsUrl;
     @SerializedName("comet_url")
     private String cometUrl;
-    
+
+    private boolean exercisesLoaded;
+
     private List<Exercise> exercises;
-    
     private List<String> unlockables; // Exercise names
     
     
@@ -37,7 +40,15 @@ public class Course {
     public void setName(String name) {
         this.name = name;
     }
-    
+
+    public String getDetailsUrl() {
+        return detailsUrl;
+    }
+
+    public void setDetailsUrl(String detailsUrl) {
+        this.detailsUrl = detailsUrl;
+    }
+
     public String getUnlockUrl() {
         return unlockUrl;
     }
@@ -60,6 +71,14 @@ public class Course {
 
     public void setCometUrl(String cometUrl) {
         this.cometUrl = cometUrl;
+    }
+
+    public boolean isExercisesLoaded() {
+        return exercisesLoaded;
+    }
+
+    public void setExercisesLoaded(boolean exercisesLoaded) {
+        this.exercisesLoaded = exercisesLoaded;
     }
 
     public List<String> getUnlockables() {

@@ -59,7 +59,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
         prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
         prefUI.setAvailableCourses(courseDb.getAvailableCourses());
-        prefUI.setSelectedCourse(courseDb.getCurrentCourse());
+        prefUI.setSelectedCourseName(courseDb.getCurrentCourseName());
         prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());

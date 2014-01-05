@@ -10,6 +10,8 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import org.apache.http.HttpException;
 import org.apache.http.HttpRequest;
 import org.apache.http.HttpResponse;
@@ -26,6 +28,7 @@ public class FakeTmcServer extends AdHocHttpServer {
     private String expectedUsername;
     private String expectedPassword;
     private String coursesJson = "{}";
+    private Map<String, String> courseDetails = new HashMap<String, String>();
     
     private HashMap<String, byte[]> zipFiles = new HashMap<String, byte[]>();
 
@@ -42,15 +45,23 @@ public class FakeTmcServer extends AdHocHttpServer {
     public synchronized void respondWithCourses(String coursesJson) {
         this.coursesJson = coursesJson;
     }
+
+    public synchronized void respondWithCourseDetails(String id, String courseDetailsJson) {
+        this.courseDetails.put(id, courseDetailsJson);
+    }
     
     public synchronized void putZipFile(String path, byte[] data) {
         zipFiles.put(path, data);
     }
     
-    public synchronized void clearZipFiles() {
+    public synchronized void clearResponses() {
+        coursesJson = "{}";
+        courseDetails.clear();
         zipFiles.clear();
     }
-    
+
+    private static final Pattern courseRegex = Pattern.compile("/courses/(.+)\\.json");
+
     private class Handler implements HttpRequestHandler {
         @Override
         public void handle(HttpRequest req, HttpResponse resp, HttpContext hc) throws HttpException, IOException {
@@ -66,14 +77,32 @@ public class FakeTmcServer extends AdHocHttpServer {
 
                 String path = uri.getPath();
                 debug("Path: " + path);
-                
+
                 if (path.startsWith("/courses.json")) {
                     authenticate(params);
                     debug("Responding with course list: " + coursesJson);
                     respondWithJson(resp, coursesJson);
+                } else if (courseRegex.matcher(path).matches()) {
+                    Matcher m = courseRegex.matcher(path);
+                    m.matches();
+                    String id = m.group(1);
+
+System.out.println(courseDetails);
+System.out.println(id);
+                    String response = courseDetails.get(id);
+                    if (response != null) {
+                        authenticate(params);
+                        debug("Responding with course details: " + response);
+                        respondWithJson(resp, response);
+                    } else {
+                        debug("Unknown course path: " + path);
+                        resp.setStatusCode(404);
+                        resp.setEntity(new StringEntity("Not Found"));
+                    }
                 } else if (zipFiles.containsKey(path)) {
                     respondWithBinary(resp, zipFiles.get(path), "application/zip");
                 } else {
+                    debug("Unknown path: " + path);
                     resp.setStatusCode(404);
                     resp.setEntity(new StringEntity("Not Found"));
                 }

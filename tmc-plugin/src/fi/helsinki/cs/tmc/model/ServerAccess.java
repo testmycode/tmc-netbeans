@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.Review;
+import fi.helsinki.cs.tmc.data.serialization.CourseInfoParser;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.data.serialization.ReviewListParser;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
@@ -25,10 +26,11 @@ import org.openide.modules.Modules;
  * A frontend for the server.
  */
 public class ServerAccess {
-    public static final int API_VERSION = 5;
+    public static final int API_VERSION = 6;
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
+    private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
     private String clientVersion;
 
@@ -39,12 +41,18 @@ public class ServerAccess {
     }
 
     public ServerAccess(TmcSettings settings) {
-        this(settings, new CourseListParser(), new ReviewListParser());
+        this(settings, new CourseListParser(), new CourseInfoParser(), new ReviewListParser());
     }
 
-    public ServerAccess(TmcSettings settings, CourseListParser courseListParser, ReviewListParser reviewListParser) {
+    public ServerAccess(
+        TmcSettings settings,
+        CourseListParser courseListParser,
+        CourseInfoParser courseInfoParser,
+        ReviewListParser reviewListParser
+    ) {
         this.settings = settings;
         this.courseListParser = courseListParser;
+        this.courseInfoParser = courseInfoParser;
         this.reviewListParser = reviewListParser;
         this.clientVersion = getClientVersion();
     }
@@ -94,6 +102,27 @@ public class ServerAccess {
                 try {
                     String text = download.call();
                     return courseListParser.parseFromJson(text);
+                } catch (FailedHttpResponseException ex) {
+                    return checkForObsoleteClient(ex);
+                }
+            }
+
+            @Override
+            public boolean cancel() {
+                return download.cancel();
+            }
+        };
+    }
+
+    public CancellableCallable<Course> getFullCourseInfoTask(Course courseStub) {
+        String url = addApiCallQueryParameters(courseStub.getDetailsUrl());
+        final CancellableCallable<String> download = createHttpTasks().getForText(url);
+        return new CancellableCallable<Course>() {
+            @Override
+            public Course call() throws Exception {
+                try {
+                    String text = download.call();
+                    return courseInfoParser.parseFromJson(text);
                 } catch (FailedHttpResponseException ex) {
                     return checkForObsoleteClient(ex);
                 }

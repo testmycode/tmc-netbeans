@@ -54,7 +54,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
                 cancellableDownloadTask = downloadTask;
             }
             
-            log.info("Requesting submission results");
+            log.fine("Requesting submission results");
             String jsonText = downloadTask.call();
             JsonElement json = new JsonParser().parse(jsonText);
             

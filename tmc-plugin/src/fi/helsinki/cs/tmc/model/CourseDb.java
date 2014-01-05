@@ -77,16 +77,22 @@ public class CourseDb {
     }
 
     public void setCurrentCourseName(String currentCourseName) {
-        if (CourseListUtils.hasCourseByName(availableCourses, currentCourseName)) {
-            this.currentCourseName = currentCourseName;
-            save();
-        } else {
-            logger.warning("Tried to set current course to one not in available courses");
+        this.currentCourseName = currentCourseName;
+        save();
+    }
+
+    public void putDetailedCourse(Course course) {
+        for (int i = 0; i < availableCourses.size(); ++i) {
+            if (availableCourses.get(i).getName().equals(course.getName())) {
+                availableCourses.set(i, course);
+                save();
+                break;
+            }
         }
     }
 
     public Exercise getExerciseByKey(ExerciseKey key) {
-        for (Exercise ex : getAllExercises()) {
+        for (Exercise ex : getCurrentCourseExercises()) {
             if (key.equals(ex.getKey())) {
                 return ex;
             }
@@ -107,17 +113,6 @@ public class CourseDb {
         } else {
             return Collections.emptyList();
         }
-    }
-    
-    /**
-     * Returns all exercises from all courses.
-     */
-    public List<Exercise> getAllExercises() {
-        List<Exercise> result = new ArrayList<Exercise>();
-        for (Course course : availableCourses) {
-            result.addAll(course.getExercises());
-        }
-        return result;
     }
     
     public Course getCourseByName(String name) {

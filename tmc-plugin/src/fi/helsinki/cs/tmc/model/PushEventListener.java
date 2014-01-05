@@ -170,7 +170,7 @@ public class PushEventListener {
                 subscribeToReviews();
                 log.fine("Comet handshake successful.");
             } else {
-                log.warning("Comet handshake failed. Will retry.");
+                log.info("Comet handshake failed. Will retry.");
             }
         }
     };

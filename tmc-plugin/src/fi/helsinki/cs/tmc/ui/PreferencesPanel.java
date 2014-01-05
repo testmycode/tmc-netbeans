@@ -139,17 +139,14 @@ import org.apache.commons.lang3.StringUtils;
     public void setAvailableCourses(List<Course> courses) {
         setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
         
-        String previousSelectedCourseName = null;
-        if (getSelectedCourse() != null) {
-            previousSelectedCourseName = getSelectedCourse().getName();
-        }
+        String previousSelectedCourseName = getSelectedCourseName();
         
         coursesComboBox.removeAllItems();
         int newSelectedIndex = -1;
         for (int i = 0; i < courses.size(); ++i) {
             Course course = courses.get(i);
             coursesComboBox.addItem(courses.get(i));
-            
+
             if (course.getName().equals(previousSelectedCourseName)) {
                 newSelectedIndex = i;
             }
@@ -177,15 +174,20 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     @Override
-    public void setSelectedCourse(Course course) {
-        coursesComboBox.setSelectedItem(course);
+    public void setSelectedCourseName(String courseName) {
+        for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
+            if (((Course)coursesComboBox.getItemAt(i)).getName().equals(courseName)) {
+                coursesComboBox.setSelectedIndex(i);
+                break;
+            }
+        }
     }
     
     @Override
-    public Course getSelectedCourse() {
+    public String getSelectedCourseName() {
         Object item = coursesComboBox.getSelectedItem();
         if (item instanceof Course) {
-            return (Course)item;
+            return ((Course)item).getName();
         } else { // because the combobox isn't populated yet
             return null;
         }
@@ -392,7 +394,7 @@ import org.apache.commons.lang3.StringUtils;
     }
     
     private boolean settingsChangedSinceLastRefresh() {
-        return lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings());
+        return (lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings()));
     }
     
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {

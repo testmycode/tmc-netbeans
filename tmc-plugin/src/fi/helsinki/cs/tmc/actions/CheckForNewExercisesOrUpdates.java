@@ -72,25 +72,24 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
     
     public void run() {
-        final Course currentCourse = courseDb.getCurrentCourse();
+        final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
         
         if (backgroundCheck && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
             return;
         }
         
-        if (currentCourse == null) {
+        if (currentCourseBeforeUpdate == null) {
             if (!beQuiet) {
                 dialogs.displayMessage("Please select a course in TMC -> Settings.");
             }
             return;
         }
         
-        BgTask.start("Checking for new exercises", serverAccess.getDownloadingCourseListTask(), new BgTaskListener<List<Course>>() {
+        BgTask.start("Checking for new exercises", serverAccess.getFullCourseInfoTask(currentCourseBeforeUpdate), new BgTaskListener<Course>() {
             @Override
-            public void bgTaskReady(List<Course> receivedCourseList) {
-                Course receivedCourse = CourseListUtils.getCourseByName(receivedCourseList, currentCourse.getName());
+            public void bgTaskReady(Course receivedCourse) {
                 if (receivedCourse != null) {
-                    courseDb.setAvailableCourses(receivedCourseList);
+                    courseDb.putDetailedCourse(receivedCourse);
 
                     final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
                     if (status.thereIsSomethingToDownload(false)) {

@@ -1,24 +1,50 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
+import com.google.gson.JsonElement;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import com.google.gson.JsonObject;
 import static fi.helsinki.cs.tmc.testing.JsonBuilder.*;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+import java.util.List;
+import java.util.UUID;
+import org.apache.commons.lang3.ArrayUtils;
 
 /**
  * Provides a default fixture for functional tests.
  */
 public class FullServerFixture {
     private FakeTmcServer fakeServer;
-    
-    public static class CourseFixture implements Jsonable {
+
+    public class CourseSummaryFixture implements Jsonable {
+        public String id;
         public String name;
+
+        public CourseSummaryFixture(String id, String name) {
+            this.id = id;
+            this.name = name;
+        }
+
+        protected Prop[] props() {
+            return new Prop[] {
+                prop("id", id),
+                prop("name", name),
+                prop("details_url", fakeServer.getBaseUrl() + "/courses/" + id + ".json")
+            };
+        }
+
+        @Override
+        public JsonElement toJson() {
+            return object(props());
+        }
+    }
+
+    public class CourseFixture extends CourseSummaryFixture {
         public ArrayList<ExerciseFixture> exercises;
 
-        public CourseFixture(String name) {
-            this.name = name;
+        public CourseFixture(String id, String name) {
+            super(id, name);
             this.exercises = new ArrayList<ExerciseFixture>();
         }
 
@@ -30,13 +56,12 @@ public class FullServerFixture {
             }
             return null;
         }
-        
+
         @Override
-        public JsonObject toJson() {
-            return object(
-                        prop("name", name),
-                        prop("exercises", array(exercises.toArray()))
-                    );
+        protected Prop[] props() {
+            return ArrayUtils.addAll(super.props(),
+                prop("exercises", array(exercises.toArray()))
+            );
         }
     }
     
@@ -83,7 +108,7 @@ public class FullServerFixture {
     }
     
     public void addEmptyCourse(String name) {
-        courses.add(new CourseFixture(name));
+        courses.add(new CourseFixture(UUID.randomUUID().toString(), name));
         updateServerCourseList();
     }
 
@@ -93,7 +118,7 @@ public class FullServerFixture {
     }
 
     public CourseFixture addDefaultCourse(String name, String exerciseName, byte[] zipData) {
-        CourseFixture course = new CourseFixture(name);
+        CourseFixture course = new CourseFixture(UUID.randomUUID().toString(), name);
         
         ExerciseFixture expiredEx = new ExerciseFixture("ExpiredExercise");
         expiredEx.deadline = "2010-01-01T23:59:59+02:00";
@@ -112,14 +137,18 @@ public class FullServerFixture {
     }
     
     public void updateServerCourseList() {
-        JsonObject json =
-                object(
-                    prop("api_version", 1),
-                    prop("courses", array(courses.toArray()))
-                );
-        fakeServer.respondWithCourses(json.toString());
+        fakeServer.clearResponses();
+
+        fakeServer.respondWithCourses(object(
+            prop("courses", array(getCourseSummaries().toArray()))
+        ).toString());
+
+        for (CourseFixture course : courses) {
+            fakeServer.respondWithCourseDetails(course.id, object(
+                prop("course", course)
+            ).toString());
+        }
         
-        fakeServer.clearZipFiles();
         for (CourseFixture course : courses) {
             for (ExerciseFixture exercise : course.exercises) {
                 if (exercise.zipData != null && exercise.zipUrl.startsWith(fakeServer.getBaseUrl())) {
@@ -129,7 +158,15 @@ public class FullServerFixture {
             }
         }
     }
-    
+
+    private List<CourseSummaryFixture> getCourseSummaries() {
+        List<CourseSummaryFixture> summaries = new ArrayList<CourseSummaryFixture>();
+        for (CourseFixture cf : courses) {
+            summaries.add(new CourseSummaryFixture(cf.id, cf.name));
+        }
+        return summaries;
+    }
+
     public Iterable<CourseFixture> getCourses() {
         return courses;
     }
