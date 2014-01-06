@@ -68,7 +68,6 @@ import org.openide.util.Lookup;
     }
 
     public HttpRequestExecutor setTimeout(int timeoutMs) {
-        this.timeout = timeoutMs;
         return this;
     }
 
@@ -87,11 +86,12 @@ import org.openide.util.Lookup;
     }
 
     private CloseableHttpClient makeHttpClient() throws IOException {
+
         ProxySelector proxys = Lookup.getDefault().lookup((ProxySelector.class));
         SystemDefaultRoutePlanner systemDefaultRoutePlanner = new SystemDefaultRoutePlanner(proxys);
 
+
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider)
                 .useSystemProperties()
                 .setRoutePlanner(systemDefaultRoutePlanner)
                 .setConnectionReuseStrategy(new NoConnectionReuseStrategy());
@@ -99,6 +99,7 @@ import org.openide.util.Lookup;
         CloseableHttpClient httpClient = httpClientBuilder.build();
 
         return httpClient;
+
     }
 
     private void disposeOfHttpClient(CloseableHttpClient httpClient) {
@@ -118,7 +119,7 @@ import org.openide.util.Lookup;
             request.addHeader(new BasicScheme().authenticate(this.credentials, request));
             response = httpClient.execute(request);
         } catch (IOException ex) {
-            log.log(Level.INFO, "catchissä");
+            log.log(Level.INFO, "Executing http request failed: {0}", ex.toString());
             if (request.isAborted()) {
                 throw new InterruptedException();
             } else {
