@@ -1,13 +1,16 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 import org.junit.After;
 import static org.junit.Assert.*;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Captor;
@@ -17,12 +20,19 @@ import org.mockito.MockitoAnnotations;
 
 public class EventSenderTest {
     @Mock
+    private CourseDb courseDb;
+
+    private Course mockCourse;
+
+    @Mock
     private SpywareSettings settings;
     @Mock
     private ServerAccess serverAccess;
 
     @Captor
-    private volatile ArgumentCaptor<ArrayList<LoggableEvent>> sentEvents;
+    private ArgumentCaptor<String> spywareServerUrl;
+    @Captor
+    private ArgumentCaptor<ArrayList<LoggableEvent>> sentEvents;
 
     private EventSender sender;
 
@@ -30,10 +40,14 @@ public class EventSenderTest {
     public void setUp() {
         MockitoAnnotations.initMocks(this);
 
+        mockCourse = new Course("mock-course");
+        mockCourse.setSpywareUrls(Arrays.asList("http://example.com/"));
+        when(courseDb.getCurrentCourse()).thenReturn(mockCourse);
+
         when(settings.isSpywareEnabled()).thenReturn(true);
         when(settings.isDetailedSpywareEnabled()).thenReturn(true);
 
-        when(serverAccess.getSendEventLogJob(sentEvents.capture())).thenReturn(new CancellableCallable<Object>() {
+        when(serverAccess.getSendEventLogJob(spywareServerUrl.capture(), sentEvents.capture())).thenReturn(new CancellableCallable<Object>() {
             @Override
             public Object call() throws Exception {
                 return null;
@@ -45,7 +59,7 @@ public class EventSenderTest {
             }
         });
 
-        sender = new EventSender(settings, serverAccess);
+        sender = new EventSender(settings, serverAccess, courseDb);
     }
 
     @After
@@ -84,6 +98,7 @@ public class EventSenderTest {
         sender.sendNow();
 
         sender.waitUntilCurrentSendingFinished(1000);
+        assertEquals("http://example.com/", spywareServerUrl.getValue());
         assertArrayEquals(new Object[] { ev1, ev2 }, sentEvents.getValue().toArray());
     }
 
@@ -105,5 +120,24 @@ public class EventSenderTest {
             sum += msg.size();
         }
         assertEquals(wayTooMuch, sum);
+    }
+
+    @Test
+    public void testPicksServerRandomly() throws InterruptedException {
+        String[] expected = new String[] { "http://example1.com/", "http://example2.com/" };
+        mockCourse.setSpywareUrls(Arrays.asList(expected));
+
+        Set<String> serversPicked = new HashSet<String>();
+        for (int i = 0; i < 1000; ++i) {
+            sender.receiveEvent(ev1);
+            sender.sendNow();
+            sender.waitUntilCurrentSendingFinished(1000);
+            serversPicked.add(spywareServerUrl.getValue());
+            if (serversPicked.size() == expected.length) {
+                return;
+            }
+        }
+
+        fail("Servers picked only contained: " + serversPicked);
     }
 }

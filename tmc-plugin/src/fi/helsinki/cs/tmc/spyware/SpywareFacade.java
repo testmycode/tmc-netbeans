@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
@@ -49,7 +50,7 @@ public class SpywareFacade implements SpywareSettings {
         settings = TmcSettings.getDefault();
         
         store = new EventStore();
-        sender = new EventSender(this, new ServerAccess());
+        sender = new EventSender(this, new ServerAccess(), CourseDb.getInstance());
         int loadedEventCount = loadEvents();
         if (loadedEventCount > 0) {
             sender.sendNow();

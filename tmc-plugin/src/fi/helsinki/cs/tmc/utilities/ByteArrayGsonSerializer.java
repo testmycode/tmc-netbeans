@@ -11,6 +11,9 @@ import com.google.gson.JsonSerializer;
 import java.lang.reflect.Type;
 import org.apache.commons.codec.binary.Base64;
 
+/**
+ * Converts byte[] to/from base64 in JSON.
+ */
 public class ByteArrayGsonSerializer implements JsonSerializer<byte[]>, JsonDeserializer<byte[]> {
     @Override
     public JsonElement serialize(byte[] data, Type type, JsonSerializationContext jsc) {

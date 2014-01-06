@@ -59,6 +59,7 @@ public class TextInsertEventSource implements Closeable {
         public void changedUpdate(DocumentEvent e) {
             // These are attribute changes and don't interest us.
         }
+        
         private FileObject cachedFile = null;
         private Exercise cachedExercise = null;
 

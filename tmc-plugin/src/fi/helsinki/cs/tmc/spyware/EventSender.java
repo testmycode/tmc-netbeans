@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 import java.util.TimerTask;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
@@ -20,9 +23,11 @@ public class EventSender implements EventReceiver {
     
     public static long DEFAULT_DELAY = 5*60*1000;
     public static int DEFAULT_MAX_EVENTS = 64 * 1024;
-    
+
+    private Random random = new Random();
     private SpywareSettings settings;
     private ServerAccess serverAccess;
+    private CourseDb courseDb;
 
     private long delay = DEFAULT_DELAY;
     private int maxEvents = DEFAULT_MAX_EVENTS;
@@ -30,9 +35,10 @@ public class EventSender implements EventReceiver {
     private ArrayList<LoggableEvent> buffer;
     private java.util.Timer sendTimer;
     
-    public EventSender(SpywareSettings settings, ServerAccess serverAccess) {
+    public EventSender(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb) {
         this.settings = settings;
         this.serverAccess = serverAccess;
+        this.courseDb = courseDb;
         this.buffer = new ArrayList<LoggableEvent>();
         this.sendTimer = new java.util.Timer("EventSender timer", true);
         this.sendTimer.schedule(sendTask, delay, delay);
@@ -111,9 +117,23 @@ public class EventSender implements EventReceiver {
                 return;
             }
             
-            log.log(Level.INFO, "Sending {0} events", events.size());
-            
-            CancellableCallable<Object> task = serverAccess.getSendEventLogJob(events);
+            Course course = courseDb.getCurrentCourse();
+            if (course == null) {
+                log.log(Level.FINE, "Not sending events because no course selected", events.size());
+                return;
+            }
+
+            List<String> urls = course.getSpywareUrls();
+            if (urls == null || urls.isEmpty()) {
+                log.log(Level.FINE, "Not sending events because no URL provided by server", events.size());
+                return;
+            }
+
+            String url = urls.get(random.nextInt(urls.size()));
+
+            log.log(Level.INFO, "Sending {0} events to {1}", new Object[] { events.size(), url });
+
+            CancellableCallable<Object> task = serverAccess.getSendEventLogJob(url, events);
             // If we fail, we add the events back to be tried again later
             Future<Object> future = BgTask.start("Sending stats", task, new BgTaskListener<Object>() {
                 @Override

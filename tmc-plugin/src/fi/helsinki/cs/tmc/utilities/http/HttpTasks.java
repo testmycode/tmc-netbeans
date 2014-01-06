@@ -9,6 +9,7 @@ import org.apache.http.NameValuePair;
 import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.entity.mime.HttpMultipartMode;
 import org.apache.http.entity.mime.MultipartEntity;
 import org.apache.http.entity.mime.content.ByteArrayBody;
@@ -52,6 +53,10 @@ public class HttpTasks {
     
     public CancellableCallable<String> postForText(String url, Map<String, String> params) {
         return downloadToText(createExecutor(makePostRequest(url, params)));
+    }
+
+    public CancellableCallable<String> rawPostForText(String url, byte[] data) {
+        return downloadToText(createExecutor(makeRawPostRequest(url, data)));
     }
     
     public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
@@ -102,6 +107,14 @@ public class HttpTasks {
         } catch (UnsupportedEncodingException ex) {
             throw new RuntimeException(ex);
         }
+    }
+
+    private HttpPost makeRawPostRequest(String url, byte[] data) {
+        HttpPost request = new HttpPost(url);
+
+        ByteArrayEntity entity = new ByteArrayEntity(data);
+        request.setEntity(entity);
+        return request;
     }
 
     private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) {
