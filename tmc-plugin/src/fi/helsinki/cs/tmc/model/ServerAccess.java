@@ -33,8 +33,6 @@ public class ServerAccess {
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
     private String clientVersion;
-
-    private JsonObject respJson;
     
     public ServerAccess() {
         this(TmcSettings.getDefault());
@@ -169,16 +167,16 @@ public class ServerAccess {
         String zipUrl = exercise.getSolutionDownloadUrl();
         return createHttpTasks().getForBinary(zipUrl);
     }
-    
-    public CancellableCallable<URI> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
+
+    public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
         
         final CancellableCallable<String> upload =
                 createHttpTasks().uploadFileForTextDownload(submitUrl, extraParams, "submission[file]", sourceZip);
         
-        return new CancellableCallable<URI>() {
+        return new CancellableCallable<SubmissionResponse>() {
             @Override
-            public URI call() throws Exception {
+            public SubmissionResponse call() throws Exception {
                 String response;
                 try {
                     response = upload.call();
@@ -186,12 +184,14 @@ public class ServerAccess {
                     return checkForObsoleteClient(ex);
                 }
                 
-                respJson = new JsonParser().parse(response).getAsJsonObject();
+                JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
                 if (respJson.get("error") != null) {
                     throw new RuntimeException("Server responded with error: " + respJson.get("error"));
                 } else if (respJson.get("submission_url") != null) {
                     try {
-                        return new URI(respJson.get("submission_url").getAsString());
+                        URI submissionUrl = new URI(respJson.get("submission_url").getAsString());
+                        URI pasteUrl = new URI(respJson.get("paste_url").getAsString());
+                        return new SubmissionResponse(submissionUrl, pasteUrl);
                     } catch (Exception e) {
                         throw new RuntimeException("Server responded with malformed submission url");
                     }
@@ -205,6 +205,15 @@ public class ServerAccess {
                 return upload.cancel();
             }
         };
+    }
+
+    public static class SubmissionResponse {
+        public final URI submissionUrl;
+        public final URI pasteUrl;
+        public SubmissionResponse(URI submissionUrl, URI pasteUrl) {
+            this.submissionUrl = submissionUrl;
+            this.pasteUrl = pasteUrl;
+        }
     }
     
     public CancellableCallable<String> getSubmissionFetchTask(String submissionUrl) {
@@ -365,9 +374,5 @@ public class ServerAccess {
         }
 
         throw ex;
-    }
-
-    public JsonObject getRespJson() {
-        return respJson;
     }
 }

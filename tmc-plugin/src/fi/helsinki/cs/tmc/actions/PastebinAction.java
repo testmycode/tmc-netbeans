@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
-import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.PastebinDialog;
 import fi.helsinki.cs.tmc.ui.PastebinResponseDialog;
@@ -24,7 +23,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
-import org.openide.cookies.EditorCookie;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -130,15 +128,13 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
                 }
 
                 final ServerAccess sa = new ServerAccess();
-                CancellableCallable<URI> submitTask = sa
+                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
                         .getSubmittingExerciseTask(exercise, zipData, extraParams);
 
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<URI>() {
+                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
                     @Override
-                    public void bgTaskReady(URI result) {
-                        new PastebinResponseDialog(sa.getRespJson().get("paste_url")
-                                .getAsString()).setVisible(true);
-
+                    public void bgTaskReady(ServerAccess.SubmissionResponse result) {
+                        new PastebinResponseDialog(result.pasteUrl.toString()).setVisible(true);
                     }
 
                     @Override

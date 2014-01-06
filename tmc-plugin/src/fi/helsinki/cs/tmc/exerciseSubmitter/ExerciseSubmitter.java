@@ -78,10 +78,10 @@ public class ExerciseSubmitter {
 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
         
-        final BgTaskListener<URI> submissionUriListener = new BgTaskListener<URI>() {
+        final BgTaskListener<ServerAccess.SubmissionResponse> submissionListener = new BgTaskListener<ServerAccess.SubmissionResponse>() {
             @Override
-            public void bgTaskReady(URI submissionUri) {
-                final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(submissionUri.toString(), dialog);
+            public void bgTaskReady(ServerAccess.SubmissionResponse response) {
+                final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(response.submissionUrl.toString(), dialog);
                 dialog.setTask(waitingTask);
                 
                 BgTask.start("Waiting for results from server.", waitingTask, new BgTaskListener<SubmissionResult>() {
@@ -146,19 +146,19 @@ public class ExerciseSubmitter {
                 Map<String, String> extraParams = new HashMap<String, String>();
                 extraParams.put("error_msg_locale", errorMsgLocale);
                 
-                CancellableCallable<URI> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData, extraParams);
+                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData, extraParams);
                 dialog.setTask(submitTask);
-                BgTask.start("Sending " + exercise.getName(), submitTask, submissionUriListener);
+                BgTask.start("Sending " + exercise.getName(), submitTask, submissionListener);
             }
 
             @Override
             public void bgTaskCancelled() {
-                submissionUriListener.bgTaskCancelled();
+                submissionListener.bgTaskCancelled();
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                submissionUriListener.bgTaskFailed(ex);
+                submissionListener.bgTaskFailed(ex);
             }
         });
     }

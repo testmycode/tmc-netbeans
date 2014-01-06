@@ -16,6 +16,8 @@ public class Course {
     private String reviewsUrl;
     @SerializedName("comet_url")
     private String cometUrl;
+    @SerializedName("spyware_urls")
+    private List<String> spywareUrls;
 
     private boolean exercisesLoaded;
 
@@ -31,6 +33,7 @@ public class Course {
         this.name = name;
         this.exercises = new ArrayList<Exercise>();
         this.unlockables = new ArrayList<String>();
+        this.spywareUrls = new ArrayList<String>();
     }
 
     public String getName() {
@@ -71,6 +74,14 @@ public class Course {
 
     public void setCometUrl(String cometUrl) {
         this.cometUrl = cometUrl;
+    }
+
+    public List<String> getSpywareUrls() {
+        return spywareUrls;
+    }
+
+    public void setSpywareUrls(List<String> spywareUrls) {
+        this.spywareUrls = spywareUrls;
     }
 
     public boolean isExercisesLoaded() {
