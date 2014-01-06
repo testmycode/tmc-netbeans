@@ -38,7 +38,7 @@ public class SpywareFacade implements SpywareSettings {
     private EventStore store;
     private EventSender sender;
     
-    private EventDeduplicater dedup;
+    private EventDeduplicater sourceSnapshotDedup;
     
     private SourceSnapshotEventSource sourceSnapshotSource;
     private ProjectActionEventSource projectActionSource;
@@ -55,9 +55,8 @@ public class SpywareFacade implements SpywareSettings {
             sender.sendNow();
         }
         
-        dedup = new EventDeduplicater(sender);
-        
-        sourceSnapshotSource = new SourceSnapshotEventSource(this, dedup);
+        sourceSnapshotDedup = new EventDeduplicater(sender);
+        sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);
         sourceSnapshotSource.startListeningToFileChanges();
         
         projectActionSource = new ProjectActionEventSource(sender);
@@ -98,7 +97,7 @@ public class SpywareFacade implements SpywareSettings {
         
         sourceSnapshotSource.close();
         
-        dedup.close();
+        sourceSnapshotDedup.close();
         sender.close();
         
         saveEvents();
