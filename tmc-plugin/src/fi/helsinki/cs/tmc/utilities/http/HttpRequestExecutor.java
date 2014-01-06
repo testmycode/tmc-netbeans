@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.utilities.http;
 
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.IOException;
+import java.net.ProxySelector;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
@@ -19,7 +20,9 @@ import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.util.EntityUtils;
+import org.openide.util.Lookup;
 
 /**
  * Downloads a single file over HTTP into memory while being cancellable.
@@ -51,6 +54,7 @@ import org.apache.http.util.EntityUtils;
             credentials = new UsernamePasswordCredentials(request.getURI().getUserInfo());
             setRequestCredentials();
         }
+
     }
 
     public HttpRequestExecutor setCredentials(String username, String password) {
@@ -71,7 +75,7 @@ import org.apache.http.util.EntityUtils;
     @Override
     public BufferedHttpEntity call() throws IOException, InterruptedException, FailedHttpResponseException {
         CloseableHttpClient httpClient = makeHttpClient();
-        
+
         try {
             return executeRequest(httpClient);
         } finally {
@@ -83,9 +87,13 @@ import org.apache.http.util.EntityUtils;
     }
 
     private CloseableHttpClient makeHttpClient() throws IOException {
+        ProxySelector proxys = Lookup.getDefault().lookup((ProxySelector.class));
+        SystemDefaultRoutePlanner systemDefaultRoutePlanner = new SystemDefaultRoutePlanner(proxys);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .setDefaultCredentialsProvider(credsProvider)        
+                .setDefaultCredentialsProvider(credsProvider)
+                .useSystemProperties()
+                .setRoutePlanner(systemDefaultRoutePlanner)
                 .setConnectionReuseStrategy(new NoConnectionReuseStrategy());
 
         CloseableHttpClient httpClient = httpClientBuilder.build();
@@ -97,14 +105,14 @@ import org.apache.http.util.EntityUtils;
         try {
             httpClient.close();
         } catch (IOException ex) {
-            log.log(Level.WARNING, "dispoce of httpClient failed {0}", ex);
+            log.log(Level.WARNING, "dispose of httpClient failed {0}", ex);
         }
     }
 
     private BufferedHttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException, FailedHttpResponseException {
-        
+
         HttpResponse response = null;
-        
+
         try {
             // Dirty trick
             request.addHeader(new BasicScheme().authenticate(this.credentials, request));
