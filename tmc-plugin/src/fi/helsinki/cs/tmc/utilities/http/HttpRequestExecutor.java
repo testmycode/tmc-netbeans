@@ -101,7 +101,7 @@ import org.openide.util.Lookup;
         try {
             httpClient.close();
         } catch (IOException ex) {
-            log.log(Level.WARNING, "dispose of httpClient failed {0}", ex);
+            log.log(Level.WARNING, "Dispose of httpClient failed {0}", ex);
         }
     }
 
@@ -120,7 +120,7 @@ import org.openide.util.Lookup;
                 throw new IOException("Download failed: " + ex.getMessage(), ex);
             }
         } catch (AuthenticationException ex) {
-            log.log(Level.INFO, "AUTH FAILED{0}", ex);
+            log.log(Level.INFO, "Auth failed {0}", ex);
             throw new InterruptedException();
         }
 
@@ -129,7 +129,6 @@ import org.openide.util.Lookup;
 
     private BufferedHttpEntity handleResponse(HttpResponse response) throws IOException, InterruptedException, FailedHttpResponseException {
         int responseCode = response.getStatusLine().getStatusCode();
-        log.log(Level.INFO, "responce:{0}", responseCode);
         if (response.getEntity() == null) {
             throw new IOException("HTTP " + responseCode + " with no response");
         }
