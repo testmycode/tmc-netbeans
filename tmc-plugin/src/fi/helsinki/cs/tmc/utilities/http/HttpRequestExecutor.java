@@ -42,7 +42,6 @@ import org.openide.util.Lookup;
     private static final Logger log = Logger.getLogger(HttpRequestExecutor.class.getName());
 
     private UsernamePasswordCredentials credentials; // May be null
-    private CredentialsProvider credsProvider;
 
     /*package*/ HttpRequestExecutor(String url) {
         this(new HttpGet(url));
@@ -52,7 +51,6 @@ import org.openide.util.Lookup;
         this.request = request;
         if (request.getURI().getUserInfo() != null) {
             credentials = new UsernamePasswordCredentials(request.getURI().getUserInfo());
-            setRequestCredentials();
         }
 
     }
@@ -63,7 +61,6 @@ import org.openide.util.Lookup;
 
     public HttpRequestExecutor setCredentials(UsernamePasswordCredentials credentials) {
         this.credentials = credentials;
-        setRequestCredentials();
         return this;
     }
 
@@ -86,20 +83,18 @@ import org.openide.util.Lookup;
     }
 
     private CloseableHttpClient makeHttpClient() throws IOException {
+        SystemDefaultRoutePlanner systemDefaultRoutePlanner = getProxy();
 
-        ProxySelector proxys = Lookup.getDefault().lookup((ProxySelector.class));
-        SystemDefaultRoutePlanner systemDefaultRoutePlanner = new SystemDefaultRoutePlanner(proxys);
-
-
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
+        return HttpClients.custom()
                 .useSystemProperties()
                 .setRoutePlanner(systemDefaultRoutePlanner)
-                .setConnectionReuseStrategy(new NoConnectionReuseStrategy());
+                .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
+                .build();
+    }
 
-        CloseableHttpClient httpClient = httpClientBuilder.build();
-
-        return httpClient;
-
+    private SystemDefaultRoutePlanner getProxy() {
+        ProxySelector proxys = Lookup.getDefault().lookup((ProxySelector.class));
+        return new SystemDefaultRoutePlanner(proxys);
     }
 
     private void disposeOfHttpClient(CloseableHttpClient httpClient) {
@@ -115,7 +110,6 @@ import org.openide.util.Lookup;
         HttpResponse response = null;
 
         try {
-            // Dirty trick
             request.addHeader(new BasicScheme().authenticate(this.credentials, request));
             response = httpClient.execute(request);
         } catch (IOException ex) {
@@ -147,15 +141,6 @@ import org.openide.util.Lookup;
         } else {
             throw new FailedHttpResponseException(responseCode, entity);
         }
-    }
-
-    // NOT REALLY WORKING...
-    private void setRequestCredentials() {
-        this.credsProvider = new BasicCredentialsProvider();
-        credsProvider.setCredentials(
-                AuthScope.ANY, // Would be wise to restrict to TMC server?
-                this.credentials);
-
     }
 
     /**
