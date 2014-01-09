@@ -251,18 +251,20 @@
             <artifactId>httpcore</artifactId>
             <version>4.3.1</version>
         </dependency>
-        <!--        <dependency>
+        
+        <dependency>
             <artifactId>httpclient</artifactId>
             <groupId>org.apache.httpcomponents</groupId>
             <type>jar</type>
             <version>4.3.1</version>
-        </dependency>-->
-        <!--        <dependency>
+        </dependency>
+        <dependency>
             <artifactId>httpcore</artifactId>
             <groupId>org.apache.httpcomponents</groupId>
             <type>jar</type>
-            <version>4.3</version>
-        </dependency>-->
+            <version>4.3.1</version>
+        </dependency>
+        
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
