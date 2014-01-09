@@ -95,7 +95,7 @@ import org.openide.util.Lookup;
 
     private void disposeOfHttpClient(CloseableHttpClient httpClient) {
         try {
-        httpClient.close();
+            httpClient.close();
         } catch (IOException ex) {
             log.log(Level.WARNING, "Dispose of httpClient failed {0}", ex);
         }
@@ -106,7 +106,9 @@ import org.openide.util.Lookup;
         HttpResponse response = null;
 
         try {
-            request.addHeader(new BasicScheme().authenticate(this.credentials, request));
+            if (this.credentials != null) {
+                request.addHeader(new BasicScheme().authenticate(this.credentials, request));
+            }
             response = httpClient.execute(request);
         } catch (IOException ex) {
             log.log(Level.INFO, "Executing http request failed: {0}", ex.toString());

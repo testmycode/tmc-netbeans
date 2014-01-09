@@ -45,6 +45,7 @@ public class HttpRequestExecutorTest {
         server.start();
         
         BufferedHttpEntity result = new HttpRequestExecutor(server.getBaseUrl()).call();
+        
         assertArrayEquals(new byte[] { 1, 2, 3 }, EntityUtils.toByteArray(result));
     }
     
