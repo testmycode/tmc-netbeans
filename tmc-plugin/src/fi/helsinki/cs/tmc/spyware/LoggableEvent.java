@@ -1,10 +1,11 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
 import java.util.Date;
 import org.netbeans.api.annotations.common.NullAllowed;
 
-public class LoggableEvent {
+public class LoggableEvent implements TmcEvent {
 
     private String courseName;
     private String exerciseName;

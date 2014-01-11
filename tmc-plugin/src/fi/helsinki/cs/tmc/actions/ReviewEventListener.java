@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.data.Review;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -15,6 +18,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -24,7 +28,7 @@ import org.openide.util.ImageUtilities;
 
 public class ReviewEventListener extends TmcEventListener {
     private static final Logger log = Logger.getLogger(ReviewEventListener.class.getName());
-    
+
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
     
     private static ReviewEventListener instance;
@@ -40,10 +44,14 @@ public class ReviewEventListener extends TmcEventListener {
 
     private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
+    private CourseDb courseDb;
+    private TmcEventBus eventBus;
     
     ReviewEventListener() {
         this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
+        this.courseDb = CourseDb.getInstance();
+        this.eventBus = TmcEventBus.getDefault();
     }
     
     public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
@@ -95,6 +103,8 @@ public class ReviewEventListener extends TmcEventListener {
                 if (dialog.getMarkAsRead()) {
                     log.fine("Marking review as read");
                     markAsRead(review);
+
+                    sendLoggableEvent(review);
                     
                     // The review might have made new exercises available.
                     // We already updated the course DB earlier, but this time
@@ -122,6 +132,32 @@ public class ReviewEventListener extends TmcEventListener {
                 log.log(Level.INFO, "Failed to mark review as read.", ex);
             }
         });
+    }
+
+    private void sendLoggableEvent(Review review) {
+        String courseName = courseDb.getCurrentCourseName();
+        if (courseName != null) {
+            ReviewOpened dataObject = new ReviewOpened(review);
+            String json = new Gson().toJson(dataObject);
+            byte[] jsonBytes = json.getBytes(Charset.forName("UTF-8"));
+
+            LoggableEvent event = new LoggableEvent(courseName, review.getExerciseName(), "review_opened", jsonBytes);
+            eventBus.post(event);
+        }
+    }
+
+    private static class ReviewOpened {
+        public final int id;
+        public final int submissionId;
+        public final String url;
+        public final boolean markedAsRead;
+
+        public ReviewOpened(Review review) {
+            this.id = review.getId();
+            this.url = review.getUrl();
+            this.submissionId = review.getSubmissionId();
+            this.markedAsRead = review.isMarkedAsRead();
+        }
     }
 
 }

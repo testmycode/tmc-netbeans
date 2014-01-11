@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -15,6 +18,7 @@ import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.nio.charset.Charset;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -44,12 +48,14 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
+    private TmcEventBus eventBus;
 
     public RequestReviewAction() {
         this.settings = TmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
     }
 
     @Override
@@ -119,11 +125,8 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
                 extraParams.put("request_review", "1");
                 if (!messageForReviewer.isEmpty()) {
-
                     extraParams.put("message_for_reviewer", messageForReviewer);
                 }
-
-
 
                 final ServerAccess sa = new ServerAccess();
                 CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
@@ -132,6 +135,8 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                 BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
                     @Override
                     public void bgTaskReady(ServerAccess.SubmissionResponse result) {
+                        sendLoggableEvent(exercise, result.submissionUrl);
+
                         dialogs.displayMessage("Code submitted for review.\n"
                                 + "You will be notified when an instructor has reviewed your code.");
                     }
@@ -161,5 +166,29 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
     @Override
     public String getName() {
         return "Request code review";
+    }
+
+    private void sendLoggableEvent(Exercise exercise, URI submissionUrl) {
+        String courseName = courseDb.getCurrentCourseName();
+        if (courseName != null) {
+            ReviewRequested dataObject = new ReviewRequested(exercise, submissionUrl);
+            String json = new Gson().toJson(dataObject);
+            byte[] jsonBytes = json.getBytes(Charset.forName("UTF-8"));
+
+            LoggableEvent event = new LoggableEvent(exercise.getCourseName(), exercise.getName(), "review_requested", jsonBytes);
+            eventBus.post(event);
+        }
+    }
+
+    private static class ReviewRequested {
+        public final String courseName;
+        public final String exerciseName;
+        public final String submissionUrl;
+
+        private ReviewRequested(Exercise exercise, URI submissionUrl) {
+            this.courseName = exercise.getCourseName();
+            this.exerciseName = exercise.getName();
+            this.submissionUrl = submissionUrl.toString();
+        }
     }
 }
