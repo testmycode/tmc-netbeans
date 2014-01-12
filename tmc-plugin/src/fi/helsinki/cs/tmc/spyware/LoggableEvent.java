@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
-import java.util.Date;
 import org.netbeans.api.annotations.common.NullAllowed;
 
 public class LoggableEvent implements TmcEvent {
@@ -12,7 +11,7 @@ public class LoggableEvent implements TmcEvent {
     private String eventType;
     private byte[] data;
     @NullAllowed private String metadata;
-    private Date happenedAt;
+    private long happenedAt; // millis from epoch
     private long systemNanotime;
     private transient String key;
 
@@ -34,7 +33,7 @@ public class LoggableEvent implements TmcEvent {
         this.eventType = eventType;
         this.data = data;
         this.metadata = metadata;
-        this.happenedAt = new Date();
+        this.happenedAt = System.currentTimeMillis();
         this.systemNanotime = System.nanoTime();
 
         this.key = courseName + "|" + exerciseName + "|" + eventType;
@@ -70,11 +69,11 @@ public class LoggableEvent implements TmcEvent {
         return key;
     }
 
-    public Date getHappenedAt() {
+    public long getHappenedAt() {
         return happenedAt;
     }
 
-    public void setHappenedAt(Date happenedAt) {
+    public void setHappenedAt(long happenedAt) {
         this.happenedAt = happenedAt;
     }
 
