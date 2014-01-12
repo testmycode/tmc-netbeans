@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Map;
 import org.apache.http.NameValuePair;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -58,6 +59,10 @@ public class HttpTasks {
     public CancellableCallable<String> rawPostForText(String url, byte[] data) {
         return downloadToText(createExecutor(makeRawPostRequest(url, data)));
     }
+
+    public CancellableCallable<String> rawPostForText(String url, byte[] data, Map<String, String> extraHeaders) {
+        return downloadToText(createExecutor(makeRawPostRequest(url, data, extraHeaders)));
+    }
     
     public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = makeFileUploadRequest(url, params, fileField, data);
@@ -110,7 +115,15 @@ public class HttpTasks {
     }
 
     private HttpPost makeRawPostRequest(String url, byte[] data) {
+        Map<String, String> empty = Collections.emptyMap();
+        return makeRawPostRequest(url, data, empty);
+    }
+
+    private HttpPost makeRawPostRequest(String url, byte[] data, Map<String, String> extraHeaders) {
         HttpPost request = new HttpPost(url);
+        for (Map.Entry<String, String> header : extraHeaders.entrySet()) {
+            request.addHeader(header.getKey(), header.getValue());
+        }
 
         ByteArrayEntity entity = new ByteArrayEntity(data);
         request.setEntity(entity);

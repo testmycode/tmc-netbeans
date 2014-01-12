@@ -26,6 +26,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
@@ -35,7 +36,7 @@ import org.openide.modules.Modules;
  * A frontend for the server.
  */
 public class ServerAccess {
-    public static final int API_VERSION = 6;
+    public static final int API_VERSION = 7;
     
     private TmcSettings settings;
     private CourseListParser courseListParser;
@@ -306,9 +307,12 @@ public class ServerAccess {
     }
     
     public CancellableCallable<Object> getSendEventLogJob(String spywareServerUrl, List<LoggableEvent> events) {
-        String fullUrl = addApiCallQueryParameters(spywareServerUrl);
-        fullUrl = UriUtils.withQueryParam(fullUrl, "username", settings.getUsername());
-        fullUrl = UriUtils.withQueryParam(fullUrl, "password", settings.getPassword());
+        String url = addApiCallQueryParameters(spywareServerUrl);
+
+        Map<String, String> extraHeaders = new LinkedHashMap<String, String>();
+        extraHeaders.put("X-Tmc-Version", "1");
+        extraHeaders.put("X-Tmc-Username", settings.getUsername());
+        extraHeaders.put("X-Tmc-Password", settings.getPassword());
 
         byte[] data;
         try {
@@ -317,7 +321,7 @@ public class ServerAccess {
             throw ExceptionUtils.toRuntimeException(e);
         }
 
-        final CancellableCallable<String> upload = createHttpTasks().rawPostForText(fullUrl, data);
+        final CancellableCallable<String> upload = createHttpTasks().rawPostForText(url, data, extraHeaders);
 
         return new CancellableCallable<Object>() {
             @Override
