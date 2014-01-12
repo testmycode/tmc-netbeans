@@ -10,9 +10,6 @@ import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.SourceSnapshotEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.TmcEventBusEventSource;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
-import java.io.IOException;
-import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class SpywareFacade implements SpywareSettings {
@@ -36,8 +33,7 @@ public class SpywareFacade implements SpywareSettings {
     
     private TmcSettings settings;
     
-    private EventStore store;
-    private EventSender sender;
+    private EventSendBuffer sender;
     
     private EventDeduplicater sourceSnapshotDedup;
     
@@ -49,12 +45,8 @@ public class SpywareFacade implements SpywareSettings {
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
         
-        store = new EventStore();
-        sender = new EventSender(this, new ServerAccess(), CourseDb.getInstance());
-        int loadedEventCount = loadEvents();
-        if (loadedEventCount > 0) {
-            sender.sendNow();
-        }
+        sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
+        sender.sendNow();
         
         sourceSnapshotDedup = new EventDeduplicater(sender);
         sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);
@@ -70,18 +62,6 @@ public class SpywareFacade implements SpywareSettings {
                 textInsertEventSource = new TextInsertEventSource(sender);
             }
         });
-    }
-    
-    private int loadEvents() {
-        try {
-            List<LoggableEvent> events = store.load();
-            store.clear();
-            sender.prependEvents(events);
-            return events.size();
-        } catch (Exception ex) {
-            log.log(Level.INFO, "Failed to load events on startup", ex);
-            return 0;
-        }
     }
     
     private void closeImpl() {
@@ -100,16 +80,6 @@ public class SpywareFacade implements SpywareSettings {
         
         sourceSnapshotDedup.close();
         sender.close();
-        
-        saveEvents();
-    }
-    
-    private void saveEvents() {
-        try {
-            store.save(sender.takeEvents());
-        } catch (IOException ex) {
-            log.log(Level.INFO, "Failed to save events on shutdown", ex);
-        }
     }
     
     @Override

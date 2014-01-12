@@ -16,9 +16,7 @@ import org.openide.util.RequestProcessor;
  */
 public class BgTask<V> implements CancellableCallable<V> {
     
-    private static RequestProcessor defaultRequestProcessor =
-            new RequestProcessor("BgTask processor", 5, true);
-    
+    private RequestProcessor requestProcessor;
     private String label;
     private BgTaskListener<? super V> listener;
     private Callable<V> callable;
@@ -76,6 +74,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     }
     
     public BgTask(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
+        this.requestProcessor = TmcRequestProcessor.instance;
         this.label = label;
         this.listener = listener;
         this.callable = callable;
@@ -83,7 +82,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     }
     
     public Future<V> start() {
-        return defaultRequestProcessor.submit(this);
+        return requestProcessor.submit(this);
     }
 
     public boolean isCancelled() {
@@ -129,14 +128,14 @@ public class BgTask<V> implements CancellableCallable<V> {
                 }
             });
             return null;
-        } catch (final Throwable t) {
+        } catch (final Exception ex) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
-                    listener.bgTaskFailed(t);
+                    listener.bgTaskFailed(ex);
                 }
             });
-            return null;
+            throw ExceptionUtils.toRuntimeException(ex);
         } finally {
             synchronized (cancelLock) {
                 executingThread = null;
