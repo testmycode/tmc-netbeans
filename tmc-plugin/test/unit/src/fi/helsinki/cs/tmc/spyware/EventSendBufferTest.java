@@ -184,6 +184,22 @@ public class EventSendBufferTest {
     }
 
     @Test
+    public void autosendsWhenNumberOfEventsGoesOverThreshold() throws TimeoutException, InterruptedException {
+        sender.setAutosendThreshold(3);
+        sender.receiveEvent(ev1);
+        sender.receiveEvent(ev2);
+        Thread.sleep(50);
+        assertEquals(0, sendOperationsFinished);
+
+        sender.receiveEvent(ev3);
+        sender.waitUntilCurrentSendingFinished(1000);
+
+        assertEquals(1, sendOperationsFinished);
+        LoggableEvent[] expecteds = new LoggableEvent[] { ev1, ev2, ev3 };
+        assertArrayEquals(expecteds, sentEvents.getValue().toArray(new LoggableEvent[0]));
+    }
+
+    @Test
     public void discardsOldestEventsOnOverflow() throws TimeoutException, InterruptedException {
         sender.setMaxEvents(3);
 

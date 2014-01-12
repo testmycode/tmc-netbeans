@@ -27,9 +27,10 @@ import java.util.logging.Logger;
 public class EventSendBuffer implements EventReceiver {
     private static final Logger log = Logger.getLogger(EventSendBuffer.class.getName());
 
-    public static long DEFAULT_SEND_INTERVAL = 3*60*1000;
-    public static long DEFAULT_SAVE_INTERVAL = 1*60*1000;
-    public static int DEFAULT_MAX_EVENTS = 64 * 1024;
+    public static final long DEFAULT_SEND_INTERVAL = 3*60*1000;
+    public static final long DEFAULT_SAVE_INTERVAL = 1*60*1000;
+    public static final int DEFAULT_MAX_EVENTS = 64 * 1024;
+    public static final int DEFAULT_AUTOSEND_THREHSOLD = DEFAULT_MAX_EVENTS / 2;
 
     private Random random = new Random();
     private SpywareSettings settings;
@@ -41,6 +42,7 @@ public class EventSendBuffer implements EventReceiver {
     private final ArrayDeque<LoggableEvent> sendQueue = new ArrayDeque<LoggableEvent>();
     private int eventsToRemoveAfterSend = 0;
     private int maxEvents = DEFAULT_MAX_EVENTS;
+    private int autosendThreshold = DEFAULT_AUTOSEND_THREHSOLD;
 
 
     public EventSendBuffer(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb, EventStore eventStore) {
@@ -87,6 +89,19 @@ public class EventSendBuffer implements EventReceiver {
         }
     }
 
+    public void setAutosendThreshold(int autosendThreshold) {
+        synchronized (sendQueue) {
+            if (autosendThreshold <= 0) {
+                throw new IllegalArgumentException();
+            }
+            this.autosendThreshold = autosendThreshold;
+
+            if (sendQueue.size() >= autosendThreshold) {
+                sendNow();
+            }
+        }
+    }
+
     public void sendNow() {
         sendingTask.start();
     }
@@ -112,6 +127,10 @@ public class EventSendBuffer implements EventReceiver {
                 eventsToRemoveAfterSend--;
             }
             sendQueue.add(event);
+
+            if (sendQueue.size() >= autosendThreshold) {
+                sendNow();
+            }
         }
     }
 
