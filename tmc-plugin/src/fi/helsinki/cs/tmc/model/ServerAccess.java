@@ -180,9 +180,14 @@ public class ServerAccess {
 
     public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
-        
+
+        Map<String, String> params = new LinkedHashMap<String, String>();
+        params.put("client_time", "" + (System.currentTimeMillis() / 1000L));
+        params.put("client_nanotime", "" + System.nanoTime());
+        params.putAll(extraParams);
+
         final CancellableCallable<String> upload =
-                createHttpTasks().uploadFileForTextDownload(submitUrl, extraParams, "submission[file]", sourceZip);
+                createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
         
         return new CancellableCallable<SubmissionResponse>() {
             @Override
