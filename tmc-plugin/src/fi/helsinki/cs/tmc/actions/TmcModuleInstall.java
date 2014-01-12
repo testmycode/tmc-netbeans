@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.prefs.Preferences;
@@ -55,10 +58,24 @@ public class TmcModuleInstall extends ModuleInstall {
                 } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
-                    new CheckForNewExercisesOrUpdates(true, false).run();
-                    if (CheckForUnopenedExercises.shouldRunOnStartup()) {
-                        new CheckForUnopenedExercises().run();
-                    }
+                    // Do full refresh.
+                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
+                        @Override
+                        public void bgTaskReady(List<Course> result) {
+                            new CheckForNewExercisesOrUpdates(true, false).run();
+                            if (CheckForUnopenedExercises.shouldRunOnStartup()) {
+                                new CheckForUnopenedExercises().run();
+                            }
+                        }
+
+                        @Override
+                        public void bgTaskCancelled() {
+                        }
+
+                        @Override
+                        public void bgTaskFailed(Throwable ex) {
+                        }
+                    }).run();
                 }
             }
         });

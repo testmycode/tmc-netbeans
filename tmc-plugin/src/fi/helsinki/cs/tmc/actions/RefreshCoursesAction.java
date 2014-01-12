@@ -45,8 +45,9 @@ public final class RefreshCoursesAction {
         return this;
     }
 
-    public void addListener(BgTaskListener<List<Course>> listener) {
+    public RefreshCoursesAction addListener(BgTaskListener<List<Course>> listener) {
         this.listeners.addListener(listener);
+        return this;
     }
 
     public void run() {
