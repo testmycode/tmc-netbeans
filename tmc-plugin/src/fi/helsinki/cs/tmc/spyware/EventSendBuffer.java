@@ -57,6 +57,8 @@ public class EventSendBuffer implements EventReceiver {
             this.sendQueue.addAll(initialEvents);
         } catch (IOException ex) {
             log.log(Level.WARNING, "Failed to read events from event store", ex);
+        } catch (RuntimeException ex) {
+            log.log(Level.WARNING, "Failed to read events from event store", ex);
         }
 
         this.sendingTask.setInterval(DEFAULT_SEND_INTERVAL);
