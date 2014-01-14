@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.utilities.http;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.IOException;
 import java.net.ProxySelector;
+import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
@@ -15,6 +16,7 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.apache.http.util.EntityUtils;
@@ -79,13 +81,13 @@ import org.openide.util.Lookup;
     }
 
     private CloseableHttpClient makeHttpClient() throws IOException {
-        SystemDefaultRoutePlanner systemDefaultRoutePlanner = getProxy();
 
-        return HttpClients.custom()
+        HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .useSystemProperties()
-                .setRoutePlanner(systemDefaultRoutePlanner)
-                .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
-                .build();
+                .setConnectionReuseStrategy(new NoConnectionReuseStrategy());
+        maybeSetProxy(httpClientBuilder);
+
+        return httpClientBuilder.build();
     }
 
     private SystemDefaultRoutePlanner getProxy() {
@@ -107,7 +109,7 @@ import org.openide.util.Lookup;
 
         try {
             if (this.credentials != null) {
-                request.addHeader(new BasicScheme().authenticate(this.credentials, request));
+                request.addHeader(new BasicScheme(Charset.forName("UTF-8")).authenticate(this.credentials, request));
             }
             response = httpClient.execute(request);
         } catch (IOException ex) {
@@ -151,5 +153,12 @@ import org.openide.util.Lookup;
             }
         }
         return true;
+    }
+
+    private void maybeSetProxy(HttpClientBuilder httpClientBuilder) {
+        SystemDefaultRoutePlanner systemDefaultRoutePlanner = getProxy();
+        if (systemDefaultRoutePlanner != null) {
+            httpClientBuilder.setRoutePlanner(systemDefaultRoutePlanner);
+        }
     }
 }
