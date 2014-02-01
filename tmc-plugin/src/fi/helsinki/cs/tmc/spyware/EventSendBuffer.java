@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import fi.helsinki.cs.tmc.utilities.Cooldown;
 import fi.helsinki.cs.tmc.utilities.SingletonTask;
 import fi.helsinki.cs.tmc.utilities.TmcRequestProcessor;
 import java.io.IOException;
@@ -31,6 +32,7 @@ public class EventSendBuffer implements EventReceiver {
     public static final long DEFAULT_SAVE_INTERVAL = 1*60*1000;
     public static final int DEFAULT_MAX_EVENTS = 64 * 1024;
     public static final int DEFAULT_AUTOSEND_THREHSOLD = DEFAULT_MAX_EVENTS / 2;
+    public static final int DEFAULT_AUTOSEND_COOLDOWN = 30*1000;
 
     private Random random = new Random();
     private SpywareSettings settings;
@@ -43,6 +45,7 @@ public class EventSendBuffer implements EventReceiver {
     private int eventsToRemoveAfterSend = 0;
     private int maxEvents = DEFAULT_MAX_EVENTS;
     private int autosendThreshold = DEFAULT_AUTOSEND_THREHSOLD;
+    private Cooldown autosendCooldown;
 
 
     public EventSendBuffer(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb, EventStore eventStore) {
@@ -50,6 +53,7 @@ public class EventSendBuffer implements EventReceiver {
         this.serverAccess = serverAccess;
         this.courseDb = courseDb;
         this.eventStore = eventStore;
+        this.autosendCooldown = new Cooldown(DEFAULT_AUTOSEND_COOLDOWN);
 
         try {
             List<LoggableEvent> initialEvents = Arrays.asList(eventStore.load());
@@ -98,10 +102,12 @@ public class EventSendBuffer implements EventReceiver {
             }
             this.autosendThreshold = autosendThreshold;
 
-            if (sendQueue.size() >= autosendThreshold) {
-                sendNow();
-            }
+            maybeAutosend();
         }
+    }
+
+    public void setAutosendCooldown(long durationMillis) {
+        this.autosendCooldown.setDurationMillis(durationMillis);
     }
 
     public void sendNow() {
@@ -130,9 +136,14 @@ public class EventSendBuffer implements EventReceiver {
             }
             sendQueue.add(event);
 
-            if (sendQueue.size() >= autosendThreshold) {
-                sendNow();
-            }
+            maybeAutosend();
+        }
+    }
+
+    private void maybeAutosend() {
+        if (sendQueue.size() >= autosendThreshold && autosendCooldown.isExpired()) {
+            autosendCooldown.start();
+            sendNow();
         }
     }
 

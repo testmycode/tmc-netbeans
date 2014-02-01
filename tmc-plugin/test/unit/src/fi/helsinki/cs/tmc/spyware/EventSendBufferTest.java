@@ -42,6 +42,7 @@ public class EventSendBufferTest {
     private long sendDuration;
     private Semaphore sendStartSemaphore; // released when a send starts
     private Exception sendException;
+    private volatile int sendOperationsStarted;
     private volatile int sendOperationsFinished;
 
     @Captor
@@ -63,10 +64,12 @@ public class EventSendBufferTest {
         sendDuration = 0;
         sendStartSemaphore = new Semaphore(0);
         sendException = null;
+        sendOperationsStarted = 0;
         sendOperationsFinished = 0;
         when(serverAccess.getSendEventLogJob(spywareServerUrl.capture(), sentEvents.capture())).thenReturn(new CancellableCallable<Object>() {
             @Override
             public Object call() throws Exception {
+                sendOperationsStarted++;
                 sendStartSemaphore.release();
                 Thread.sleep(sendDuration);
                 if (sendException != null) {
@@ -195,6 +198,23 @@ public class EventSendBufferTest {
         sender.waitUntilCurrentSendingFinished(1000);
 
         assertEquals(1, sendOperationsFinished);
+        LoggableEvent[] expecteds = new LoggableEvent[] { ev1, ev2, ev3 };
+        assertArrayEquals(expecteds, sentEvents.getValue().toArray(new LoggableEvent[0]));
+    }
+
+    @Test
+    public void autosendingWhenOverThresholdHasACooldown() throws TimeoutException, InterruptedException {
+        sendException = new RuntimeException("Sending failed");
+        sender.setAutosendThreshold(3);
+        sender.setAutosendCooldown(30000);
+        sender.receiveEvent(ev1);
+        sender.receiveEvent(ev2);
+        sender.receiveEvent(ev3);
+        sender.waitUntilCurrentSendingFinished(1000);
+        sender.receiveEvent(ev4);
+        sender.waitUntilCurrentSendingFinished(1000);
+
+        assertEquals(1, sendOperationsStarted);
         LoggableEvent[] expecteds = new LoggableEvent[] { ev1, ev2, ev3 };
         assertArrayEquals(expecteds, sentEvents.getValue().toArray(new LoggableEvent[0]));
     }
