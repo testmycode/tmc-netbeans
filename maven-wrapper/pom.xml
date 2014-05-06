@@ -329,6 +329,7 @@
                         <publicPackage>org.apache.commons.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>org.cometd.*</publicPackage>
                         <publicPackage>org.eclipse.jetty.*</publicPackage>
                         <publicPackage>org.slf4j.*</publicPackage>
