@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
 import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -15,17 +16,20 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogDisplayer;
+    private CheckstyleRunHandler checkstyleRunHandler;
     private TestRunHandler testRunHandler;
-    
+
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
+        this.checkstyleRunHandler = new CheckstyleRunHandler();
         this.testRunHandler = new TestRunHandler();
         putValue("noIconInMenu", Boolean.TRUE);
     }
 
     @Override
     protected void performAction(Node[] nodes) {
+        this.checkstyleRunHandler.performAction();
         this.testRunHandler.performAction(projectsFromNodes(nodes).toArray(new Project[0]));
     }
 
