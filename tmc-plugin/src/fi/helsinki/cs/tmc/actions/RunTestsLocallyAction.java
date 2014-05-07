@@ -1,10 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
-import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
+import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
@@ -29,8 +29,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
 
     @Override
     protected void performAction(Node[] nodes) {
-        this.checkstyleRunHandler.performAction();
-        this.testRunHandler.performAction(projectsFromNodes(nodes).toArray(new Project[0]));
+
+        Project[] projects = projectsFromNodes(nodes).toArray(new Project[0]);
+
+        this.checkstyleRunHandler.performAction(projects[0]);
+        this.testRunHandler.performAction(projects);
     }
 
     @Override
