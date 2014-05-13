@@ -38,7 +38,8 @@ public class TestRunHandler {
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();
-        this.resultDisplayer = TestResultDisplayer.getInstance();this.exerciseSubmitter = new ExerciseSubmitter();
+        this.resultDisplayer = TestResultDisplayer.getInstance();
+        this.exerciseSubmitter = new ExerciseSubmitter();
         this.courseDb = CourseDb.getInstance();
     }
 
