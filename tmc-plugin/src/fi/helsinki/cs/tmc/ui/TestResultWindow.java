@@ -61,14 +61,14 @@ class TestResultWindow extends TopComponent {
         topPanel.add(Box.createHorizontalGlue());
         topPanel.setMinimumSize(new Dimension(topPanel.getMinimumSize().width, 40));
 
-        this.checkstylePanel = new CheckstyleResultPanel();
-        this.resultPanel = new TestResultPanel();
+        checkstylePanel = new CheckstyleResultPanel();
+        resultPanel = new TestResultPanel();
 
         JPanel resultContainer = new JPanel();
         resultContainer.setLayout(new BoxLayout(resultContainer, BoxLayout.Y_AXIS));
 
-        resultContainer.add(this.checkstylePanel);
-        resultContainer.add(this.resultPanel);
+        resultContainer.add(checkstylePanel);
+        resultContainer.add(resultPanel);
 
         JScrollPane scrollPane = new JScrollPane(
                 resultContainer,
@@ -76,7 +76,6 @@ class TestResultWindow extends TopComponent {
                 ScrollPaneConstants.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         scrollPane.getVerticalScrollBar().setUnitIncrement(20);
         scrollPane.getHorizontalScrollBar().setUnitIncrement(20);
-
 
         this.add(topPanel);
         this.add(usingMaxHeight(scrollPane));
@@ -105,15 +104,16 @@ class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
+    public void setCheckstyleResult(final CheckstyleResult result) {
+
+        checkstylePanel.setCheckstyleResult(result);
+    }
+
     public void setTestCaseResults(List<TestCaseResult> results) {
         resultPanel.setTestCaseResults(results);
         testColorBar.setMaximum(results.size());
         testColorBar.setValue(countSuccessfulTests(results));
         testColorBar.setIndeterminate(false);
-    }
-
-    public void setCheckstyleResults(CheckstyleResult result) {
-        checkstylePanel.setCheckstyleResults(result);
     }
 
     private int countSuccessfulTests(List<TestCaseResult> results) {
