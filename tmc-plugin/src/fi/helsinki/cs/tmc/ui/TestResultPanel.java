@@ -37,6 +37,7 @@ import org.openide.text.Line.ShowOpenType;
 import org.openide.text.Line.ShowVisibilityType;
 
 class TestResultPanel extends JPanel {
+
     private static final int PADDING_BETWEEN_BOXES = 4;
 
     private static final Logger log = Logger.getLogger(TestResultPanel.class.getName());
@@ -68,11 +69,11 @@ class TestResultPanel extends JPanel {
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
-        gbc.insets.bottom = PADDING_BETWEEN_BOXES;
+        gbc.insets.top = PADDING_BETWEEN_BOXES;
 
         for (TestCaseResult result : storedResults) {
             if (!result.isSuccessful() || passedTestsVisible) {
-                this.add(new TestCaseResultCell(result, sourceFileLookup), gbc);
+                this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), gbc);
 
                 if (!allFailuresVisible && !result.isSuccessful()) {
                     break;
@@ -114,6 +115,7 @@ class TestResultPanel extends JPanel {
     }
 
     private static class TestCaseResultCell extends JPanel {
+
         private static final Color FAIL_COLOR = new Color(0xED0000);
         private static final Color PASS_COLOR = new Color(0x6FD06D);
         private static final Color FAIL_TEXT_COLOR = FAIL_COLOR.darker();
@@ -131,9 +133,12 @@ class TestResultPanel extends JPanel {
             this.sourceFileLookup = sourceFileLookup;
             this.detailedView = createDetailedView();
 
-            String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+        }
 
-            this.add(new ResultCell(getResultTextColor(), title, result.getMessage(), detailedView));
+        public JPanel getCell(){
+
+            String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+            return new ResultCell(getResultTextColor(), title, result.getMessage(), detailedView);
         }
 
         private JPanel createDetailedView() {
@@ -160,6 +165,7 @@ class TestResultPanel extends JPanel {
         }
 
         private static class ExceptionDisplay extends JEditorPane {
+
             private StringBuilder htmlBuilder;
             private HashMap<String, ActionListener> linkHandlers;
             private int nextLinkId;
@@ -227,6 +233,7 @@ class TestResultPanel extends JPanel {
         }
 
         private static class DetailedMessageDisplay extends JEditorPane {
+
             private String content;
 
             public DetailedMessageDisplay() {
@@ -237,12 +244,12 @@ class TestResultPanel extends JPanel {
             }
 
             public void setContent(String content) {
-                this.content = "<html>" +
-                        StringEscapeUtils.escapeHtml3(content)
+                this.content = "<html>"
+                        + StringEscapeUtils.escapeHtml3(content)
                         .replaceAll(" ", "&nbsp;")
                         .replaceAll("\n", "<br />")
-                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") +
-                        "</html>";
+                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
+                        + "</html>";
             }
 
             public void finish() {
