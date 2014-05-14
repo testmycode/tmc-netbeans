@@ -28,7 +28,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
-    protected void performAction(Node[] nodes) {
+    protected void performAction(final Node[] nodes) {
 
         Project[] projects = projectsFromNodes(nodes).toArray(new Project[0]);
 

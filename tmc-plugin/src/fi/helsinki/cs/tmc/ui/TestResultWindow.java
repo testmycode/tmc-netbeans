@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.stylerunner.CheckstyleResult;
+import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;
@@ -28,7 +28,7 @@ class TestResultWindow extends TopComponent {
 
     private static final Logger log = Logger.getLogger(TestResultWindow.class.getName());
 
-    private final CheckstyleResultPanel checkstylePanel;
+    private final ValidationResultPanel validationResultPanel;
     private final TestResultPanel resultPanel;
     private final JCheckBox showAllCheckbox;
     private final TestColorBar testColorBar;
@@ -61,13 +61,13 @@ class TestResultWindow extends TopComponent {
         topPanel.add(Box.createHorizontalGlue());
         topPanel.setMinimumSize(new Dimension(topPanel.getMinimumSize().width, 40));
 
-        checkstylePanel = new CheckstyleResultPanel();
+        validationResultPanel = new ValidationResultPanel();
         resultPanel = new TestResultPanel();
 
         JPanel resultContainer = new JPanel();
         resultContainer.setLayout(new BoxLayout(resultContainer, BoxLayout.Y_AXIS));
 
-        resultContainer.add(checkstylePanel);
+        resultContainer.add(validationResultPanel);
         resultContainer.add(resultPanel);
 
         JScrollPane scrollPane = new JScrollPane(
@@ -104,9 +104,9 @@ class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public void setCheckstyleResult(final CheckstyleResult result) {
+    public void setValidationResult(final ValidationResult result) {
 
-        checkstylePanel.setCheckstyleResult(result);
+        validationResultPanel.setValidationResult(result);
     }
 
     public void setTestCaseResults(List<TestCaseResult> results) {
