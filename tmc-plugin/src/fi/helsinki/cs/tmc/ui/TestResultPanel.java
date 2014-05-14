@@ -125,25 +125,26 @@ class TestResultPanel extends JPanel {
         private final SourceFileLookup sourceFileLookup;
         private JButton detailedMessageButton;
         private final GridBagConstraints gbc = new GridBagConstraints();
-        private final JPanel detailedView;
+        private final JPanel detailView;
 
-        public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
+        public TestCaseResultCell(final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
 
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
-            this.detailedView = createDetailedView();
+            this.detailView = createDetailView();
 
         }
 
         public JPanel getCell(){
 
-            String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
-            return new ResultCell(getResultTextColor(), title, result.getMessage(), detailedView);
+            final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+
+            return new ResultCell(getResultTextColor(), title, result.getMessage(), detailView);
         }
 
-        private JPanel createDetailedView() {
+        private JPanel createDetailView() {
 
-            JPanel view = new JPanel();
+            final JPanel view = new JPanel();
             view.setLayout(new GridBagLayout());
 
             if (result.getException() != null) {
@@ -260,15 +261,15 @@ class TestResultPanel extends JPanel {
         private Action valgrindAction = new AbstractAction("Show valgrind trace") {
 
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent event) {
 
-                detailedView.remove(detailedMessageButton);
+                detailView.remove(detailedMessageButton);
 
-                DetailedMessageDisplay display = new DetailedMessageDisplay();
-                String output = result.getDetailedMessage();
-                display.setContent(output);
+                final DetailedMessageDisplay display = new DetailedMessageDisplay();
+                display.setContent(result.getDetailedMessage());
                 display.finish();
-                detailedView.add(display, gbc);
+
+                detailView.add(display, gbc);
 
                 revalidate();
             }
@@ -276,15 +277,17 @@ class TestResultPanel extends JPanel {
         };
 
         private Action detailedMessageAction = new AbstractAction("Show detailed message") {
+
             @Override
-            public void actionPerformed(ActionEvent e) {
+            public void actionPerformed(final ActionEvent event) {
 
-                detailedView.remove(detailedMessageButton);
+                detailView.remove(detailedMessageButton);
 
-                ExceptionDisplay display = new ExceptionDisplay();
+                final ExceptionDisplay display = new ExceptionDisplay();
                 addException(display, result.getException(), false);
                 display.finish();
-                detailedView.add(display, gbc);
+
+                detailView.add(display, gbc);
 
                 revalidate();
             }
