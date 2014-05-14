@@ -2,14 +2,12 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.stylerunner.ValidationError;
 import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
-
+import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.List;
 import java.util.Map.Entry;
-
 import javax.swing.JPanel;
-import javax.swing.JTextArea;
 
 public final class ValidationResultPanel extends JPanel {
 
@@ -22,20 +20,23 @@ public final class ValidationResultPanel extends JPanel {
 
         this.removeAll();
 
-        JTextArea area = new JTextArea();
-        area.setEditable(false);
-
         for (Entry<File, List<ValidationError>> entry : result.getValidationErrors().entrySet()) {
 
-            area.append("File: " + entry.getKey().getName() + ", errors: " + entry.getValue().size() + "\n");
+            final File file = entry.getKey();
+            final List<ValidationError> errors = entry.getValue();
 
-            for (ValidationError error : entry.getValue()) {
-                area.append("  " + error.getMessage() + "\n");
+            StringBuilder builder = new StringBuilder();
+
+            for (ValidationError error : errors) {
+
+                builder.append("Line ");
+                builder.append(error.getLine());
+                builder.append(": ");
+                builder.append(error.getMessage());
+                builder.append("\n");
             }
 
-            area.append("\n");
+            this.add(new ResultCell(new Color(0xFFD000), file.getName(), builder.toString(), null));
         }
-
-        this.add(area);
     }
 }
