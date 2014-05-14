@@ -4,35 +4,36 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
+
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
 
 public final class ResultCell extends JPanel {
 
-    private final GridBagConstraints gbc = new GridBagConstraints();
-    private final Color resultColor;
+    private final GridBagConstraints constraints = new GridBagConstraints();
+    private final Color color;
 
-    public ResultCell(final Color color, final String title, final String message, final JPanel detailedView) {
+    public ResultCell(final Color color, final String title, final String message, final JPanel detailView) {
 
-        this.resultColor = color;
+        this.color = color;
         this.setLayout(new GridBagLayout());
 
         createConstraints();
         createTitle(title);
         createMessage(message);
-        createDetailedView(detailedView);
+        createDetailView(detailView);
         createBorder();
     }
 
     private void createConstraints() {
 
-        gbc.gridx = 0;
-        gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.fill = GridBagConstraints.NONE;
-        gbc.anchor = GridBagConstraints.NORTHWEST;
-        gbc.weightx = 1.0;
-        gbc.weighty = 0.0;
+        constraints.gridx = 0;
+        constraints.gridy = GridBagConstraints.RELATIVE;
+        constraints.fill = GridBagConstraints.NONE;
+        constraints.anchor = GridBagConstraints.NORTHWEST;
+        constraints.weightx = 1.0;
+        constraints.weighty = 0.0;
     }
 
     private void createTitle(final String title) {
@@ -43,29 +44,29 @@ public final class ResultCell extends JPanel {
                                      .deriveFont(Font.BOLD)
                                      .deriveFont(titleLabel.getFont().getSize2D() + 2));
 
-        titleLabel.setForeground(resultColor);
+        titleLabel.setForeground(color);
 
-        this.add(titleLabel, gbc);
+        this.add(titleLabel, constraints);
     }
 
     private void createMessage(final String message) {
 
         if (message != null) {
-            this.add(new SelectableText(message), gbc);
+            this.add(new SelectableText(message), constraints);
         }
     }
 
-    private void createDetailedView(final JPanel detailedView) {
+    private void createDetailView(final JPanel detailView) {
 
-        if (detailedView != null) {
-            this.add(detailedView, gbc);
+        if (detailView != null) {
+            this.add(detailView, constraints);
         }
     }
 
     private void createBorder() {
 
         Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
-        Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, resultColor);
+        Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, color);
 
         this.setBorder(BorderFactory.createCompoundBorder(leftColorBar, innerPadding));
     }

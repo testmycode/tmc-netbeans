@@ -2,11 +2,13 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.stylerunner.ValidationError;
 import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
+
 import java.awt.Color;
 import java.awt.GridLayout;
 import java.io.File;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javax.swing.JPanel;
 
 public final class ValidationResultPanel extends JPanel {
