@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.awt.Color;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Rectangle;
@@ -39,29 +38,29 @@ import org.openide.text.Line.ShowVisibilityType;
 
 class TestResultPanel extends JPanel {
     private static final int PADDING_BETWEEN_BOXES = 4;
-    
+
     private static final Logger log = Logger.getLogger(TestResultPanel.class.getName());
-    
+
     private final SourceFileLookup sourceFileLookup;
-    
+
     private boolean passedTestsVisible = false;
     private boolean allFailuresVisible = false;
     private List<TestCaseResult> storedResults = new ArrayList<TestCaseResult>();
-    
+
     public TestResultPanel() {
         this.sourceFileLookup = SourceFileLookup.getDefault();
         this.setLayout(new GridBagLayout());
     }
-    
+
     public void setTestCaseResults(List<TestCaseResult> results) {
         this.clear();
         storedResults.addAll(results);
         rebuildCells();
     }
-    
+
     private void rebuildCells() {
         this.removeAll();
-        
+
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = GridBagConstraints.RELATIVE;
@@ -70,11 +69,11 @@ class TestResultPanel extends JPanel {
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
         gbc.insets.bottom = PADDING_BETWEEN_BOXES;
-        
+
         for (TestCaseResult result : storedResults) {
             if (!result.isSuccessful() || passedTestsVisible) {
                 this.add(new TestCaseResultCell(result, sourceFileLookup), gbc);
-                
+
                 if (!allFailuresVisible && !result.isSuccessful()) {
                     break;
                 }
@@ -82,10 +81,10 @@ class TestResultPanel extends JPanel {
         }
         gbc.weighty = 1.0;
         this.add(Box.createVerticalGlue(), gbc); // Minimize component heights
-        
+
         this.revalidate();
         this.repaint();
-        
+
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -93,11 +92,11 @@ class TestResultPanel extends JPanel {
             }
         });
     }
-    
+
     private void scrollToTop() {
         scrollRectToVisible(new Rectangle(0, 0, 1, 1));
     }
-    
+
     public void clear() {
         storedResults.clear();
         this.removeAll();
@@ -108,77 +107,72 @@ class TestResultPanel extends JPanel {
         this.passedTestsVisible = passedTestsVisible;
         rebuildCells();
     }
-    
+
     public void setAllFailuresVisible(boolean allResultsVisible) {
         this.allFailuresVisible = allResultsVisible;
         rebuildCells();
     }
-    
+
     private static class TestCaseResultCell extends JPanel {
         private static final Color FAIL_COLOR = new Color(0xED0000);
         private static final Color PASS_COLOR = new Color(0x6FD06D);
         private static final Color FAIL_TEXT_COLOR = FAIL_COLOR.darker();
         private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
-        
+
         private final TestCaseResult result;
         private final SourceFileLookup sourceFileLookup;
-        private final JButton detailedMessageButton;
+        private JButton detailedMessageButton;
         private final GridBagConstraints gbc = new GridBagConstraints();
+        private final JPanel detailedView;
 
         public TestCaseResultCell(TestCaseResult result, SourceFileLookup sourceFileLookup) {
+
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
-            
-            this.setLayout(new GridBagLayout());
-            gbc.gridx = 0;
-            gbc.gridy = GridBagConstraints.RELATIVE;
-            gbc.fill = GridBagConstraints.NONE;
-            gbc.anchor = GridBagConstraints.NORTHWEST;
-            gbc.weightx = 1.0;
-            gbc.weighty = 0.0;
-            
-            String passOrFail = result.isSuccessful() ? "PASS: " : "FAIL: ";
-            SelectableText titleLabel = new SelectableText(passOrFail + result.getName());
-            titleLabel.setFont(titleLabel.getFont().deriveFont(Font.BOLD).deriveFont(titleLabel.getFont().getSize2D() + 2));
-            titleLabel.setForeground(getResultTextColor());
-            
-            this.add(titleLabel, gbc);
-            
-            if (result.getMessage() != null) {
-                this.add(new SelectableText(result.getMessage()), gbc);
-            }
-            
+            this.detailedView = createDetailedView();
+
+            String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+
+            this.add(new ResultCell(getResultTextColor(), title, result.getMessage(), detailedView));
+        }
+
+        private JPanel createDetailedView() {
+
+            JPanel view = new JPanel();
+            view.setLayout(new GridBagLayout());
+
             if (result.getException() != null) {
-                add(Box.createVerticalStrut(16), gbc);
+                view.add(Box.createVerticalStrut(16), gbc);
                 this.detailedMessageButton = new JButton(detailedMessageAction);
                 gbc.weighty = 1.0; // Leave it so for the detailed message
-                this.add(detailedMessageButton, gbc);
+                view.add(detailedMessageButton, gbc);
             } else if (result.getDetailedMessage() != null) {
-                add(Box.createVerticalStrut(16), gbc);
+                view.add(Box.createVerticalStrut(16), gbc);
                 this.detailedMessageButton = new JButton(valgrindAction);
                 gbc.weighty = 1.0; // Leave it so for the detailed message
-                this.add(detailedMessageButton, gbc);
+                view.add(detailedMessageButton, gbc);
             } else {
                 this.detailedMessageButton = null;
+                return null;
             }
-            
-            this.setBorder(this.createBorder());
+
+            return view;
         }
 
         private static class ExceptionDisplay extends JEditorPane {
             private StringBuilder htmlBuilder;
             private HashMap<String, ActionListener> linkHandlers;
             private int nextLinkId;
-            
+
             public ExceptionDisplay() {
                 this.htmlBuilder = new StringBuilder().append("<html><body>");
                 this.linkHandlers = new HashMap<String, ActionListener>();
                 this.nextLinkId = 1;
-                
+
                 this.setEditable(false);
                 this.setContentType("text/html");
                 this.setBackground(UIManager.getColor("Label.background"));
-                
+
                 this.addHyperlinkListener(new HyperlinkListener() {
                     @Override
                     public void hyperlinkUpdate(HyperlinkEvent e) {
@@ -192,7 +186,7 @@ class TestResultPanel extends JPanel {
                     }
                 });
             }
-            
+
             private String htmlText(String text) {
                 return nlToBr(escapeHtml(text.trim()));
             }
@@ -200,7 +194,7 @@ class TestResultPanel extends JPanel {
             private static String escapeHtml(String s) {
                 return StringEscapeUtils.escapeHtml3(s);
             }
-            
+
             private static String nlToBr(String message) {
                 StringBuilder sb = new StringBuilder();
                 String[] lines = message.split("\n");
@@ -210,31 +204,31 @@ class TestResultPanel extends JPanel {
                 sb.append(lines[lines.length - 1].toString());
                 return sb.toString();
             }
-            
+
             public void addTextLine(String text) {
                 htmlBuilder.append(htmlText(text)).append("<br />");
             }
-            
+
             public void addBoldTextLine(String text) {
                 htmlBuilder.append("<b>").append(htmlText(text)).append("</b>").append("<br />");
             }
-            
+
             public void addLink(String text, ActionListener listener) {
                 htmlBuilder.append("<a href=\"#link").append(nextLinkId).append("\">").append(htmlText(text)).append("</a>").append("<br />");
                 linkHandlers.put("#link" + nextLinkId, listener);
                 nextLinkId += 1;
             }
-            
+
             public void finish() {
                 htmlBuilder.append("</body></html>");
                 this.setText(htmlBuilder.toString());
                 htmlBuilder = new StringBuilder();
             }
         }
-        
+
         private static class DetailedMessageDisplay extends JEditorPane {
             private String content;
-            
+
             public DetailedMessageDisplay() {
                 this.content = "";
                 this.setEditable(false);
@@ -243,49 +237,51 @@ class TestResultPanel extends JPanel {
             }
 
             public void setContent(String content) {
-                this.content = "<html>" + 
+                this.content = "<html>" +
                         StringEscapeUtils.escapeHtml3(content)
                         .replaceAll(" ", "&nbsp;")
                         .replaceAll("\n", "<br />")
-                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") + 
+                        .replaceAll("\t", "&nbsp;&nbsp;&nbsp;&nbsp;") +
                         "</html>";
             }
-            
+
             public void finish() {
                 this.setText(content);
             }
         }
-        
+
         private Action valgrindAction = new AbstractAction("Show valgrind trace") {
 
             @Override
             public void actionPerformed(ActionEvent e) {
-                remove(detailedMessageButton);
-                
+
+                detailedView.remove(detailedMessageButton);
+
                 DetailedMessageDisplay display = new DetailedMessageDisplay();
                 String output = result.getDetailedMessage();
                 display.setContent(output);
                 display.finish();
-                add(display, gbc);
-                
+                detailedView.add(display, gbc);
+
                 revalidate();
             }
-            
+
         };
-        
+
         private Action detailedMessageAction = new AbstractAction("Show detailed message") {
             @Override
             public void actionPerformed(ActionEvent e) {
-                remove(detailedMessageButton);
-                
+
+                detailedView.remove(detailedMessageButton);
+
                 ExceptionDisplay display = new ExceptionDisplay();
                 addException(display, result.getException(), false);
                 display.finish();
-                add(display, gbc);
-                
+                detailedView.add(display, gbc);
+
                 revalidate();
             }
-            
+
             private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
                 String mainLine;
                 if (ex.message != null) {
@@ -297,18 +293,18 @@ class TestResultPanel extends JPanel {
                     mainLine = "Caused by: " + mainLine;
                 }
                 display.addBoldTextLine(mainLine);
-                
+
                 addStackTraceLines(display, ex.stackTrace);
-                
+
                 if (ex.cause != null) {
                     addException(display, ex.cause, true);
                 }
             }
-            
+
             private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
                 for (final StackTraceElement ste : stackTrace) {
                     final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
-                    
+
                     if (sourceFile != null && ste.getLineNumber() > 0) {
                         display.addLink(ste.toString(), new ActionListener() {
                             @Override
@@ -321,7 +317,7 @@ class TestResultPanel extends JPanel {
                     }
                 }
             }
-            
+
             private void openAtLine(FileObject sourceFile, final int lineNum) {
                 try {
                     if (sourceFile.isValid()) {
@@ -344,7 +340,7 @@ class TestResultPanel extends JPanel {
                 }
             }
         };
-        
+
         private Color getResultColor() {
             if (result.isSuccessful()) {
                 return PASS_COLOR;
@@ -352,7 +348,7 @@ class TestResultPanel extends JPanel {
                 return FAIL_COLOR;
             }
         }
-        
+
         private Color getResultTextColor() {
             if (result.isSuccessful()) {
                 return PASS_TEXT_COLOR;
@@ -360,13 +356,13 @@ class TestResultPanel extends JPanel {
                 return FAIL_TEXT_COLOR;
             }
         }
-        
+
         private Border createBorder() {
             Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
             Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, getResultColor());
-            
+
             return BorderFactory.createCompoundBorder(leftColorBar, innerPadding);
         }
     }
-    
+
 }
