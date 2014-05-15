@@ -12,12 +12,18 @@ import javax.swing.border.Border;
 public final class ResultCell extends JPanel {
 
     private final GridBagConstraints constraints = new GridBagConstraints();
-    private final Color color;
+    private final Color titleColor, borderColor;
 
-    public ResultCell(final Color color, final String title, final String message, final JPanel detailView) {
+    public ResultCell(final Color borderColor,
+                       final Color titleColor,
+                       final String title,
+                       final String message,
+                       final JPanel detailView) {
 
-        this.color = color;
+        this.borderColor = borderColor;
+        this.titleColor = titleColor;
         this.setLayout(new GridBagLayout());
+        this.setBackground(Color.WHITE);
 
         createConstraints();
         createTitle(title);
@@ -28,10 +34,9 @@ public final class ResultCell extends JPanel {
 
     private void createConstraints() {
 
+        constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.gridx = 0;
         constraints.gridy = GridBagConstraints.RELATIVE;
-        constraints.fill = GridBagConstraints.NONE;
-        constraints.anchor = GridBagConstraints.NORTHWEST;
         constraints.weightx = 1.0;
         constraints.weighty = 0.0;
     }
@@ -44,7 +49,7 @@ public final class ResultCell extends JPanel {
                                      .deriveFont(Font.BOLD)
                                      .deriveFont(titleLabel.getFont().getSize2D() + 2));
 
-        titleLabel.setForeground(color);
+        titleLabel.setForeground(titleColor);
 
         this.add(titleLabel, constraints);
     }
@@ -66,7 +71,7 @@ public final class ResultCell extends JPanel {
     private void createBorder() {
 
         Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
-        Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, color);
+        Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, borderColor);
 
         this.setBorder(BorderFactory.createCompoundBorder(leftColorBar, innerPadding));
     }

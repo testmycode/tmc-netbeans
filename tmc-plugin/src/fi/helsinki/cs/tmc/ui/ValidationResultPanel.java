@@ -15,7 +15,7 @@ public final class ValidationResultPanel extends JPanel {
 
     public ValidationResultPanel() {
 
-        this.setLayout(new GridLayout(0, 1));
+        this.setLayout(new GridLayout(0, 1, 0, 5));
     }
 
     public void setValidationResult(final ValidationResult result) {
@@ -31,14 +31,18 @@ public final class ValidationResultPanel extends JPanel {
 
             for (ValidationError error : errors) {
 
-                builder.append("Line ");
-                builder.append(error.getLine());
-                builder.append(": ");
-                builder.append(error.getMessage());
-                builder.append("\n");
+                builder.append("Line ")
+                       .append(error.getLine())
+                       .append(": ")
+                       .append(error.getMessage())
+                       .append("\n");
             }
 
-            this.add(new ResultCell(new Color(0xFFD000), file.getName(), builder.toString(), null));
+            this.add(new ResultCell(new Color(0xFFD000),
+                                    Color.DARK_GRAY,
+                                    file.getName(),
+                                    builder.toString(),
+                                    null));
         }
     }
 }

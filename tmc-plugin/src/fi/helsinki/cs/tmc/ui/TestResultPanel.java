@@ -17,14 +17,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import javax.swing.Action;
-import javax.swing.BorderFactory;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
-import javax.swing.border.Border;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -38,7 +36,7 @@ import org.openide.text.Line.ShowVisibilityType;
 
 class TestResultPanel extends JPanel {
 
-    private static final int PADDING_BETWEEN_BOXES = 4;
+    private static final int PADDING_BETWEEN_BOXES = 5;
 
     private static final Logger log = Logger.getLogger(TestResultPanel.class.getName());
 
@@ -65,7 +63,7 @@ class TestResultPanel extends JPanel {
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.gridx = 0;
         gbc.gridy = GridBagConstraints.RELATIVE;
-        gbc.fill = GridBagConstraints.NONE;
+        gbc.fill = GridBagConstraints.HORIZONTAL;
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.weightx = 1.0;
         gbc.weighty = 0.0;
@@ -129,23 +127,28 @@ class TestResultPanel extends JPanel {
 
         public TestCaseResultCell(final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
 
+            gbc.anchor = GridBagConstraints.NORTHWEST;
+            gbc.gridx = 0;
+            gbc.weightx = 1.0;
+
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
             this.detailView = createDetailView();
-
         }
 
-        public JPanel getCell(){
+        public JPanel getCell() {
 
             final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
 
-            return new ResultCell(getResultTextColor(), title, result.getMessage(), detailView);
+            return new ResultCell(getResultColor(), getResultTextColor(), title, result.getMessage(), detailView);
         }
 
         private JPanel createDetailView() {
 
             final JPanel view = new JPanel();
+
             view.setLayout(new GridBagLayout());
+            view.setBackground(Color.WHITE);
 
             if (result.getException() != null) {
                 view.add(Box.createVerticalStrut(16), gbc);
@@ -365,13 +368,6 @@ class TestResultPanel extends JPanel {
             } else {
                 return FAIL_TEXT_COLOR;
             }
-        }
-
-        private Border createBorder() {
-            Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
-            Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, getResultColor());
-
-            return BorderFactory.createCompoundBorder(leftColorBar, innerPadding);
         }
     }
 
