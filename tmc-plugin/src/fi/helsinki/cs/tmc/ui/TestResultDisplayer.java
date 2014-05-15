@@ -22,22 +22,23 @@ import org.openide.NotifyDescriptor;
 
 public class TestResultDisplayer {
     private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
-    
+
     private static TestResultDisplayer instance;
-    
+    private boolean validationStatus = true;
+
     public static TestResultDisplayer getInstance() {
         if (instance == null) {
             instance = new TestResultDisplayer();
         }
         return instance;
     }
-    
+
     private ConvenientDialogDisplayer dialogs;
-    
+
     /*package*/ TestResultDisplayer() {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
-    
+
     public void showSubmissionResult(Exercise exercise, SubmissionResult result) {
         switch (result.getStatus()) {
             case OK:
@@ -57,7 +58,7 @@ public class TestResultDisplayer {
 
     private void displaySuccessfulSubmissionMsg(Exercise exercise, final SubmissionResult result) {
         final SuccessfulSubmissionDialog dialog = new SuccessfulSubmissionDialog(exercise, result);
-        
+
         dialog.addOkListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,13 +85,13 @@ public class TestResultDisplayer {
                 }
             }
         });
-        
+
         dialog.setModalityType(Dialog.ModalityType.MODELESS);
         dialog.setLocationRelativeTo(null);
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
     }
-    
+
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
         String msg;
         boolean milderFail;
@@ -102,20 +103,24 @@ public class TestResultDisplayer {
             msg = "Exercise " + exercise.getName() + " failed.\n";
             milderFail = false;
         }
-        
+
         if (result.allTestCasesFailed()) {
             msg += "All tests failed on the server.\nSee below.";
         } else {
             msg += "Some tests failed on the server.\nSee below.";
         }
-        
+
         if (milderFail) {
             dialogs.displayWarning(msg);
         } else {
             dialogs.displayError(msg);
         }
     }
-    
+
+    public void setValidationStatus(boolean allOk){
+        this.validationStatus = allOk;
+    }
+
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
@@ -126,8 +131,8 @@ public class TestResultDisplayer {
                 numFailed += 1;
             }
         }
-        
-        if (numFailed == 0 && canSubmit) {
+
+        if (numFailed == 0 && canSubmit  && validationStatus) {
             displayTestCases(results, false);
             dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
                 @Override
@@ -142,7 +147,7 @@ public class TestResultDisplayer {
             displayTestCases(results, true);
         }
     }
-    
+
     private void displayError(String error) {
         String htmlError =
                 "<html><font face=\"monospaced\" color=\"red\">" +
@@ -151,7 +156,7 @@ public class TestResultDisplayer {
         LongTextDisplayPanel panel = new LongTextDisplayPanel(htmlError);
         dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "", false);
     }
-    
+
     private String preformattedToHtml(String text) {
         // <font> doesn't work around pre, so we do this
         return StringEscapeUtils.escapeHtml4(text)
@@ -159,7 +164,7 @@ public class TestResultDisplayer {
                 .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
                 .replace("\n", "<br>");
     }
-    
+
     private void displayTestCases(List<TestCaseResult> testCases, boolean activate) {
         TestResultWindow window = TestResultWindow.get();
         window.setTestCaseResults(testCases);
@@ -168,7 +173,7 @@ public class TestResultDisplayer {
             window.requestActive();
         }
     }
-    
+
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
     }
