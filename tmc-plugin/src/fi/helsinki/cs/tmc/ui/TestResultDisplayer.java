@@ -119,7 +119,7 @@ public class TestResultDisplayer {
 
     public void cannotSubmit() {
 
-        this.canSubmit = false;
+        canSubmit = false;
     }
 
     /**
@@ -133,7 +133,7 @@ public class TestResultDisplayer {
             }
         }
 
-        if (numFailed == 0 && this.canSubmit && returnable) {
+        if (numFailed == 0 && canSubmit && returnable) {
             displayTestCases(results, false);
             dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
                 @Override
