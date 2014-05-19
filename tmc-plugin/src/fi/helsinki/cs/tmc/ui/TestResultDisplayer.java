@@ -117,7 +117,7 @@ public class TestResultDisplayer {
         }
     }
 
-    public void setValidationStatus(boolean allOk){
+    public void setValidationStatus(boolean allOk) {
         this.validationStatus = allOk;
     }
 

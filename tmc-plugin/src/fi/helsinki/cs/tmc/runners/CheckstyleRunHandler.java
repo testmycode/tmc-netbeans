@@ -19,6 +19,7 @@ public final class CheckstyleRunHandler {
 
     public void performAction(final Project project) {
 
+        ProjectMediator.getInstance().saveAllFiles();
         final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
 
         try {
