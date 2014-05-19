@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.runners;
 
-
 import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -11,7 +10,6 @@ import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.ui.ValidationResultDisplayer;
 import org.netbeans.api.project.Project;
 import org.openide.util.Exceptions;
-
 
 public final class CheckstyleRunHandler {
 
