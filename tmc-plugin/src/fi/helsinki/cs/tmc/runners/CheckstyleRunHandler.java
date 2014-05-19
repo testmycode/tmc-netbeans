@@ -22,6 +22,12 @@ public final class CheckstyleRunHandler {
         ProjectMediator.getInstance().saveAllFiles();
         final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
 
+        String projectType = projectInfo.getProjectType().name();
+
+        if (!projectType.equals("JAVA_SIMPLE") || !projectType.equals("JAVA_MAVEN")) {
+            return;
+        }
+
         try {
             final ValidationResult result = new CheckstyleRunner(projectInfo.getProjectDirAsFile()).run();
             validationResultDisplayer.showValidationResult(result);
