@@ -19,7 +19,7 @@ class TestColorBar extends JProgressBar {
         setStringPainted(true);
     }
 
-    public void validationPass(final boolean validationPassed){
+    public void validationPass(final boolean validationPassed) {
         validationPass = validationPassed;
     }
 
@@ -51,9 +51,9 @@ class TestColorBar extends JProgressBar {
                     filled = w;
                 }
                 int notFilled = w - filled;
-                if(validationPass){
+                if (validationPass) {
                     g.setColor(PASS_COLOR);
-                }else{
+                } else {
                     g.setColor(VALIDATION_COLOR);
                 }
                 g.fillRect(0, 0, filled, h);
