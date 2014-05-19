@@ -31,7 +31,10 @@ public final class CheckstyleRunHandler {
         try {
             final ValidationResult result = new CheckstyleRunner(projectInfo.getProjectDirAsFile()).run();
             validationResultDisplayer.showValidationResult(result);
-            TestResultDisplayer.getInstance().setValidationStatus(result.getValidationErrors().isEmpty());
+
+            if (!result.getValidationErrors().isEmpty()) {
+                TestResultDisplayer.getInstance().cannotSubmit();
+            }
         } catch (CheckstyleException exception) {
             Exceptions.printStackTrace(exception);
         }
