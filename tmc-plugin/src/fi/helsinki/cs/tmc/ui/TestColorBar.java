@@ -12,14 +12,17 @@ class TestColorBar extends JProgressBar {
     private static final Color FAIL_COLOR = new Color(0xE10000);
     private static final Color VALIDATION_COLOR = new Color(0xFFD000);
     private static final Color UNSET_COLOR = new Color(0xEEEEEE);
+
     private boolean validationPass;
 
     public TestColorBar() {
+
         validationPass = true;
         setStringPainted(true);
     }
 
     public void validationPass(final boolean validationPassed) {
+
         validationPass = validationPassed;
     }
 
