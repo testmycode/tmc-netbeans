@@ -12,15 +12,15 @@ class TestColorBar extends JProgressBar {
     private static final Color FAIL_COLOR = new Color(0xE10000);
     private static final Color VALIDATION_COLOR = new Color(0xFFD000);
     private static final Color UNSET_COLOR = new Color(0xEEEEEE);
-    private boolean validationFail;
+    private boolean validationPass;
 
     public TestColorBar() {
-        validationFail = false;
+        validationPass = true;
         setStringPainted(true);
     }
 
-    public void validationFail(){
-        validationFail = true;
+    public void validationPass(final boolean validationPassed){
+        validationPass = validationPassed;
     }
 
     @Override
@@ -51,10 +51,10 @@ class TestColorBar extends JProgressBar {
                     filled = w;
                 }
                 int notFilled = w - filled;
-                if(validationFail){
-                    g.setColor(VALIDATION_COLOR);
-                }else{
+                if(validationPass){
                     g.setColor(PASS_COLOR);
+                }else{
+                    g.setColor(VALIDATION_COLOR);
                 }
                 g.fillRect(0, 0, filled, h);
                 g.setColor(FAIL_COLOR);

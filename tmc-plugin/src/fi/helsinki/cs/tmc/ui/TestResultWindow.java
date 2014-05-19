@@ -107,9 +107,7 @@ class TestResultWindow extends TopComponent {
     public void setValidationResult(final ValidationResult result) {
 
         validationResultPanel.setValidationResult(result);
-        if(!result.getValidationErrors().isEmpty()){
-            testColorBar.validationFail();
-        }
+        testColorBar.validationPass(result.getValidationErrors().isEmpty());
     }
 
     public void setTestCaseResults(List<TestCaseResult> results) {
