@@ -24,7 +24,7 @@ public class TestResultDisplayer {
     private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
 
     private static TestResultDisplayer instance;
-    private boolean validationStatus = true;
+    private boolean canSubmit = true;
 
     public static TestResultDisplayer getInstance() {
         if (instance == null) {
@@ -117,14 +117,15 @@ public class TestResultDisplayer {
         }
     }
 
-    public void setValidationStatus(boolean allOk) {
-        this.validationStatus = allOk;
+    public void cannotSubmit() {
+
+        this.canSubmit = false;
     }
 
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
-    public void showLocalRunResult(List<TestCaseResult> results, boolean canSubmit, final Runnable submissionCallback) {
+    public void showLocalRunResult(List<TestCaseResult> results, boolean returnable, final Runnable submissionCallback) {
         int numFailed = 0;
         for (TestCaseResult result : results) {
             if (!result.isSuccessful()) {
@@ -132,7 +133,7 @@ public class TestResultDisplayer {
             }
         }
 
-        if (numFailed == 0 && canSubmit  && validationStatus) {
+        if (numFailed == 0 && this.canSubmit && returnable) {
             displayTestCases(results, false);
             dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
                 @Override
