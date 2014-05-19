@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;

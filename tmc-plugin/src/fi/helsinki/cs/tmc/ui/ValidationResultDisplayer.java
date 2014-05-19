@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 
 public final class ValidationResultDisplayer {
 

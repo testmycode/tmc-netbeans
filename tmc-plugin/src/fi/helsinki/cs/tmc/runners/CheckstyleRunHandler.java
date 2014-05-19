@@ -5,7 +5,7 @@ import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.stylerunner.CheckstyleRunner;
-import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.ui.ValidationResultDisplayer;
 
@@ -24,7 +24,7 @@ public final class CheckstyleRunHandler {
 
         String projectType = projectInfo.getProjectType().name();
 
-        if (!projectType.equals("JAVA_SIMPLE") || !projectType.equals("JAVA_MAVEN")) {
+        if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
             return;
         }
 

@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.stylerunner.ValidationError;
-import fi.helsinki.cs.tmc.stylerunner.ValidationResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 
 import java.awt.Color;
 import java.awt.GridLayout;
