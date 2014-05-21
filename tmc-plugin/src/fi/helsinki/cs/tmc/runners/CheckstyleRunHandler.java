@@ -35,9 +35,7 @@ public final class CheckstyleRunHandler {
             final ValidationResult result = new CheckstyleRunner(projectInfo.getProjectDirAsFile()).run();
 
             // Cannot submit when validation errors exist
-            if (!result.getValidationErrors().isEmpty()) {
-                TestResultDisplayer.getInstance().cannotSubmit();
-            }
+            TestResultDisplayer.getInstance().canSubmit(result.getValidationErrors().isEmpty());
 
             validationResultDisplayer.showValidationResult(result);
 

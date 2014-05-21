@@ -117,9 +117,9 @@ public class TestResultDisplayer {
         }
     }
 
-    public void cannotSubmit() {
+    public void canSubmit(boolean status) {
 
-        canSubmit = false;
+        canSubmit = status;
     }
 
     /**
