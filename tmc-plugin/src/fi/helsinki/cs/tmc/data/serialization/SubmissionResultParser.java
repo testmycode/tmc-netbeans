@@ -38,10 +38,11 @@ public class SubmissionResultParser {
 
             return result;
 
-        } catch (RuntimeException e) {
-            throw new RuntimeException("Failed to parse submission result: " + e.getMessage(), e);
-        } catch (IOException ex) {
-            throw new RuntimeException("Failed to parse submission result: " + ex.getMessage(), ex);
+        } catch (RuntimeException runtimeException) {
+            throw new RuntimeException("Failed to parse submission result: " + runtimeException.getMessage(),
+                                                                               runtimeException);
+        } catch (IOException ioException) {
+            throw new RuntimeException("Failed to parse submission result: " + ioException.getMessage(), ioException);
         }
     }
 

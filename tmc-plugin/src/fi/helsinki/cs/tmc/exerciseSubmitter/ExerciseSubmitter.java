@@ -45,7 +45,7 @@ public class ExerciseSubmitter {
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private ValidationResultDisplayer validationResultDisplayer;
+    private final ValidationResultDisplayer validationResultDisplayer;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
     private TmcEventBus eventBus;
@@ -92,6 +92,7 @@ public class ExerciseSubmitter {
 
                     @Override
                     public void bgTaskReady(SubmissionResult result) {
+
                         dialog.close();
 
                         validationResultDisplayer.showValidationResult(result.getValidationResult());

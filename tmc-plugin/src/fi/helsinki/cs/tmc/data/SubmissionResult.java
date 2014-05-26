@@ -114,12 +114,14 @@ public class SubmissionResult {
         this.feedbackAnswerUrl = feedbackAnswerUrl;
     }
 
-    public ValidationResult getValidationResult() {
-        return validationResult;
+    public void setValidationResult(final ValidationResult result) {
+
+        this.validationResult = result;
     }
 
-    public void setValidationResult(ValidationResult result) {
-        this.validationResult = result;
+    public ValidationResult getValidationResult() {
+
+        return validationResult;
     }
 
     public boolean allTestCasesFailed() {
