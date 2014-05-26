@@ -1,6 +1,9 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
+
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+
 import java.util.Collections;
 import java.util.List;
 
@@ -11,31 +14,33 @@ public class SubmissionResult {
         FAIL,
         ERROR
     }
-    
+
     @SerializedName("status")
     private Status status;
-    
+
     @SerializedName("error")
     private String error; // e.g. compile error
-    
+
     @SerializedName("test_cases")
     private List<TestCaseResult> testCases;
-    
+
     @SerializedName("solution_url")
     private String solutionUrl;
-    
+
     @SerializedName("points")
     private List<String> points;
-    
+
     @SerializedName("missing_review_points")
     private List<String> missingReviewPoints;
-    
+
     @SerializedName("feedback_questions")
     private List<FeedbackQuestion> feedbackQuestions;
-    
+
     @SerializedName("feedback_answer_url")
     private String feedbackAnswerUrl;
-    
+
+    private ValidationResult validationResult;
+
     public SubmissionResult() {
         status = Status.ERROR;
         error = null;
@@ -108,7 +113,15 @@ public class SubmissionResult {
     public void setFeedbackAnswerUrl(String feedbackAnswerUrl) {
         this.feedbackAnswerUrl = feedbackAnswerUrl;
     }
-    
+
+    public ValidationResult getValidationResult() {
+        return validationResult;
+    }
+
+    public void setValidationResult(ValidationResult result) {
+        this.validationResult = result;
+    }
+
     public boolean allTestCasesFailed() {
         for (TestCaseResult tcr : testCases) {
             if (tcr.isSuccessful()) {

@@ -5,13 +5,19 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
+import com.google.gson.JsonParser;
+
 import fi.helsinki.cs.tmc.data.SubmissionResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
+
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 public class SubmissionResultParser {
-    
+
     public SubmissionResult parseFromJson(String json) {
         if (json.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty input");
@@ -22,12 +28,23 @@ public class SubmissionResultParser {
                     .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
                     .create();
 
-            return gson.fromJson(json, SubmissionResult.class);
+            SubmissionResult result = gson.fromJson(json, SubmissionResult.class);
+
+            // Parse validations field from JSON
+            JsonObject output = new JsonParser().parse(json).getAsJsonObject();
+            String validations = output.get("validations").toString();
+
+            result.setValidationResult(CheckstyleResult.build(validations));
+
+            return result;
+
         } catch (RuntimeException e) {
             throw new RuntimeException("Failed to parse submission result: " + e.getMessage(), e);
+        } catch (IOException ex) {
+            throw new RuntimeException("Failed to parse submission result: " + ex.getMessage(), ex);
         }
     }
-    
+
     private static class StatusDeserializer implements JsonDeserializer<SubmissionResult.Status> {
         @Override
         public SubmissionResult.Status deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context)
