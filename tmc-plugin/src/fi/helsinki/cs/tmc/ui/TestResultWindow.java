@@ -111,6 +111,7 @@ class TestResultWindow extends TopComponent {
     }
 
     public void setTestCaseResults(List<TestCaseResult> results) {
+
         resultPanel.setTestCaseResults(results);
         testColorBar.setMaximum(results.size());
         testColorBar.setValue(countSuccessfulTests(results));
