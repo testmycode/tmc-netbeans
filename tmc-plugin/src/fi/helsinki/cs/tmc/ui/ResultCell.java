@@ -1,24 +1,20 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.awt.Color;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
-import java.util.logging.Level;
 
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 import javax.swing.border.Border;
+
 import org.openide.cookies.EditorCookie;
-import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
-import org.openide.text.Line;
-import org.openide.util.Exceptions;
 
 public final class ResultCell extends JPanel {
 
@@ -26,10 +22,10 @@ public final class ResultCell extends JPanel {
     private Color titleColor, borderColor;
 
     public ResultCell(final Color borderColor,
-            final Color titleColor,
-            final FileObject fileObject,
-            final String message,
-            final JPanel detailView) {
+                      final Color titleColor,
+                      final FileObject fileObject,
+                      final String message,
+                      final JPanel detailView) {
 
         createStyle(borderColor, titleColor);
         createTitle(fileObject);
@@ -37,10 +33,10 @@ public final class ResultCell extends JPanel {
     }
 
     public ResultCell(final Color borderColor,
-            final Color titleColor,
-            final String title,
-            final String message,
-            final JPanel detailView) {
+                      final Color titleColor,
+                      final String title,
+                      final String message,
+                      final JPanel detailView) {
 
         createStyle(borderColor, titleColor);
         createTitle(title);
@@ -58,8 +54,10 @@ public final class ResultCell extends JPanel {
 
         this.borderColor = borderColor;
         this.titleColor = titleColor;
+
         this.setLayout(new GridBagLayout());
         this.setBackground(Color.WHITE);
+
         createConstraints();
         createBorder();
     }
@@ -75,11 +73,11 @@ public final class ResultCell extends JPanel {
 
     private void createTitle(final String title) {
 
-        SelectableText titleLabel = new SelectableText(title);
+        final SelectableText titleLabel = new SelectableText(title);
 
         titleLabel.setFont(titleLabel.getFont()
-                .deriveFont(Font.BOLD)
-                .deriveFont(titleLabel.getFont().getSize2D() + 2));
+                  .deriveFont(Font.BOLD)
+                  .deriveFont(titleLabel.getFont().getSize2D() + 2));
 
         titleLabel.setForeground(titleColor);
 
@@ -88,23 +86,26 @@ public final class ResultCell extends JPanel {
 
     private void createTitle(final FileObject fileObject) {
 
-        SelectableText titleLabel = new SelectableText(fileObject.getName());
+        final SelectableText titleLabel = new SelectableText(fileObject.getName());
 
         titleLabel.addMouseListener(new MouseListener() {
 
             @Override
-            public void mouseClicked(MouseEvent e) {
+            public void mouseClicked(MouseEvent event) {
 
                 if (fileObject.isValid()) {
-                    DataObject dataObject;
+
+                    final DataObject dataObject;
+
                     try {
                         dataObject = DataObject.find(fileObject);
-                    } catch (DataObjectNotFoundException ex) {
+                    } catch (DataObjectNotFoundException exception) {
                         // Should propably log something somewhere
                         return;
                     }
 
-                    EditorCookie editorCookie = dataObject.getLookup().lookup(EditorCookie.class);
+                    final EditorCookie editorCookie = dataObject.getLookup().lookup(EditorCookie.class);
+
                     if (editorCookie != null) {
                         editorCookie.open(); // Asynchronous
                     }
@@ -112,25 +113,21 @@ public final class ResultCell extends JPanel {
             }
 
             @Override
-            public void mousePressed(MouseEvent e) {
-            }
+            public void mousePressed(MouseEvent event) {}
 
             @Override
-            public void mouseReleased(MouseEvent e) {
-            }
+            public void mouseReleased(MouseEvent event) {}
 
             @Override
-            public void mouseEntered(MouseEvent e) {
-            }
+            public void mouseEntered(MouseEvent event) {}
 
             @Override
-            public void mouseExited(MouseEvent e) {
-            }
+            public void mouseExited(MouseEvent event) {}
         });
 
         titleLabel.setFont(titleLabel.getFont()
-                .deriveFont(Font.BOLD)
-                .deriveFont(titleLabel.getFont().getSize2D() + 2));
+                  .deriveFont(Font.BOLD)
+                  .deriveFont(titleLabel.getFont().getSize2D() + 2));
 
         titleLabel.setForeground(titleColor);
 
@@ -153,8 +150,8 @@ public final class ResultCell extends JPanel {
 
     private void createBorder() {
 
-        Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
-        Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, borderColor);
+        final Border innerPadding = BorderFactory.createEmptyBorder(5, 10, 5, 5);
+        final Border leftColorBar = BorderFactory.createMatteBorder(0, 6, 0, 0, borderColor);
 
         this.setBorder(BorderFactory.createCompoundBorder(leftColorBar, innerPadding));
     }

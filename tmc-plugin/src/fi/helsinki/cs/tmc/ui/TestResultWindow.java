@@ -110,7 +110,7 @@ class TestResultWindow extends TopComponent {
         validationResultPanel.setValidationResult(result);
     }
 
-    public void setTestCaseResults(List<TestCaseResult> results) {
+    public void setTestCaseResults(final List<TestCaseResult> results) {
 
         resultPanel.setTestCaseResults(results);
         testColorBar.setMaximum(results.size());

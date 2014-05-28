@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map.Entry;
 
 import javax.swing.JPanel;
+
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.openide.filesystems.FileObject;
 
@@ -34,26 +35,28 @@ public final class ValidationResultPanel extends JPanel {
             for (ValidationError error : errors) {
 
                 builder.append("Line ")
-                        .append(error.getLine())
-                        .append(": ")
-                        .append(error.getMessage())
-                        .append("\n");
+                       .append(error.getLine())
+                       .append(": ")
+                       .append(error.getMessage())
+                       .append("\n");
             }
 
-            FileObject fileObject = GlobalPathRegistry.getDefault().findResource(file.toString());
+            final FileObject fileObject = GlobalPathRegistry.getDefault().findResource(file.toString());
 
             if (fileObject == null) {
+
                 this.add(new ResultCell(new Color(0xFFD000),
-                        Color.DARK_GRAY,
-                        file.getName(),
-                        builder.toString(),
-                        null));
+                         Color.DARK_GRAY,
+                         file.getName(),
+                         builder.toString(),
+                         null));
             } else {
+
                 this.add(new ResultCell(new Color(0xFFD000),
-                        Color.DARK_GRAY,
-                        fileObject,
-                        builder.toString(),
-                        null));
+                         Color.DARK_GRAY,
+                         fileObject,
+                         builder.toString(),
+                         null));
             }
 
         }
