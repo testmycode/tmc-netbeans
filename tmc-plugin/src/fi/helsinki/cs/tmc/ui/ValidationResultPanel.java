@@ -9,6 +9,7 @@ import java.awt.GridBagLayout;
 import java.io.File;
 import java.util.List;
 import java.util.Map.Entry;
+
 import javax.swing.JPanel;
 
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
