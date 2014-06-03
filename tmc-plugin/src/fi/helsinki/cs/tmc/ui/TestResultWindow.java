@@ -36,8 +36,8 @@ class TestResultWindow extends TopComponent {
     private List<TestCaseResult> testCaseResults;
     private ValidationResult validationResults;
 
-    private boolean testCaseResultLock;
-    private boolean validationResultLock;
+    private boolean testCaseResultLock = true;
+    private boolean validationResultLock = true;
 
     private boolean isReturnable;
     private Runnable submissionCallback;
@@ -116,39 +116,30 @@ class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public void setValidationResult(final ValidationResult result) {
+    public synchronized void setValidationResult(final ValidationResult result) {
 
-        synchronized (this) {
+        this.validationResults = result;
+        this.validationResultLock = false;
 
-            this.validationResults = result;
-            this.validationResultLock = true;
-
-            if (testCaseResultLock) {
-                showAllResults();
-            }
+        if (!testCaseResultLock) {
+            showAllResults();
         }
     }
 
-    public void setTestCaseResults(final List<TestCaseResult> results) {
+    public synchronized void setTestCaseResults(final List<TestCaseResult> results) {
 
-        synchronized (this) {
+        this.testCaseResults = results;
+        this.testCaseResultLock = false;
 
-            this.testCaseResults = results;
-            this.testCaseResultLock = true;
-
-            if (validationResultLock) {
-                showAllResults();
-            }
+        if (!validationResultLock) {
+            showAllResults();
         }
     }
 
-    private void showAllResults() {
+    private synchronized void showAllResults() {
 
-        synchronized (this) {
-
-            this.testCaseResultLock = false;
-            this.validationResultLock = false;
-        }
+        this.testCaseResultLock = true;
+        this.validationResultLock = true;
 
         testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
 
