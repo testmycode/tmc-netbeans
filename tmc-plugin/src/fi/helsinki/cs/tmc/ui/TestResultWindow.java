@@ -29,7 +29,6 @@ class TestResultWindow extends TopComponent {
 
     private static final Logger log = Logger.getLogger(TestResultWindow.class.getName());
 
-    private final ValidationResultPanel validationResultPanel;
     private final TestResultPanel resultPanel;
     private final JCheckBox showAllCheckbox;
     private final TestColorBar testColorBar;
@@ -76,13 +75,11 @@ class TestResultWindow extends TopComponent {
         topPanel.add(Box.createHorizontalGlue());
         topPanel.setMinimumSize(new Dimension(topPanel.getMinimumSize().width, 40));
 
-        validationResultPanel = new ValidationResultPanel();
         resultPanel = new TestResultPanel();
 
         JPanel resultContainer = new JPanel();
         resultContainer.setLayout(new BoxLayout(resultContainer, BoxLayout.Y_AXIS));
 
-        resultContainer.add(validationResultPanel);
         resultContainer.add(resultPanel);
 
         JScrollPane scrollPane = new JScrollPane(
@@ -155,11 +152,7 @@ class TestResultWindow extends TopComponent {
 
         testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
 
-        validationResultPanel.setValidationResult(validationResults);
-        validationResultPanel.revalidate();
-        validationResultPanel.repaint();
-
-        resultPanel.setTestCaseResults(testCaseResults);
+        resultPanel.setResults(testCaseResults, validationResults);
 
         testColorBar.setMaximum(testCaseResults.size());
         testColorBar.setValue(countSuccessfulTests(testCaseResults));

@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.awt.Color;
@@ -10,9 +12,11 @@ import java.awt.GridBagLayout;
 import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -26,6 +30,7 @@ import javax.swing.UIManager;
 import javax.swing.event.HyperlinkEvent;
 import javax.swing.event.HyperlinkListener;
 import org.apache.commons.lang3.StringEscapeUtils;
+import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.openide.cookies.EditorCookie;
 import org.openide.cookies.LineCookie;
 import org.openide.filesystems.FileObject;
@@ -44,16 +49,19 @@ class TestResultPanel extends JPanel {
 
     private boolean passedTestsVisible = false;
     private boolean allFailuresVisible = false;
-    private List<TestCaseResult> storedResults = new ArrayList<TestCaseResult>();
+    private List<TestCaseResult> storedTestCaseResults = new ArrayList<TestCaseResult>();
+    private Map<File, List<ValidationError>>  storedValidationResults = new HashMap<File, List<ValidationError>>();
 
     public TestResultPanel() {
         this.sourceFileLookup = SourceFileLookup.getDefault();
         this.setLayout(new GridBagLayout());
     }
 
-    public void setTestCaseResults(List<TestCaseResult> results) {
+    public void setResults(List<TestCaseResult> results, ValidationResult validationResults) {
+
         this.clear();
-        storedResults.addAll(results);
+        storedTestCaseResults.addAll(results);
+        this.storedValidationResults.putAll(validationResults.getValidationErrors());
         rebuildCells();
     }
 
@@ -69,15 +77,9 @@ class TestResultPanel extends JPanel {
         gbc.weighty = 0.0;
         gbc.insets.top = PADDING_BETWEEN_BOXES;
 
-        for (TestCaseResult result : storedResults) {
-            if (!result.isSuccessful() || passedTestsVisible) {
-                this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), gbc);
+        buildValidationCells(gbc);
+        buildTestResultCells(gbc);
 
-                if (!allFailuresVisible && !result.isSuccessful()) {
-                    break;
-                }
-            }
-        }
         gbc.weighty = 1.0;
         this.add(Box.createVerticalGlue(), gbc); // Minimize component heights
 
@@ -92,12 +94,65 @@ class TestResultPanel extends JPanel {
         });
     }
 
+    private void buildTestResultCells(GridBagConstraints gbc) {
+        for (TestCaseResult result : storedTestCaseResults) {
+            if (!result.isSuccessful() || passedTestsVisible) {
+                this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), gbc);
+
+                if (!allFailuresVisible && !result.isSuccessful()) {
+                    break;
+                }
+            }
+        }
+    }
+
+    private void buildValidationCells(GridBagConstraints gbc) {
+        for (Map.Entry<File, List<ValidationError>> entry : storedValidationResults.entrySet()) {
+
+            final File file = entry.getKey();
+            final List<ValidationError> errors = entry.getValue();
+
+            StringBuilder builder = new StringBuilder();
+
+            for (ValidationError error : errors) {
+
+                builder.append("Line ")
+                       .append(error.getLine())
+                       .append(": ")
+                       .append(error.getMessage())
+                       .append("\n");
+            }
+
+            final FileObject fileObject = GlobalPathRegistry.getDefault().findResource(file.toString());
+
+            if (fileObject == null) {
+
+                this.add(new ResultCell(new Color(0xFFD000),
+                         Color.DARK_GRAY,
+                         file.getName(),
+                         builder.toString(),
+                         null),
+                         gbc);
+            } else {
+
+                this.add(new ResultCell(new Color(0xFFD000),
+                         Color.DARK_GRAY,
+                         fileObject,
+                         builder.toString(),
+                         null),
+                         gbc);
+            }
+
+        }
+    }
+
     private void scrollToTop() {
         scrollRectToVisible(new Rectangle(0, 0, 1, 1));
     }
 
     public void clear() {
-        storedResults.clear();
+        storedTestCaseResults.clear();
+        storedValidationResults.clear();
         this.removeAll();
         this.revalidate();
     }
