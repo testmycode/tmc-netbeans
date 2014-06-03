@@ -199,7 +199,7 @@ public class EventSendBuffer implements EventReceiver {
                 log.log(Level.INFO, "Sending {0} events to {1}", new Object[] { eventsToSend.size(), url });
 
                 doSend(eventsToSend, url);
-            } while (shouldSendMore);
+            } while (false);
         }
 
         private ArrayList<LoggableEvent> copyEventsToSendFromQueue() {
@@ -251,7 +251,7 @@ public class EventSendBuffer implements EventReceiver {
             log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[] { eventsToSend.size(), url });
 
             removeSentEventsFromQueue();
-            
+
             // If saving fails now (or is already running and fails later)
             // then we may end up sending duplicate events later.
             // This will hopefully be very rare.

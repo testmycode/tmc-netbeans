@@ -32,7 +32,14 @@ public class SubmissionResultParser {
 
             // Parse validations field from JSON
             JsonObject output = new JsonParser().parse(json).getAsJsonObject();
-            String validations = output.get("validations").toString();
+
+            JsonElement validationElement = output.get("validations");
+
+            String validations = "{}";
+
+            if (validationElement != null) {
+                validations = validationElement.toString();
+            }
 
             result.setValidationResult(CheckstyleResult.build(validations));
 

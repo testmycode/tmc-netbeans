@@ -1,10 +1,13 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+import org.openide.windows.WindowManager;
 
 public final class ValidationResultDisplayer {
 
     private static ValidationResultDisplayer instance;
+
+    private final ValidationResultDisplayRunner r = new ValidationResultDisplayRunner();
 
     private ValidationResultDisplayer() {}
 
@@ -19,6 +22,7 @@ public final class ValidationResultDisplayer {
 
     public void showValidationResult(final ValidationResult result) {
 
-        TestResultWindow.get().setValidationResult(result);
+        r.setValidationResult(result);
+        WindowManager.getDefault().invokeWhenUIReady(r);
     }
 }

@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import java.awt.Component;
@@ -33,8 +34,22 @@ class TestResultWindow extends TopComponent {
     private final JCheckBox showAllCheckbox;
     private final TestColorBar testColorBar;
 
+    private List<TestCaseResult> testCaseResults;
+    private ValidationResult validationResults;
+
+    private boolean testCaseResultLock;
+    private boolean validationResultLock;
+
+    private boolean isReturnable;
+    private Runnable submissionCallback;
+
+    private ConvenientDialogDisplayer dialogs;
+
 
     public TestResultWindow() {
+
+        this.dialogs = ConvenientDialogDisplayer.getDefault();
+
         this.setName("TMC Test Results");
         this.setDisplayName("TMC Test Results");
 
@@ -106,16 +121,82 @@ class TestResultWindow extends TopComponent {
 
     public void setValidationResult(final ValidationResult result) {
 
-        testColorBar.validationPass(result.getValidationErrors().isEmpty());
-        validationResultPanel.setValidationResult(result);
+        synchronized (this) {
+
+            this.validationResults = result;
+            this.validationResultLock = true;
+
+            if (testCaseResultLock) {
+                showAllResults();
+            }
+        }
     }
 
     public void setTestCaseResults(final List<TestCaseResult> results) {
 
-        resultPanel.setTestCaseResults(results);
-        testColorBar.setMaximum(results.size());
-        testColorBar.setValue(countSuccessfulTests(results));
+        synchronized (this) {
+
+            this.testCaseResults = results;
+            this.testCaseResultLock = true;
+
+            if (validationResultLock) {
+                showAllResults();
+            }
+        }
+    }
+
+    private void showAllResults() {
+
+        synchronized (this) {
+
+            this.testCaseResultLock = false;
+            this.validationResultLock = false;
+        }
+
+        testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
+
+        validationResultPanel.setValidationResult(validationResults);
+        validationResultPanel.revalidate();
+        validationResultPanel.repaint();
+
+        resultPanel.setTestCaseResults(testCaseResults);
+
+        testColorBar.setMaximum(testCaseResults.size());
+        testColorBar.setValue(countSuccessfulTests(testCaseResults));
         testColorBar.setIndeterminate(false);
+
+        if (isSubmittable()) {
+            dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
+                @Override
+                public Void apply(Boolean yes) {
+                    if (yes) {
+                        submissionCallback.run();
+                    }
+
+                    return null;
+                }
+            });
+        } else {
+            this.openAtTabPosition(0);
+            this.requestActive();
+        }
+    }
+
+    private boolean isSubmittable() {
+
+
+        for (TestCaseResult result : testCaseResults) {
+            if (!result.isSuccessful()) {
+                return false;
+            }
+        }
+
+        if (!validationResults.getValidationErrors().isEmpty()) {
+            return false;
+        }
+
+        return isReturnable;
+
     }
 
     private int countSuccessfulTests(List<TestCaseResult> results) {
@@ -141,5 +222,15 @@ class TestResultWindow extends TopComponent {
     private void loadWindowPreferences() {
         Preferences prefs = NbPreferences.forModule(TestResultWindow.class);
         showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
+    }
+
+    public void setReturnable(boolean returnable) {
+
+        isReturnable = returnable;
+    }
+
+    public void setSubmissionCallback(Runnable submissionCallback) {
+
+        this.submissionCallback = submissionCallback;
     }
 }
