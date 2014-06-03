@@ -151,7 +151,6 @@ public class TestResultDisplayer {
         window.setTestCaseResults(testCases);
     }
 
-
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
     }
