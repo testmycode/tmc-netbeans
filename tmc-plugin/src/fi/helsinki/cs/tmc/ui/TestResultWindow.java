@@ -42,12 +42,12 @@ class TestResultWindow extends TopComponent {
     private boolean isReturnable;
     private Runnable submissionCallback;
 
-    private ConvenientDialogDisplayer dialogs;
+    private ConvenientDialogDisplayer dialogDisplayer;
 
 
     public TestResultWindow() {
 
-        this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
 
         this.setName("TMC Test Results");
         this.setDisplayName("TMC Test Results");
@@ -141,18 +141,20 @@ class TestResultWindow extends TopComponent {
         this.testCaseResultLock = true;
         this.validationResultLock = true;
 
+        testColorBar.setMaximum(testCaseResults.size());
+        testColorBar.setValue(countSuccessfulTests(testCaseResults));
+        testColorBar.setIndeterminate(false);
         testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
 
         resultPanel.setResults(testCaseResults, validationResults);
 
-        testColorBar.setMaximum(testCaseResults.size());
-        testColorBar.setValue(countSuccessfulTests(testCaseResults));
-        testColorBar.setIndeterminate(false);
-
         if (isSubmittable()) {
-            dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
+
+            dialogDisplayer.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
+
                 @Override
-                public Void apply(Boolean yes) {
+                public Void apply(final Boolean yes) {
+
                     if (yes) {
                         submissionCallback.run();
                     }
@@ -160,6 +162,7 @@ class TestResultWindow extends TopComponent {
                     return null;
                 }
             });
+
         } else {
             this.openAtTabPosition(0);
             this.requestActive();
@@ -167,7 +170,6 @@ class TestResultWindow extends TopComponent {
     }
 
     private boolean isSubmittable() {
-
 
         for (TestCaseResult result : testCaseResults) {
             if (!result.isSuccessful()) {
@@ -180,7 +182,6 @@ class TestResultWindow extends TopComponent {
         }
 
         return isReturnable;
-
     }
 
     private int countSuccessfulTests(List<TestCaseResult> results) {
@@ -208,12 +209,12 @@ class TestResultWindow extends TopComponent {
         showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
     }
 
-    public void setReturnable(boolean returnable) {
+    public void setReturnable(final boolean returnable) {
 
         isReturnable = returnable;
     }
 
-    public void setSubmissionCallback(Runnable submissionCallback) {
+    public void setSubmissionCallback(final Runnable submissionCallback) {
 
         this.submissionCallback = submissionCallback;
     }

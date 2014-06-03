@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import org.netbeans.api.project.Project;
+
 import org.openide.util.Exceptions;
 
 public final class CheckstyleRunHandler implements Runnable {
@@ -25,20 +26,19 @@ public final class CheckstyleRunHandler implements Runnable {
 
         this.project = project;
 
-        BgTask.start("Running validation tests", this, new BgTaskListener<Object>() {
+        BgTask.start("Running validations", this, new BgTaskListener<Object>() {
 
             @Override
-            public void bgTaskFailed(Throwable ex) {
+            public void bgTaskFailed(final Throwable exception) {
+
                 dialogDisplayer.displayError("Failed to validate the code.");
             }
 
             @Override
-            public void bgTaskCancelled() {
-            }
+            public void bgTaskCancelled() {}
 
             @Override
-            public void bgTaskReady(Object result) {
-            }
+            public void bgTaskReady(final Object result) {}
         });
     }
 
@@ -49,7 +49,6 @@ public final class CheckstyleRunHandler implements Runnable {
         final String projectType = projectInfo.getProjectType().name();
 
         if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
-
             validationResultDisplayer.showValidationResult(new CheckstyleResult());
             return;
         }

@@ -18,11 +18,14 @@ import java.lang.reflect.Type;
 
 public class SubmissionResultParser {
 
-    public SubmissionResult parseFromJson(String json) {
+    public SubmissionResult parseFromJson(final String json) {
+
         if (json.trim().isEmpty()) {
             throw new IllegalArgumentException("Empty input");
         }
+
         try {
+
             Gson gson = new GsonBuilder()
                     .registerTypeAdapter(SubmissionResult.Status.class, new StatusDeserializer())
                     .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
@@ -32,16 +35,13 @@ public class SubmissionResultParser {
 
             // Parse validations field from JSON
             JsonObject output = new JsonParser().parse(json).getAsJsonObject();
-
             JsonElement validationElement = output.get("validations");
 
-            String validations = "{}";
-
             if (validationElement != null) {
-                validations = validationElement.toString();
+                result.setValidationResult(CheckstyleResult.build(validationElement.toString()));
+            } else {
+                result.setValidationResult(CheckstyleResult.build("{}"));
             }
-
-            result.setValidationResult(CheckstyleResult.build(validations));
 
             return result;
 

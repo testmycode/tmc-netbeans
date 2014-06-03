@@ -118,10 +118,11 @@ public class TestResultDisplayer {
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
-    public void showLocalRunResult(List<TestCaseResult> results, boolean returnable, final Runnable submissionCallback) {
+    public void showLocalRunResult(final List<TestCaseResult> results,
+                                   final boolean returnable,
+                                   final Runnable submissionCallback) {
 
-        TestResultWindow window = TestResultWindow.get();
-        window.setSubmissionCallback(submissionCallback);
+        TestResultWindow.get().setSubmissionCallback(submissionCallback);
 
         displayTestCases(results, returnable);
     }
@@ -143,7 +144,7 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
 
-    private void displayTestCases(List<TestCaseResult> testCases, boolean returnable) {
+    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable) {
 
         TestResultWindow window = TestResultWindow.get();
 

@@ -49,23 +49,26 @@ class TestResultPanel extends JPanel {
 
     private boolean passedTestsVisible = false;
     private boolean allFailuresVisible = false;
-    private List<TestCaseResult> storedTestCaseResults = new ArrayList<TestCaseResult>();
-    private Map<File, List<ValidationError>>  storedValidationResults = new HashMap<File, List<ValidationError>>();
+    private final List<TestCaseResult> storedTestCaseResults = new ArrayList<TestCaseResult>();
+    private final Map<File, List<ValidationError>> storedValidationResults = new HashMap<File, List<ValidationError>>();
 
     public TestResultPanel() {
         this.sourceFileLookup = SourceFileLookup.getDefault();
         this.setLayout(new GridBagLayout());
     }
 
-    public void setResults(List<TestCaseResult> results, ValidationResult validationResults) {
+    public void setResults(final List<TestCaseResult> results, final ValidationResult validationResults) {
 
         this.clear();
+
         storedTestCaseResults.addAll(results);
-        this.storedValidationResults.putAll(validationResults.getValidationErrors());
+        storedValidationResults.putAll(validationResults.getValidationErrors());
+
         rebuildCells();
     }
 
     private void rebuildCells() {
+
         this.removeAll();
 
         GridBagConstraints gbc = new GridBagConstraints();
@@ -94,9 +97,12 @@ class TestResultPanel extends JPanel {
         });
     }
 
-    private void buildTestResultCells(GridBagConstraints gbc) {
+    private void buildTestResultCells(final GridBagConstraints gbc) {
+
         for (TestCaseResult result : storedTestCaseResults) {
+
             if (!result.isSuccessful() || passedTestsVisible) {
+
                 this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), gbc);
 
                 if (!allFailuresVisible && !result.isSuccessful()) {
@@ -106,7 +112,8 @@ class TestResultPanel extends JPanel {
         }
     }
 
-    private void buildValidationCells(GridBagConstraints gbc) {
+    private void buildValidationCells(final GridBagConstraints gbc) {
+
         for (Map.Entry<File, List<ValidationError>> entry : storedValidationResults.entrySet()) {
 
             final File file = entry.getKey();
@@ -142,7 +149,6 @@ class TestResultPanel extends JPanel {
                          null),
                          gbc);
             }
-
         }
     }
 
@@ -151,8 +157,10 @@ class TestResultPanel extends JPanel {
     }
 
     public void clear() {
+
         storedTestCaseResults.clear();
         storedValidationResults.clear();
+
         this.removeAll();
         this.revalidate();
     }
