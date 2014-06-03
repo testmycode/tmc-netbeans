@@ -199,7 +199,7 @@ public class EventSendBuffer implements EventReceiver {
                 log.log(Level.INFO, "Sending {0} events to {1}", new Object[] { eventsToSend.size(), url });
 
                 doSend(eventsToSend, url);
-            } while (false);
+            } while (shouldSendMore);
         }
 
         private ArrayList<LoggableEvent> copyEventsToSendFromQueue() {
