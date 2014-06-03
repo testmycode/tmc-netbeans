@@ -42,7 +42,7 @@ public class DefaultTailoring implements Tailoring {
     
     @Override
     public Locale[] getAvailableErrorMsgLocales() {
-        return new Locale[] { new Locale("en") };
+        return new Locale[] { new Locale("en"), new Locale("fi") };
     }
     
     @Override
