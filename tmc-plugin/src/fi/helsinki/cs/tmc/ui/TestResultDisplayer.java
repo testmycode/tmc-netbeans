@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.ui;
 
-import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
@@ -24,7 +23,6 @@ public class TestResultDisplayer {
     private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
 
     private static TestResultDisplayer instance;
-    private boolean canSubmit = true;
 
     public static TestResultDisplayer getInstance() {
         if (instance == null) {
@@ -46,7 +44,7 @@ public class TestResultDisplayer {
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases(), true);
+                displayTestCases(result.getTestCases(), false);
                 displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
@@ -117,36 +115,15 @@ public class TestResultDisplayer {
         }
     }
 
-    public void canSubmit(boolean status) {
-
-        canSubmit = status;
-    }
-
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
     public void showLocalRunResult(List<TestCaseResult> results, boolean returnable, final Runnable submissionCallback) {
-        int numFailed = 0;
-        for (TestCaseResult result : results) {
-            if (!result.isSuccessful()) {
-                numFailed += 1;
-            }
-        }
 
-        if (numFailed == 0 && canSubmit && returnable) {
-            displayTestCases(results, false);
-            dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
-                @Override
-                public Void apply(Boolean yes) {
-                    if (yes) {
-                        submissionCallback.run();
-                    }
-                    return null;
-                }
-            });
-        } else {
-            displayTestCases(results, true);
-        }
+        TestResultWindow window = TestResultWindow.get();
+        window.setSubmissionCallback(submissionCallback);
+
+        displayTestCases(results, returnable);
     }
 
     private void displayError(String error) {
@@ -166,14 +143,14 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
 
-    private void displayTestCases(List<TestCaseResult> testCases, boolean activate) {
+    private void displayTestCases(List<TestCaseResult> testCases, boolean returnable) {
+
         TestResultWindow window = TestResultWindow.get();
+
+        window.setReturnable(returnable);
         window.setTestCaseResults(testCases);
-        if (activate) {
-            window.openAtTabPosition(0);
-            window.requestActive();
-        }
     }
+
 
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
