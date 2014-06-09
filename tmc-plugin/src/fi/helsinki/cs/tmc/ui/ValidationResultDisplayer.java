@@ -19,7 +19,7 @@ public final class ValidationResultDisplayer {
     }
 
     public void showValidationResult(final ValidationResult result) {
- 
+
         ResultCollector.getInstance().setValidationResult(result);
     }
 }

@@ -24,8 +24,8 @@ public final class CheckstyleRunHandler implements Runnable {
     private Project project;
     private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
     private final ValidationResultDisplayer validationResultDisplayer = ValidationResultDisplayer.getInstance();
-    private ValidationResult validationResult;
-    
+    private ValidationResult validationResult = new CheckstyleResult();
+
     public void performAction(final Project project) {
 
         this.project = project;
@@ -43,6 +43,7 @@ public final class CheckstyleRunHandler implements Runnable {
 
             @Override
             public void bgTaskReady(final Object result) {
+
                 validationResultDisplayer.showValidationResult(validationResult);
             }
         });
@@ -55,7 +56,6 @@ public final class CheckstyleRunHandler implements Runnable {
         final String projectType = projectInfo.getProjectType().name();
 
         if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
-            validationResult = new CheckstyleResult();
             return;
         }
 
