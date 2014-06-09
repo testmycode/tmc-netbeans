@@ -24,7 +24,7 @@ import org.openide.windows.WindowManager;
 
 @TopComponent.Description(preferredID=TestResultWindow.PREFERRED_ID, persistenceType=TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode="output", openAtStartup=false)
-class TestResultWindow extends TopComponent {
+public class TestResultWindow extends TopComponent {
     public static final String PREFERRED_ID = "TestResultWindow";
 
     private static final Logger log = Logger.getLogger(TestResultWindow.class.getName());
@@ -32,15 +32,6 @@ class TestResultWindow extends TopComponent {
     private final TestResultPanel resultPanel;
     private final JCheckBox showAllCheckbox;
     private final TestColorBar testColorBar;
-
-    private List<TestCaseResult> testCaseResults;
-    private ValidationResult validationResults;
-
-    private boolean testCaseResultLock = true;
-    private boolean validationResultLock = true;
-
-    private boolean isReturnable;
-    private Runnable submissionCallback;
 
     private ConvenientDialogDisplayer dialogDisplayer;
 
@@ -116,30 +107,8 @@ class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public synchronized void setValidationResult(final ValidationResult result) {
+    public void showResults(final List<TestCaseResult> testCaseResults, final ValidationResult validationResults, final Runnable submissionCallback, final boolean submittable) {
 
-        this.validationResults = result;
-        this.validationResultLock = false;
-
-        if (!testCaseResultLock) {
-            showAllResults();
-        }
-    }
-
-    public synchronized void setTestCaseResults(final List<TestCaseResult> results) {
-
-        this.testCaseResults = results;
-        this.testCaseResultLock = false;
-
-        if (!validationResultLock) {
-            showAllResults();
-        }
-    }
-
-    private synchronized void showAllResults() {
-
-        this.testCaseResultLock = true;
-        this.validationResultLock = true;
 
         testColorBar.setMaximum(testCaseResults.size());
         testColorBar.setValue(countSuccessfulTests(testCaseResults));
@@ -148,7 +117,7 @@ class TestResultWindow extends TopComponent {
 
         resultPanel.setResults(testCaseResults, validationResults);
 
-        if (isSubmittable()) {
+        if (submittable) {
 
             dialogDisplayer.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
 
@@ -167,21 +136,6 @@ class TestResultWindow extends TopComponent {
             this.openAtTabPosition(0);
             this.requestActive();
         }
-    }
-
-    private boolean isSubmittable() {
-
-        for (TestCaseResult result : testCaseResults) {
-            if (!result.isSuccessful()) {
-                return false;
-            }
-        }
-
-        if (!validationResults.getValidationErrors().isEmpty()) {
-            return false;
-        }
-
-        return isReturnable;
     }
 
     private int countSuccessfulTests(List<TestCaseResult> results) {
@@ -209,13 +163,4 @@ class TestResultWindow extends TopComponent {
         showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
     }
 
-    public void setReturnable(final boolean returnable) {
-
-        isReturnable = returnable;
-    }
-
-    public void setSubmissionCallback(final Runnable submissionCallback) {
-
-        this.submissionCallback = submissionCallback;
-    }
 }

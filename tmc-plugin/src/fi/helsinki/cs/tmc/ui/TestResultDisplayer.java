@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -122,7 +123,7 @@ public class TestResultDisplayer {
                                    final boolean returnable,
                                    final Runnable submissionCallback) {
 
-        TestResultWindow.get().setSubmissionCallback(submissionCallback);
+        ResultCollector.getInstance().setSubmissionCallback(submissionCallback);
 
         displayTestCases(results, returnable);
     }
@@ -146,10 +147,10 @@ public class TestResultDisplayer {
 
     private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable) {
 
-        TestResultWindow window = TestResultWindow.get();
+        ResultCollector resultCollector = ResultCollector.getInstance();
 
-        window.setReturnable(returnable);
-        window.setTestCaseResults(testCases);
+        resultCollector.setReturnable(returnable);
+        resultCollector.setTestCaseResults(testCases);
     }
 
 

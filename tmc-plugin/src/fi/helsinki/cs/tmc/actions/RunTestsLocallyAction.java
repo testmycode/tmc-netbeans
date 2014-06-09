@@ -8,15 +8,17 @@ import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.WindowManager;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
-public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
+public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction implements Runnable{
 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private CheckstyleRunHandler checkstyleRunHandler;
     private TestRunHandler testRunHandler;
-
+    private Project[] projects;
+    
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -28,10 +30,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     @Override
     protected void performAction(final Node[] nodes) {
 
-        Project[] projects = projectsFromNodes(nodes).toArray(new Project[0]);
-
-        this.checkstyleRunHandler.performAction(projects[0]);
-        this.testRunHandler.performAction(projects);
+        this.projects = projectsFromNodes(nodes).toArray(new Project[0]);
+        WindowManager.getDefault().invokeWhenUIReady(this);
     }
 
     @Override
@@ -59,5 +59,12 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     protected boolean enabledFor(Exercise exercise) {
         // Overridden to not care about the deadline
         return exercise.isReturnable();
+    }
+
+    @Override
+    public void run() {
+        
+        this.checkstyleRunHandler.performAction(projects[0]);
+        this.testRunHandler.performAction(projects);
     }
 }

@@ -24,7 +24,8 @@ public final class CheckstyleRunHandler implements Runnable {
     private Project project;
     private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
     private final ValidationResultDisplayer validationResultDisplayer = ValidationResultDisplayer.getInstance();
-
+    private ValidationResult validationResult;
+    
     public void performAction(final Project project) {
 
         this.project = project;
@@ -41,7 +42,9 @@ public final class CheckstyleRunHandler implements Runnable {
             public void bgTaskCancelled() {}
 
             @Override
-            public void bgTaskReady(final Object result) {}
+            public void bgTaskReady(final Object result) {
+                validationResultDisplayer.showValidationResult(validationResult);
+            }
         });
     }
 
@@ -52,7 +55,7 @@ public final class CheckstyleRunHandler implements Runnable {
         final String projectType = projectInfo.getProjectType().name();
 
         if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
-            validationResultDisplayer.showValidationResult(new CheckstyleResult());
+            validationResult = new CheckstyleResult();
             return;
         }
 
@@ -62,9 +65,7 @@ public final class CheckstyleRunHandler implements Runnable {
         try {
 
             final Locale locale = TmcSettings.getDefault().getErrorMsgLocale();
-            final ValidationResult result = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
-
-            validationResultDisplayer.showValidationResult(result);
+            validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
 
         } catch (CheckstyleException exception) {
             ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
