@@ -60,7 +60,7 @@ public final class CheckstyleRunHandler implements Runnable {
 
         try {
 
-            Locale locale = TmcSettings.getDefault().getErrorMsgLocale();
+            final Locale locale = TmcSettings.getDefault().getErrorMsgLocale();
             final ValidationResult result = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
 
             validationResultDisplayer.showValidationResult(result);
