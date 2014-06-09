@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.Locale;
 
 import org.netbeans.api.project.Project;
+
 import org.openide.util.Exceptions;
 
 public final class CheckstyleRunHandler implements Runnable {

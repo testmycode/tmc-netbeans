@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
 import fi.helsinki.cs.tmc.runners.TestRunHandler;
-
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
