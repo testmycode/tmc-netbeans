@@ -327,7 +327,6 @@
                         <publicPackage>org.yaml.snakeyaml</publicPackage>
                         <publicPackage>org.apache.http.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
-                        <publicPackage>com.puppycrawl.tools.checkstyle.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>

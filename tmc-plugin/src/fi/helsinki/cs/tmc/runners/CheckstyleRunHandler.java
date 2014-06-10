@@ -1,11 +1,10 @@
 package fi.helsinki.cs.tmc.runners;
 
-import com.puppycrawl.tools.checkstyle.api.CheckstyleException;
-
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.stylerunner.CheckstyleRunner;
+import fi.helsinki.cs.tmc.stylerunner.exception.TMCCheckstyleException;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -67,7 +66,7 @@ public final class CheckstyleRunHandler implements Runnable {
             final Locale locale = TmcSettings.getDefault().getErrorMsgLocale();
             validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
 
-        } catch (CheckstyleException exception) {
+        } catch (TMCCheckstyleException exception) {
             ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
             Exceptions.printStackTrace(exception);
         }
