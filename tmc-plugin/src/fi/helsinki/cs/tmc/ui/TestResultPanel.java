@@ -178,7 +178,7 @@ class TestResultPanel extends JPanel {
         rebuildCells();
     }
 
-    private static class TestCaseResultCell extends JPanel {
+    private static class TestCaseResultCell {
 
         private static final Color FAIL_COLOR = new Color(0xED0000);
         private static final Color PASS_COLOR = new Color(0x6FD06D);
@@ -190,9 +190,10 @@ class TestResultPanel extends JPanel {
         private JButton detailedMessageButton;
         private final GridBagConstraints gbc = new GridBagConstraints();
         private final JPanel detailView;
-
+        private final ResultCell resultCell;
+        
         public TestCaseResultCell(final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
-
+            
             gbc.anchor = GridBagConstraints.NORTHWEST;
             gbc.gridx = 0;
             gbc.weightx = 1.0;
@@ -200,13 +201,14 @@ class TestResultPanel extends JPanel {
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
             this.detailView = createDetailView();
+            
+            final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+            this.resultCell = new ResultCell(getResultColor(), getResultTextColor(), title, result.getMessage(), detailView);
         }
-
+        
         public JPanel getCell() {
 
-            final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
-
-            return new ResultCell(getResultColor(), getResultTextColor(), title, result.getMessage(), detailView);
+            return this.resultCell;
         }
 
         private JPanel createDetailView() {
@@ -340,7 +342,7 @@ class TestResultPanel extends JPanel {
 
                 detailView.add(display, gbc);
 
-                revalidate();
+                resultCell.revalidate();
             }
 
         };
@@ -358,7 +360,7 @@ class TestResultPanel extends JPanel {
 
                 detailView.add(display, gbc);
 
-                revalidate();
+                resultCell.revalidate();
             }
 
             private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
@@ -415,7 +417,6 @@ class TestResultPanel extends JPanel {
                     }
                 } catch (Exception ex) {
                     ExceptionUtils.logException(ex, log, Level.WARNING);
-                    return;
                 }
             }
         };
