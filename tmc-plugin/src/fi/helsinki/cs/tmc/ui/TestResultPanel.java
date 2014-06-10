@@ -42,7 +42,7 @@ import org.openide.text.Line;
 import org.openide.text.Line.ShowOpenType;
 import org.openide.text.Line.ShowVisibilityType;
 
-class TestResultPanel extends JPanel {
+public class TestResultPanel extends JPanel {
 
     private static final int PADDING_BETWEEN_BOXES = 5;
 
