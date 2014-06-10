@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
+import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
@@ -17,6 +18,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -114,6 +116,8 @@ class TestResultPanel extends JPanel {
 
     private void buildValidationCells(final GridBagConstraints gbc) {
 
+        ResourceBundle bundle = ResourceBundle.getBundle("fi.helsinki.cs.tmc.resources.messages", TmcSettings.getDefault().getErrorMsgLocale());
+
         for (Map.Entry<File, List<ValidationError>> entry : storedValidationResults.entrySet()) {
 
             final File file = entry.getKey();
@@ -123,9 +127,8 @@ class TestResultPanel extends JPanel {
 
             for (ValidationError error : errors) {
 
-                builder.append("Line ")
-                       .append(error.getLine())
-                       .append(": ")
+                builder.append(String.format(bundle.getString("message.line"), error.getLine()))
+                       .append(" ")
                        .append(error.getMessage())
                        .append("\n");
             }
