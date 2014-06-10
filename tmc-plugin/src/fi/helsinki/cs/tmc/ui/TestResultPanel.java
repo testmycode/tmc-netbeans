@@ -26,6 +26,7 @@ import javax.swing.Action;
 import javax.swing.Box;
 import javax.swing.JButton;
 import javax.swing.JEditorPane;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
@@ -250,7 +251,8 @@ class TestResultPanel extends JPanel {
 
                 this.setEditable(false);
                 this.setContentType("text/html");
-                this.setBackground(UIManager.getColor("Label.background"));
+                this.setBackground(Color.WHITE);
+                this.setFont(new JLabel().getFont());
 
                 this.addHyperlinkListener(new HyperlinkListener() {
                     @Override
@@ -344,6 +346,7 @@ class TestResultPanel extends JPanel {
                 detailView.add(display, gbc);
 
                 resultCell.revalidate();
+                resultCell.repaint();
             }
 
         };
@@ -362,6 +365,7 @@ class TestResultPanel extends JPanel {
                 detailView.add(display, gbc);
 
                 resultCell.revalidate();
+                resultCell.repaint();
             }
 
             private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
