@@ -25,6 +25,7 @@ import org.openide.windows.WindowManager;
 @TopComponent.Description(preferredID=TestResultWindow.PREFERRED_ID, persistenceType=TopComponent.PERSISTENCE_ALWAYS)
 @TopComponent.Registration(mode="output", openAtStartup=false)
 public class TestResultWindow extends TopComponent {
+
     public static final String PREFERRED_ID = "TestResultWindow";
 
     private static final Logger log = Logger.getLogger(TestResultWindow.class.getName());
@@ -34,7 +35,6 @@ public class TestResultWindow extends TopComponent {
     private final TestColorBar testColorBar;
 
     private ConvenientDialogDisplayer dialogDisplayer;
-
 
     public TestResultWindow() {
 
@@ -107,8 +107,10 @@ public class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public void showResults(final List<TestCaseResult> testCaseResults, final ValidationResult validationResults, final Runnable submissionCallback, final boolean submittable) {
-
+    public void showResults(final List<TestCaseResult> testCaseResults,
+                            final ValidationResult validationResults,
+                            final Runnable submissionCallback,
+                            final boolean submittable) {
 
         testColorBar.setMaximum(testCaseResults.size());
         testColorBar.setValue(countSuccessfulTests(testCaseResults));

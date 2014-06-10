@@ -11,14 +11,14 @@ import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
-public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction implements Runnable{
+public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction implements Runnable {
 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private CheckstyleRunHandler checkstyleRunHandler;
     private TestRunHandler testRunHandler;
     private Project[] projects;
-    
+
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -31,6 +31,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     protected void performAction(final Node[] nodes) {
 
         this.projects = projectsFromNodes(nodes).toArray(new Project[0]);
+
         WindowManager.getDefault().invokeWhenUIReady(this);
     }
 
@@ -63,7 +64,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     public void run() {
-        
+
         this.checkstyleRunHandler.performAction(projects[0]);
         this.testRunHandler.performAction(projects);
     }
