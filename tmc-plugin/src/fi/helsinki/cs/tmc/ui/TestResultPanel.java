@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.resources.LocalizedMessage;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.ResourceBundle;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
@@ -117,9 +116,6 @@ public class TestResultPanel extends JPanel {
 
     private void buildValidationCells(final GridBagConstraints constraints) {
 
-        ResourceBundle bundle = ResourceBundle.getBundle("fi.helsinki.cs.tmc.resources.messages", TmcSettings.getDefault().getErrorMsgLocale());
-        String line = bundle.getString("message.line");
-
         for (Map.Entry<File, List<ValidationError>> entry : storedValidationResults.entrySet()) {
 
             final File file = entry.getKey();
@@ -129,7 +125,7 @@ public class TestResultPanel extends JPanel {
 
             for (ValidationError error : errors) {
 
-                builder.append(String.format("%1$-10s", String.format(line, error.getLine())))
+                builder.append(String.format("%1$-10s", LocalizedMessage.getFormattedMessage("label.line", error.getLine())))
                        .append(" ")
                        .append(error.getMessage())
                        .append("\n");
