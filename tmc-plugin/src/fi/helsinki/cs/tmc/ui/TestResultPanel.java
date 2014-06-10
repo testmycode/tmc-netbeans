@@ -129,7 +129,7 @@ class TestResultPanel extends JPanel {
 
             for (ValidationError error : errors) {
 
-                builder.append(String.format(line, error.getLine()))
+                builder.append(String.format("%1$-10s", String.format(line, error.getLine())))
                        .append(" ")
                        .append(error.getMessage())
                        .append("\n");
