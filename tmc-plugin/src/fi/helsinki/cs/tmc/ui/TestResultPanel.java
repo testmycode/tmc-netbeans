@@ -115,7 +115,7 @@ public class TestResultPanel extends JPanel {
         }
     }
 
-    private void buildValidationCells(final GridBagConstraints gbc) {
+    private void buildValidationCells(final GridBagConstraints constraints) {
 
         ResourceBundle bundle = ResourceBundle.getBundle("fi.helsinki.cs.tmc.resources.messages", TmcSettings.getDefault().getErrorMsgLocale());
         String line = bundle.getString("message.line");
@@ -144,7 +144,7 @@ public class TestResultPanel extends JPanel {
                          file.getName(),
                          builder.toString(),
                          null),
-                         gbc);
+                         constraints);
             } else {
 
                 this.add(new ResultCell(new Color(0xFFD000),
@@ -152,7 +152,7 @@ public class TestResultPanel extends JPanel {
                          fileObject,
                          builder.toString(),
                          null),
-                         gbc);
+                         constraints);
             }
         }
     }
@@ -205,12 +205,17 @@ public class TestResultPanel extends JPanel {
             this.detailView = createDetailView();
 
             final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
-            this.resultCell = new ResultCell(getResultColor(), getResultTextColor(), title, result.getMessage(), detailView);
+
+            this.resultCell = new ResultCell(getResultColor(),
+                                             getResultTextColor(),
+                                             title,
+                                             result.getMessage(),
+                                             detailView);
         }
 
         public JPanel getCell() {
 
-            return this.resultCell;
+            return resultCell;
         }
 
         private JPanel createDetailView() {
