@@ -117,6 +117,7 @@ class TestResultPanel extends JPanel {
     private void buildValidationCells(final GridBagConstraints gbc) {
 
         ResourceBundle bundle = ResourceBundle.getBundle("fi.helsinki.cs.tmc.resources.messages", TmcSettings.getDefault().getErrorMsgLocale());
+        String line = bundle.getString("message.line");
 
         for (Map.Entry<File, List<ValidationError>> entry : storedValidationResults.entrySet()) {
 
@@ -127,7 +128,7 @@ class TestResultPanel extends JPanel {
 
             for (ValidationError error : errors) {
 
-                builder.append(String.format(bundle.getString("message.line"), error.getLine()))
+                builder.append(String.format(line, error.getLine()))
                        .append(" ")
                        .append(error.getMessage())
                        .append("\n");
@@ -191,9 +192,9 @@ class TestResultPanel extends JPanel {
         private final GridBagConstraints gbc = new GridBagConstraints();
         private final JPanel detailView;
         private final ResultCell resultCell;
-        
+
         public TestCaseResultCell(final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
-            
+
             gbc.anchor = GridBagConstraints.NORTHWEST;
             gbc.gridx = 0;
             gbc.weightx = 1.0;
@@ -201,11 +202,11 @@ class TestResultPanel extends JPanel {
             this.result = result;
             this.sourceFileLookup = sourceFileLookup;
             this.detailView = createDetailView();
-            
+
             final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
             this.resultCell = new ResultCell(getResultColor(), getResultTextColor(), title, result.getMessage(), detailView);
         }
-        
+
         public JPanel getCell() {
 
             return this.resultCell;
