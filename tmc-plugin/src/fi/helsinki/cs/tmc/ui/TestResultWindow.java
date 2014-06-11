@@ -46,9 +46,12 @@ public class TestResultWindow extends TopComponent {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.showAllCheckbox = new JCheckBox("Show all tests", false);
+
         showAllCheckbox.addItemListener(new ItemListener() {
+
             @Override
-            public void itemStateChanged(ItemEvent e) {
+            public void itemStateChanged(final ItemEvent event) {
+
                 resultPanel.setAllTestsVisible(showAllCheckbox.isSelected());
                 saveWindowPreferences();
             }

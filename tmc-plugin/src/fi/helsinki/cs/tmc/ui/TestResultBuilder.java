@@ -6,10 +6,9 @@ import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TestResultBuilder {
+public final class TestResultBuilder {
 
-    private TestResultBuilder() {
-    }
+    private TestResultBuilder() {}
 
     public static List<ResultCell> buildCells(final List<TestCaseResult> testCaseResults, final boolean showAll) {
 
@@ -22,6 +21,7 @@ public class TestResultBuilder {
 
                 resultCells.add(new TestCaseResultCell(result, sourceFileLookup).getCell());
 
+                // Show only first result
                 if(!showAll) {
                     break;
                 }
