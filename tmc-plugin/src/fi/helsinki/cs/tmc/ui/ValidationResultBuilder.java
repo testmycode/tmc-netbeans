@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
+
 import org.openide.filesystems.FileObject;
 
 public final class ValidationResultBuilder {
@@ -26,7 +27,7 @@ public final class ValidationResultBuilder {
             final File file = entry.getKey();
             final List<ValidationError> errors = entry.getValue();
 
-            StringBuilder builder = new StringBuilder();
+            final StringBuilder builder = new StringBuilder();
 
             for (ValidationError error : errors) {
 

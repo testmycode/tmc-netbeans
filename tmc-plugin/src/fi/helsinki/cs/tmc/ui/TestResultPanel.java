@@ -13,7 +13,7 @@ import javax.swing.Box;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 
-public class TestResultPanel extends JPanel {
+public final class TestResultPanel extends JPanel {
 
     private static final int PADDING_BETWEEN_BOXES = 5;
 
@@ -68,7 +68,7 @@ public class TestResultPanel extends JPanel {
 
     private void buildTestResultCells(final GridBagConstraints constraints) {
 
-        for ( ResultCell resultCell : TestResultBuilder.buildCells(storedTestCaseResults, allTestsVisible)) {
+        for (ResultCell resultCell : TestResultBuilder.buildCells(storedTestCaseResults, allTestsVisible)) {
             this.add(resultCell, constraints);
         }
     }
@@ -96,8 +96,10 @@ public class TestResultPanel extends JPanel {
         this.revalidate();
     }
 
-    public void setAllTestsVisible(boolean allTestsVisible) {
+    public void setAllTestsVisible(final boolean allTestsVisible) {
+
         this.allTestsVisible = allTestsVisible;
+
         rebuildCells();
     }
 }
