@@ -41,7 +41,6 @@ public final class ResultCell extends JPanel {
         createStyle(borderColor, titleColor);
         createTitle(title);
         createBody(message, detailView);
-
     }
 
     private void createBody(final String message, final JPanel detailView) {
