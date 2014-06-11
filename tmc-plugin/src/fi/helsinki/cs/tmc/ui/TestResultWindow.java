@@ -49,8 +49,7 @@ public class TestResultWindow extends TopComponent {
         showAllCheckbox.addItemListener(new ItemListener() {
             @Override
             public void itemStateChanged(ItemEvent e) {
-                resultPanel.setAllFailuresVisible(showAllCheckbox.isSelected());
-                resultPanel.setPassedTestsVisible(showAllCheckbox.isSelected());
+                resultPanel.setAllTestsVisible(showAllCheckbox.isSelected());
                 saveWindowPreferences();
             }
         });
