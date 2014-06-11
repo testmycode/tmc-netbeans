@@ -99,13 +99,13 @@ public class TestResultPanel extends JPanel {
         });
     }
 
-    private void buildTestResultCells(final GridBagConstraints gbc) {
+    private void buildTestResultCells(final GridBagConstraints constraints) {
 
         for (TestCaseResult result : storedTestCaseResults) {
 
             if (!result.isSuccessful() || passedTestsVisible) {
 
-                this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), gbc);
+                this.add(new TestCaseResultCell(result, sourceFileLookup).getCell(), constraints);
 
                 if (!allFailuresVisible && !result.isSuccessful()) {
                     break;

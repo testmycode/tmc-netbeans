@@ -164,5 +164,4 @@ public class TestResultWindow extends TopComponent {
         Preferences prefs = NbPreferences.forModule(TestResultWindow.class);
         showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
     }
-
 }
