@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -285,10 +287,30 @@ import org.apache.commons.lang3.StringUtils;
 
 
     private void setUpErrorMsgLocaleSelection() {
+
+        restartMessage.setText("");
+
         for (Locale locale : SelectedTailoring.get().getAvailableErrorMsgLocales()) {
             errorMsgLocaleComboBox.addItem(new LocaleWrapper(locale));
         }
+
         errorMsgLocaleComboBox.setSelectedItem(SelectedTailoring.get().getDefaultErrorMsgLocale());
+        errorMsgLocaleComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+
+                    // Language changed, notify user about restarting
+                    if (!TmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                        restartMessage.setText("Changing language requires restart");
+                    } else {
+                        restartMessage.setText("");
+                    }
+                }
+            }
+        });
     }
 
     private void makeLoadingLabelNicer() {
