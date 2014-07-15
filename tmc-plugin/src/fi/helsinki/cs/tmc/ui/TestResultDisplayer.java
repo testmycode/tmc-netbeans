@@ -92,8 +92,10 @@ public class TestResultDisplayer {
     }
 
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
+
         String msg;
         boolean milderFail;
+
         if (!result.getPoints().isEmpty()) {
             msg = "Exercise " + exercise.getName() + " failed partially.\n";
             msg += "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".\n\n";
@@ -103,10 +105,22 @@ public class TestResultDisplayer {
             milderFail = false;
         }
 
-        if (result.allTestCasesFailed()) {
-            msg += "All tests failed on the server.\nSee below.";
-        } else {
-            msg += "Some tests failed on the server.\nSee below.";
+        if (result.validationsFailed()) {
+            msg += "There are validation errors.\n";
+        }
+
+        switch (result.getTestResultStatus()) {
+            case ALL:
+                msg += "All tests failed on the server.\nSee below.";
+                break;
+            case SOME:
+                msg += "Some tests failed on the server.\nSee below.";
+                break;
+            case NONE:
+                if (result.validationsFailed()) {
+                    msg += "See below.";
+                }
+                break;
         }
 
         if (milderFail) {
