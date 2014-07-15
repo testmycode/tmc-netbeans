@@ -293,7 +293,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tmc-checkstyle-runner</artifactId>
-            <version>1.0</version>
+            <version>1.0.1-SNAPSHOT</version>
             <exclusions>
                 <exclusion>
                     <groupId>com.puppycrawl.tools</groupId>
