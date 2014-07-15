@@ -51,6 +51,9 @@ public final class ResultCollector {
 
     private synchronized void showAllResults() {
 
+        this.validationResultLock = true;
+        this.testCaseResultLock = true;
+
         TestResultWindow.get().showResults(testCaseResults, validationResults, submissionCallback, isSubmittable());
     }
 
