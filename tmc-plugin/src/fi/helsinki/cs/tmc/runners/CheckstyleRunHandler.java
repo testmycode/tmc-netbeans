@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcSettings;
@@ -8,24 +9,19 @@ import fi.helsinki.cs.tmc.stylerunner.exception.TMCCheckstyleException;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.ValidationResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-
 import java.util.Locale;
-
 import org.netbeans.api.project.Project;
-
 import org.openide.util.Exceptions;
 
 public final class CheckstyleRunHandler implements Runnable {
 
     private Project project;
     private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
-    private final ValidationResultDisplayer validationResultDisplayer = ValidationResultDisplayer.getInstance();
     private ValidationResult validationResult = new CheckstyleResult();
 
-    public void performAction(final Project project) {
+    public void performAction(final ResultCollector resultCollector, final Project project) {
 
         this.project = project;
 
@@ -41,9 +37,9 @@ public final class CheckstyleRunHandler implements Runnable {
             public void bgTaskCancelled() {}
 
             @Override
-            public void bgTaskReady(final Object result) {
+            public void bgTaskReady(final Object nothing) {
 
-                validationResultDisplayer.showValidationResult(validationResult);
+                resultCollector.setValidationResult(validationResult);
             }
         });
     }

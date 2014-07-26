@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -43,7 +44,7 @@ public class TestRunHandler {
         this.courseDb = CourseDb.getInstance();
     }
 
-    public void performAction(Project... projects) {
+    public void performAction(final ResultCollector resultCollector, Project... projects) {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
@@ -53,7 +54,7 @@ public class TestRunHandler {
                 @Override
                 public void bgTaskReady(Integer result) {
                     if (result == 0) {
-                        startRunningTests(runner, projectInfo);
+                        startRunningTests(runner, projectInfo, resultCollector);
                     } else {
                         dialogDisplayer.displayError("The code did not compile.");
                     }
@@ -71,7 +72,7 @@ public class TestRunHandler {
         }
     }
 
-    private void startRunningTests(ExerciseRunner runner, final TmcProjectInfo projectInfo) {
+    private void startRunningTests(ExerciseRunner runner, final TmcProjectInfo projectInfo, final ResultCollector resultCollector) {
         BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
             @Override
             public void bgTaskReady(TestRunResult result) {
@@ -82,7 +83,7 @@ public class TestRunHandler {
                     public void run() {
                         exerciseSubmitter.performAction(projectInfo.getProject());
                     }
-                });
+                }, resultCollector);
             }
 
             @Override

@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -16,7 +17,6 @@ import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
-import fi.helsinki.cs.tmc.ui.ValidationResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -45,7 +45,6 @@ public class ExerciseSubmitter {
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private final ValidationResultDisplayer validationResultDisplayer;
     private TestResultDisplayer resultDisplayer;
     private ConvenientDialogDisplayer dialogDisplayer;
     private TmcEventBus eventBus;
@@ -55,7 +54,6 @@ public class ExerciseSubmitter {
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
-        this.validationResultDisplayer = ValidationResultDisplayer.getInstance();
         this.resultDisplayer = TestResultDisplayer.getInstance();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();
@@ -95,8 +93,9 @@ public class ExerciseSubmitter {
 
                         dialog.close();
 
-                        validationResultDisplayer.showValidationResult(result.getValidationResult());
-                        resultDisplayer.showSubmissionResult(exercise, result);
+                        final ResultCollector resultCollector = new ResultCollector();
+                        resultCollector.setValidationResult(result.getValidationResult());
+                        resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
 
                         // We change exercise state as a first approximation,
                         // then refresh from the server and potentially notify the user

@@ -38,14 +38,14 @@ public class TestResultDisplayer {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
 
-    public void showSubmissionResult(Exercise exercise, SubmissionResult result) {
+    public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
         switch (result.getStatus()) {
             case OK:
-                displayTestCases(result.getTestCases(), false);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases(), false);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
@@ -135,11 +135,12 @@ public class TestResultDisplayer {
      */
     public void showLocalRunResult(final List<TestCaseResult> results,
                                    final boolean returnable,
-                                   final Runnable submissionCallback) {
+                                   final Runnable submissionCallback,
+                                   final ResultCollector resultCollector) {
 
-        ResultCollector.getInstance().setSubmissionCallback(submissionCallback);
+        resultCollector.setSubmissionCallback(submissionCallback);
 
-        displayTestCases(results, returnable);
+        displayTestCases(results, returnable, resultCollector);
     }
 
     private void displayError(String error) {
@@ -159,9 +160,7 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
 
-    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable) {
-
-        ResultCollector resultCollector = ResultCollector.getInstance();
+    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable, final ResultCollector resultCollector) {
 
         resultCollector.setReturnable(returnable);
         resultCollector.setTestCaseResults(testCases);
