@@ -53,6 +53,8 @@ public final class ResultCollector {
 
         this.validationResultLock = true;
         this.testCaseResultLock = true;
+        this.isReturnable = false;
+        this.submissionCallback = null;
 
         TestResultWindow.get().showResults(testCaseResults, validationResults, submissionCallback, isSubmittable());
     }
