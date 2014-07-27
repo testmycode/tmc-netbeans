@@ -251,7 +251,7 @@
             <artifactId>httpcore</artifactId>
             <version>4.3.1</version>
         </dependency>
-        
+
         <dependency>
             <artifactId>httpclient</artifactId>
             <groupId>org.apache.httpcomponents</groupId>
@@ -264,7 +264,7 @@
             <type>jar</type>
             <version>4.3.1</version>
         </dependency>
-        
+
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
@@ -289,6 +289,17 @@
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
             <version>4.11</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tmc-checkstyle-runner</artifactId>
+            <version>1.0.1</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>com.puppycrawl.tools</groupId>
+                    <artifactId>checkstyle</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -322,6 +333,7 @@
                         <publicPackage>org.yaml.snakeyaml</publicPackage>
                         <publicPackage>org.apache.http.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
                         <publicPackage>org.cometd.*</publicPackage>

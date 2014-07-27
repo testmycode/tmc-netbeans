@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
-import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -22,30 +22,30 @@ import org.openide.NotifyDescriptor;
 
 public class TestResultDisplayer {
     private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
-    
+
     private static TestResultDisplayer instance;
-    
+
     public static TestResultDisplayer getInstance() {
         if (instance == null) {
             instance = new TestResultDisplayer();
         }
         return instance;
     }
-    
+
     private ConvenientDialogDisplayer dialogs;
-    
+
     /*package*/ TestResultDisplayer() {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
-    
-    public void showSubmissionResult(Exercise exercise, SubmissionResult result) {
+
+    public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
         switch (result.getStatus()) {
             case OK:
-                displayTestCases(result.getTestCases(), false);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases(), true);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
@@ -57,7 +57,7 @@ public class TestResultDisplayer {
 
     private void displaySuccessfulSubmissionMsg(Exercise exercise, final SubmissionResult result) {
         final SuccessfulSubmissionDialog dialog = new SuccessfulSubmissionDialog(exercise, result);
-        
+
         dialog.addOkListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -84,16 +84,18 @@ public class TestResultDisplayer {
                 }
             }
         });
-        
+
         dialog.setModalityType(Dialog.ModalityType.MODELESS);
         dialog.setLocationRelativeTo(null);
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
     }
-    
+
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
+
         String msg;
         boolean milderFail;
+
         if (!result.getPoints().isEmpty()) {
             msg = "Exercise " + exercise.getName() + " failed partially.\n";
             msg += "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".\n\n";
@@ -102,47 +104,45 @@ public class TestResultDisplayer {
             msg = "Exercise " + exercise.getName() + " failed.\n";
             milderFail = false;
         }
-        
-        if (result.allTestCasesFailed()) {
-            msg += "All tests failed on the server.\nSee below.";
-        } else {
-            msg += "Some tests failed on the server.\nSee below.";
+
+        if (result.validationsFailed()) {
+            msg += "There are validation errors.\n";
         }
-        
+
+        switch (result.getTestResultStatus()) {
+            case ALL:
+                msg += "All tests failed on the server.\nSee below.";
+                break;
+            case SOME:
+                msg += "Some tests failed on the server.\nSee below.";
+                break;
+            case NONE:
+                if (result.validationsFailed()) {
+                    msg += "See below.";
+                }
+                break;
+        }
+
         if (milderFail) {
             dialogs.displayWarning(msg);
         } else {
             dialogs.displayError(msg);
         }
     }
-    
+
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
-    public void showLocalRunResult(List<TestCaseResult> results, boolean canSubmit, final Runnable submissionCallback) {
-        int numFailed = 0;
-        for (TestCaseResult result : results) {
-            if (!result.isSuccessful()) {
-                numFailed += 1;
-            }
-        }
-        
-        if (numFailed == 0 && canSubmit) {
-            displayTestCases(results, false);
-            dialogs.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
-                @Override
-                public Void apply(Boolean yes) {
-                    if (yes) {
-                        submissionCallback.run();
-                    }
-                    return null;
-                }
-            });
-        } else {
-            displayTestCases(results, true);
-        }
+    public void showLocalRunResult(final List<TestCaseResult> results,
+                                   final boolean returnable,
+                                   final Runnable submissionCallback,
+                                   final ResultCollector resultCollector) {
+
+        resultCollector.setSubmissionCallback(submissionCallback);
+
+        displayTestCases(results, returnable, resultCollector);
     }
-    
+
     private void displayError(String error) {
         String htmlError =
                 "<html><font face=\"monospaced\" color=\"red\">" +
@@ -151,7 +151,7 @@ public class TestResultDisplayer {
         LongTextDisplayPanel panel = new LongTextDisplayPanel(htmlError);
         dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "", false);
     }
-    
+
     private String preformattedToHtml(String text) {
         // <font> doesn't work around pre, so we do this
         return StringEscapeUtils.escapeHtml4(text)
@@ -159,16 +159,14 @@ public class TestResultDisplayer {
                 .replace("\t", "&nbsp;&nbsp;&nbsp;&nbsp;")
                 .replace("\n", "<br>");
     }
-    
-    private void displayTestCases(List<TestCaseResult> testCases, boolean activate) {
-        TestResultWindow window = TestResultWindow.get();
-        window.setTestCaseResults(testCases);
-        if (activate) {
-            window.openAtTabPosition(0);
-            window.requestActive();
-        }
+
+    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable, final ResultCollector resultCollector) {
+
+        resultCollector.setReturnable(returnable);
+        resultCollector.setTestCaseResults(testCases);
     }
-    
+
+
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
     }

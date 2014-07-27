@@ -16,6 +16,7 @@ import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.auth.BasicScheme;
 import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
@@ -84,7 +85,8 @@ import org.openide.util.Lookup;
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .useSystemProperties()
-                .setConnectionReuseStrategy(new NoConnectionReuseStrategy());
+                .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
+                .setRedirectStrategy(new DefaultRedirectStrategy());
         maybeSetProxy(httpClientBuilder);
 
         return httpClientBuilder.build();

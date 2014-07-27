@@ -8,6 +8,8 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
@@ -22,19 +24,19 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * The settings panel.
- * 
+ *
  * This is missing the "OK" and "Cancel" buttons because it is placed in
  * a dialog that provides these.
  */
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
-    
+
     private String usernameFieldName = "username";
 
     private ConvenientDialogDisplayer dialogs = ConvenientDialogDisplayer.getDefault();
 
     private DelayedRunner refreshRunner = new DelayedRunner();
     private RefreshSettings lastRefreshSettings = null;
-    
+
     private static class RefreshSettings {
         private final String username;
         private final String password;
@@ -45,7 +47,7 @@ import org.apache.commons.lang3.StringUtils;
             this.password = password;
             this.baseUrl = baseUrl;
         }
-        
+
         public boolean isAllSet() {
             return username != null && password != null && baseUrl != null;
         }
@@ -62,7 +64,7 @@ import org.apache.commons.lang3.StringUtils;
                 return false;
             }
         }
-        
+
         @Override
         public int hashCode() {
             return 0;
@@ -73,21 +75,21 @@ import org.apache.commons.lang3.StringUtils;
         initComponents();
         setUpErrorMsgLocaleSelection();
         makeLoadingLabelNicer();
-        
+
         setUpFieldChangeListeners();
         setUsernameFieldName(usernameFieldName);
     }
-    
+
     @Override
     public String getUsername() {
         return usernameTextField.getText().trim();
     }
-    
+
     @Override
     public void setUsername(String username) {
         usernameTextField.setText(username);
     }
-    
+
     @Override
     public final void setUsernameFieldName(String usernameFieldName) {
         this.usernameFieldName = usernameFieldName;
@@ -114,22 +116,22 @@ import org.apache.commons.lang3.StringUtils;
     public void setShouldSavePassword(boolean shouldSavePassword) {
         savePasswordCheckBox.setSelected(shouldSavePassword);
     }
-    
+
     @Override
     public String getServerBaseUrl() {
         return serverAddressTextField.getText().trim();
     }
-    
+
     @Override
     public void setServerBaseUrl(String baseUrl) {
         serverAddressTextField.setText(baseUrl);
     }
-    
+
     @Override
     public String getProjectDir() {
         return projectFolderTextField.getText().trim();
     }
-    
+
     @Override
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
@@ -138,9 +140,9 @@ import org.apache.commons.lang3.StringUtils;
     @Override
     public void setAvailableCourses(List<Course> courses) {
         setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
-        
+
         String previousSelectedCourseName = getSelectedCourseName();
-        
+
         coursesComboBox.removeAllItems();
         int newSelectedIndex = -1;
         for (int i = 0; i < courses.size(); ++i) {
@@ -151,9 +153,9 @@ import org.apache.commons.lang3.StringUtils;
                 newSelectedIndex = i;
             }
         }
-        
+
         coursesComboBox.setSelectedIndex(newSelectedIndex);
-        
+
         // Process any change events before enabling course selection
         // to avoid triggering another refresh.
         SwingUtilities.invokeLater(new Runnable() {
@@ -182,7 +184,7 @@ import org.apache.commons.lang3.StringUtils;
             }
         }
     }
-    
+
     @Override
     public String getSelectedCourseName() {
         Object item = coursesComboBox.getSelectedItem();
@@ -237,7 +239,7 @@ import org.apache.commons.lang3.StringUtils;
     public void setErrorMsgLocale(Locale locale) {
         errorMsgLocaleComboBox.setSelectedItem(new LocaleWrapper(locale));
     }
-    
+
     private static class LocaleWrapper {
         private Locale locale;
         public LocaleWrapper(Locale locale) {
@@ -269,7 +271,7 @@ import org.apache.commons.lang3.StringUtils;
             return locale.hashCode();
         }
     }
-    
+
     private TmcSettings getTransientSettingsForRefresh() {
         TmcSettings settings = TmcSettings.getTransient();
         settings.setUsername(getUsername());
@@ -278,19 +280,39 @@ import org.apache.commons.lang3.StringUtils;
         settings.setProjectRootDir(getProjectDir());
         return settings;
     }
-    
+
     private RefreshSettings getRefreshSettings() {
         return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
     }
-    
-    
+
+
     private void setUpErrorMsgLocaleSelection() {
+
+        restartMessage.setText("");
+
         for (Locale locale : SelectedTailoring.get().getAvailableErrorMsgLocales()) {
             errorMsgLocaleComboBox.addItem(new LocaleWrapper(locale));
         }
+
         errorMsgLocaleComboBox.setSelectedItem(SelectedTailoring.get().getDefaultErrorMsgLocale());
+        errorMsgLocaleComboBox.addItemListener(new ItemListener() {
+
+            @Override
+            public void itemStateChanged(ItemEvent event) {
+
+                if (event.getStateChange() == ItemEvent.SELECTED) {
+
+                    // Language changed, notify user about restarting
+                    if (!TmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                        restartMessage.setText("Changing language requires restart");
+                    } else {
+                        restartMessage.setText("");
+                    }
+                }
+            }
+        });
     }
-    
+
     private void makeLoadingLabelNicer() {
         try {
             courseListReloadingLabel.setIcon(new javax.swing.ImageIcon(this.getClass().getResource("loading-spinner.gif")));
@@ -299,13 +321,13 @@ import org.apache.commons.lang3.StringUtils;
         }
         courseListReloadingLabel.setText("");
     }
-    
+
     private void setCourseListRefreshInProgress(boolean inProgress) {
         refreshCoursesBtn.setEnabled(!inProgress);
         coursesComboBox.setEnabled(!inProgress);
         courseListReloadingLabel.setVisible(inProgress);
     }
-    
+
     private void setUpFieldChangeListeners() {
         DocumentListener docListener = new DocumentListener() {
             @Override
@@ -325,7 +347,7 @@ import org.apache.commons.lang3.StringUtils;
         passwordField.getDocument().addDocumentListener(docListener);
         serverAddressTextField.getDocument().addDocumentListener(docListener);
         projectFolderTextField.getDocument().addDocumentListener(docListener);
-        
+
         coursesComboBox.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -333,15 +355,15 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
     }
-    
+
     private void fieldChanged() {
         updateAdvice();
-        
+
         if (canProbablyRefreshCourseList() && !alreadyRefreshingCourseList() && settingsChangedSinceLastRefresh()) {
             startRefreshingCourseList(true, true);
         }
     }
-    
+
     private void updateAdvice() {
         ArrayList<String> advices = new ArrayList<String>();
         if (usernameTextField.getText().isEmpty()) {
@@ -359,7 +381,7 @@ import org.apache.commons.lang3.StringUtils;
         if (coursesComboBox.getSelectedIndex() == -1) {
             advices.add("select course");
         }
-        
+
         if (!advices.isEmpty()) {
             String advice = "Please " + joinWithCommasAndAnd(advices) + ".";
             adviceLabel.setText(advice);
@@ -367,7 +389,7 @@ import org.apache.commons.lang3.StringUtils;
             adviceLabel.setText("");
         }
     }
-    
+
     private String joinWithCommasAndAnd(List<String> strings) {
         if (strings.isEmpty()) {
             return "";
@@ -384,19 +406,19 @@ import org.apache.commons.lang3.StringUtils;
             return s;
         }
     }
-    
+
     private boolean canProbablyRefreshCourseList() {
         return getRefreshSettings().isAllSet();
     }
-    
+
     private boolean alreadyRefreshingCourseList() {
         return courseListReloadingLabel.isVisible();
     }
-    
+
     private boolean settingsChangedSinceLastRefresh() {
         return (lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings()));
     }
-    
+
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {
         final RefreshCoursesAction action = new RefreshCoursesAction(getTransientSettingsForRefresh());
         action.addDefaultListener(!failSilently, false);
@@ -429,13 +451,13 @@ import org.apache.commons.lang3.StringUtils;
             refreshCourseListNow(action);
         }
     }
-    
+
     private void refreshCourseListNow(RefreshCoursesAction action) {
         setCourseListRefreshInProgress(true);
         lastRefreshSettings = getRefreshSettings();
         action.run();
     }
-    
+
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -470,6 +492,7 @@ import org.apache.commons.lang3.StringUtils;
         jSeparator3 = new javax.swing.JSeparator();
         errorMsgLocaleLabel = new javax.swing.JLabel();
         errorMsgLocaleComboBox = new javax.swing.JComboBox();
+        restartMessage = new javax.swing.JLabel();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -552,6 +575,9 @@ import org.apache.commons.lang3.StringUtils;
 
         errorMsgLocaleComboBox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.errorMsgLocaleComboBox.toolTipText")); // NOI18N
 
+        restartMessage.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
+        restartMessage.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.restartMessage.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -591,16 +617,20 @@ import org.apache.commons.lang3.StringUtils;
                         .addComponent(folderChooserBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
                     .addComponent(jSeparator3)
                     .addGroup(layout.createSequentialGroup()
+                        .addComponent(errorMsgLocaleLabel)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                        .addComponent(errorMsgLocaleComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(spywareEnabledCheckbox)
                             .addComponent(checkForUnopenedExercisesCheckbox)
                             .addComponent(checkForUpdatesInBackgroundCheckbox))
-                        .addGap(0, 0, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(errorMsgLocaleLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(errorMsgLocaleComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                .addContainerGap())
+                        .addGap(0, 0, Short.MAX_VALUE)))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                .addComponent(restartMessage)
+                .addGap(22, 22, 22))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -647,7 +677,9 @@ import org.apache.commons.lang3.StringUtils;
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(errorMsgLocaleLabel)
                     .addComponent(errorMsgLocaleComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addContainerGap())
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(restartMessage)
+                .addContainerGap(20, Short.MAX_VALUE))
         );
 
         bindingGroup.bind();
@@ -656,7 +688,7 @@ import org.apache.commons.lang3.StringUtils;
     /**
      * The method is used to select the default save folder for downloaded exercises.
      * It is called when the user presses the "Browse" button on the preferences window.
-     * @param evt 
+     * @param evt
      */
     private void folderChooserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folderChooserBtnActionPerformed
         JFileChooser folderChooser = new JFileChooser();
@@ -701,6 +733,7 @@ import org.apache.commons.lang3.StringUtils;
     private javax.swing.JLabel projectFolderLabel;
     private javax.swing.JTextField projectFolderTextField;
     private javax.swing.JButton refreshCoursesBtn;
+    private javax.swing.JLabel restartMessage;
     private javax.swing.JCheckBox savePasswordCheckBox;
     private javax.swing.JLabel serverAddressLabel;
     private javax.swing.JTextField serverAddressTextField;

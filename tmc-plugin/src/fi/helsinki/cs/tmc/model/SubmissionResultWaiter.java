@@ -11,21 +11,21 @@ import org.openide.util.Cancellable;
 
 /**
  * Sends a submission to the server and polls for results for a time.
- * 
+ *
  * Reports approximate progress.
  */
 public class SubmissionResultWaiter implements CancellableCallable<SubmissionResult> {
     private static final Logger log = Logger.getLogger(SubmissionResultWaiter.class.getName());
-    
+
     private final long DEFAULT_POLL_DELAY = 2 * 1000;
-    
+
     private final String submissionUrl;
     private final SubmissionProgressView view;
-    
+
     private final SubmissionResultParser resultParser;
     private final ServerAccess serverAccess;
     private final long pollDelay;
-    
+
     // Concurrency control on cancel
     private final Object lock = new Object();
     private boolean canceled = false;
@@ -44,7 +44,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
     public SubmissionResult call() throws Exception {
         while (true) {
             CancellableCallable<String> downloadTask = serverAccess.getSubmissionFetchTask(submissionUrl);
-            
+
             synchronized (lock) {
                 if (canceled) {
                     String msg = "Waiting for submission results cancelled";
@@ -53,11 +53,11 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
                 }
                 cancellableDownloadTask = downloadTask;
             }
-            
+
             log.fine("Requesting submission results");
             String jsonText = downloadTask.call();
             JsonElement json = new JsonParser().parse(jsonText);
-            
+
             if (isProcessing(json)) {
                 updateProgress(json);
                 sleepInterruptably(pollDelay);
@@ -66,7 +66,7 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
             }
         }
     }
-    
+
     private void sleepInterruptably(long delay) {
         synchronized (lock) {
             if (canceled) {
@@ -83,12 +83,12 @@ public class SubmissionResultWaiter implements CancellableCallable<SubmissionRes
             Thread.interrupted(); // Consume any interrupt.
         }
     }
-    
+
     private boolean isProcessing(JsonElement responseRoot) {
         String status = responseRoot.getAsJsonObject().get("status").getAsString();
         return status.equals("processing");
     }
-    
+
     private void updateProgress(JsonElement responseRoot) {
         int submissionsBefore = responseRoot.getAsJsonObject().get("submissions_before_this").getAsInt();
         view.setPositionInQueueFromAnyThread(submissionsBefore + 1);

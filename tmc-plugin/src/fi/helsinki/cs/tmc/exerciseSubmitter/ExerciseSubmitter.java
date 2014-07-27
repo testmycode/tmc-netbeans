@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -20,18 +21,19 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
-import java.net.URI;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.netbeans.api.project.Project;
 
 public class ExerciseSubmitter {
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
-    
+
     public static class InvokedEvent implements TmcEvent {
         public final TmcProjectInfo projectInfo;
         public InvokedEvent(TmcProjectInfo projectInfo) {
@@ -77,29 +79,35 @@ public class ExerciseSubmitter {
         // Oh what a mess :/
 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
-        
+
         final BgTaskListener<ServerAccess.SubmissionResponse> submissionListener = new BgTaskListener<ServerAccess.SubmissionResponse>() {
             @Override
             public void bgTaskReady(ServerAccess.SubmissionResponse response) {
                 final SubmissionResultWaiter waitingTask = new SubmissionResultWaiter(response.submissionUrl.toString(), dialog);
                 dialog.setTask(waitingTask);
-                
+
                 BgTask.start("Waiting for results from server.", waitingTask, new BgTaskListener<SubmissionResult>() {
 
                     @Override
                     public void bgTaskReady(SubmissionResult result) {
+
                         dialog.close();
-                        resultDisplayer.showSubmissionResult(exercise, result);
-                        
+
+                        final ResultCollector resultCollector = new ResultCollector();
+                        resultCollector.setValidationResult(result.getValidationResult());
+                        resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+
                         // We change exercise state as a first approximation,
                         // then refresh from the server and potentially notify the user
                         // as we might have unlocked new exercises.
                         exercise.setAttempted(true);
+
                         if (result.getStatus() == SubmissionResult.Status.OK) {
                             exercise.setCompleted(true);
                         }
+
                         courseDb.save();
-                        
+
                         new CheckForNewExercisesOrUpdates(true, false).run();
                     }
 
@@ -133,7 +141,7 @@ public class ExerciseSubmitter {
         };
 
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
-        
+
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {
@@ -145,7 +153,7 @@ public class ExerciseSubmitter {
             public void bgTaskReady(byte[] zipData) {
                 Map<String, String> extraParams = new HashMap<String, String>();
                 extraParams.put("error_msg_locale", errorMsgLocale);
-                
+
                 CancellableCallable<ServerAccess.SubmissionResponse> submitTask = serverAccess.getSubmittingExerciseTask(exercise, zipData, extraParams);
                 dialog.setTask(submitTask);
                 BgTask.start("Sending " + exercise.getName(), submitTask, submissionListener);

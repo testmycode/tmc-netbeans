@@ -1,32 +1,39 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
+import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
+import org.openide.windows.WindowManager;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
-public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
+public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction implements Runnable {
 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private ConvenientDialogDisplayer dialogDisplayer;
+    private CheckstyleRunHandler checkstyleRunHandler;
     private TestRunHandler testRunHandler;
-    
+    private Project[] projects;
+
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
+        this.checkstyleRunHandler = new CheckstyleRunHandler();
         this.testRunHandler = new TestRunHandler();
         putValue("noIconInMenu", Boolean.TRUE);
     }
 
     @Override
-    protected void performAction(Node[] nodes) {
-        this.testRunHandler.performAction(projectsFromNodes(nodes).toArray(new Project[0]));
+    protected void performAction(final Node[] nodes) {
+
+        this.projects = projectsFromNodes(nodes).toArray(new Project[0]);
+
+        WindowManager.getDefault().invokeWhenUIReady(this);
     }
 
     @Override
@@ -54,5 +61,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction {
     protected boolean enabledFor(Exercise exercise) {
         // Overridden to not care about the deadline
         return exercise.isReturnable();
+    }
+
+    @Override
+    public void run() {
+
+        ResultCollector resultCollector = new ResultCollector();
+        this.checkstyleRunHandler.performAction(resultCollector, projects[0]);
+        this.testRunHandler.performAction(resultCollector, projects);
     }
 }

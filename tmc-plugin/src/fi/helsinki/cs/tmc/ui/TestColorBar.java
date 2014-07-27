@@ -10,10 +10,20 @@ class TestColorBar extends JProgressBar {
 
     private static final Color PASS_COLOR = new Color(0x00C800);
     private static final Color FAIL_COLOR = new Color(0xE10000);
+    private static final Color VALIDATION_COLOR = new Color(0xFFD000);
     private static final Color UNSET_COLOR = new Color(0xEEEEEE);
-    
+
+    private boolean validationPass;
+
     public TestColorBar() {
+
+        validationPass = true;
         setStringPainted(true);
+    }
+
+    public void validationPass(final boolean validationPassed) {
+
+        validationPass = validationPassed;
     }
 
     @Override
@@ -27,14 +37,14 @@ class TestColorBar extends JProgressBar {
 
     @Override
     protected void paintComponent(Graphics g) {
-        
+
         Color oldColor = g.getColor();
-        
+
         try {
             int w = getWidth();
             int h = getHeight();
             g.clearRect(0, 0, w, h);
-            
+
             if (!isIndeterminate()) {
                 int range = (getMaximum() - getMinimum());
                 int filled;
@@ -44,8 +54,11 @@ class TestColorBar extends JProgressBar {
                     filled = w;
                 }
                 int notFilled = w - filled;
-
-                g.setColor(PASS_COLOR);
+                if (validationPass) {
+                    g.setColor(PASS_COLOR);
+                } else {
+                    g.setColor(VALIDATION_COLOR);
+                }
                 g.fillRect(0, 0, filled, h);
                 g.setColor(FAIL_COLOR);
                 g.fillRect(filled, 0, notFilled, h);
@@ -67,11 +80,11 @@ class TestColorBar extends JProgressBar {
                 g.setColor(UNSET_COLOR);
                 g.fillRect(0, 0, w, h);
             }
-            
+
         } finally {
             g.setColor(oldColor);
         }
     }
-    
-    
+
+
 }
