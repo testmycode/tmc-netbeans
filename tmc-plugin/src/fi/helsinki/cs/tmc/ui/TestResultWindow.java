@@ -109,7 +109,7 @@ public class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public synchronized void showResults(final List<TestCaseResult> testCaseResults,
+    public void showResults(final List<TestCaseResult> testCaseResults,
                             final ValidationResult validationResults,
                             final Runnable submissionCallback,
                             final boolean submittable) {

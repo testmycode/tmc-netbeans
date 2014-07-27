@@ -5,6 +5,10 @@ import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
 import java.util.List;
 
+/**
+ * Waits for test and validation results and shows the result view only when
+ * both have become available.
+ */
 public final class ResultCollector {
 
     private List<TestCaseResult> testCaseResults;
@@ -16,7 +20,7 @@ public final class ResultCollector {
     private boolean isReturnable;
     private Runnable submissionCallback;
 
-    public synchronized void setValidationResult(final ValidationResult result) {
+    public void setValidationResult(final ValidationResult result) {
 
         this.validationResults = result;
         this.validationResultLock = false;
@@ -26,7 +30,7 @@ public final class ResultCollector {
         }
     }
 
-    public synchronized void setTestCaseResults(final List<TestCaseResult> results) {
+    public void setTestCaseResults(final List<TestCaseResult> results) {
 
         this.testCaseResults = results;
         this.testCaseResultLock = false;
@@ -36,7 +40,7 @@ public final class ResultCollector {
         }
     }
 
-    private synchronized void showAllResults() {
+    private void showAllResults() {
 
         this.validationResultLock = true;
         this.testCaseResultLock = true;
