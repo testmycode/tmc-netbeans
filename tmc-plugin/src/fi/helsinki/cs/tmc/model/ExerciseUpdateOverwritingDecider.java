@@ -29,7 +29,7 @@ public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.Overw
                 relPath.startsWith("src" + s + "test" + s + "resources") ||
                 relPath.startsWith("lib") ||
                 (relPath.startsWith("nbproject") && !relPath.startsWith("nbproject" + s + "private")) ||
-                relPath.equals(".tmcproject.yml")
+                relPath.equals(".tmcproject.yml") || relPath.equals(".tmcproject.json")
                 );
     }
 
