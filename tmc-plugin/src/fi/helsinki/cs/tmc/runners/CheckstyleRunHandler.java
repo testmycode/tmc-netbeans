@@ -11,8 +11,11 @@ import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.util.Locale;
+
 import org.netbeans.api.project.Project;
+
 import org.openide.util.Exceptions;
 
 public final class CheckstyleRunHandler implements Runnable {
