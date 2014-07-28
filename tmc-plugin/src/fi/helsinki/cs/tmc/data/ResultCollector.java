@@ -38,11 +38,6 @@ public final class ResultCollector {
 
     private synchronized void showAllResults() {
 
-        this.validationResultLock = true;
-        this.testCaseResultLock = true;
-        this.isReturnable = false;
-        this.submissionCallback = null;
-
         TestResultWindow.get().showResults(testCaseResults, validationResults, submissionCallback, isSubmittable());
     }
 
