@@ -118,6 +118,8 @@ public class TestResultWindow extends TopComponent {
         testColorBar.setValue(countSuccessfulTests(testCaseResults));
         testColorBar.setIndeterminate(false);
         testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
+        testColorBar.revalidate();
+        testColorBar.repaint();
 
         resultPanel.setResults(testCaseResults, validationResults);
 
