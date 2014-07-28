@@ -16,19 +16,6 @@ public final class ResultCollector {
     private boolean isReturnable;
     private Runnable submissionCallback;
 
-    private static ResultCollector instance;
-
-    private ResultCollector() {}
-
-    public static ResultCollector getInstance() {
-
-        if (instance == null) {
-            instance = new ResultCollector();
-        }
-
-        return instance;
-    }
-
     public synchronized void setValidationResult(final ValidationResult result) {
 
         this.validationResults = result;

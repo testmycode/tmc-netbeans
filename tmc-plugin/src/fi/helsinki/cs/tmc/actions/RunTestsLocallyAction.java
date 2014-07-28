@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
@@ -65,7 +66,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
 
-        this.checkstyleRunHandler.performAction(projects[0]);
-        this.testRunHandler.performAction(projects);
+        ResultCollector resultCollector = new ResultCollector();
+        this.checkstyleRunHandler.performAction(resultCollector, projects[0]);
+        this.testRunHandler.performAction(resultCollector, projects);
     }
 }

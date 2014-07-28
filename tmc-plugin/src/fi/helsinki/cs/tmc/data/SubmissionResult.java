@@ -15,6 +15,12 @@ public class SubmissionResult {
         ERROR
     }
 
+    public static enum TestResultStatus {
+        ALL,
+        SOME,
+        NONE
+    }
+
     @SerializedName("status")
     private Status status;
 
@@ -124,12 +130,29 @@ public class SubmissionResult {
         return validationResult;
     }
 
-    public boolean allTestCasesFailed() {
+    public TestResultStatus getTestResultStatus() {
+
+        int testsFailed = 0;
+
         for (TestCaseResult tcr : testCases) {
-            if (tcr.isSuccessful()) {
-                return false;
+            if (!tcr.isSuccessful()) {
+                testsFailed++;
             }
         }
-        return true;
+
+        if (testsFailed == testCases.size()) {
+            return TestResultStatus.ALL;
+        }
+
+        if (testsFailed != 0) {
+            return TestResultStatus.SOME;
+        }
+
+        return TestResultStatus.NONE;
+    }
+
+    public boolean validationsFailed() {
+
+        return !this.validationResult.getValidationErrors().isEmpty();
     }
 }

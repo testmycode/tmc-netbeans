@@ -46,11 +46,13 @@ public class TestResultWindow extends TopComponent {
         this.setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
 
         this.showAllCheckbox = new JCheckBox("Show all tests", false);
+
         showAllCheckbox.addItemListener(new ItemListener() {
+
             @Override
-            public void itemStateChanged(ItemEvent e) {
-                resultPanel.setAllFailuresVisible(showAllCheckbox.isSelected());
-                resultPanel.setPassedTestsVisible(showAllCheckbox.isSelected());
+            public void itemStateChanged(final ItemEvent event) {
+
+                resultPanel.setAllTestsVisible(showAllCheckbox.isSelected());
                 saveWindowPreferences();
             }
         });
@@ -107,7 +109,7 @@ public class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public void showResults(final List<TestCaseResult> testCaseResults,
+    public synchronized void showResults(final List<TestCaseResult> testCaseResults,
                             final ValidationResult validationResults,
                             final Runnable submissionCallback,
                             final boolean submittable) {
@@ -164,5 +166,4 @@ public class TestResultWindow extends TopComponent {
         Preferences prefs = NbPreferences.forModule(TestResultWindow.class);
         showAllCheckbox.setSelected(prefs.getBoolean("showAllTests", false));
     }
-
 }

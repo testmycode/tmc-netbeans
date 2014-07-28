@@ -38,14 +38,14 @@ public class TestResultDisplayer {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
 
-    public void showSubmissionResult(Exercise exercise, SubmissionResult result) {
+    public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
         switch (result.getStatus()) {
             case OK:
-                displayTestCases(result.getTestCases(), false);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases(), false);
+                displayTestCases(result.getTestCases(), false, resultCollector);
                 displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
@@ -92,8 +92,10 @@ public class TestResultDisplayer {
     }
 
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
+
         String msg;
         boolean milderFail;
+
         if (!result.getPoints().isEmpty()) {
             msg = "Exercise " + exercise.getName() + " failed partially.\n";
             msg += "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".\n\n";
@@ -103,10 +105,22 @@ public class TestResultDisplayer {
             milderFail = false;
         }
 
-        if (result.allTestCasesFailed()) {
-            msg += "All tests failed on the server.\nSee below.";
-        } else {
-            msg += "Some tests failed on the server.\nSee below.";
+        if (result.validationsFailed()) {
+            msg += "There are validation errors.\n";
+        }
+
+        switch (result.getTestResultStatus()) {
+            case ALL:
+                msg += "All tests failed on the server.\nSee below.";
+                break;
+            case SOME:
+                msg += "Some tests failed on the server.\nSee below.";
+                break;
+            case NONE:
+                if (result.validationsFailed()) {
+                    msg += "See below.";
+                }
+                break;
         }
 
         if (milderFail) {
@@ -121,11 +135,12 @@ public class TestResultDisplayer {
      */
     public void showLocalRunResult(final List<TestCaseResult> results,
                                    final boolean returnable,
-                                   final Runnable submissionCallback) {
+                                   final Runnable submissionCallback,
+                                   final ResultCollector resultCollector) {
 
-        ResultCollector.getInstance().setSubmissionCallback(submissionCallback);
+        resultCollector.setSubmissionCallback(submissionCallback);
 
-        displayTestCases(results, returnable);
+        displayTestCases(results, returnable, resultCollector);
     }
 
     private void displayError(String error) {
@@ -145,9 +160,7 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
 
-    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable) {
-
-        ResultCollector resultCollector = ResultCollector.getInstance();
+    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable, final ResultCollector resultCollector) {
 
         resultCollector.setReturnable(returnable);
         resultCollector.setTestCaseResults(testCases);

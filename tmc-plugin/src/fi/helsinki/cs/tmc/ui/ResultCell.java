@@ -16,7 +16,7 @@ import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
 import org.openide.loaders.DataObjectNotFoundException;
 
-public class ResultCell extends JPanel {
+public final class ResultCell extends JPanel {
 
     private final GridBagConstraints constraints = new GridBagConstraints();
     private Color titleColor, borderColor;
@@ -41,7 +41,6 @@ public class ResultCell extends JPanel {
         createStyle(borderColor, titleColor);
         createTitle(title);
         createBody(message, detailView);
-
     }
 
     private void createBody(final String message, final JPanel detailView) {
