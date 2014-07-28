@@ -61,8 +61,6 @@ public final class ResultCollector {
             }
         }
 
-        System.out.println(validationResults.getStrategy());
-
         if (validationResults.getStrategy() == Strategy.DISABLED) {
             validationResults.getValidationErrors().clear();
         }
