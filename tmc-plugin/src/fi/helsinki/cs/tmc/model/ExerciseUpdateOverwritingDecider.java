@@ -5,8 +5,9 @@ import java.io.File;
 import org.apache.commons.io.FilenameUtils;
 
 public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.OverwritingDecider {
+
     private static final String s = File.separator;
-    private TmcProjectFile projectFile;
+    private final TmcProjectFile projectFile;
 
     public ExerciseUpdateOverwritingDecider(File projectDir) {
         this.projectFile = TmcProjectFile.forProject(projectDir);
@@ -36,7 +37,7 @@ public class ExerciseUpdateOverwritingDecider implements NbProjectUnzipper.Overw
     private boolean isInProjectRootDir(String relPath) {
         return !relPath.contains(s);
     }
-    
+
     private boolean isNotAnExtraFile(String relPath) {
         String normalized = FilenameUtils.normalizeNoEndSeparator(relPath, true);
         return !projectFile.getExtraStudentFiles().contains(normalized);

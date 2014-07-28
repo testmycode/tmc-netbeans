@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
@@ -58,6 +59,16 @@ public final class ResultCollector {
             if (!result.isSuccessful()) {
                 return false;
             }
+        }
+
+        System.out.println(validationResults.getStrategy());
+
+        if (validationResults.getStrategy() == Strategy.DISABLED) {
+            validationResults.getValidationErrors().clear();
+        }
+
+        if (validationResults.getStrategy() != Strategy.FAIL) {
+            return isReturnable;
         }
 
         if (!validationResults.getValidationErrors().isEmpty()) {
