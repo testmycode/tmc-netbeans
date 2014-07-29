@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -105,7 +106,7 @@ public class TestResultDisplayer {
             milderFail = false;
         }
 
-        if (result.validationsFailed()) {
+        if (result.validationsFailed() && result.getValidationResult().getStrategy() == Strategy.FAIL) {
             msg += "There are validation errors.\n";
         }
 
