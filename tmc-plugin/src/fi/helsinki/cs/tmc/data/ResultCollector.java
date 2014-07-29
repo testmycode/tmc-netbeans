@@ -61,10 +61,6 @@ public final class ResultCollector {
             }
         }
 
-        if (validationResults.getStrategy() == Strategy.DISABLED) {
-            validationResults.getValidationErrors().clear();
-        }
-
         if (validationResults.getStrategy() != Strategy.FAIL) {
             return isReturnable;
         }
