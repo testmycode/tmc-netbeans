@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
@@ -42,11 +43,6 @@ public final class ResultCollector {
 
     private void showAllResults() {
 
-        this.validationResultLock = true;
-        this.testCaseResultLock = true;
-        this.isReturnable = false;
-        this.submissionCallback = null;
-
         TestResultWindow.get().showResults(testCaseResults, validationResults, submissionCallback, isSubmittable());
     }
 
@@ -67,6 +63,10 @@ public final class ResultCollector {
             if (!result.isSuccessful()) {
                 return false;
             }
+        }
+
+        if (validationResults.getStrategy() != Strategy.FAIL) {
+            return isReturnable;
         }
 
         if (!validationResults.getValidationErrors().isEmpty()) {

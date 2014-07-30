@@ -110,16 +110,23 @@ public class TestResultWindow extends TopComponent {
     }
 
     public void showResults(final List<TestCaseResult> testCaseResults,
-                            final ValidationResult validationResults,
+                            final ValidationResult validationResult,
                             final Runnable submissionCallback,
                             final boolean submittable) {
 
         testColorBar.setMaximum(testCaseResults.size());
         testColorBar.setValue(countSuccessfulTests(testCaseResults));
         testColorBar.setIndeterminate(false);
-        testColorBar.validationPass(validationResults.getValidationErrors().isEmpty());
+        testColorBar.validationPass(validationResult.getValidationErrors().isEmpty());
+        testColorBar.revalidate();
+        testColorBar.repaint();
 
-        resultPanel.setResults(testCaseResults, validationResults);
+        resultPanel.setResults(testCaseResults, validationResult);
+
+        if (!submittable || !validationResult.getValidationErrors().isEmpty()) {
+            this.openAtTabPosition(0);
+            this.requestActive();
+        }
 
         if (submittable) {
 
@@ -135,10 +142,6 @@ public class TestResultWindow extends TopComponent {
                     return null;
                 }
             });
-
-        } else {
-            this.openAtTabPosition(0);
-            this.requestActive();
         }
     }
 
