@@ -4,14 +4,14 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.4</version>
+    <version>1.5</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <netbeans.version>RELEASE74</netbeans.version>
+        <netbeans.version>RELEASE80</netbeans.version>
         <maven.version>3.0.5</maven.version>
     </properties>
 
@@ -249,20 +249,19 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpcore</artifactId>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
         </dependency>
-
         <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
             <artifactId>httpclient</artifactId>
-            <groupId>org.apache.httpcomponents</groupId>
             <type>jar</type>
-            <version>4.3.1</version>
+            <version>4.3.4</version>
         </dependency>
         <dependency>
-            <artifactId>httpcore</artifactId>
             <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpcore</artifactId>
             <type>jar</type>
-            <version>4.3.1</version>
+            <version>4.3.2</version>
         </dependency>
 
         <dependency>
