@@ -7,14 +7,17 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.http.HttpResponse;
+import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.AuthenticationException;
 import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.BufferedHttpEntity;
 import org.apache.http.impl.NoConnectionReuseStrategy;
 import org.apache.http.impl.auth.BasicScheme;
+import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
@@ -84,10 +87,13 @@ import org.openide.util.Lookup;
     }
 
     private CloseableHttpClient makeHttpClient() throws IOException {
+        CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .useSystemProperties()
                 .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
+                .setDefaultCredentialsProvider(credentialsProvider)
                 .setRedirectStrategy(new DefaultRedirectStrategy());
         maybeSetProxy(httpClientBuilder);
 
