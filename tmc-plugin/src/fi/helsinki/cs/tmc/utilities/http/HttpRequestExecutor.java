@@ -20,6 +20,8 @@ import org.apache.http.impl.client.DefaultRedirectStrategy;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.apache.http.protocol.BasicHttpContext;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.openide.util.Lookup;
 
@@ -106,12 +108,12 @@ import org.openide.util.Lookup;
     }
 
     private BufferedHttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException, FailedHttpResponseException {
-
         HttpResponse response = null;
+        HttpContext context = new BasicHttpContext();
 
         try {
             if (this.credentials != null) {
-                request.addHeader(new BasicScheme(Charset.forName("UTF-8")).authenticate(this.credentials, request));
+                request.addHeader(new BasicScheme(Charset.forName("UTF-8")).authenticate(this.credentials, request, context));
             }
             response = httpClient.execute(request);
         } catch (IOException ex) {

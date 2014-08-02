@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.utilities.http;
 
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Map;
@@ -11,10 +10,10 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.ByteArrayEntity;
+import org.apache.http.entity.ContentType;
 import org.apache.http.entity.mime.HttpMultipartMode;
-import org.apache.http.entity.mime.MultipartEntity;
+import org.apache.http.entity.mime.MultipartEntityBuilder;
 import org.apache.http.entity.mime.content.ByteArrayBody;
-import org.apache.http.entity.mime.content.StringBody;
 import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 
@@ -25,6 +24,8 @@ import org.apache.http.util.EntityUtils;
  * with a non-successful status code.
  */
 public class HttpTasks {
+    private static final ContentType UTF8_TEXT_CONTENT_TYPE = ContentType.create("text/plain", "utf-8");
+
     private UsernamePasswordCredentials credentials = null;
 
     public HttpTasks setCredentials(String username, String password) {
@@ -132,16 +133,13 @@ public class HttpTasks {
 
     private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = new HttpPost(url);
-        MultipartEntity entity = new MultipartEntity(HttpMultipartMode.BROWSER_COMPATIBLE);
+        MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
+        entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);
         for (Map.Entry<String, String> e : params.entrySet()) {
-            try {
-                entity.addPart(e.getKey(), new StringBody(e.getValue(), Charset.forName("UTF-8")));
-            } catch (UnsupportedEncodingException ex) {
-                throw new RuntimeException(ex);
-            }
+            entityBuilder.addTextBody(e.getKey(), e.getValue(), UTF8_TEXT_CONTENT_TYPE);
         }
-        entity.addPart(fileField, new ByteArrayBody(data, "file"));
-        request.setEntity(entity);
+        entityBuilder.addPart(fileField, new ByteArrayBody(data, "file"));
+        request.setEntity(entityBuilder.build());
         return request;
     }
 }
