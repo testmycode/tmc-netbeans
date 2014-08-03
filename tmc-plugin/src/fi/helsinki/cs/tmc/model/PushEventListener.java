@@ -103,6 +103,10 @@ public class PushEventListener {
         }
         
         String cometUrl = course.getCometUrl();
+        if (cometUrl == null) {
+            return;
+        }
+
         ClientTransport transport;
         try {
             transport = createWebSocketTransport(cometUrl);
