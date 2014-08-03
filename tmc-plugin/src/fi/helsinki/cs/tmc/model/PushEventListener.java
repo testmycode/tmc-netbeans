@@ -14,9 +14,9 @@ import org.cometd.bayeux.Message;
 import org.cometd.bayeux.client.ClientSession;
 import org.cometd.bayeux.client.ClientSessionChannel;
 import org.cometd.client.BayeuxClient;
-import org.cometd.websocket.client.WebSocketTransport;
-import org.eclipse.jetty.websocket.WebSocketClientFactory;
 import org.cometd.bayeux.client.ClientSessionChannel.MessageListener;
+import org.cometd.client.transport.ClientTransport;
+import org.cometd.websocket.client.WebSocketTransport;
 
 /**
  * Receives HTTP push events and fires the appropriate events.
@@ -55,7 +55,6 @@ public class PushEventListener {
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
-        client = createDummyClient(); // To avoid client ever being null
         initClientIfPossible();
         
         this.eventBus.subscribeDependent(new TmcEventListener() {
@@ -78,13 +77,13 @@ public class PushEventListener {
     }
     
     private synchronized void ensureConnected() {
-        if (client.isDisconnected()) {
+        if (client != null && client.isDisconnected()) {
             initClientIfPossible();
         }
     }
     
     private synchronized void reconnect() {
-        if (client.isConnected()) {
+        if (client != null && client.isConnected()) {
             shouldReconnect = true;
             client.disconnect();
         } else {
@@ -104,7 +103,13 @@ public class PushEventListener {
         }
         
         String cometUrl = course.getCometUrl();
-        WebSocketTransport transport = createWebSocketTransport();
+        ClientTransport transport;
+        try {
+            transport = createWebSocketTransport(cometUrl);
+        } catch (Exception ex) {
+            log.log(Level.WARNING, "Failed to initialize web socket transport.", ex);
+            return;
+        }
 
         client = new BayeuxClient(cometUrl, transport);
         client.getChannel(Channel.META_HANDSHAKE).addListener(handshakeListener);
@@ -114,14 +119,10 @@ public class PushEventListener {
         client.handshake();
     }
     
-    private WebSocketTransport createWebSocketTransport() {
+    private ClientTransport createWebSocketTransport(String cometUrl) throws Exception {
         Map<String, Object> transportOpts = new HashMap<String, Object>();
-        WebSocketTransport transport = WebSocketTransport.create(transportOpts, new WebSocketClientFactory());
-        return transport;
-    }
-
-    private BayeuxClient createDummyClient() {
-        return new BayeuxClient("http://localhost/dummy-comet-url", createWebSocketTransport());
+        WebSocketTransport.Factory factory = new WebSocketTransport.Factory();
+        return factory.newClientTransport(cometUrl, transportOpts);
     }
     
     private boolean hasEnoughSettings() {
@@ -170,7 +171,7 @@ public class PushEventListener {
                 subscribeToReviews();
                 log.fine("Comet handshake successful.");
             } else {
-                log.info("Comet handshake failed. Will retry.");
+                log.info("Comet handshake with failed. Will retry.");
             }
         }
     };
