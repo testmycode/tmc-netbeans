@@ -88,7 +88,9 @@ import org.openide.util.Lookup;
 
     private CloseableHttpClient makeHttpClient() throws IOException {
         CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
-        credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+        if (credentials != null) {
+            credentialsProvider.setCredentials(AuthScope.ANY, credentials);
+        }
 
         HttpClientBuilder httpClientBuilder = HttpClients.custom()
                 .useSystemProperties()
