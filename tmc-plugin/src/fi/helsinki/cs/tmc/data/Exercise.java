@@ -50,6 +50,9 @@ public class Exercise implements Serializable {
     @SerializedName("memory_limit")
     private Integer memoryLimit;
 
+    @SerializedName("runtime_params")
+    private String[] runtimeParams;
+
     public Exercise() {
     }
 
@@ -235,7 +238,15 @@ public class Exercise implements Serializable {
     public void setMemoryLimit(Integer memoryLimit) {
         this.memoryLimit = memoryLimit;
     }
-    
+
+    public String[] getRuntimeParams() {
+        return runtimeParams != null ? runtimeParams : new String[0];
+    }
+
+    public void setRuntimeParams(String[] runtimeParams) {
+        this.runtimeParams = runtimeParams;
+    }
+
     @Override
     public String toString() {
         return name;
