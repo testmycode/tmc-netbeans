@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
@@ -10,6 +11,7 @@ import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
@@ -76,9 +78,14 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
                 args.add("-Djava.endorsed.dirs=" + endorsedLibsPath(projectInfo));
             }
 
-            Integer memoryLimit = getMemoryLimit(projectInfo.getProject());
-            if (memoryLimit != null) {
-                args.add("-Xmx" + memoryLimit + "M");
+            Exercise exercise = tryGetExercise(projectInfo.getProject());
+            if (exercise != null) {
+                if (exercise.getMemoryLimit() != null) {
+                    args.add("-Xmx" + exercise.getMemoryLimit() + "M");
+                }
+                if (exercise.getRuntimeParams() != null) {
+                    args.addAll(Arrays.asList(exercise.getRuntimeParams()));
+                }
             }
 
             args.add("fi.helsinki.cs.tmc.testrunner.Main");

@@ -37,13 +37,8 @@ public abstract class AbstractExerciseRunner implements ExerciseRunner {
         this.eventBus = TmcEventBus.getDefault();
     }
 
-    protected Integer getMemoryLimit(Project project) {
-        Exercise ex = projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(project), courseDb);
-        if (ex != null) {
-            return ex.getMemoryLimit();
-        } else {
-            return null;
-        }
+    protected Exercise tryGetExercise(Project project) {
+        return projectMediator.tryGetExerciseForProject(projectMediator.wrapProject(project), courseDb);
     }
 
     protected InputOutput getIoTab() {

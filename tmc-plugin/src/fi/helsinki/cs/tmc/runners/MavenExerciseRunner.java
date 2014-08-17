@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.maven.MavenRunBuilder;
@@ -7,6 +8,7 @@ import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -59,9 +61,14 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
 
         List<String> jvmOpts = new ArrayList<String>();
 
-        Integer memLimit = getMemoryLimit(projectInfo.getProject());
-        if (memLimit != null) {
-            jvmOpts.add("-Xmx" + memLimit + "m");
+        Exercise exercise = tryGetExercise(projectInfo.getProject());
+        if (exercise != null) {
+            if (exercise.getMemoryLimit() != null) {
+                jvmOpts.add("-Xmx" + exercise.getMemoryLimit() + "M");
+            }
+            if (exercise.getRuntimeParams() != null) {
+                jvmOpts.addAll(Arrays.asList(exercise.getRuntimeParams()));
+            }
         }
 
         jvmOpts.add("-D" + ERROR_MSG_LOCALE_SETTING + "=" + settings.getErrorMsgLocale().toString());
