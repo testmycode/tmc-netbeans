@@ -152,7 +152,7 @@ public class SubmissionResult {
     }
 
     public boolean validationsFailed() {
-
-        return !this.validationResult.getValidationErrors().isEmpty();
+        return this.validationResult == null ?
+                false : !this.validationResult.getValidationErrors().isEmpty();
     }
 }
