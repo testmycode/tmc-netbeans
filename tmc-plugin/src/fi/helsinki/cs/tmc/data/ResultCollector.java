@@ -65,7 +65,7 @@ public final class ResultCollector {
             }
         }
 
-        if (validationResults.getStrategy() != Strategy.FAIL) {
+        if (validationResults == null || validationResults.getStrategy() != Strategy.FAIL) {
             return isReturnable;
         }
 
