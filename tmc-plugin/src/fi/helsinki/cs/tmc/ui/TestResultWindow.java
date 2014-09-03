@@ -125,7 +125,7 @@ public class TestResultWindow extends TopComponent {
 
         resultPanel.setResults(testCaseResults, validationResult);
 
-        if (!submittable || !validationResult.getValidationErrors().isEmpty()) {
+        if (!submittable || (validationResult != null && !validationResult.getValidationErrors().isEmpty())) {
             this.openAtTabPosition(0);
             this.requestActive();
         }
