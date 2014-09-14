@@ -61,6 +61,11 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     protected boolean enabledFor(Exercise exercise) {
         return exercise.getSolutionDownloadUrl() != null;
     }
+
+    @Override
+    protected boolean enabledForMultipleProjects() {
+        return true;
+    }
     
     @Override
     protected boolean asynchronous() {

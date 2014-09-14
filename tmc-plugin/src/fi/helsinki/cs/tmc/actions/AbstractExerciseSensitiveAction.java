@@ -52,6 +52,10 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         if (projects.length == 0) {
             return false;
         }
+
+        if (projects.length != 1 && !enabledForMultipleProjects()) {
+            return false;
+        }
         
         for (Project project : projects) {
             Exercise exercise = exerciseForProject(project);
@@ -59,6 +63,10 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
                 return true;
             }
         }
+        return false;
+    }
+
+    protected boolean enabledForMultipleProjects() {
         return false;
     }
     
