@@ -4,11 +4,10 @@ import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
 import junit.framework.Test;
 import org.netbeans.jemmy.operators.JComboBoxOperator;
-import org.netbeans.junit.NbModuleSuite;
 
 public class FetchingCourseListWhileEditingSettingsTest extends TmcFunctionalTestCase {
     public static Test suite() {
-        return NbModuleSuite.allModules(FetchingCourseListWhileEditingSettingsTest.class);
+        return loadSuite(FetchingCourseListWhileEditingSettingsTest.class);
     }
     
     public FetchingCourseListWhileEditingSettingsTest() {

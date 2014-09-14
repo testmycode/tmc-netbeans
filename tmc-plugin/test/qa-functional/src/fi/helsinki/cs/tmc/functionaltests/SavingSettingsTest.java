@@ -3,12 +3,11 @@ package fi.helsinki.cs.tmc.functionaltests;
 import fi.helsinki.cs.tmc.functionaltests.utils.TmcFunctionalTestCase;
 import fi.helsinki.cs.tmc.functionaltests.utils.SettingsOperator;
 import junit.framework.Test;
-import org.netbeans.junit.NbModuleSuite;
 
 public class SavingSettingsTest extends TmcFunctionalTestCase {
 
     public static Test suite() {
-        return NbModuleSuite.allModules(SavingSettingsTest.class);
+        return loadSuite(SavingSettingsTest.class);
     }
     
     public SavingSettingsTest() {

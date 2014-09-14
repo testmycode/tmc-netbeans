@@ -15,11 +15,10 @@ import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
-import org.netbeans.junit.NbModuleSuite;
 
 public class UpdatingExercisesTest extends TmcFunctionalTestCase {
     public static Test suite() {
-        return NbModuleSuite.allModules(UpdatingExercisesTest.class);
+        return loadSuite(UpdatingExercisesTest.class);
     }
 
     public UpdatingExercisesTest() {

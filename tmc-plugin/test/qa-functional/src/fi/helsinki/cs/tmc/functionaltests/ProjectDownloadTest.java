@@ -7,11 +7,10 @@ import org.netbeans.jellytools.ProjectsTabOperator;
 import org.netbeans.jellytools.nodes.Node;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
-import org.netbeans.junit.NbModuleSuite;
 
 public class ProjectDownloadTest extends TmcFunctionalTestCase {
     public static Test suite() {
-        return NbModuleSuite.allModules(ProjectDownloadTest.class);
+        return loadSuite(ProjectDownloadTest.class);
     }
 
     public ProjectDownloadTest() {

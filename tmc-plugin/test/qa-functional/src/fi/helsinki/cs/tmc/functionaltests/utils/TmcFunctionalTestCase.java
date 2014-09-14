@@ -1,9 +1,12 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
 import java.io.File;
+import junit.framework.Test;
+import junit.framework.TestCase;
 import org.netbeans.jellytools.JellyTestCase;
 import org.netbeans.jemmy.operators.JButtonOperator;
 import org.netbeans.jemmy.operators.JDialogOperator;
+import org.netbeans.junit.NbModuleSuite;
 
 public abstract class TmcFunctionalTestCase extends JellyTestCase {
 
@@ -12,6 +15,10 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
     public TmcFunctionalTestCase(String testName) {
         super(testName);
         closeAllModal = true;
+    }
+
+    public static Test loadSuite(Class<? extends TestCase> cls) {
+        return NbModuleSuite.create(cls, "ide|java|cnd|dlight|mavenmodules", ".*");
     }
 
     @Override

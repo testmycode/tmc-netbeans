@@ -5,7 +5,6 @@ import junit.framework.Test;
 import org.netbeans.jellytools.NbDialogOperator;
 import org.netbeans.jellytools.ProjectsTabOperator;
 import org.netbeans.jellytools.actions.Action;
-import org.netbeans.junit.NbModuleSuite;
 
 public class RunningTestsLocallyWhenTestsSucceedTest extends TmcFunctionalTestCase {
 
@@ -14,7 +13,7 @@ public class RunningTestsLocallyWhenTestsSucceedTest extends TmcFunctionalTestCa
     }
     
     public static Test suite() {
-        return NbModuleSuite.allModules(RunningTestsLocallyWhenTestsSucceedTest.class);
+        return loadSuite(RunningTestsLocallyWhenTestsSucceedTest.class);
     }
     
     public void testRunningTestsLocallyWhenTestsSucceed() throws Exception {

@@ -8,7 +8,6 @@ import org.netbeans.jellytools.TopComponentOperator;
 import org.netbeans.jellytools.actions.Action;
 import org.netbeans.jellytools.actions.OpenAction;
 import org.netbeans.jellytools.nodes.Node;
-import org.netbeans.junit.NbModuleSuite;
 
 public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase {
 
@@ -17,7 +16,7 @@ public class RunningTestsLocallyWhenTestsFailTest extends TmcFunctionalTestCase 
     }
     
     public static Test suite() {
-        return NbModuleSuite.allModules(RunningTestsLocallyWhenTestsFailTest.class);
+        return loadSuite(RunningTestsLocallyWhenTestsFailTest.class);
     }
 
     public void testRunningTestsLocallyWhenTestsFail() throws Exception {
