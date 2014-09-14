@@ -93,7 +93,7 @@ public class ExerciseSubmitter {
 
                         dialog.close();
 
-                        final ResultCollector resultCollector = new ResultCollector();
+                        final ResultCollector resultCollector = new ResultCollector(exercise);
                         resultCollector.setValidationResult(result.getValidationResult());
                         resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
 

@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
 
@@ -10,7 +11,7 @@ public final class TestResultBuilder {
 
     private TestResultBuilder() {}
 
-    public static List<ResultCell> buildCells(final List<TestCaseResult> testCaseResults, final boolean showAll) {
+    public static List<ResultCell> buildCells(final Exercise exercise, final List<TestCaseResult> testCaseResults, final boolean showAll) {
 
         final SourceFileLookup sourceFileLookup = SourceFileLookup.getDefault();
         final List<ResultCell> resultCells = new ArrayList<ResultCell>();
@@ -19,7 +20,7 @@ public final class TestResultBuilder {
 
             if (showAll || !result.isSuccessful()) {
 
-                resultCells.add(new TestCaseResultCell(result, sourceFileLookup).getCell());
+                resultCells.add(new TestCaseResultCell(exercise, result, sourceFileLookup).getCell());
 
                 // Show only first result
                 if(!showAll) {

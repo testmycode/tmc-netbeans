@@ -12,38 +12,42 @@ import java.util.List;
  */
 public final class ResultCollector {
 
+    private final Exercise exercise;
     private List<TestCaseResult> testCaseResults;
     private ValidationResult validationResults;
 
-    private boolean testCaseResultLock = true;
-    private boolean validationResultLock = true;
+    private boolean testCaseResultsSet = false;
+    private boolean validationResultsSet = false;
 
     private boolean isReturnable;
     private Runnable submissionCallback;
 
+    public ResultCollector(Exercise exercise) {
+        this.exercise = exercise;
+    }
+
     public void setValidationResult(final ValidationResult result) {
 
         this.validationResults = result;
-        this.validationResultLock = false;
+        this.validationResultsSet = true;
 
-        if (!testCaseResultLock) {
-            showAllResults();
-        }
+        showResultsIfReady();
     }
 
     public void setTestCaseResults(final List<TestCaseResult> results) {
 
         this.testCaseResults = results;
-        this.testCaseResultLock = false;
+        this.testCaseResultsSet = true;
 
-        if (!validationResultLock) {
-            showAllResults();
-        }
+        showResultsIfReady();
     }
 
-    private void showAllResults() {
+    private void showResultsIfReady() {
 
-        TestResultWindow.get().showResults(testCaseResults, validationResults, submissionCallback, isSubmittable());
+        boolean ready = testCaseResultsSet && validationResultsSet;
+        if (ready) {
+            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, isSubmittable());
+        }
     }
 
     public void setSubmissionCallback(final Runnable submissionCallback) {

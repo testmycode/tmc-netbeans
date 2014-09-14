@@ -18,7 +18,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     private ProjectMediator projectMediator;
     private CheckstyleRunHandler checkstyleRunHandler;
     private TestRunHandler testRunHandler;
-    private Project[] projects;
+    private Project project;
 
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
@@ -31,9 +31,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     protected void performAction(final Node[] nodes) {
 
-        this.projects = projectsFromNodes(nodes).toArray(new Project[0]);
+        if (nodes.length == 1) {
+            this.project = projectsFromNodes(nodes).get(0);
 
-        WindowManager.getDefault().invokeWhenUIReady(this);
+            WindowManager.getDefault().invokeWhenUIReady(this);
+        }
     }
 
     @Override
@@ -66,8 +68,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
 
-        ResultCollector resultCollector = new ResultCollector();
-        this.checkstyleRunHandler.performAction(resultCollector, projects[0]);
-        this.testRunHandler.performAction(resultCollector, projects);
+        Exercise exercise = exerciseForProject(project);
+        if (exercise != null) {
+            ResultCollector resultCollector = new ResultCollector(exercise);
+            this.checkstyleRunHandler.performAction(resultCollector, project);
+            this.testRunHandler.performAction(resultCollector, project);
+        }
     }
 }

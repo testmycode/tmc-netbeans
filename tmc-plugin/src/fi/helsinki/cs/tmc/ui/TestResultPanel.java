@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 
@@ -18,6 +19,7 @@ public final class TestResultPanel extends JPanel {
     private static final int PADDING_BETWEEN_BOXES = 5;
 
     private boolean allTestsVisible = false;
+    private Exercise exercise = null;
     private final List<TestCaseResult> storedTestCaseResults = new ArrayList<TestCaseResult>();
     private ValidationResult storedValidationResult;
 
@@ -26,10 +28,11 @@ public final class TestResultPanel extends JPanel {
         this.setLayout(new GridBagLayout());
     }
 
-    public void setResults(final List<TestCaseResult> results, final ValidationResult validationResult) {
+    public void setResults(final Exercise exercise, final List<TestCaseResult> results, final ValidationResult validationResult) {
 
         this.clear();
 
+        this.exercise = exercise;
         storedTestCaseResults.addAll(results);
         storedValidationResult = validationResult;
 
@@ -68,7 +71,7 @@ public final class TestResultPanel extends JPanel {
 
     private void buildTestResultCells(final GridBagConstraints constraints) {
 
-        for (ResultCell resultCell : TestResultBuilder.buildCells(storedTestCaseResults, allTestsVisible)) {
+        for (ResultCell resultCell : TestResultBuilder.buildCells(exercise, storedTestCaseResults, allTestsVisible)) {
             this.add(resultCell, constraints);
         }
     }
@@ -90,6 +93,7 @@ public final class TestResultPanel extends JPanel {
 
     public void clear() {
 
+        exercise = null;
         storedTestCaseResults.clear();
 
         this.removeAll();

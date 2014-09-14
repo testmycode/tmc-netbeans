@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
@@ -42,6 +43,7 @@ public final class TestCaseResultCell {
     private static final Color FAIL_TEXT_COLOR = FAIL_COLOR.darker();
     private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
 
+    private final Exercise exercise;
     private final TestCaseResult result;
     private final SourceFileLookup sourceFileLookup;
     private JButton detailedMessageButton;
@@ -49,12 +51,13 @@ public final class TestCaseResultCell {
     private final JPanel detailView;
     private final ResultCell resultCell;
 
-    public TestCaseResultCell(final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
+    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
 
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
         gbc.weightx = 1.0;
 
+        this.exercise = exercise;
         this.result = result;
         this.sourceFileLookup = sourceFileLookup;
         this.detailView = createDetailView();
@@ -249,7 +252,7 @@ public final class TestCaseResultCell {
 
         private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
             for (final StackTraceElement ste : stackTrace) {
-                final FileObject sourceFile = sourceFileLookup.findSourceFileFor(ste.getClassName());
+                final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, ste.getClassName());
 
                 if (sourceFile != null && ste.getLineNumber() > 0) {
                     display.addLink(ste.toString(), new ActionListener() {

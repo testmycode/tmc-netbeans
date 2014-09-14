@@ -71,7 +71,7 @@ public class TmcProjectInfo {
     @Override
     public boolean equals(Object obj) {
         if (obj instanceof TmcProjectInfo) {
-            return this.project.equals((TmcProjectInfo) obj);
+            return this.project.equals(((TmcProjectInfo) obj).project);
         } else {
             return false;
         }

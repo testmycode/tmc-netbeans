@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import com.google.common.base.Function;
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import java.awt.Component;
@@ -109,7 +110,8 @@ public class TestResultWindow extends TopComponent {
         testColorBar.setIndeterminate(true);
     }
 
-    public void showResults(final List<TestCaseResult> testCaseResults,
+    public void showResults(final Exercise exercise,
+                            final List<TestCaseResult> testCaseResults,
                             final ValidationResult validationResult,
                             final Runnable submissionCallback,
                             final boolean submittable) {
@@ -123,7 +125,7 @@ public class TestResultWindow extends TopComponent {
         testColorBar.revalidate();
         testColorBar.repaint();
 
-        resultPanel.setResults(testCaseResults, validationResult);
+        resultPanel.setResults(exercise, testCaseResults, validationResult);
 
         if (!submittable || (validationResult != null && !validationResult.getValidationErrors().isEmpty())) {
             this.openAtTabPosition(0);
