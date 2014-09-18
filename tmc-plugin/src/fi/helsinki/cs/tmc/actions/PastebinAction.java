@@ -45,7 +45,7 @@ import org.openide.util.NbBundle.Messages;
 //plz remove everything that isn't needed here. --kviiri
 public final class PastebinAction extends AbstractExerciseSensitiveAction {
 
-    private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
+    private static final Logger log = Logger.getLogger(PastebinAction.class.getName());
     private TmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
