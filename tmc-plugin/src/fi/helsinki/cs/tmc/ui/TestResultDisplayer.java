@@ -46,7 +46,7 @@ public class TestResultDisplayer {
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
-                displayTestCases(result.getTestCases(), false, resultCollector);
+                displayTestCases(maybeAddValdrindToResults(result), false, resultCollector);
                 displayFailedTestsMsg(exercise, result);
                 break;
             case ERROR:
@@ -167,8 +167,20 @@ public class TestResultDisplayer {
         resultCollector.setTestCaseResults(testCases);
     }
 
-
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
     }
+
+    private List<TestCaseResult> maybeAddValdrindToResults(SubmissionResult result) {
+        String valdrindOutput = result.getValgrindOutput();
+        List<TestCaseResult> resultList = result.getTestCases();
+
+        if (StringUtils.isNotBlank(valdrindOutput)) {
+            TestCaseResult valgrindResult = new TestCaseResult("Valgrind validations", false , "Click show valgrind trace to view valgrind trace", valdrindOutput);
+            resultList.set(0, valgrindResult);
+        }
+
+        return resultList;
+    }
+
 }
