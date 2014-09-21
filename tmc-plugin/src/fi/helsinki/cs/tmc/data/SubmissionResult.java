@@ -45,6 +45,9 @@ public class SubmissionResult {
     @SerializedName("feedback_answer_url")
     private String feedbackAnswerUrl;
 
+    @SerializedName("valgrind")
+    private String valgrindOutput;
+
     private ValidationResult validationResult;
 
     public SubmissionResult() {
@@ -128,6 +131,11 @@ public class SubmissionResult {
     public ValidationResult getValidationResult() {
 
         return validationResult;
+    }
+
+    public String getValgrindOutput() {
+
+        return valgrindOutput;
     }
 
     public TestResultStatus getTestResultStatus() {
