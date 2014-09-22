@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.data.Exercise.ValgrindStrategy;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.io.File;
 import java.io.FileInputStream;
@@ -26,11 +28,13 @@ public class CTestResultParser {
 
     private File testResults;
     private File valgrindOutput;
+    private Exercise.ValgrindStrategy valgrindStrategy;
     private ArrayList<CTestCase> tests;
 
-    public CTestResultParser(File testResults, File valgrindOutput) {
+    public CTestResultParser(File testResults, File valgrindOutput, ValgrindStrategy valgrindStrategy) {
         this.testResults = testResults;
         this.valgrindOutput = valgrindOutput;
+        this.valgrindStrategy = valgrindStrategy;
         this.tests = new ArrayList<CTestCase>();
     }
 
@@ -90,7 +94,7 @@ public class CTestResultParser {
             String result = node.getAttribute("result");
             String name = node.getElementsByTagName("description").item(0).getTextContent();
             String message = node.getElementsByTagName("message").item(0).getTextContent();
-            cases.add(new CTestCase(name, result, message));
+            cases.add(new CTestCase(name, result, message, valgrindStrategy));
         }
 
         return cases;

@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
@@ -19,6 +20,7 @@ import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 public class MakefileExerciseRunner extends AbstractExerciseRunner {
+
     private static final Logger log = Logger.getLogger(MakefileExerciseRunner.class.getName());
 
     @Override
@@ -69,6 +71,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         log.log(Level.INFO, "Running tests {0}", projectInfo.getProjectName());
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
+
         if (withValgrind) {
             command = new String[]{"valgrind", "--log-file=valgrind.log", "."
                 + File.separatorChar + "test" + File.separatorChar + "test"};
@@ -83,19 +86,30 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
                 .getIO(projectInfo.getProjectName(), false));
 
         try {
+            log.info("Prepering to run tests");
             runner.call();
-        } catch (IOException ex) {
+            log.info("Ran tests");
+        } catch (IOException e) {
             if (withValgrind) {
                 runTests(projectInfo, false);
             } else {
-                log.log(Level.WARNING, "Failed to run tests: {0}", ex);
-                throw new UserVisibleException("Failed to run tests:\n" + ex.getMessage());
+                log.log(Level.WARNING, "Failed to run tests: {0}", e);
+                throw new UserVisibleException("Failed to run tests:\n" + e.getMessage());
             }
         }
 
         File resultsFile = new File(testDir.getAbsolutePath() + "/tmc_test_results.xml");
         File valgrindLog = withValgrind ? new File(testDir.getAbsolutePath() + "/valgrind.log") : null;
 
-        return resultParser.parseCTestResults(resultsFile, valgrindLog);
+        log.info("Locating exercise");
+        Exercise exercise = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+
+        if (exercise != null) {
+            log.log(Level.INFO, "Parsing exercises with valgrind strategy {0}", exercise.getValgrindStrategy());
+            return resultParser.parseCTestResults(resultsFile, valgrindLog, exercise.getValgrindStrategy());
+        } else {
+            log.log(Level.INFO, "Parsing exercises with out valgrind strategy");
+            return resultParser.parseCTestResults(resultsFile, valgrindLog, null);
+        }
     }
 }

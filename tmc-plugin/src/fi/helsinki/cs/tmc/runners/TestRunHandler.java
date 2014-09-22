@@ -16,9 +16,13 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 
 public class TestRunHandler {
+
+    private static final Logger log = Logger.getLogger(TestRunHandler.class.getName());
+
 
     public static class InvokedEvent implements TmcEvent {
         public final TmcProjectInfo projectInfo;
@@ -62,7 +66,7 @@ public class TestRunHandler {
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    dialogDisplayer.displayError("Failed to compile the code.");
+                    dialogDisplayer.displayError("Failed to compile the code." + ex);
                 }
 
                 @Override
@@ -88,7 +92,7 @@ public class TestRunHandler {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogDisplayer.displayError("Failed to compile the code.");
+                dialogDisplayer.displayError("Failed to run the tests.");
             }
 
             @Override

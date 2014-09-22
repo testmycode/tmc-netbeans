@@ -15,18 +15,18 @@ public class TestCaseResult {
 
     public TestCaseResult() {
     }
-    
+
     public TestCaseResult(String name, boolean successful, String message) {
         this.name = name;
         this.successful = successful;
         this.message = message;
     }
-    
+
     public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
         this(name, successful, message);
         this.detailedMessage = valgrindTrace;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -44,12 +44,12 @@ public class TestCaseResult {
     public CaughtException getException() {
         return exception;
     }
-    
+
     @CheckForNull
     public String getDetailedMessage() {
         return detailedMessage;
     }
-    
+
     /**
      * Creates a TestCaseResult from a TestCase probably returned by a local run of tmc-junit-runner.
      */

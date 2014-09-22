@@ -1,17 +1,15 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
+import fi.helsinki.cs.tmc.data.Exercise;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import javax.xml.parsers.ParserConfigurationException;
 import org.junit.Before;
 import org.junit.Test;
 import static org.junit.Assert.*;
-import org.xml.sax.SAXException;
 
 public class CTestResultParserTest {
 
@@ -23,8 +21,8 @@ public class CTestResultParserTest {
     @Before
     public void setUp() {
         oneOfEachTest = new ArrayList<CTestCase>();
-        oneOfEachTest.add(new CTestCase("passing", "success", "Passed"));
-        oneOfEachTest.add(new CTestCase("failing", "failure", "This test should've failed"));
+        oneOfEachTest.add(new CTestCase("passing", "success", "Passed", null));
+        oneOfEachTest.add(new CTestCase("failing", "failure", "This test should've failed", null));
     }
 
     @Test(expected=IllegalStateException.class)
@@ -32,7 +30,7 @@ public class CTestResultParserTest {
         CTestResultParser cpar = null;
         File tmp = mkTempFile("test_output", ".xml");
         try {
-            cpar = new CTestResultParser(tmp, null);
+            cpar = new CTestResultParser(tmp, null, null);
             cpar.parseTestOutput();
         } finally {
             tmp.delete();
@@ -47,7 +45,7 @@ public class CTestResultParserTest {
             ArrayList<CTestCase> testCases = new ArrayList<CTestCase>();
             testCases.add(oneOfEachTest.get(0));
             File tmp = constructTestOutput(testCases);
-            cpar = new CTestResultParser(tmp, null);
+            cpar = new CTestResultParser(tmp, null, Exercise.ValgrindStrategy.NONE);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -69,7 +67,7 @@ public class CTestResultParserTest {
             ArrayList<CTestCase> testCases = new ArrayList<CTestCase>();
             testCases.add(oneOfEachTest.get(1));
             File tmp = constructTestOutput(testCases);
-            cpar = new CTestResultParser(tmp, null);
+            cpar = new CTestResultParser(tmp, null, null);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -89,7 +87,7 @@ public class CTestResultParserTest {
         CTestResultParser cpar = null;
         try {
             File tmp = constructTestOutput(oneOfEachTest);
-            cpar = new CTestResultParser(tmp, null);
+            cpar = new CTestResultParser(tmp, null, null);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -110,7 +108,7 @@ public class CTestResultParserTest {
             testCases.add(oneOfEachTest.get(1));
             File ttmp = constructTestOutput(testCases);
             File vtmp = constructNotMemoryFailingValgrindOutput(testCases);
-            cpar = new CTestResultParser(ttmp, null);
+            cpar = new CTestResultParser(ttmp, null, null);
             cpar.parseTestOutput();
             ttmp.delete();
             vtmp.delete();
@@ -132,8 +130,8 @@ public class CTestResultParserTest {
         try {
             File ttmp = constructTestOutput(oneOfEachTest);
             File vtmp = constructNotMemoryFailingValgrindOutput(oneOfEachTest);
-            
-            cpar = new CTestResultParser(ttmp, vtmp);
+
+            cpar = new CTestResultParser(ttmp, vtmp, null);
             cpar.parseTestOutput();
             vtmp.delete();
             ttmp.delete();
@@ -148,7 +146,7 @@ public class CTestResultParserTest {
             i++;
         }
     }
-    
+
     @Test
     public void testTestsPassWhenNoMemoryErrors() {
         CTestResultParser cpar = null;
@@ -156,7 +154,7 @@ public class CTestResultParserTest {
             File ttmp = constructTestOutput(oneOfEachTest);
             File vtmp = constructNotMemoryFailingValgrindOutput(oneOfEachTest);
 
-            cpar = new CTestResultParser(ttmp, vtmp);
+            cpar = new CTestResultParser(ttmp, vtmp, null);
             cpar.parseTestOutput();
             vtmp.delete();
             ttmp.delete();
@@ -171,7 +169,7 @@ public class CTestResultParserTest {
             i++;
         }
     }
-    
+
     public File constructMemoryTestOutput(ArrayList<CTestCase> testCases) throws IOException {
         File tmp = mkTempFile("test_memory", ".txt");
         PrintWriter pw = new PrintWriter(tmp, "UTF-8");
@@ -181,7 +179,7 @@ public class CTestResultParserTest {
         pw.close();
         return tmp;
     }
-    
+
     public File constructTestOutput(ArrayList<CTestCase> testCases) throws IOException {
         File tmp = mkTempFile("test_output", ".xml");
         PrintWriter pw = new PrintWriter(tmp, "UTF-8");
