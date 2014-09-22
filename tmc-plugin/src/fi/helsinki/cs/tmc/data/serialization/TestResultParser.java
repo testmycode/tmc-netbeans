@@ -39,7 +39,7 @@ public class TestResultParser {
 
     public TestRunResult parseCTestResults(File resultsFile, File valgrindLog) throws Exception {
         // CTestResultParser could use refactoring. Duplicates parseTestResults and is kinda messy.
-        CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog, null);
+        CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog);
         parser.parseTestOutput();
         return new TestRunResult(parser.getTestCaseResults());
     }

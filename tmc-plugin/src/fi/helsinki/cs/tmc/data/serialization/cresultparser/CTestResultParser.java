@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.runners.ValgrindMemoryChecks;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -10,7 +9,6 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.Reader;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Scanner;
 import java.util.logging.Logger;
@@ -26,15 +24,13 @@ import org.xml.sax.SAXException;
 public class CTestResultParser {
     protected static final Logger log = Logger.getLogger(CTestResultParser.class.getName());
 
-    private File memoryOptions;
     private File testResults;
     private File valgrindOutput;
     private ArrayList<CTestCase> tests;
 
-    public CTestResultParser(File testResults, File valgrindOutput, File memoryOptions) {
+    public CTestResultParser(File testResults, File valgrindOutput) {
         this.testResults = testResults;
         this.valgrindOutput = valgrindOutput;
-        this.memoryOptions = memoryOptions;
         this.tests = new ArrayList<CTestCase>();
     }
 
@@ -42,11 +38,6 @@ public class CTestResultParser {
         this.tests = parseTestCases(testResults);
         if (valgrindOutput != null) {
             addValgrindOutput();
-
-            if (memoryOptions != null) {
-                addMemoryTests();
-                ValgrindMemoryChecks.analyzeMemory(tests);
-            }
         } else {
             addWarningToValgrindOutput();
         }
@@ -103,34 +94,6 @@ public class CTestResultParser {
         }
 
         return cases;
-    }
-
-    private void addMemoryTests() throws FileNotFoundException {
-        HashMap<String, String> memoryInfoByName = new HashMap<String, String>();
-        Scanner scanner = new Scanner(memoryOptions, "UTF-8");
-        while (scanner.hasNextLine()) {
-            String[] split = scanner.nextLine().split(" ");
-            memoryInfoByName.put(split[0], split[1] + " " + split[2]);
-        }
-        scanner.close();
-
-        for (CTestCase t : tests) {
-            String str = memoryInfoByName.get(t.getName());
-            if (str == null) {
-                continue;
-            }
-            String[] params = str.split(" ");
-            int checkLeaks, maxBytes;
-            try {
-                checkLeaks = Integer.parseInt(params[0]);
-                maxBytes = Integer.parseInt(params[1]);
-            } catch (Exception e) {
-                checkLeaks = 0;
-                maxBytes = -1;
-            }
-            t.setMaxBytesAllocated(maxBytes);
-            t.setCheckedForMemoryLeaks(checkLeaks == 1);
-        }
     }
 
     private void addWarningToValgrindOutput() {

@@ -32,7 +32,7 @@ public class CTestResultParserTest {
         CTestResultParser cpar = null;
         File tmp = mkTempFile("test_output", ".xml");
         try {
-            cpar = new CTestResultParser(tmp, null, null);
+            cpar = new CTestResultParser(tmp, null);
             cpar.parseTestOutput();
         } finally {
             tmp.delete();
@@ -47,7 +47,7 @@ public class CTestResultParserTest {
             ArrayList<CTestCase> testCases = new ArrayList<CTestCase>();
             testCases.add(oneOfEachTest.get(0));
             File tmp = constructTestOutput(testCases);
-            cpar = new CTestResultParser(tmp, null, null);
+            cpar = new CTestResultParser(tmp, null);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -69,7 +69,7 @@ public class CTestResultParserTest {
             ArrayList<CTestCase> testCases = new ArrayList<CTestCase>();
             testCases.add(oneOfEachTest.get(1));
             File tmp = constructTestOutput(testCases);
-            cpar = new CTestResultParser(tmp, null, null);
+            cpar = new CTestResultParser(tmp, null);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -89,7 +89,7 @@ public class CTestResultParserTest {
         CTestResultParser cpar = null;
         try {
             File tmp = constructTestOutput(oneOfEachTest);
-            cpar = new CTestResultParser(tmp, null, null);
+            cpar = new CTestResultParser(tmp, null);
             cpar.parseTestOutput();
             tmp.delete();
 
@@ -110,7 +110,7 @@ public class CTestResultParserTest {
             testCases.add(oneOfEachTest.get(1));
             File ttmp = constructTestOutput(testCases);
             File vtmp = constructNotMemoryFailingValgrindOutput(testCases);
-            cpar = new CTestResultParser(ttmp, null, null);
+            cpar = new CTestResultParser(ttmp, null);
             cpar.parseTestOutput();
             ttmp.delete();
             vtmp.delete();
@@ -133,7 +133,7 @@ public class CTestResultParserTest {
             File ttmp = constructTestOutput(oneOfEachTest);
             File vtmp = constructNotMemoryFailingValgrindOutput(oneOfEachTest);
             
-            cpar = new CTestResultParser(ttmp, vtmp, null);
+            cpar = new CTestResultParser(ttmp, vtmp);
             cpar.parseTestOutput();
             vtmp.delete();
             ttmp.delete();
@@ -156,7 +156,7 @@ public class CTestResultParserTest {
             File ttmp = constructTestOutput(oneOfEachTest);
             File vtmp = constructNotMemoryFailingValgrindOutput(oneOfEachTest);
 
-            cpar = new CTestResultParser(ttmp, vtmp, null);
+            cpar = new CTestResultParser(ttmp, vtmp);
             cpar.parseTestOutput();
             vtmp.delete();
             ttmp.delete();
@@ -170,178 +170,6 @@ public class CTestResultParserTest {
             assertEquals("==" + i * 2 + "== " + (i - 1), r.getDetailedMessage().split("\n")[1]);
             i++;
         }
-    }
-    
-    @Test
-    public void testWithMemoryErrors() throws Exception {
-        CTestResultParser cpar = null;
-        try {
-            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
-            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
-            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
-            test2.setCheckedForMemoryLeaks(true);
-            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(99);
-            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
-            
-            File ttmp = constructTestOutput(tests);
-            File vtmp = constructMemoryFailingValgrindOutput();
-            File mtpm = constructMemoryTestOutput(tests);
-            
-            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
-            cpar.parseTestOutput();
-            vtmp.delete();
-            ttmp.delete();
-        } catch (SAXException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (IOException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (ParserConfigurationException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        }
-        List<TestCaseResult> results = cpar.getTestCaseResults();
-        assertEquals("There should be three test results", 3, results.size());
-        
-        assertFalse("First test should fail", results.get(0).isSuccessful());
-        assertEquals("First test should fail to a memory error", "Unit tests passed, but a memory error was detected by Valgrind. Please refer to the valgrind trace for more details.", results.get(0).getMessage());
-    
-        assertFalse("Second test should fail", results.get(1).isSuccessful());
-        assertEquals("Second test should fail to memory leakage", "Unit tests passed, but a memory leak was detected. Please refer to the Valgrind trace for more details.", results.get(1).getMessage());
-        
-        assertFalse("Third test should fail", results.get(2).isSuccessful());
-        assertEquals("Third test should fail to using too much heap space", "Unit tests passed, but too much memory was used. Refer to the exercise description.", results.get(2).getMessage());
-    }
-    
-    @Test
-    public void testMemoryErrorsShouldNotFailIfBytesUsedIsGivenMaximum() throws Exception {
-        CTestResultParser cpar = null;
-        try {
-            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
-            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
-            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
-            test2.setCheckedForMemoryLeaks(true);
-            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(-1);
-            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
-            
-            File ttmp = constructTestOutput(tests);
-            File vtmp = constructMemoryFailingValgrindOutput();
-            File mtpm = constructMemoryTestOutput(tests);
-            
-            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
-            cpar.parseTestOutput();
-            vtmp.delete();
-            ttmp.delete();
-        } catch (SAXException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (IOException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (ParserConfigurationException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        }
-        List<TestCaseResult> results = cpar.getTestCaseResults();
-        assertEquals("There should be three test results", 3, results.size());
-        
-        assertTrue("Third test should not fail using excess memory", results.get(2).isSuccessful());
-    }
-    
-    @Test
-    public void testMemoryLeaksDontFailTestIfNotFollowed() throws Exception {
-        CTestResultParser cpar = null;
-        try {
-            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
-            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
-            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
-            test2.setCheckedForMemoryLeaks(false);
-            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(99);
-            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
-            
-            File ttmp = constructTestOutput(tests);
-            File vtmp = constructMemoryFailingValgrindOutput();
-            File mtpm = constructMemoryTestOutput(tests);
-            
-            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
-            cpar.parseTestOutput();
-            vtmp.delete();
-            ttmp.delete();
-        } catch (SAXException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (IOException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (ParserConfigurationException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        }
-        List<TestCaseResult> results = cpar.getTestCaseResults();
-        assertEquals("There should be three test results", 3, results.size());
-        
-        assertTrue("Second test should not fail for leaking memory", results.get(1).isSuccessful());
-    }
-
-    @Test
-    public void testShouldNotFailForExcessMemoryUseIfNotFollowed() throws Exception {
-        CTestResultParser cpar = null;
-        try {
-            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
-            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
-            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
-            test2.setCheckedForMemoryLeaks(true);
-            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(100);
-            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
-            
-            File ttmp = constructTestOutput(tests);
-            File vtmp = constructMemoryFailingValgrindOutput();
-            File mtpm = constructMemoryTestOutput(tests);
-            
-            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
-            cpar.parseTestOutput();
-            vtmp.delete();
-            ttmp.delete();
-        } catch (SAXException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (IOException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (ParserConfigurationException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        }
-        List<TestCaseResult> results = cpar.getTestCaseResults();
-        assertEquals("There should be three test results", 3, results.size());
-        
-        assertTrue("Third test should not fail using excess memory", results.get(2).isSuccessful());
-    }
-    
-    @Test
-    public void testShouldNotFailWhenGivenMaximumAllocationsIsHigherThanUsed() throws Exception {
-        CTestResultParser cpar = null;
-        try {
-            ArrayList<CTestCase> tests = new ArrayList<CTestCase>();
-            CTestCase test1 = new CTestCase("passing1", "success", "Passed");
-            CTestCase test2 = new CTestCase("passing2", "success", "Passed");
-            test2.setCheckedForMemoryLeaks(true);
-            CTestCase test3 = new CTestCase("passing3", "success", "Passed");
-            test3.setMaxBytesAllocated(900);
-            tests.addAll(Arrays.asList(new CTestCase[]{test1, test2, test3}));
-            
-            File ttmp = constructTestOutput(tests);
-            File vtmp = constructMemoryFailingValgrindOutput();
-            File mtpm = constructMemoryTestOutput(tests);
-            
-            cpar = new CTestResultParser(ttmp, vtmp, mtpm);
-            cpar.parseTestOutput();
-            vtmp.delete();
-            ttmp.delete();
-        } catch (SAXException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (IOException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        } catch (ParserConfigurationException e) {
-            fail("Error creating or parsing mock output file: " + e.getMessage());
-        }
-        List<TestCaseResult> results = cpar.getTestCaseResults();
-        assertEquals("There should be three test results", 3, results.size());
-        
-        assertTrue("Third test should not fail using excess memory", results.get(2).isSuccessful());
     }
     
     public File constructMemoryTestOutput(ArrayList<CTestCase> testCases) throws IOException {
