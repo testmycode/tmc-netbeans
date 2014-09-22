@@ -203,6 +203,7 @@ public final class TestCaseResultCell {
             detailView.remove(detailedMessageButton);
 
             final DetailedMessageDisplay display = new DetailedMessageDisplay();
+            display.setBackground(Color.WHITE);
             display.setContent(result.getDetailedMessage());
             display.finish();
 
