@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.runners;
 
-import fi.helsinki.cs.tmc.actions.RunTestsLocallyAction;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.serialization.TestResultParser;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
