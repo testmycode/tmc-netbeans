@@ -3,13 +3,16 @@ package fi.helsinki.cs.tmc.runners;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
+import static fi.helsinki.cs.tmc.runners.AbstractExerciseRunner.log;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
 import fi.helsinki.cs.tmc.utilities.process.ProcessRunner;
 import java.io.File;
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.concurrent.Callable;
+import java.util.logging.Level;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
 import org.openide.windows.IOProvider;
@@ -19,6 +22,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
 
     @Override
     public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {
+        log.log(Level.INFO, "Compiling project {0}", projectInfo.getProjectName());
         Project project = projectInfo.getProject();
         FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
         File workDir = projectInfo.getProjectDirAsFile();
@@ -41,6 +45,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
                     }
                     return ret;
                 } catch (Exception ex) {
+                    log.log(Level.INFO, "Compilation failed, {0}", ex);
                     io.select();
                     throw ex;
                 }
@@ -58,16 +63,20 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         };
     }
 
+    // WTF why not use make
     private TestRunResult runTests(final TmcProjectInfo projectInfo, final boolean withValgrind) throws Exception {
+        log.log(Level.INFO, "Running tests {0}", projectInfo.getProjectName());
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
         if (withValgrind) {
             command = new String[]{"valgrind", "--log-file=valgrind.log", "."
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         } else {
+            // If running tests with make fails - fall back running them manually
             command = new String[]{testDir.getAbsolutePath()
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         }
+        log.log(Level.INFO, "Running tests for project {0} with command {1}", new Object[]{projectInfo.getProjectName(), command});
 
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault()
                 .getIO(projectInfo.getProjectName(), false));
@@ -78,6 +87,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             if (withValgrind) {
                 runTests(projectInfo, false);
             } else {
+                log.log(Level.WARNING, "Failed to run tests: {0}", ex);
                 throw new UserVisibleException("Failed to run tests:\n" + ex.getMessage());
             }
         }
