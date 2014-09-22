@@ -19,7 +19,7 @@ import org.openide.windows.InputOutput;
 public abstract class AbstractExerciseRunner implements ExerciseRunner {
 
     protected static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
-    protected static final Logger log = Logger.getLogger(AbstractExerciseRunner.class.getName());
+    private static final Logger log = Logger.getLogger(AbstractExerciseRunner.class.getName());
 
     protected TmcSettings settings;
     protected CourseDb courseDb;

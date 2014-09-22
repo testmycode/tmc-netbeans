@@ -18,6 +18,7 @@ import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.apache.tools.ant.module.api.support.ActionUtils;
 import org.netbeans.api.java.classpath.ClassPath;
 import org.netbeans.api.project.Project;
@@ -27,6 +28,7 @@ import org.openide.filesystems.FileUtil;
 import org.openide.windows.InputOutput;
 
 public class AntExerciseRunner extends AbstractJavaExerciseRunner {
+    private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
 
     @Override
     public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {

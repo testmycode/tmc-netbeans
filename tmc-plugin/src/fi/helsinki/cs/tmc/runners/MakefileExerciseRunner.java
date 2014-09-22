@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.runners;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
-import static fi.helsinki.cs.tmc.runners.AbstractExerciseRunner.log;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
@@ -13,12 +12,14 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
 import org.openide.windows.IOProvider;
 import org.openide.windows.InputOutput;
 
 public class MakefileExerciseRunner extends AbstractExerciseRunner {
+    private static final Logger log = Logger.getLogger(MakefileExerciseRunner.class.getName());
 
     @Override
     public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {

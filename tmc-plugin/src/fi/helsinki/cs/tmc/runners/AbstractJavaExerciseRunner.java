@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import static fi.helsinki.cs.tmc.runners.AbstractExerciseRunner.log;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
 import fi.helsinki.cs.tmc.testscanner.TestScanner;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -13,6 +12,7 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Future;
+import java.util.logging.Logger;
 import javax.tools.JavaCompiler;
 import javax.tools.ToolProvider;
 import org.apache.commons.lang3.StringUtils;
@@ -25,6 +25,7 @@ import org.openide.filesystems.FileUtil;
 import org.openide.windows.InputOutput;
 
 public abstract class AbstractJavaExerciseRunner extends AbstractExerciseRunner {
+    private static final Logger log = Logger.getLogger(AbstractJavaExerciseRunner.class.getName());
 
     protected boolean endorsedLibsExist(final TmcProjectInfo projectInfo) {
         File endorsedDir = endorsedLibsPath(projectInfo);
