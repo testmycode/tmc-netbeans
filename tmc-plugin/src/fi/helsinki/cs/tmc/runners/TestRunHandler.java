@@ -66,7 +66,7 @@ public class TestRunHandler {
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    dialogDisplayer.displayError("Failed to compile the code." + ex);
+                    dialogDisplayer.displayError("Failed to compile the code:" + ex);
                 }
 
                 @Override

@@ -20,7 +20,7 @@ public final class TestResultBuilder {
 
             if (showAll || !result.isSuccessful()) {
 
-                resultCells.add(new TestCaseResultCell(exercise, result, sourceFileLookup).getCell());
+                resultCells.add(new TestCaseResultCell(exercise, result, sourceFileLookup, result.getValgrindFailed()).getCell());
 
                 // Show only first result
                 if(!showAll) {

@@ -55,7 +55,7 @@ public class Exercise implements Serializable {
 
 
     @SerializedName("valgrind_strategy")
-    private ValgrindStrategy valgrindStrategy;
+    private ValgrindStrategy valgrindStrategy = ValgrindStrategy.FAIL;
 
     public enum ValgrindStrategy {
         @SerializedName("")
@@ -261,6 +261,7 @@ public class Exercise implements Serializable {
     public ValgrindStrategy getValgrindStrategy() {
         return valgrindStrategy;
     }
+
     @Override
     public String toString() {
         return name;

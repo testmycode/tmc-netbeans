@@ -12,6 +12,7 @@ public class TestCaseResult {
     private String message;
     private CaughtException exception;
     private String detailedMessage;
+    private boolean valgrindFailed;
 
     public TestCaseResult() {
     }
@@ -22,9 +23,10 @@ public class TestCaseResult {
         this.message = message;
     }
 
-    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
+    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace, boolean valgrindFailed) {
         this(name, successful, message);
         this.detailedMessage = valgrindTrace;
+        this.valgrindFailed = valgrindFailed;
     }
 
     public String getName() {
@@ -48,6 +50,10 @@ public class TestCaseResult {
     @CheckForNull
     public String getDetailedMessage() {
         return detailedMessage;
+    }
+
+    public boolean getValgrindFailed() {
+        return this.valgrindFailed;
     }
 
     /**

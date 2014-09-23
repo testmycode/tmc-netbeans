@@ -46,23 +46,22 @@ public class CTestCase {
     }
 
     public TestCaseResult createTestCaseResult() {
-        boolean successful; // = valgrindPassedGivenStragegy(valgrindStrategy, valgrindTrace);
+        boolean successful;
 
         String msg = message;
 
+        boolean valgrindFailed = false;
+
         if (ValgrindStrategy.FAIL == valgrindStrategy) {
-            boolean valgrindFailed = failedDueToValgrind(valgrindTrace);
+            valgrindFailed = failedDueToValgrind(valgrindTrace);
             successful = ((result.equals("success")) && !valgrindFailed);
             if (valgrindFailed) {
-                if ("Passed".equals(msg)) {
-                    msg = "Failed due to errors in valgrind log; see log below";
-                }
-
+                msg += " - Failed due to errors in valgrind log; see log below";
             }
         } else {
             successful = result.equals("success");
         }
-        return new TestCaseResult(name, successful, msg, valgrindTrace);
+        return new TestCaseResult(name, successful, msg, valgrindTrace, valgrindFailed);
     }
 
     public String getName() {
