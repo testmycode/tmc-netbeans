@@ -5,11 +5,9 @@ import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 
-
 public class CTestCase {
 
     private static final Logger log = Logger.getLogger(CTestCase.class.getName());
-
 
     private String name;
     private String result;
@@ -46,21 +44,16 @@ public class CTestCase {
     }
 
     public TestCaseResult createTestCaseResult() {
-        boolean successful;
-
         String msg = message;
 
-        boolean valgrindFailed = false;
+        boolean valgrindFailed = failedDueToValgrind(valgrindTrace);
+        boolean successful = result.equals("success") && !valgrindFailed;
 
-        if (ValgrindStrategy.FAIL == valgrindStrategy) {
-            valgrindFailed = failedDueToValgrind(valgrindTrace);
-            successful = ((result.equals("success")) && !valgrindFailed);
-            if (valgrindFailed) {
-                msg += " - Failed due to errors in valgrind log; see log below";
-            }
-        } else {
-            successful = result.equals("success");
+        if (valgrindFailed) {
+            msg += " - Failed due to errors in valgrind log; see log below";
         }
+
+
         return new TestCaseResult(name, successful, msg, valgrindTrace, valgrindFailed);
     }
 
