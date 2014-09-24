@@ -73,7 +73,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         String[] command;
 
         if (withValgrind) {
-            command = new String[]{"valgrind", "--log-file=valgrind.log", "."
+            command = new String[]{"valgrind", "--track-origins=yes", "--leak-check=full", "--log-file=valgrind.log", "."
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         } else {
             // If running tests with make fails - fall back running them manually

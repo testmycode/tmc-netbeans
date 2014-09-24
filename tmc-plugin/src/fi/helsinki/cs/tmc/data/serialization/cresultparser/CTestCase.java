@@ -47,14 +47,15 @@ public class CTestCase {
         String msg = message;
 
         boolean valgrindFailed = failedDueToValgrind(valgrindTrace);
-        boolean successful = result.equals("success") && !valgrindFailed;
-
-        if (valgrindFailed) {
-            msg += " - Failed due to errors in valgrind log; see log below";
+        boolean resultsSuccessful = result.equals("success");
+        boolean successful = resultsSuccessful && !valgrindFailed;
+        boolean failedOnlyBecauseOfValgrind = resultsSuccessful && valgrindFailed;
+        if (failedOnlyBecauseOfValgrind) {
+            msg += " - Failed due to errors in valgrind log; see log below. Try submitting to server, some leaks might be platform dependent";
         }
 
 
-        return new TestCaseResult(name, successful, msg, valgrindTrace, valgrindFailed);
+        return new TestCaseResult(name, successful, msg, valgrindTrace, failedOnlyBecauseOfValgrind);
     }
 
     public String getName() {
