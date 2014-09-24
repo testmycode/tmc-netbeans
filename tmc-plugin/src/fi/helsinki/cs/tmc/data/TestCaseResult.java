@@ -12,21 +12,23 @@ public class TestCaseResult {
     private String message;
     private CaughtException exception;
     private String detailedMessage;
+    private boolean valgrindFailed;
 
     public TestCaseResult() {
     }
-    
+
     public TestCaseResult(String name, boolean successful, String message) {
         this.name = name;
         this.successful = successful;
         this.message = message;
     }
-    
-    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace) {
+
+    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace, boolean valgrindFailed) {
         this(name, successful, message);
         this.detailedMessage = valgrindTrace;
+        this.valgrindFailed = valgrindFailed;
     }
-    
+
     public String getName() {
         return name;
     }
@@ -44,12 +46,16 @@ public class TestCaseResult {
     public CaughtException getException() {
         return exception;
     }
-    
+
     @CheckForNull
     public String getDetailedMessage() {
         return detailedMessage;
     }
-    
+
+    public boolean getValgrindFailed() {
+        return this.valgrindFailed;
+    }
+
     /**
      * Creates a TestCaseResult from a TestCase probably returned by a local run of tmc-junit-runner.
      */

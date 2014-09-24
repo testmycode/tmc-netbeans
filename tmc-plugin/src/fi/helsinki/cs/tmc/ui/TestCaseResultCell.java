@@ -40,6 +40,7 @@ public final class TestCaseResultCell {
 
     private static final Color FAIL_COLOR = new Color(0xED0000);
     private static final Color PASS_COLOR = new Color(0x6FD06D);
+    private static final Color VALGRIND_FAILED_COLOR = new Color(0xFFD000);
     private static final Color FAIL_TEXT_COLOR = FAIL_COLOR.darker();
     private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
 
@@ -50,8 +51,14 @@ public final class TestCaseResultCell {
     private final GridBagConstraints gbc = new GridBagConstraints();
     private final JPanel detailView;
     private final ResultCell resultCell;
+    private final boolean valgrindFailed;
 
     public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
+
+        this(exercise, result, sourceFileLookup, false);
+    }
+
+    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup, boolean valgrindFailed) {
 
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
@@ -61,6 +68,7 @@ public final class TestCaseResultCell {
         this.result = result;
         this.sourceFileLookup = sourceFileLookup;
         this.detailView = createDetailView();
+        this.valgrindFailed = valgrindFailed;
 
         final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
 
@@ -291,7 +299,9 @@ public final class TestCaseResultCell {
     };
 
     private Color getResultColor() {
-        if (result.isSuccessful()) {
+        if (valgrindFailed) {
+            return VALGRIND_FAILED_COLOR;
+        } else if (result.isSuccessful()) {
             return PASS_COLOR;
         } else {
             return FAIL_COLOR;

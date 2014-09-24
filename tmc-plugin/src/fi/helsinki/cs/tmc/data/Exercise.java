@@ -7,36 +7,36 @@ import java.util.Date;
 public class Exercise implements Serializable {
 
     private int id;
-    
+
     private String name;
-    
+
     private String courseName;
-    
+
     /**
      * The URL this exercise can be downloaded from.
      */
     @SerializedName("zip_url")
     private String downloadUrl;
-    
+
     /**
      * The URL the solution can be downloaded from (admins only).
      */
     @SerializedName("solution_zip_url")
     private String solutionDownloadUrl;
-    
+
     /**
      * The URL where this exercise should be posted for review.
      */
     @SerializedName("return_url")
     private String returnUrl;
-    
+
     private boolean locked;
-    
+
     @SerializedName("deadline_description")
     private String deadlineDescription;
-    
+
     private Date deadline;
-    
+
     private boolean returnable;
     @SerializedName("requires_review")
     private boolean requiresReview;
@@ -46,12 +46,23 @@ public class Exercise implements Serializable {
     @SerializedName("all_review_points_given")
     private boolean allReviewPointsGiven;
     private String checksum;
-    
+
     @SerializedName("memory_limit")
     private Integer memoryLimit;
 
     @SerializedName("runtime_params")
     private String[] runtimeParams;
+
+
+    @SerializedName("valgrind_strategy")
+    private ValgrindStrategy valgrindStrategy = ValgrindStrategy.FAIL;
+
+    public enum ValgrindStrategy {
+        @SerializedName("")
+        NONE,
+        @SerializedName("fail")
+        FAIL
+     }
 
     public Exercise() {
     }
@@ -72,7 +83,7 @@ public class Exercise implements Serializable {
     public void setId(int id) {
         this.id = id;
     }
-    
+
     public String getName() {
         return this.name;
     }
@@ -102,7 +113,7 @@ public class Exercise implements Serializable {
     public void setDeadlineDescription(String deadlineDescription) {
         this.deadlineDescription = deadlineDescription;
     }
-    
+
     public boolean hasDeadlinePassed() {
         return hasDeadlinePassedAt(new Date());
     }
@@ -117,7 +128,7 @@ public class Exercise implements Serializable {
             return false;
         }
     }
-    
+
     public ExerciseKey getKey() {
         return new ExerciseKey(courseName, name);
     }
@@ -129,7 +140,7 @@ public class Exercise implements Serializable {
     public void setCourseName(String courseName) {
         this.courseName = courseName;
     }
-    
+
     public String getDownloadUrl() {
         return this.downloadUrl;
     }
@@ -166,7 +177,7 @@ public class Exercise implements Serializable {
         }
         this.returnUrl = returnAddress;
     }
-    
+
     public Date getDeadline() {
         return deadline;
     }
@@ -174,7 +185,7 @@ public class Exercise implements Serializable {
     public void setDeadline(Date deadline) {
         this.deadline = deadline;
     }
-    
+
     public boolean isReturnable() {
         return returnable && !hasDeadlinePassed();
     }
@@ -245,6 +256,10 @@ public class Exercise implements Serializable {
 
     public void setRuntimeParams(String[] runtimeParams) {
         this.runtimeParams = runtimeParams;
+    }
+
+    public ValgrindStrategy getValgrindStrategy() {
+        return valgrindStrategy;
     }
 
     @Override

@@ -176,7 +176,7 @@ public class TestResultDisplayer {
         List<TestCaseResult> resultList = result.getTestCases();
 
         if (StringUtils.isNotBlank(valdrindOutput)) {
-            TestCaseResult valgrindResult = new TestCaseResult("Valgrind validations", false , "Click show valgrind trace to view valgrind trace", valdrindOutput);
+            TestCaseResult valgrindResult = new TestCaseResult("Valgrind validations", false , "Click show valgrind trace to view valgrind trace", valdrindOutput, true);
             resultList.set(0, valgrindResult);
         }
 

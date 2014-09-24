@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import fi.helsinki.cs.tmc.data.Exercise.ValgrindStrategy;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;
@@ -37,9 +38,9 @@ public class TestResultParser {
         return new TestRunResult(testCaseResults);
     }
 
-    public TestRunResult parseCTestResults(File resultsFile, File valgrindLog) throws Exception {
+    public TestRunResult parseCTestResults(File resultsFile, File valgrindLog, ValgrindStrategy valgrindStrategy) throws Exception {
         // CTestResultParser could use refactoring. Duplicates parseTestResults and is kinda messy.
-        CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog);
+        CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog, valgrindStrategy);
         parser.parseTestOutput();
         return new TestRunResult(parser.getTestCaseResults());
     }
