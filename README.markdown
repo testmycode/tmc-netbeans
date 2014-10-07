@@ -39,7 +39,7 @@ The system was improved and C language support was added in another SE lab proje
 Checkstyle-support was integrated by
 
 - Kenny Heinonen ([kennyhei](https://github.com/kennyhei/))
-- Kasper Hirvikoski ([kasperhirvikoski](https://github.com/kasperhirvikoski/))
+- Kasper Hirvikoski ([kasper](https://github.com/kasper/))
 - Jarmo Isotalo ([jamox](https://github.com/jamox/))
 - Joni Salmi ([josalmi](https://github.com/josalmi/))
 
