@@ -14,6 +14,10 @@ For a little more convenience while testing, you might want to set `tmc-plugin/s
 
 ## Credits ##
 
+Current maintainers of the project are
+- Martin Pärtel ([mpartel](https://github.com/mpartel))
+- Jarmo Isotalo ([jamox](https://github.com/jamox))
+
 The project started as a Software Engineering Lab project at the [University of Helsinki CS Dept.](http://cs.helsinki.fi/). The original authors of the NetBeans plugin were
 
 - Kirsi Kaltiainen
