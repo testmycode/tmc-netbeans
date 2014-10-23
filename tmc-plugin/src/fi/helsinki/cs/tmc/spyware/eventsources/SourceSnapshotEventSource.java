@@ -182,7 +182,8 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             // For now we just accept that. Not sure if the FileObject API would allow some sort of
             // global locking of the project.
             File projectDir = projectInfo.getProjectDirAsFile();
-            RecursiveZipper zipper = new RecursiveZipper(projectDir, projectInfo.getZippingDecider());
+            RecursiveZipper.ZippingDecider zippingDecider = new ZippingDeciderWrapper(projectInfo, projectInfo.getZippingDecider());
+            RecursiveZipper zipper = new RecursiveZipper(projectDir, zippingDecider);
             try {
                 byte[] data = zipper.zipProjectSources();
                 LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data, metadata);
@@ -193,6 +194,70 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 // failing the test.
                 log.log(Level.INFO, "Error zipping project sources in: " + projectDir, ex);
             }
+        }
+    }
+
+    private static class ZippingDeciderWrapper implements RecursiveZipper.ZippingDecider {
+        private static final long MAX_FILE_SIZE = 100 * 1024; // 100KB
+
+        protected static final String[] BLACKLISTED_FILE_EXTENSIONS = {
+            ".min.js",
+            ".pack.js",
+            ".jar",
+            ".war",
+            ".mp3",
+            ".ogg",
+            ".wav",
+            ".png",
+            ".jpg",
+            ".jpeg",
+            ".ttf",
+            ".eot",
+            ".woff"
+        };
+
+        private final TmcProjectInfo projectInfo;
+        private final RecursiveZipper.ZippingDecider subdecider;
+
+        public ZippingDeciderWrapper(TmcProjectInfo projectInfo, RecursiveZipper.ZippingDecider subdecider) {
+            this.projectInfo = projectInfo;
+            this.subdecider = subdecider;
+        }
+
+        protected boolean isProbablyBundledBinary(String zipPath) {
+            for (String ext : BLACKLISTED_FILE_EXTENSIONS) {
+                if (zipPath.endsWith(ext)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        protected boolean isTooBig(File file) {
+            return file.length() > MAX_FILE_SIZE;
+        }
+
+        protected boolean hasNoSnapshotFile(File dir) {
+            return new File(dir, ".tmcnosnapshot").exists();
+        }
+
+        @Override
+        public boolean shouldZip(String zipPath) {
+            File file = new File(projectInfo.getProjectDirAsFile().getParentFile(), zipPath);
+            if (file.isDirectory()) {
+                if (hasNoSnapshotFile(file)) {
+                    return false;
+                }
+            } else {
+                if (isProbablyBundledBinary(zipPath)) {
+                    return false;
+                }
+                if (isTooBig(file)) {
+                    return false;
+                }
+            }
+
+            return subdecider.shouldZip(zipPath);
         }
     }
 }
