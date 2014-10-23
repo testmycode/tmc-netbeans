@@ -83,20 +83,47 @@ public class TmcProjectInfo {
     }
 
     private abstract static class AbstractZippingDecider implements RecursiveZipper.ZippingDecider {
+
         protected TmcProjectInfo projectInfo;
 
         public AbstractZippingDecider(TmcProjectInfo projectInfo) {
             this.projectInfo = projectInfo;
         }
 
+        protected String withoutRootDir(String zipPath) {
+            int i = zipPath.indexOf('/');
+            if (i != -1) {
+                return zipPath.substring(i + 1);
+            } else {
+                return "";
+            }
+        }
+
+        protected boolean isExplicitlyStudentFile(String zipPath) {
+            // TODO: make glob patterns like 'foo/bar/*/baz/**/xoox.*' possible
+            return projectInfo.getTmcProjectFile().getExtraStudentFiles().contains(withoutRootDir(zipPath));
+        }
+
+        protected boolean hasNoSubmitFile(File dir) {
+            return new File(dir, ".tmcnosubmit").exists();
+        }
+
+        protected abstract boolean isProbablySourceFile(String zipPath);
+
         @Override
         public boolean shouldZip(String zipPath) {
-            File dir = new File(projectInfo.getProjectDirAsFile().getParentFile(), zipPath);
-            if (!dir.isDirectory()) {
+            File file = new File(projectInfo.getProjectDirAsFile().getParentFile(), zipPath);
+            if (isExplicitlyStudentFile(zipPath)) {
                 return true;
             }
-            
-            return !new File(dir, ".tmcnosubmit").exists();
+
+            if (file.isDirectory()) {
+                if (hasNoSubmitFile(file)) {
+                    return false;
+                }
+            }
+
+            return isProbablySourceFile(zipPath);
         }
     }
 
@@ -107,25 +134,8 @@ public class TmcProjectInfo {
         }
 
         @Override
-        public boolean shouldZip(String zipPath) {
-            if (!super.shouldZip(zipPath)) {
-                return false;
-            }
-
-            if (projectInfo.getTmcProjectFile().getExtraStudentFiles().contains(withoutRootDir(zipPath))) {
-                return true;
-            } else {
-                return zipPath.contains("/src/");
-            }
-        }
-
-        private String withoutRootDir(String zipPath) {
-            int i = zipPath.indexOf('/');
-            if (i != -1) {
-                return zipPath.substring(i + 1);
-            } else {
-                return "";
-            }
+        protected boolean isProbablySourceFile(String zipPath) {
+            return zipPath.contains("/src/");
         }
     }
 
@@ -138,11 +148,7 @@ public class TmcProjectInfo {
         }
 
         @Override
-        public boolean shouldZip(String zipPath) {
-            if (!super.shouldZip(zipPath)) {
-                return false;
-            }
-
+        protected boolean isProbablySourceFile(String zipPath) {
             return !rejectPattern.matcher(zipPath).matches();
         }
     }
