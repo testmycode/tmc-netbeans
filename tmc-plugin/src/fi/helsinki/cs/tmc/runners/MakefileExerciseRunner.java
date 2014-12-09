@@ -66,7 +66,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         };
     }
 
-    // WTF why not use make
+    // TODO: use make
     private TestRunResult runTests(final TmcProjectInfo projectInfo, final boolean withValgrind) throws Exception {
         log.log(Level.INFO, "Running tests {0}", projectInfo.getProjectName());
         final File testDir = projectInfo.getProjectDirAsFile();
@@ -80,20 +80,22 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             command = new String[]{testDir.getAbsolutePath()
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         }
-        log.log(Level.INFO, "Running tests for project {0} with command {1}", new Object[]{projectInfo.getProjectName(), command});
+        log.log(Level.INFO, "Running tests for project {0} with command {1}",
+                new Object[]{projectInfo.getProjectName(), Arrays.deepToString(command)});
 
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault()
                 .getIO(projectInfo.getProjectName(), false));
 
         try {
-            log.info("Prepering to run tests");
+            log.info("Preparing to run tests");
             runner.call();
-            log.info("Ran tests");
+            log.info("Running tests completed");
         } catch (IOException e) {
             if (withValgrind) {
                 runTests(projectInfo, false);
             } else {
-                log.log(Level.WARNING, "Failed to run tests: {0}", e);
+                log.log(Level.WARNING, "Failed to run tests for project: \"{0}\" with command: \"{1}\".\n\"{2}\"",
+                        new Object[]{projectInfo.getProjectName(), Arrays.deepToString(command), e.getMessage()});
                 throw new UserVisibleException("Failed to run tests:\n" + e.getMessage());
             }
         }
