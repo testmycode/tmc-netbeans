@@ -94,8 +94,9 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             runner.call();
             log.info("Running tests completed");
         } catch (IOException e) {
+            log.log(INFO, "IOException while running tests, kinda wanted. {0}", e.getMessage());
             if (withValgrind) {
-                runTests(projectInfo, false);
+                return runTests(projectInfo, false);
             } else {
                 log.log(WARNING, "Failed to run tests for project: \"{0}\" with command: \"{1}\".\n\"{2}\"",
                         new Object[]{projectInfo.getProjectName(), Arrays.deepToString(command), e.getMessage()});
