@@ -13,6 +13,7 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -82,6 +83,7 @@ public class CTestResultParser {
         }
 
         if (doc == null) {
+            log.log(INFO, "doc cannot be null - can't parse test results :(");
             throw new IllegalStateException("doc cannot be null - can't parse test results :(");
         }
 
@@ -96,7 +98,7 @@ public class CTestResultParser {
             String message = node.getElementsByTagName("message").item(0).getTextContent();
             cases.add(new CTestCase(name, result, message, valgrindStrategy));
         }
-
+        log.log(INFO, "C testcases parsed.");
         return cases;
     }
 

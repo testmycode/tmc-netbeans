@@ -13,9 +13,14 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import static java.util.logging.Level.INFO;
+import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 
 public class TestResultParser {
+
+  private static final Logger log = Logger.getLogger(TestResultParser.class.getName());
+
     public TestRunResult parseTestResults(File resultsFile) throws IOException {
         String resultsJson = FileUtils.readFileToString(resultsFile, "UTF-8");
         return parseTestResults(resultsJson);
@@ -40,8 +45,11 @@ public class TestResultParser {
 
     public TestRunResult parseCTestResults(File resultsFile, File valgrindLog, ValgrindStrategy valgrindStrategy) throws Exception {
         // CTestResultParser could use refactoring. Duplicates parseTestResults and is kinda messy.
+        log.log(INFO, "Starting to parse C test results.");
         CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog, valgrindStrategy);
+        log.log(INFO, "C test results parser created.");
         parser.parseTestOutput();
+        log.log(INFO, "C test results parsed.");
         return new TestRunResult(parser.getTestCaseResults());
     }
 }
