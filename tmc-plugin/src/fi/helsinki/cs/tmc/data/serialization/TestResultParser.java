@@ -50,6 +50,8 @@ public class TestResultParser {
         log.log(INFO, "C test results parser created.");
         parser.parseTestOutput();
         log.log(INFO, "C test results parsed.");
-        return new TestRunResult(parser.getTestCaseResults());
+        TestRunResult results = new TestRunResult(parser.getTestCaseResults());
+        log.log(INFO, "TestRunTesults created.");
+        return results;
     }
 }

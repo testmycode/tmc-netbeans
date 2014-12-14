@@ -54,10 +54,12 @@ public class CTestResultParser {
     }
 
     public List<TestCaseResult> getTestCaseResults() {
+        log.log(INFO, "Creating TestCaseResults.");
         List<TestCaseResult> tcaseResults = new ArrayList<TestCaseResult>();
         for (CTestCase test : tests) {
             tcaseResults.add(test.createTestCaseResult());
         }
+        log.log(INFO, "Created TestCaseResults.");
         return tcaseResults;
     }
 
