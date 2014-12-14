@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import java.util.Arrays;
 import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
@@ -66,7 +67,7 @@ public class TestRunHandler {
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    log.log(INFO, "CompilingProject failed", ex.getMessage());
+                    log.log(INFO, "CompilingProject failed {0}", ex.getMessage());
                     dialogDisplayer.displayError("Failed to compile the code:" + ex);
                 }
 
@@ -93,8 +94,9 @@ public class TestRunHandler {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                log.log(INFO, "StartRunningTests failed", ex.getMessage());
-                dialogDisplayer.displayError("Failed to run the tests.");
+                log.log(INFO, "StartRunningTests failed message: {0}, trace: {1}",
+                        new Object[] {ex.getMessage(), Arrays.deepToString(ex.getStackTrace())});
+                dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
             }
 
             @Override
