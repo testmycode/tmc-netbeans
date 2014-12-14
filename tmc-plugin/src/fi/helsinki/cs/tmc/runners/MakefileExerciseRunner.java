@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
+import static java.util.logging.Level.INFO;
+import static java.util.logging.Level.WARNING;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -31,6 +33,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         File workDir = projectInfo.getProjectDirAsFile();
 
         if (makeFile == null) {
+            log.log(INFO, "Project has no Makefile");
             throw new RuntimeException("Project has no Makefile");
         }
         String[] command = {"make", "test"};
@@ -48,7 +51,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
                     }
                     return ret;
                 } catch (Exception ex) {
-                    log.log(Level.INFO, "Compilation failed, {0}", ex);
+                    log.log(INFO, "Compilation failed, {0}", ex.getMessage());
                     io.select();
                     throw ex;
                 }
@@ -68,7 +71,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
 
     // TODO: use make
     private TestRunResult runTests(final TmcProjectInfo projectInfo, final boolean withValgrind) throws Exception {
-        log.log(Level.INFO, "Running tests {0}", projectInfo.getProjectName());
+        log.log(INFO, "Running tests {0}", projectInfo.getProjectName());
         final File testDir = projectInfo.getProjectDirAsFile();
         String[] command;
 
@@ -80,7 +83,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             command = new String[]{testDir.getAbsolutePath()
                 + File.separatorChar + "test" + File.separatorChar + "test"};
         }
-        log.log(Level.INFO, "Running tests for project {0} with command {1}",
+        log.log(INFO, "Running tests for project {0} with command {1}",
                 new Object[]{projectInfo.getProjectName(), Arrays.deepToString(command)});
 
         ProcessRunner runner = new ProcessRunner(command, testDir, IOProvider.getDefault()
@@ -94,7 +97,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             if (withValgrind) {
                 runTests(projectInfo, false);
             } else {
-                log.log(Level.WARNING, "Failed to run tests for project: \"{0}\" with command: \"{1}\".\n\"{2}\"",
+                log.log(WARNING, "Failed to run tests for project: \"{0}\" with command: \"{1}\".\n\"{2}\"",
                         new Object[]{projectInfo.getProjectName(), Arrays.deepToString(command), e.getMessage()});
                 throw new UserVisibleException("Failed to run tests:\n" + e.getMessage());
             }
@@ -107,10 +110,10 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         Exercise exercise = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
 
         if (exercise != null) {
-            log.log(Level.INFO, "Parsing exercises with valgrind strategy {0}", exercise.getValgrindStrategy());
+            log.log(INFO, "Parsing exercises with valgrind strategy {0}", exercise.getValgrindStrategy());
             return resultParser.parseCTestResults(resultsFile, valgrindLog, exercise.getValgrindStrategy());
         } else {
-            log.log(Level.INFO, "Parsing exercises with out valgrind strategy");
+            log.log(INFO, "Parsing exercises with out valgrind strategy");
             return resultParser.parseCTestResults(resultsFile, valgrindLog, null);
         }
     }
