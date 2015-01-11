@@ -55,15 +55,13 @@ public class PushEventListener {
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
-        initClientIfPossible();
-        
         this.eventBus.subscribeDependent(new TmcEventListener() {
             public void receive(TmcSettings.SavedEvent e) {
-                reconnect();
+                reconnectSoon();
             }
             
             public void receive(CourseDb.ChangedEvent e) {
-                reconnect();
+                reconnectSoon();
             }
         }, this);
         
@@ -73,13 +71,24 @@ public class PushEventListener {
             public void run() {
                 ensureConnected();
             }
-        }, CONNECTION_CHECK_INTERVAL);
+        }, 0, CONNECTION_CHECK_INTERVAL);
     }
     
     private synchronized void ensureConnected() {
-        if (client != null && client.isDisconnected()) {
+        if (client == null || client.isDisconnected()) {
             initClientIfPossible();
         }
+    }
+
+    private void reconnectSoon() {
+        Thread t = new Thread() {
+            @Override
+            public void run() {
+                reconnect();
+            }
+        };
+        t.setDaemon(true);
+        t.start();
     }
     
     private synchronized void reconnect() {
