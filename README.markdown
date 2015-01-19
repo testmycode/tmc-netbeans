@@ -4,7 +4,7 @@ This is a NetBeans plugin for the [Test My Code server](https://github.com/testm
 
 ## Developer setup ##
 
-:exclamation: If you cannot find `NetBeans Platforms` from within `Tools` activate *Developing NetBeans* plugin from `Tools -> Plugins -> Installed` check the checkbox next to *Developing NetBeans* and click `Activate`. 
+:exclamation: If you cannot find `NetBeans Platforms` from within `Tools`. You need to activate *Developing NetBeans* plugin from `Tools -> Plugins -> Installed`, check the checkbox next to *Developing NetBeans*, and click `Activate`. 
 
 To ensure compatibility to a specific release, the project is configured to use a fresh unpatched installation of a specific version of NetBeans (currently 8.0.2). Download the "OS Independent Zip" edition of this version of NetBeans and extract it somewhere.
 Then start your ordinary NetBeans (NOT the one you just extracted, another one). Go to `Tools -> NetBeans Platforms` and
