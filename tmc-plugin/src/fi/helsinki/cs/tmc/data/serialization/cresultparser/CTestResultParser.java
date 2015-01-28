@@ -15,6 +15,8 @@ import java.util.List;
 import java.util.Scanner;
 import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
@@ -134,7 +136,7 @@ public class CTestResultParser {
             outputs[i] = "";
         }
 
-	Pattern errpat = Pattern.compile("ERROR SUMMARY: ([0-9]+)");
+        Pattern errorPattern = Pattern.compile("ERROR SUMMARY: ([0-9]+)");
 
         String line = scanner.nextLine();
         int firstPID = parsePID(line);
@@ -149,7 +151,7 @@ public class CTestResultParser {
                 parentOutput += "\n" + line;
             } else {
                 outputs[findIndex(pid, pids)] += "\n" + line;
-                Matcher m = errpat.matcher(line);
+                Matcher m = errorPattern.matcher(line);
                 if (m.find()) {
                     errors[findIndex(pid, pids)] = Integer.parseInt(m.group(1));
                 }
@@ -158,9 +160,10 @@ public class CTestResultParser {
         scanner.close();
 
         for (int i = 0; i < outputs.length; i++) {
-	    if (errors[i] == 0) {
-		outputs[i] = "";
-	    }
+            if (errors[i] == 0) {
+                // Workaround for a bug where any valgrind output is considered a potential error.
+                outputs[i] = "";
+            }
             tests.get(i).setValgrindTrace(outputs[i]);
         }
     }
