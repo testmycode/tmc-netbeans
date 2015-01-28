@@ -129,9 +129,12 @@ public class CTestResultParser {
         String parentOutput = ""; // Contains total amount of memory used and such things. Useful if we later want to add support for testing memory usage
         String[] outputs = new String[tests.size()];
         int[] pids = new int[tests.size()];
+        int[] errors = new int[tests.size()];
         for (int i = 0; i < outputs.length; i++) {
             outputs[i] = "";
         }
+
+	Pattern errpat = Pattern.compile("ERROR SUMMARY: ([0-9]+)");
 
         String line = scanner.nextLine();
         int firstPID = parsePID(line);
@@ -146,11 +149,18 @@ public class CTestResultParser {
                 parentOutput += "\n" + line;
             } else {
                 outputs[findIndex(pid, pids)] += "\n" + line;
+                Matcher m = errpat.matcher(line);
+                if (m.find()) {
+                    errors[findIndex(pid, pids)] = Integer.parseInt(m.group(1));
+                }
             }
         }
         scanner.close();
 
         for (int i = 0; i < outputs.length; i++) {
+	    if (errors[i] == 0) {
+		outputs[i] = "";
+	    }
             tests.get(i).setValgrindTrace(outputs[i]);
         }
     }
