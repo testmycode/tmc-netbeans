@@ -129,7 +129,7 @@ public class CTestResultParserTest {
         CTestResultParser cpar = null;
         try {
             File ttmp = constructTestOutput(oneOfEachTest);
-            File vtmp = constructNotMemoryFailingValgrindOutput(oneOfEachTest);
+            File vtmp = constructMemoryFailingValgrindOutput();
 
             cpar = new CTestResultParser(ttmp, vtmp, null);
             cpar.parseTestOutput();
@@ -140,11 +140,12 @@ public class CTestResultParserTest {
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
         assertEquals("There should be two test results", 2, results.size());
-        int i = 2;
-        for (TestCaseResult r : results) {
-            assertEquals("==" + i * 2 + "== " + (i - 1), r.getDetailedMessage().split("\n")[1]);
-            i++;
-        }
+        assertNotNull("Valgrind errors should go in detailed message",
+                results.get(0).getDetailedMessage());
+        assertTrue("Valgrind errors should go in detailed message",
+                results.get(0).getDetailedMessage().contains("==1== 1"));
+        assertNull("Valgrind output should go into detailed message if there were not errors",
+                results.get(1).getDetailedMessage());
     }
 
     @Test
@@ -163,10 +164,9 @@ public class CTestResultParserTest {
         }
         List<TestCaseResult> results = cpar.getTestCaseResults();
         assertEquals("There should be two test results", 2, results.size());
-        int i = 2;
         for (TestCaseResult r : results) {
-            assertEquals("==" + i * 2 + "== " + (i - 1), r.getDetailedMessage().split("\n")[1]);
-            i++;
+            assertNull("Valgrind output should be empty when there was no error",
+                    r.getDetailedMessage());
         }
     }
 
