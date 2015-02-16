@@ -57,6 +57,9 @@ public class Exercise implements Serializable {
     @SerializedName("valgrind_strategy")
     private ValgrindStrategy valgrindStrategy = ValgrindStrategy.FAIL;
 
+    @SerializedName("code_review_requests_enabled")
+    private boolean codeReviewRequestsEnabled;
+
     public enum ValgrindStrategy {
         @SerializedName("")
         NONE,
@@ -260,6 +263,14 @@ public class Exercise implements Serializable {
 
     public ValgrindStrategy getValgrindStrategy() {
         return valgrindStrategy;
+    }
+
+    public boolean isCodeReviewRequestsEnabled() {
+        return codeReviewRequestsEnabled;
+    }
+
+    public void setCodeReviewRequestsEnabled(boolean codeReviewRequestsEnabled) {
+        this.codeReviewRequestsEnabled = codeReviewRequestsEnabled;
     }
 
     @Override
