@@ -70,10 +70,16 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
         Exercise exercise = exerciseForProject(project);
-        if (exercise != null) {
-            ResultCollector resultCollector = new ResultCollector(exercise);
-            this.checkstyleRunHandler.performAction(resultCollector, project);
-            this.testRunHandler.performAction(resultCollector, project);
+        if (exercise == null) {
+            return;
         }
+
+        ResultCollector resultCollector = new ResultCollector(exercise);
+
+        if (exercise.isCheckstyleEnabled()) {
+            this.checkstyleRunHandler.performAction(resultCollector, project);
+        }
+
+        this.testRunHandler.performAction(resultCollector, project);
     }
 }
