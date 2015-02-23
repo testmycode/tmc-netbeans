@@ -64,7 +64,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     protected boolean enabledFor(Exercise exercise) {
         // Overridden to not care about the deadline
-        return exercise.isReturnable();
+        return exercise.isRunTestsLocallyActionEnabled() && exercise.isReturnable();
     }
 
     @Override
