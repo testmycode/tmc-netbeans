@@ -60,6 +60,9 @@ public class Exercise implements Serializable {
     @SerializedName("code_review_requests_enabled")
     private boolean codeReviewRequestsEnabled;
 
+    @SerializedName("run_tests_locally_action_enabled")
+    private boolean runTestsLocallyActionEnabled = true;
+
     public enum ValgrindStrategy {
         @SerializedName("")
         NONE,
@@ -271,6 +274,14 @@ public class Exercise implements Serializable {
 
     public void setCodeReviewRequestsEnabled(boolean codeReviewRequestsEnabled) {
         this.codeReviewRequestsEnabled = codeReviewRequestsEnabled;
+    }
+
+    public boolean isRunTestsLocallyActionEnabled() {
+        return runTestsLocallyActionEnabled;
+    }
+
+    public void setRunTestsLocallyActionEnabled(boolean runTestsLocallyActionEnabled) {
+        this.runTestsLocallyActionEnabled = runTestsLocallyActionEnabled;
     }
 
     @Override
