@@ -69,19 +69,8 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
-    public boolean enable(Project... projects) {
-        if (projects.length != 1) {
-            return false; // One at a time please
-        }
-
-        TmcProjectInfo projectInfo = projectMediator.wrapProject(projects[0]);
-        Exercise exercise = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
-
-        if (exercise != null && !exercise.isCodeReviewRequestsEnabled()) {
-            return false;
-        }
-
-        return super.enable(projects);
+    protected boolean enabledFor(Exercise exercise) {
+        return exercise.isCodeReviewRequestsEnabled() && super.enabledFor(exercise);
     }
 
     @Override

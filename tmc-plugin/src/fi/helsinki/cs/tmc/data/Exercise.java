@@ -58,7 +58,7 @@ public class Exercise implements Serializable {
     private ValgrindStrategy valgrindStrategy = ValgrindStrategy.FAIL;
 
     @SerializedName("code_review_requests_enabled")
-    private boolean codeReviewRequestsEnabled;
+    private boolean codeReviewRequestsEnabled = true;
 
     @SerializedName("run_tests_locally_action_enabled")
     private boolean runTestsLocallyActionEnabled = true;
