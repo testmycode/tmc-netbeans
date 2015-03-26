@@ -1,4 +1,5 @@
-package fi.helsinki.cs.tmc.runners;
+/**
+ * package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
@@ -119,3 +120,5 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         }
     }
 }
+
+*/

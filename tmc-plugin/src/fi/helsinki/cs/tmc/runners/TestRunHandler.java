@@ -55,20 +55,29 @@ public class TestRunHandler {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
             final ExerciseRunner runner = getRunner(projectInfo);
-            BgTask.start("Compiling project", runner.getCompilingTask(projectInfo), new BgTaskListener<Integer>() {
+            BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
                 @Override
-                public void bgTaskReady(Integer result) {
-                    if (result == 0) {
-                        startRunningTests(runner, projectInfo, resultCollector);
-                    } else {
+                public void bgTaskReady(TestRunResult result) {
+                    if (result == null) {
                         dialogDisplayer.displayError("The code did not compile.");
+                        return;
+
                     }
+                    Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+                    boolean canSubmit = ex.isReturnable();
+                    resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
+                        @Override
+                        public void run() {
+                            exerciseSubmitter.performAction(projectInfo.getProject());
+                        }
+                    }, resultCollector);
                 }
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    log.log(INFO, "CompilingProject failed {0}", ex.getMessage());
-                    dialogDisplayer.displayError("Failed to compile the code:" + ex);
+                    log.log(INFO, "performAction failed message: {0}, trace: {1}",
+                            new Object[]{ex.getMessage(), Arrays.deepToString(ex.getStackTrace())});
+                    dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
                 }
 
                 @Override
@@ -78,41 +87,15 @@ public class TestRunHandler {
         }
     }
 
-    private void startRunningTests(ExerciseRunner runner, final TmcProjectInfo projectInfo, final ResultCollector resultCollector) {
-        BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
-            @Override
-            public void bgTaskReady(TestRunResult result) {
-                Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
-                boolean canSubmit = ex.isReturnable();
-                resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
-                    @Override
-                    public void run() {
-                        exerciseSubmitter.performAction(projectInfo.getProject());
-                    }
-                }, resultCollector);
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                log.log(INFO, "StartRunningTests failed message: {0}, trace: {1}",
-                        new Object[] {ex.getMessage(), Arrays.deepToString(ex.getStackTrace())});
-                dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-        });
-    }
-
     private AbstractExerciseRunner getRunner(TmcProjectInfo projectInfo) {
         switch (projectInfo.getProjectType()) {
             case JAVA_MAVEN:
-                return new MavenExerciseRunner();
+                return null;
             case JAVA_SIMPLE:
+                log.log(INFO, "Ant task selected");
                 return new AntExerciseRunner();
             case MAKEFILE:
-                return new MakefileExerciseRunner();
+                return null;
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
         }

@@ -2,6 +2,12 @@ package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
+<<<<<<< HEAD
+=======
+import fi.helsinki.cs.tmc.langs.TestResult;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
+>>>>>>> 7e632d9... Initial refactoring, ant testrunning reworked
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
@@ -17,7 +23,9 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
+import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
+import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import org.apache.tools.ant.module.api.support.ActionUtils;
 import org.netbeans.api.java.classpath.ClassPath;
@@ -25,48 +33,67 @@ import org.netbeans.api.project.Project;
 import org.openide.execution.ExecutorTask;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.windows.InputOutput;
 
 public class AntExerciseRunner extends AbstractJavaExerciseRunner {
-    private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
 
-    @Override
-    public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {
-        Project project = projectInfo.getProject();
-        FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
-        if (buildScript == null) {
-            throw new RuntimeException("Project has no build.xml");
-        }
-        ExecutorTask task;
-        try {
-            task = ActionUtils.runTarget(buildScript, new String[]{"compile-test"}, null);
-            return executorTaskToCallable(task);
-        } catch (IOException ex) {
-            throw ExceptionUtils.toRuntimeException(ex);
-        }
-    }
+    private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
 
     @Override
     public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
         return new Callable<TestRunResult>() {
+
             @Override
-            public TestRunResult call() throws UserVisibleException, IOException, InterruptedException, ExecutionException {
-                FileObject testDir = findTestDir(projectInfo);
-                if (testDir == null) {
-                    throw new UserVisibleException("No test directory in project");
+            public TestRunResult call() throws Exception {
+
+                log.log(INFO,
+                        "Starting compile");
+
+                Project project = projectInfo.getProject();
+                FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
+                if (buildScript == null) {
+                    throw new RuntimeException("Project has no build.xml");
+                }
+                ExecutorTask task;
+
+                try {
+                    task = ActionUtils.runTarget(buildScript, new String[]{"compile-test"}, null);
+                } catch (IOException ex) {
+                    Exceptions.printStackTrace(ex);
+                    throw ExceptionUtils.toRuntimeException(ex);
+                } catch (IllegalArgumentException ex) {
+                    Exceptions.printStackTrace(ex);
+                    throw ExceptionUtils.toRuntimeException(ex);
                 }
 
-                List<TestMethod> tests = findProjectTests(projectInfo, testDir);
-
-                File tempFile;
-                tempFile = File.createTempFile("tmc_test_results", ".txt");
-                try {
-                    return runTests(projectInfo, testDir, tests, tempFile);
-                } finally {
-                    tempFile.delete();
+                int compileResult = task.result();
+                if (compileResult == 0) {
+                    log.log(INFO, "Compile resulted in 0");
+                    return runTests(projectInfo);
+                } else {
+                    return null;
                 }
             }
         };
+    }
+
+    protected TestRunResult runTests(final TmcProjectInfo projectInfo) throws UserVisibleException, IOException, InterruptedException, ExecutionException {
+
+        FileObject testDir = findTestDir(projectInfo);
+        if (testDir == null) {
+            throw new UserVisibleException("No test directory in project");
+        }
+
+        List<TestMethod> tests = findProjectTests(projectInfo, testDir);
+
+        File tempFile;
+        tempFile = File.createTempFile("tmc_test_results", ".txt");
+        try {
+            return runTests(projectInfo, testDir, tests, tempFile);
+        } finally {
+            tempFile.delete();
+        }
     }
 
     private TestRunResult runTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods, File tempFile) throws UserVisibleException {

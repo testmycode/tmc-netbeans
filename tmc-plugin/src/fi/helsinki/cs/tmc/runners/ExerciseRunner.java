@@ -5,7 +5,5 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import java.util.concurrent.Callable;
 
 public interface ExerciseRunner {
-    public abstract Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo);
-
     public abstract Callable<TestRunResult> getTestRunningTask(TmcProjectInfo projectInfo);
 }
