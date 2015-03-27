@@ -40,8 +40,7 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
             @Override
             public Optional<TestRunResult> call() throws Exception {
 
-                log.log(INFO,
-                        "Starting compile");
+                log.log(INFO, "Starting compile");
 
                 Project project = projectInfo.getProject();
                 FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
@@ -63,7 +62,7 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
                 int compileResult = task.result();
                 if (compileResult == 0) {
                     log.log(INFO, "Compile success for project {0}", projectInfo.toString());
-                    return Optional.of(runTests(projectInfo));
+                    return Optional.of(runTestTask(projectInfo));
                 } else {
                     return Optional.absent();
                 }
@@ -71,7 +70,7 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
         };
     }
 
-    protected TestRunResult runTests(final TmcProjectInfo projectInfo) throws UserVisibleException, IOException, InterruptedException, ExecutionException {
+    protected TestRunResult runTestTask(final TmcProjectInfo projectInfo) throws UserVisibleException, IOException, InterruptedException, ExecutionException {
 
         FileObject testDir = findTestDir(projectInfo);
         if (testDir == null) {

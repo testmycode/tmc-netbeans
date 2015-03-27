@@ -90,7 +90,8 @@ public class TestRunHandler {
     private AbstractExerciseRunner getRunner(TmcProjectInfo projectInfo) {
         switch (projectInfo.getProjectType()) {
             case JAVA_MAVEN:
-                return null;
+                log.log(INFO, "Maven task selected");
+                return new MavenExerciseRunner();
             case JAVA_SIMPLE:
                 log.log(INFO, "Ant task selected");
                 return new AntExerciseRunner();
