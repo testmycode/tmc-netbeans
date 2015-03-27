@@ -96,7 +96,8 @@ public class TestRunHandler {
                 log.log(INFO, "Ant task selected");
                 return new AntExerciseRunner();
             case MAKEFILE:
-                return null;
+                log.log(INFO, "Makefile task selected");
+                return new MakefileExerciseRunner();
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
         }

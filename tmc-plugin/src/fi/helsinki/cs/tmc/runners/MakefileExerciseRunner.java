@@ -1,6 +1,6 @@
-/**
- * package fi.helsinki.cs.tmc.runners;
+package fi.helsinki.cs.tmc.runners;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -25,51 +25,47 @@ import org.openide.windows.InputOutput;
 public class MakefileExerciseRunner extends AbstractExerciseRunner {
 
     private static final Logger log = Logger.getLogger(MakefileExerciseRunner.class.getName());
-
+    
     @Override
-    public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {
-        log.log(Level.INFO, "Compiling project {0}", projectInfo.getProjectName());
-        Project project = projectInfo.getProject();
-        FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
-        File workDir = projectInfo.getProjectDirAsFile();
+    public Callable<Optional<TestRunResult>> getTestRunningTask(final TmcProjectInfo projectInfo) {
+        return new Callable<Optional<TestRunResult>>() {
 
-        if (makeFile == null) {
-            log.log(INFO, "Project has no Makefile");
-            throw new RuntimeException("Project has no Makefile");
-        }
-        String[] command = {"make", "test"};
-
-        final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
-        final ProcessRunner runner = new ProcessRunner(command, workDir, io);
-        return new Callable<Integer>() {
             @Override
-            public Integer call() throws Exception {
+            public Optional<TestRunResult> call() throws Exception {
+                log.log(Level.INFO, "Compiling project {0}", projectInfo.getProjectName());
+                Project project = projectInfo.getProject();
+                FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
+                
+                if (makeFile == null) {
+                    log.log(INFO, "Project has no Makefile");
+                    return Optional.absent();
+                }
+                
+                File workDir = projectInfo.getProjectDirAsFile();
+                String[] command = {"make", "test"};
+                
+                final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
+                final ProcessRunner runner = new ProcessRunner(command, workDir, io);
+                
                 try {
                     ProcessResult result = runner.call();
                     int ret = result.statusCode;
                     if (ret != 0) {
                         io.select();
+                        log.log(INFO, "Compile resulted in non-zero exit code {0}", result.statusCode);
+                        return Optional.absent();
                     }
-                    return ret;
+
+                    log.log(INFO, "Running tests");
+                    return Optional.of(runTests(projectInfo, true));
                 } catch (Exception ex) {
-                    log.log(INFO, "Compilation failed, {0}", ex.getMessage());
                     io.select();
                     throw ex;
                 }
             }
         };
     }
-
-    @Override
-    public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
-        return new Callable<TestRunResult>() {
-            @Override
-            public TestRunResult call() throws Exception {
-                return runTests(projectInfo, true);
-            }
-        };
-    }
-
+    
     // TODO: use make
     private TestRunResult runTests(final TmcProjectInfo projectInfo, final boolean withValgrind) throws Exception {
         log.log(INFO, "Running tests {0}", projectInfo.getProjectName());
@@ -120,5 +116,3 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
         }
     }
 }
-
-*/
