@@ -1,13 +1,8 @@
 package fi.helsinki.cs.tmc.runners;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
-<<<<<<< HEAD
-=======
-import fi.helsinki.cs.tmc.langs.TestResult;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutor;
-import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
->>>>>>> 7e632d9... Initial refactoring, ant testrunning reworked
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
@@ -23,7 +18,6 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.CancellationException;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
-import java.util.concurrent.FutureTask;
 import java.util.logging.Level;
 import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
@@ -41,11 +35,10 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
     private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
 
     @Override
-    public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
-        return new Callable<TestRunResult>() {
-
+    public Callable<Optional<TestRunResult>> getTestRunningTask(final TmcProjectInfo projectInfo) {
+        return new Callable<Optional<TestRunResult>>() {
             @Override
-            public TestRunResult call() throws Exception {
+            public Optional<TestRunResult> call() throws Exception {
 
                 log.log(INFO,
                         "Starting compile");
@@ -69,10 +62,10 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
 
                 int compileResult = task.result();
                 if (compileResult == 0) {
-                    log.log(INFO, "Compile resulted in 0");
-                    return runTests(projectInfo);
+                    log.log(INFO, "Compile success for project {0}", projectInfo.toString());
+                    return Optional.of(runTests(projectInfo));
                 } else {
-                    return null;
+                    return Optional.absent();
                 }
             }
         };
