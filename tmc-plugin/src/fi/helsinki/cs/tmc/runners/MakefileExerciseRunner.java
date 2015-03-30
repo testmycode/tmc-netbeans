@@ -25,28 +25,28 @@ import org.openide.windows.InputOutput;
 public class MakefileExerciseRunner extends AbstractExerciseRunner {
 
     private static final Logger log = Logger.getLogger(MakefileExerciseRunner.class.getName());
-    
+
     @Override
     public Callable<Optional<TestRunResult>> getTestRunningTask(final TmcProjectInfo projectInfo) {
-        return new Callable<Optional<TestRunResult>>() {
+        final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
 
+        return new Callable<Optional<TestRunResult>>() {
             @Override
             public Optional<TestRunResult> call() throws Exception {
                 log.log(Level.INFO, "Compiling project {0}", projectInfo.getProjectName());
                 Project project = projectInfo.getProject();
                 FileObject makeFile = project.getProjectDirectory().getFileObject("Makefile");
-                
+
                 if (makeFile == null) {
                     log.log(INFO, "Project has no Makefile");
                     return Optional.absent();
                 }
-                
+
                 File workDir = projectInfo.getProjectDirAsFile();
                 String[] command = {"make", "test"};
-                
-                final InputOutput io = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
+
                 final ProcessRunner runner = new ProcessRunner(command, workDir, io);
-                
+
                 try {
                     ProcessResult result = runner.call();
                     int ret = result.statusCode;
@@ -65,7 +65,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
             }
         };
     }
-    
+
     // TODO: use make
     private TestRunResult runTests(final TmcProjectInfo projectInfo, final boolean withValgrind) throws Exception {
         log.log(INFO, "Running tests {0}", projectInfo.getProjectName());

@@ -27,13 +27,14 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
 
     @Override
     public Callable<Optional<TestRunResult>> getTestRunningTask(final TmcProjectInfo projectInfo) {
+        final InputOutput inOut = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
+
         return new Callable<Optional<TestRunResult>>() {
             @Override
             public Optional<TestRunResult> call() throws Exception {
                 File projectDir = projectInfo.getProjectDirAsFile();
                 log.log(INFO, "Starting compile");
                 String goal = "test-compile";
-                final InputOutput inOut = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
 
                 final ProcessRunner runner = new MavenRunBuilder()
                         .setProjectDir(projectDir)
