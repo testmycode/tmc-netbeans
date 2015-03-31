@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.runners;
 
-import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
+import fi.helsinki.cs.tmc.data.TestRunResult.Status;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.maven.MavenRunBuilder;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
@@ -14,7 +14,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.Callable;
-import static java.util.logging.Level.INFO;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.windows.IOProvider;
@@ -26,14 +26,14 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
     private static final Logger log = Logger.getLogger(MavenExerciseRunner.class.getName());
 
     @Override
-    public Callable<Optional<TestRunResult>> getTestRunningTask(final TmcProjectInfo projectInfo) {
+    public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
         final InputOutput inOut = IOProvider.getDefault().getIO(projectInfo.getProjectName(), false);
 
-        return new Callable<Optional<TestRunResult>>() {
+        return new Callable<TestRunResult>() {
             @Override
-            public Optional<TestRunResult> call() throws Exception {
+            public TestRunResult call() throws Exception {
                 File projectDir = projectInfo.getProjectDirAsFile();
-                log.log(INFO, "Starting compile");
+                log.info("Starting compile");
                 String goal = "test-compile";
 
                 final ProcessRunner runner = new MavenRunBuilder()
@@ -46,11 +46,11 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
                     int ret = result.statusCode;
                     if (ret != 0) {
                         inOut.select();
-                        log.log(INFO, "Compile resulted in non-zero exit code {0}", result.statusCode);
-                        return Optional.absent();
+                        log.log(Level.INFO, "Compile resulted in non-zero exit code {0}", result.statusCode);
+                        return new TestRunResult(Status.COMPILE_FAILED);
                     } else {
-                        log.log(INFO, "Running tests");
-                        return Optional.of(runTests(projectInfo));
+                        log.log(Level.INFO, "Running tests");
+                        return runTests(projectInfo, inOut);
                     }
                 } catch (Exception ex) {
                     inOut.select();
@@ -61,12 +61,10 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
         };
     }
 
-    public TestRunResult runTests(final TmcProjectInfo projectInfo) throws Exception {
+    public TestRunResult runTests(final TmcProjectInfo projectInfo, InputOutput inOut) throws Exception {
         final File projectDir = projectInfo.getProjectDirAsFile();
         String goal = MAVEN_TEST_RUN_GOAL;
         Map<String, String> props = new HashMap<String, String>();
-        InputOutput inOut = getIoTab();
-
         List<String> jvmOpts = new ArrayList<String>();
 
         Exercise exercise = tryGetExercise(projectInfo.getProject());

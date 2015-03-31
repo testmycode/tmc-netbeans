@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.runners;
 
 import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestRunResult;
@@ -56,16 +57,16 @@ public class TestRunHandler {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
             final ExerciseRunner runner = getRunner(projectInfo);
-            BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<Optional<TestRunResult>>() {
+            BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
                 @Override
-                public void bgTaskReady(Optional<TestRunResult> result) {
-                    if (!result.isPresent()) {
+                public void bgTaskReady(TestRunResult result) {
+                    if (result.status == TestRunResult.Status.COMPILE_FAILED) {
                         dialogDisplayer.displayError("The code did not compile.");
                         return;
                     }
                     Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
                     boolean canSubmit = ex.isReturnable();
-                    resultDisplayer.showLocalRunResult(result.get().getTestCaseResults(), canSubmit, new Runnable() {
+                    resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
                         @Override
                         public void run() {
                             exerciseSubmitter.performAction(projectInfo.getProject());
@@ -75,8 +76,8 @@ public class TestRunHandler {
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    log.log(INFO, "performAction of TestRunHandler failed with message: {0}, trace: {1}",
-                            new Object[]{ex.getMessage(), Arrays.deepToString(ex.getStackTrace())});
+                    log.log(INFO, "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
+                            new Object[]{ex.getMessage(), Throwables.getStackTraceAsString(ex)});
                     dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
                 }
 
@@ -90,13 +91,10 @@ public class TestRunHandler {
     private AbstractExerciseRunner getRunner(TmcProjectInfo projectInfo) {
         switch (projectInfo.getProjectType()) {
             case JAVA_MAVEN:
-                log.log(INFO, "Maven task selected");
                 return new MavenExerciseRunner();
             case JAVA_SIMPLE:
-                log.log(INFO, "Ant task selected");
                 return new AntExerciseRunner();
             case MAKEFILE:
-                log.log(INFO, "Makefile task selected");
                 return new MakefileExerciseRunner();
             default:
                 throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
