@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
-import fi.helsinki.cs.tmc.data.TestRunResult.Status;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.utilities.maven.MavenRunBuilder;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
@@ -47,7 +46,7 @@ public class MavenExerciseRunner extends AbstractJavaExerciseRunner {
                     if (ret != 0) {
                         inOut.select();
                         log.log(Level.INFO, "Compile resulted in non-zero exit code {0}", result.statusCode);
-                        return new TestRunResult(Status.COMPILE_FAILED);
+                        return new TestRunResult(false);
                     } else {
                         log.log(Level.INFO, "Running tests");
                         return runTests(projectInfo, inOut);

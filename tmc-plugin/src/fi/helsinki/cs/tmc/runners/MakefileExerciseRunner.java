@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
-import fi.helsinki.cs.tmc.data.TestRunResult.Status;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
 import fi.helsinki.cs.tmc.utilities.process.ProcessResult;
@@ -49,7 +48,7 @@ public class MakefileExerciseRunner extends AbstractExerciseRunner {
                     if (ret != 0) {
                         io.select();
                         log.log(Level.INFO, "Compile resulted in non-zero exit code {0}", result.statusCode);
-                        return new TestRunResult(Status.COMPILE_FAILED);
+                        return new TestRunResult(false);
                     }
 
                     log.info("Running tests");

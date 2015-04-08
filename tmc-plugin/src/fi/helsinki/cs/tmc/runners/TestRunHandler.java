@@ -60,7 +60,7 @@ public class TestRunHandler {
             BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
                 @Override
                 public void bgTaskReady(TestRunResult result) {
-                    if (result.status == TestRunResult.Status.COMPILE_FAILED) {
+                    if (!result.getCompilationSuccess()) {
                         dialogDisplayer.displayError("The code did not compile.");
                         return;
                     }

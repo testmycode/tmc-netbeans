@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.runners;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestRunResult;
-import fi.helsinki.cs.tmc.data.TestRunResult.Status;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.UserVisibleException;
 import fi.helsinki.cs.tmc.testscanner.TestMethod;
@@ -43,7 +42,7 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
                     log.log(Level.INFO, "Compile success for project {0}", projectInfo.toString());
                     return runTests(projectInfo);
                 } else {
-                    return new TestRunResult(Status.COMPILE_FAILED);
+                    return new TestRunResult(false);
                 }
             }
         };

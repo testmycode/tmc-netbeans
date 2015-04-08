@@ -4,30 +4,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class TestRunResult {
-    public static enum Status {
-        PASSED,
-        COMPILE_FAILED
-    }
-    
     private final List<TestCaseResult> testCaseResults;
-    public final Status status;
+    private final boolean compilationSucceeded;
 
     public TestRunResult(List<TestCaseResult> testCaseResults) {
-        this.status = Status.PASSED;
+        this.compilationSucceeded = true;
         this.testCaseResults = testCaseResults;
     }
 
-    public TestRunResult(Status status) {
-        this.status = status;
+    public TestRunResult(boolean compilationSucceeded) {
+        this.compilationSucceeded = compilationSucceeded;
         this.testCaseResults = new ArrayList<TestCaseResult>();
     }
 
-    public TestRunResult(List<TestCaseResult> testCaseResults, Status status) {
+    public TestRunResult(List<TestCaseResult> testCaseResults, boolean compilationSucceeded) {
         this.testCaseResults = testCaseResults;
-        this.status = status;
+        this.compilationSucceeded = compilationSucceeded;
     }
 
     public List<TestCaseResult> getTestCaseResults() {
         return testCaseResults;
+    }
+    
+    public boolean getCompilationSuccess() {
+        return compilationSucceeded;
     }
 }
