@@ -27,46 +27,63 @@ import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
 import org.openide.windows.InputOutput;
 
-public class AntExerciseRunner extends AbstractJavaExerciseRunner {
-    private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
 
-    @Override
-    public Callable<Integer> getCompilingTask(TmcProjectInfo projectInfo) {
-        Project project = projectInfo.getProject();
-        FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
-        if (buildScript == null) {
-            throw new RuntimeException("Project has no build.xml");
-        }
-        ExecutorTask task;
-        try {
-            task = ActionUtils.runTarget(buildScript, new String[]{"compile-test"}, null);
-            return executorTaskToCallable(task);
-        } catch (IOException ex) {
-            throw ExceptionUtils.toRuntimeException(ex);
-        }
-    }
+public class AntExerciseRunner extends AbstractJavaExerciseRunner {
+
+    private static final Logger log = Logger.getLogger(AntExerciseRunner.class.getName());
+    private static final Integer SUCCESS = 0;
 
     @Override
     public Callable<TestRunResult> getTestRunningTask(final TmcProjectInfo projectInfo) {
         return new Callable<TestRunResult>() {
             @Override
-            public TestRunResult call() throws UserVisibleException, IOException, InterruptedException, ExecutionException {
-                FileObject testDir = findTestDir(projectInfo);
-                if (testDir == null) {
-                    throw new UserVisibleException("No test directory in project");
-                }
-
-                List<TestMethod> tests = findProjectTests(projectInfo, testDir);
-
-                File tempFile;
-                tempFile = File.createTempFile("tmc_test_results", ".txt");
-                try {
-                    return runTests(projectInfo, testDir, tests, tempFile);
-                } finally {
-                    tempFile.delete();
+            public TestRunResult call() throws Exception {
+                if (compileProject(projectInfo) == SUCCESS) {
+                    log.log(Level.INFO, "Compile success for project {0}", projectInfo.toString());
+                    return runTests(projectInfo);
+                } else {
+                    return new TestRunResult(false);
                 }
             }
         };
+    }
+
+    protected int compileProject(TmcProjectInfo projectInfo) {
+        log.info("Starting compile");
+        Project project = projectInfo.getProject();
+        FileObject buildScript = project.getProjectDirectory().getFileObject("build.xml");
+
+        if (buildScript == null) {
+            throw new RuntimeException("Project has no build.xml");
+        }
+
+        ExecutorTask task;
+
+        try {
+            task = ActionUtils.runTarget(buildScript, new String[]{"compile-test"}, null);
+        } catch (IOException ex) {
+            throw ExceptionUtils.toRuntimeException(ex);
+        }
+
+        return task.result();
+    }
+
+    protected TestRunResult runTests(final TmcProjectInfo projectInfo) throws UserVisibleException, IOException, InterruptedException, ExecutionException {
+
+        FileObject testDir = findTestDir(projectInfo);
+        if (testDir == null) {
+            throw new UserVisibleException("No test directory in project");
+        }
+
+        List<TestMethod> tests = findProjectTests(projectInfo, testDir);
+
+        File tempFile;
+        tempFile = File.createTempFile("tmc_test_results", ".txt");
+        try {
+            return runTests(projectInfo, testDir, tests, tempFile);
+        } finally {
+            tempFile.delete();
+        }
     }
 
     private TestRunResult runTests(final TmcProjectInfo projectInfo, FileObject testDir, List<TestMethod> testMethods, File tempFile) throws UserVisibleException {
@@ -118,7 +135,11 @@ public class AntExerciseRunner extends AbstractJavaExerciseRunner {
             throw ex;
         } catch (UserVisibleException ex) {
             throw ex;
-        } catch (Throwable t) {
+        } catch (InterruptedException t) {
+            throw new UserVisibleException("Failed to run tests", t);
+        } catch (ExecutionException t) {
+            throw new UserVisibleException("Failed to run tests", t);
+        } catch (IOException t) {
             throw new UserVisibleException("Failed to run tests", t);
         }
     }

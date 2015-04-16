@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.runners;
 
+import com.google.common.base.Optional;
+import com.google.common.base.Throwables;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestRunResult;
@@ -33,12 +35,12 @@ public class TestRunHandler {
         }
     }
 
-    private ProjectMediator projectMediator;
-    private ConvenientDialogDisplayer dialogDisplayer;
-    private TmcEventBus eventBus;
-    private TestResultDisplayer resultDisplayer;
-    private ExerciseSubmitter exerciseSubmitter;
-    private CourseDb courseDb;
+    private final ProjectMediator projectMediator;
+    private final ConvenientDialogDisplayer dialogDisplayer;
+    private final TmcEventBus eventBus;
+    private final TestResultDisplayer resultDisplayer;
+    private final ExerciseSubmitter exerciseSubmitter;
+    private final CourseDb courseDb;
 
     public TestRunHandler() {
         this.projectMediator = ProjectMediator.getInstance();
@@ -55,20 +57,28 @@ public class TestRunHandler {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
             final ExerciseRunner runner = getRunner(projectInfo);
-            BgTask.start("Compiling project", runner.getCompilingTask(projectInfo), new BgTaskListener<Integer>() {
+            BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
                 @Override
-                public void bgTaskReady(Integer result) {
-                    if (result == 0) {
-                        startRunningTests(runner, projectInfo, resultCollector);
-                    } else {
+                public void bgTaskReady(TestRunResult result) {
+                    if (!result.getCompilationSuccess()) {
                         dialogDisplayer.displayError("The code did not compile.");
+                        return;
                     }
+                    Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+                    boolean canSubmit = ex.isReturnable();
+                    resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
+                        @Override
+                        public void run() {
+                            exerciseSubmitter.performAction(projectInfo.getProject());
+                        }
+                    }, resultCollector);
                 }
 
                 @Override
                 public void bgTaskFailed(Throwable ex) {
-                    log.log(INFO, "CompilingProject failed {0}", ex.getMessage());
-                    dialogDisplayer.displayError("Failed to compile the code:" + ex);
+                    log.log(INFO, "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
+                            new Object[]{ex.getMessage(), Throwables.getStackTraceAsString(ex)});
+                    dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
                 }
 
                 @Override
@@ -76,33 +86,6 @@ public class TestRunHandler {
                 }
             });
         }
-    }
-
-    private void startRunningTests(ExerciseRunner runner, final TmcProjectInfo projectInfo, final ResultCollector resultCollector) {
-        BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
-            @Override
-            public void bgTaskReady(TestRunResult result) {
-                Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
-                boolean canSubmit = ex.isReturnable();
-                resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
-                    @Override
-                    public void run() {
-                        exerciseSubmitter.performAction(projectInfo.getProject());
-                    }
-                }, resultCollector);
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                log.log(INFO, "StartRunningTests failed message: {0}, trace: {1}",
-                        new Object[] {ex.getMessage(), Arrays.deepToString(ex.getStackTrace())});
-                dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-        });
     }
 
     private AbstractExerciseRunner getRunner(TmcProjectInfo projectInfo) {
