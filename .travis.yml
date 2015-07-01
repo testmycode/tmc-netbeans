@@ -12,5 +12,3 @@ before_install:
 script:
   - mvn clean test
   - mvn verify
-after_success:
-  - mvn clean cobertura:cobertura org.eluder.coveralls:coveralls-maven-plugin:report
