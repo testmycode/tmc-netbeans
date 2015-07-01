@@ -42,7 +42,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
         timer.setRepeats(true);
         timer.start();
-        
     }
     
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();

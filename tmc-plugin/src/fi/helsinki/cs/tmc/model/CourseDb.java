@@ -8,7 +8,6 @@ import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseKey;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
-import hy.tmc.core.TmcCore;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
