@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ServerAccess;

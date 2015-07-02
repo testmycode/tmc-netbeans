@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import com.google.common.collect.Iterables;
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;

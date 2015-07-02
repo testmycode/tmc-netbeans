@@ -2,8 +2,8 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Course;
+import hy.tmc.core.domain.Exercise;
 import java.util.Date;
 
 public class CourseInfoParser {

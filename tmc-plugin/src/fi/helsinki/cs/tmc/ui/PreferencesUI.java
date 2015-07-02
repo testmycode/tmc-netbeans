@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import java.util.List;
 import java.util.Locale;
 

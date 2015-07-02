@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import java.io.File;
 import java.io.IOException;

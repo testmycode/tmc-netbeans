@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.runners;
 
 import com.google.common.base.Optional;
 import com.google.common.base.Throwables;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;

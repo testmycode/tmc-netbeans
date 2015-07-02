@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;

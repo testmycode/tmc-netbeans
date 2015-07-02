@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;

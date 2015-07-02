@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.data;
 import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
+import hy.tmc.core.domain.Exercise;
+import hy.tmc.core.domain.Course;
 
 import java.util.List;
 

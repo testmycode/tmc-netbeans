@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.exerciseSubmitter;
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;

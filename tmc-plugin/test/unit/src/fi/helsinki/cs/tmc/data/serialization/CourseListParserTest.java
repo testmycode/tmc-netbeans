@@ -2,9 +2,9 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import org.junit.Test;
 import static org.junit.Assert.*;
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseListUtils;
 import java.util.GregorianCalendar;
 import java.util.List;

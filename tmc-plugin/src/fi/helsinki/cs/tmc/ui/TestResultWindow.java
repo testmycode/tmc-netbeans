@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
 import com.google.common.base.Function;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import java.awt.Component;

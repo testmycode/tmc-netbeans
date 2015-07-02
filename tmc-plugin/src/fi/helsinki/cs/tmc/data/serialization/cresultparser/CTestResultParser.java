@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.Exercise.ValgrindStrategy;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import java.io.File;

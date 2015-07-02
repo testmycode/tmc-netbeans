@@ -2,9 +2,9 @@ package fi.helsinki.cs.tmc.model;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.data.Course;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
-import fi.helsinki.cs.tmc.data.Exercise;
+import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ExerciseKey;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;

@@ -1,6 +1,9 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -10,10 +13,16 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListenerList;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import hy.tmc.core.TmcCore;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 /**
  * Refreshes the course list in the background.
@@ -50,9 +59,50 @@ public final class RefreshCoursesAction {
         return this;
     }
 
-    public void run() {
+    public void run() throws TmcCoreException {
         CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
+        TmcCore c = new TmcCore();
+        final ListenableFuture<List<Course>> courses = c.listCourses();
+        /*
+        
+        courses.addListener(new Runnable() {
 
+            @Override
+            public void run() {
+                System.out.println("Jeee, kurssit haettu!");
+                
+                try {
+                    for (Course get : courses.get()) {
+                        System.out.println(get.getName());
+                    }
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                } catch (ExecutionException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            
+            }
+
+        }, Executors.newFixedThreadPool(1));
+
+        if(true) {
+            return;
+        }*/
+        
+        /*Futures.addCallback(courses, new FutureCallback<List<Course>>(){
+            @Override
+            public void onSuccess(List<Course> v) {
+                for(Course c: v){
+                    System.out.println(c.getName());
+                }
+            }
+
+            @Override
+            public void onFailure(Throwable thrwbl) {
+                
+            }         
+        });*/
+        
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
 
             @Override
