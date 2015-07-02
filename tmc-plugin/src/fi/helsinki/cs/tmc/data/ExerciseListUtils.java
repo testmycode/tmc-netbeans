@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import hy.tmc.core.domain.Exercise;
 import java.util.List;
 
 public class ExerciseListUtils {

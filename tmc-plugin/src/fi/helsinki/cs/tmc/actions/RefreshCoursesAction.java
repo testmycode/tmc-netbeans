@@ -14,12 +14,8 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListenerList;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import hy.tmc.core.TmcCore;
-import hy.tmc.core.exceptions.TmcCoreException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.openide.util.Exceptions;
@@ -35,18 +31,22 @@ public final class RefreshCoursesAction {
     private ConvenientDialogDisplayer dialogs;
     
     private BgTaskListenerList<List<Course>> listeners;
+    private final TmcCore tmcCore;
+    private final TmcSettings tmcSettings;
 
     public RefreshCoursesAction() {
         this(TmcSettings.getDefault());
     }
     
     public RefreshCoursesAction(TmcSettings settings) {
+        this.tmcSettings = settings;
         this.serverAccess = new ServerAccess(settings);
         this.serverAccess.setSettings(settings);
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         this.listeners = new BgTaskListenerList<List<Course>>();
+        this.tmcCore = new TmcCore();
     }
 
     public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
@@ -58,64 +58,42 @@ public final class RefreshCoursesAction {
         this.listeners.addListener(listener);
         return this;
     }
-
-    public void run() throws TmcCoreException {
-        CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
-        TmcCore c = new TmcCore();
-        final ListenableFuture<List<Course>> courses = c.listCourses();
-        /*
-        
-        courses.addListener(new Runnable() {
-
+    
+    public void run() {
+        Credentials credentials = new Credentials(this.tmcSettings.getUsername(),
+                this.tmcSettings.getPassword());
+        System.out.println(credentials);
+        ListenableFuture<Boolean> login = this.tmcCore.login(credentials, tmcSettings.getServerBaseUrl());
+        Futures.addCallback(login, new FutureCallback<Boolean>() {
             @Override
-            public void run() {
-                System.out.println("Jeee, kurssit haettu!");
-                
-                try {
-                    for (Course get : courses.get()) {
-                        System.out.println(get.getName());
-                    }
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (ExecutionException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+            public void onSuccess(Boolean v) {
+                System.out.println("TOIMIIIII: " + v);
+            }
             
-            }
-
-        }, Executors.newFixedThreadPool(1));
-
-        if(true) {
-            return;
-        }*/
-        
-        /*Futures.addCallback(courses, new FutureCallback<List<Course>>(){
-            @Override
-            public void onSuccess(List<Course> v) {
-                for(Course c: v){
-                    System.out.println(c.getName());
-                }
-            }
-
             @Override
             public void onFailure(Throwable thrwbl) {
-                
-            }         
-        });*/
-        
-        BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
+                System.out.println("LOGIN LATAUS FEILASI1: " );
+                Exceptions.printStackTrace(thrwbl);
+            }
+        });
+    }
 
+    public void oldRun() {
+        
+        CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
+        BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
+            
             @Override
             public void bgTaskReady(final List<Course> courses) {
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                 if (currentCourseStub != null) {
                     CancellableCallable<Course> currentCourseTask = serverAccess.getFullCourseInfoTask(currentCourseStub);
-
+                    
                     BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
                         @Override
                         public void bgTaskReady(Course currentCourse) {
                             currentCourse.setExercisesLoaded(true);
-
+                            
                             ArrayList<Course> finalCourses = new ArrayList<Course>();
                             for (Course course : courses) {
                                 if (course.getName().equals(currentCourse.getName())) {
@@ -126,12 +104,12 @@ public final class RefreshCoursesAction {
                             }
                             listeners.bgTaskReady(finalCourses);
                         }
-
+                        
                         @Override
                         public void bgTaskCancelled() {
                             listeners.bgTaskCancelled();
                         }
-
+                        
                         @Override
                         public void bgTaskFailed(Throwable ex) {
                             log.log(Level.INFO, "Failed to download current course info.", ex);
@@ -143,12 +121,12 @@ public final class RefreshCoursesAction {
                     listeners.bgTaskReady(courses);
                 }
             }
-
+            
             @Override
             public void bgTaskCancelled() {
                 listeners.bgTaskCancelled();
             }
-
+            
             @Override
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Failed to download course list.", ex);

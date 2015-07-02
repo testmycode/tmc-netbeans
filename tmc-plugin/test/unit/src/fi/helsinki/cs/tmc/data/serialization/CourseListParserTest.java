@@ -44,7 +44,8 @@ public class CourseListParserTest {
         assertEquals("TheCourse", exercise.getCourseName());
         
         GregorianCalendar cal = new GregorianCalendar();
-        cal.setTime(exercise.getDeadline());
+        cal.setTime(exercise.getDeadlineDate());
+        System.out.println("AIKA: " + exercise.getDeadlineDate());
         assertEquals(2015, cal.get(GregorianCalendar.YEAR));
         assertEquals(1, cal.get(GregorianCalendar.HOUR_OF_DAY));
         assertEquals(30, cal.get(GregorianCalendar.MINUTE));
