@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.apache.http.auth.Credentials;
 import org.openide.util.Exceptions;
 
 /**
@@ -60,22 +61,22 @@ public final class RefreshCoursesAction {
     }
     
     public void run() {
-        Credentials credentials = new Credentials(this.tmcSettings.getUsername(),
-                this.tmcSettings.getPassword());
-        System.out.println(credentials);
-        ListenableFuture<Boolean> login = this.tmcCore.login(credentials, tmcSettings.getServerBaseUrl());
-        Futures.addCallback(login, new FutureCallback<Boolean>() {
-            @Override
-            public void onSuccess(Boolean v) {
-                System.out.println("TOIMIIIII: " + v);
-            }
-            
-            @Override
-            public void onFailure(Throwable thrwbl) {
-                System.out.println("LOGIN LATAUS FEILASI1: " );
-                Exceptions.printStackTrace(thrwbl);
-            }
-        });
+//        Credentials credentials = new Credentials(this.tmcSettings.getUsername(),
+//                this.tmcSettings.getPassword()) {};
+//        System.out.println(credentials);
+//        ListenableFuture<Boolean> login = this.tmcCore.login(credentials, tmcSettings.getServerBaseUrl());
+//        Futures.addCallback(login, new FutureCallback<Boolean>() {
+//            @Override
+//            public void onSuccess(Boolean v) {
+//                System.out.println("TOIMIIIII: " + v);
+//            }
+//            
+//            @Override
+//            public void onFailure(Throwable thrwbl) {
+//                System.out.println("LOGIN LATAUS FEILASI1: " );
+//                Exceptions.printStackTrace(thrwbl);
+//            }
+//        });
     }
 
     public void oldRun() {

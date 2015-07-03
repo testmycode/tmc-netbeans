@@ -137,6 +137,7 @@ public class ServerAccess {
             public Course call() throws Exception {
                 try {
                     String text = download.call();
+                    System.out.println(text);
                     return courseInfoParser.parseFromJson(text);
                 } catch (FailedHttpResponseException ex) {
                     return checkForObsoleteClient(ex);
