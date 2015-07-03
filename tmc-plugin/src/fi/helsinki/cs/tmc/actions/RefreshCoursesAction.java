@@ -7,6 +7,7 @@ import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -48,7 +49,7 @@ public final class RefreshCoursesAction {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         this.listeners = new BgTaskListenerList<List<Course>>();
-        this.tmcCore = new TmcCore();
+        this.tmcCore = TmcCoreSingleton.getInstance();
     }
 
     public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
