@@ -7,14 +7,16 @@ import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
+import org.openide.util.Exceptions;
 
 public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
-    
+
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
     }
@@ -66,7 +68,7 @@ public class SaveSettingsAction extends AbstractAction {
             });
             refresh.run();
         }
-        
+
         settings.save();
     }
 }
