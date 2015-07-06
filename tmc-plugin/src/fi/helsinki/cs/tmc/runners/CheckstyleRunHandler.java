@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.runners;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.stylerunner.CheckstyleRunner;
 import fi.helsinki.cs.tmc.stylerunner.exception.TMCCheckstyleException;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
@@ -62,7 +62,7 @@ public final class CheckstyleRunHandler implements Runnable {
 
         try {
 
-            final Locale locale = TmcSettings.getDefault().getErrorMsgLocale();
+            final Locale locale = NBTmcSettings.getDefault().getErrorMsgLocale();
             validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
 
         } catch (TMCCheckstyleException exception) {

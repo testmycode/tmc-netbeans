@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -119,7 +119,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     }
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
-        ServerAccess serverAccess = new ServerAccess(TmcSettings.getDefault());
+        ServerAccess serverAccess = new ServerAccess(NBTmcSettings.getDefault());
         CancellableCallable<byte[]> downloadTask = serverAccess.getDownloadingExerciseSolutionZipTask(ex);
         BgTask.start("Downloading solution for " + ex.getName(), downloadTask, new BgTaskListener<byte[]>() {
             @Override

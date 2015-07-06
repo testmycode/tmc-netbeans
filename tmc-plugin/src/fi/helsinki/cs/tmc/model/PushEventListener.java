@@ -43,20 +43,20 @@ public class PushEventListener {
         }
     }
     
-    private TmcSettings settings;
+    private NBTmcSettings settings;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
     private BayeuxClient client;
     private boolean shouldReconnect;
 
     PushEventListener() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = NBTmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
         this.eventBus.subscribeDependent(new TmcEventListener() {
-            public void receive(TmcSettings.SavedEvent e) {
+            public void receive(NBTmcSettings.SavedEvent e) {
                 reconnectSoon();
             }
             
@@ -141,7 +141,7 @@ public class PushEventListener {
     private boolean hasEnoughSettings() {
         return !"".equals(settings.getUsername()) &&
                 !"".equals(settings.getPassword()) &&
-                !"".equals(settings.getServerBaseUrl());
+                !"".equals(settings.getServerAddress());
     }
     
     public ClientSession.Extension getAuthenticationExtension(final Map<String, Object> fields) {
@@ -173,7 +173,7 @@ public class PushEventListener {
         HashMap<String, Object> result = new HashMap<String, Object>();
         result.put("username", settings.getUsername());
         result.put("password", settings.getPassword());
-        result.put("serverBaseUrl", settings.getServerBaseUrl());
+        result.put("serverBaseUrl", settings.getServerAddress());
         return result;
     }
     

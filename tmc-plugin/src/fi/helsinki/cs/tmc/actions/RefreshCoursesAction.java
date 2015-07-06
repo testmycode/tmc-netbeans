@@ -7,7 +7,8 @@ import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -25,21 +26,22 @@ import org.openide.util.Exceptions;
  * Refreshes the course list in the background.
  */
 public final class RefreshCoursesAction {
+
     private final static Logger log = Logger.getLogger(RefreshCoursesAction.class.getName());
 
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
-    
+
     private BgTaskListenerList<List<Course>> listeners;
     private final TmcCore tmcCore;
-    private final TmcSettings tmcSettings;
+    private final NBTmcSettings tmcSettings;
 
     public RefreshCoursesAction() {
-        this(TmcSettings.getDefault());
+        this(NBTmcSettings.getDefault());
     }
-    
-    public RefreshCoursesAction(TmcSettings settings) {
+
+    public RefreshCoursesAction(NBTmcSettings settings) {
         this.tmcSettings = settings;
         this.serverAccess = new ServerAccess(settings);
         this.serverAccess.setSettings(settings);
@@ -47,7 +49,7 @@ public final class RefreshCoursesAction {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         this.listeners = new BgTaskListenerList<List<Course>>();
-        this.tmcCore = new TmcCore();
+        this.tmcCore = TmcCoreSingleton.getInstance();
     }
 
     public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
@@ -59,46 +61,70 @@ public final class RefreshCoursesAction {
         this.listeners.addListener(listener);
         return this;
     }
-    
-    public void run() {
-//        try {
-//            Credentials credentials = new Credentials(this.tmcSettings.getUsername(),
-//                    this.tmcSettings.getPassword()) {};
-//            System.out.println(credentials);
-//            ListenableFuture<Boolean> login = this.tmcCore.login(credentials, tmcSettings.getServerBaseUrl()+"/user");
-//            Futures.addCallback(login, new FutureCallback<Boolean>() {
-//                @Override
-//                public void onSuccess(Boolean loginSuccess) {
-//                    
-//                }
-//                
-//                @Override
-//                public void onFailure(Throwable thrwbl) {
-//                    System.out.println("LOGIN LATAUS FEILASI1: " );
-//                    Exceptions.printStackTrace(thrwbl);
-//                }
-//            });
-//        } catch (TmcCoreException ex) {
-//            Exceptions.printStackTrace(ex);
-//        }
+
+    //HUOM metodissa oldRun on vanha toteutus. Se hakee palvelmelta nykyisen kurssin "fullcourse info".
+    public void newrun() {
+        try {
+            ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
+            Futures.addCallback(listCourses, new FutureCallback<List<Course>>() {
+                @Override
+                public void onSuccess(List<Course> courses) {
+                    Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
+                    if (currentCourse != null) {
+                       ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
+                       Futures.addCallback(courseFuture, new FutureCallback<Course>()
+                               @Override
+                               public void onSuccess(Course detailedCourse) {
+                                   detailedCourse.setExercisesLoaded(true);
+                                   ArrayList<Course> finalCourses = new ArrayList<Course>();
+                                   for(Course course: courses){
+                                       if(course.getName().equals(detailedCourse.getName())){
+                                           finalCourses.add(detailedCourses);
+                                       } else {
+                                           finalCourses.add(course);
+                                       }
+                                   }
+                                   listeners.bgTaskReady(finalCourses);
+                               }
+                               @Override
+                               public void onFailure() {
+                                   
+                               }
+                       );
+                    } else {
+                        listeners.bgTaskReady(courses);
+                    }
+                }
+
+                @Override
+                public void onFailure(Throwable ex) {
+                    log.log(Level.INFO, "Failed to download current course info.", ex);
+                    listeners.bgTaskFailed(ex);
+                }
+            }
+            );
+        } catch (TmcCoreException ex) {
+            Exceptions.printStackTrace(ex);
+        }
     }
 
-    public void oldRun() {
-        
+    public void run() {
         CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
-            
+
             @Override
             public void bgTaskReady(final List<Course> courses) {
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
+                // CurrentCourseStub on null jos on vanhentunut/ ei enää olemassa servulla
                 if (currentCourseStub != null) {
+                    // Jos on olemassa servulla, päivitetään lokaali kurssi servun kurssia vastaavaksi
                     CancellableCallable<Course> currentCourseTask = serverAccess.getFullCourseInfoTask(currentCourseStub);
-                    
+
                     BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
                         @Override
                         public void bgTaskReady(Course currentCourse) {
                             currentCourse.setExercisesLoaded(true);
-                            
+
                             ArrayList<Course> finalCourses = new ArrayList<Course>();
                             for (Course course : courses) {
                                 if (course.getName().equals(currentCourse.getName())) {
@@ -109,29 +135,28 @@ public final class RefreshCoursesAction {
                             }
                             listeners.bgTaskReady(finalCourses);
                         }
-                        
+
                         @Override
                         public void bgTaskCancelled() {
                             listeners.bgTaskCancelled();
                         }
-                        
+
                         @Override
                         public void bgTaskFailed(Throwable ex) {
                             log.log(Level.INFO, "Failed to download current course info.", ex);
                             listeners.bgTaskFailed(ex);
                         }
                     });
-                    
                 } else {
                     listeners.bgTaskReady(courses);
                 }
             }
-            
+
             @Override
             public void bgTaskCancelled() {
                 listeners.bgTaskCancelled();
             }
-            
+
             @Override
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Failed to download course list.", ex);
@@ -141,6 +166,7 @@ public final class RefreshCoursesAction {
     }
 
     private class DefaultListener implements BgTaskListener<List<Course>> {
+
         private final boolean showDialogOnError;
         private final boolean updateCourseDb;
 

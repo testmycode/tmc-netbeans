@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
 import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
@@ -74,7 +74,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
         
-        if (backgroundCheck && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
+        if (backgroundCheck && !NBTmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
             return;
         }
         

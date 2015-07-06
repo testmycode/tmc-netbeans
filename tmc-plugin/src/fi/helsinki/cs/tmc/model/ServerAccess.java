@@ -44,7 +44,7 @@ import org.openide.util.Exceptions;
 public class ServerAccess {
     public static final int API_VERSION = 7;
     
-    private TmcSettings settings;
+    private NBTmcSettings settings;
     private CourseListParser courseListParser;
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
@@ -52,15 +52,15 @@ public class ServerAccess {
     private TmcCore tmcCore;
     
     public ServerAccess() {
-        this(TmcSettings.getDefault());
+        this(NBTmcSettings.getDefault());
     }
 
-    public ServerAccess(TmcSettings settings) {
+    public ServerAccess(NBTmcSettings settings) {
         this(settings, new CourseListParser(), new CourseInfoParser(), new ReviewListParser());
     }
 
     public ServerAccess(
-        TmcSettings settings,
+        NBTmcSettings settings,
         CourseListParser courseListParser,
         CourseInfoParser courseInfoParser,
         ReviewListParser reviewListParser
@@ -76,12 +76,12 @@ public class ServerAccess {
         return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
     }
     
-    public void setSettings(TmcSettings settings) {
+    public void setSettings(NBTmcSettings settings) {
         this.settings = settings;
     }
     
     private String getCourseListUrl() {
-        return addApiCallQueryParameters(settings.getServerBaseUrl() + "/courses.json");
+        return addApiCallQueryParameters(settings.getServerAddress() + "/courses.json");
     }
     
     private String addApiCallQueryParameters(String url) {
@@ -99,14 +99,14 @@ public class ServerAccess {
         return
                 !settings.getUsername().isEmpty() &&
                 !settings.getPassword().isEmpty() &&
-                !settings.getServerBaseUrl().isEmpty();
+                !settings.getServerAddress().isEmpty();
     }
 
     public boolean needsOnlyPassword() {
         return
                 !settings.getUsername().isEmpty() &&
                 settings.getPassword().isEmpty() &&
-                !settings.getServerBaseUrl().isEmpty();
+                !settings.getServerAddress().isEmpty();
     }
     
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {

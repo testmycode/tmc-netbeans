@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,6 +25,7 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 
 public class ReviewEventListener extends TmcEventListener {
@@ -68,7 +70,11 @@ public class ReviewEventListener extends TmcEventListener {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                refreshCourseDb();
+                try {
+                    refreshCourseDb();
+                } catch (TmcCoreException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
                 
                 String title = "Code review";
                 String msg = "Code review for " + review.getExerciseName() + " ready.";
@@ -90,7 +96,7 @@ public class ReviewEventListener extends TmcEventListener {
         });
     }
     
-    private void refreshCourseDb() {
+    private void refreshCourseDb() throws TmcCoreException {
         // Exercise properties have probably changed
         new RefreshCoursesAction().addDefaultListener(false, true).run();
     }
