@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -35,13 +35,13 @@ public final class RefreshCoursesAction {
     
     private BgTaskListenerList<List<Course>> listeners;
     private final TmcCore tmcCore;
-    private final TmcSettings tmcSettings;
+    private final NBTmcSettings tmcSettings;
 
     public RefreshCoursesAction() {
-        this(TmcSettings.getDefault());
+        this(NBTmcSettings.getDefault());
     }
     
-    public RefreshCoursesAction(TmcSettings settings) {
+    public RefreshCoursesAction(NBTmcSettings settings) {
         this.tmcSettings = settings;
         this.serverAccess = new ServerAccess(settings);
         this.serverAccess.setSettings(settings);
@@ -62,7 +62,7 @@ public final class RefreshCoursesAction {
         return this;
     }
     
-    public void run() {
+    /*public void run() {
         try {
             Credentials credentials = new Credentials(this.tmcSettings.getUsername(),
                     this.tmcSettings.getPassword()) {};
@@ -83,9 +83,9 @@ public final class RefreshCoursesAction {
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
         }
-    }
+    }*/
 
-    public void oldRun() {
+    public void run() {
         
         CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {

@@ -16,7 +16,7 @@ public class TmcSettingsTest {
     @Mock private Tailoring tailoring;
     private TmcEventBus eventBus;
     
-    private TmcSettings settings;
+    private NBTmcSettings settings;
     
     @Before
     public void setUp() {
@@ -33,33 +33,33 @@ public class TmcSettingsTest {
         store.cancel();
     }
     
-    private TmcSettings newSettings() {
-        return new TmcSettings(store, tailoring, eventBus);
+    private NBTmcSettings newSettings() {
+        return new NBTmcSettings(store, tailoring, eventBus);
     }
     
     @Test
     public void itUsesBaseUrlFromTailoringIfNoneStored() {
-        assertEquals("http://default.example.com", settings.getServerBaseUrl());
+        assertEquals("http://default.example.com", settings.getServerAddress());
     }
     
     @Test
     public void itUsesProjectRootDirFromTailoringIfNoneStored() {
-        assertEquals("http://default.example.com", settings.getServerBaseUrl());
+        assertEquals("http://default.example.com", settings.getServerAddress());
     }
     
     @Test
     public void itStripsTrailingSlashesOffTheBaseUrl() {
         settings.setServerBaseUrl("http://example.com");
-        assertEquals("http://example.com", settings.getServerBaseUrl());
+        assertEquals("http://example.com", settings.getServerAddress());
         
         settings.setServerBaseUrl("http://example.com/");
-        assertEquals("http://example.com", settings.getServerBaseUrl());
+        assertEquals("http://example.com", settings.getServerAddress());
         
         settings.setServerBaseUrl("http://example.com///////");
-        assertEquals("http://example.com", settings.getServerBaseUrl());
+        assertEquals("http://example.com", settings.getServerAddress());
         
         settings.setServerBaseUrl("http://example.com///////");
-        assertEquals("http://example.com", newSettings().getServerBaseUrl());
+        assertEquals("http://example.com", settings.getServerAddress());
     }
     
     @Test

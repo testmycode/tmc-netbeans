@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -32,7 +32,7 @@ public class SaveSettingsAction extends AbstractAction {
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
-        TmcSettings settings = TmcSettings.getDefault();
+        NBTmcSettings settings = NBTmcSettings.getDefault();
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());

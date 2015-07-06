@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import hy.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
@@ -272,8 +272,8 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
 
-    private TmcSettings getTransientSettingsForRefresh() {
-        TmcSettings settings = TmcSettings.getTransient();
+    private NBTmcSettings getTransientSettingsForRefresh() {
+        NBTmcSettings settings = NBTmcSettings.getTransient();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
@@ -303,7 +303,7 @@ import org.apache.commons.lang3.StringUtils;
                 if (event.getStateChange() == ItemEvent.SELECTED) {
 
                     // Language changed, notify user about restarting
-                    if (!TmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                    if (!NBTmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
                         restartMessage.setText("Changing language requires restart");
                     } else {
                         restartMessage.setText("");
@@ -703,8 +703,8 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        TmcSettings settings = getTransientSettingsForRefresh();
-        if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
+        NBTmcSettings settings = getTransientSettingsForRefresh();
+        if (settings.getServerAddress() == null || settings.getServerAddress().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first");
         }
         startRefreshingCourseList(false, false);

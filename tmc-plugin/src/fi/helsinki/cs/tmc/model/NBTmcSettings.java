@@ -1,15 +1,18 @@
 package fi.helsinki.cs.tmc.model;
 
+import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
+import hy.tmc.core.configuration.TmcSettings;
+import hy.tmc.core.domain.Course;
 import java.util.Locale;
 
 /**
  * A transient saveable collection of all settings of the TMC plugin.
  */
-public class TmcSettings {
+public class NBTmcSettings implements TmcSettings {
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
@@ -20,9 +23,9 @@ public class TmcSettings {
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     
-    private static final TmcSettings defaultInstance =
-            new TmcSettings(
-                    PersistableSettings.forModule(TmcSettings.class),
+    private static final NBTmcSettings defaultInstance =
+            new NBTmcSettings(
+                    PersistableSettings.forModule(NBTmcSettings.class),
                     SelectedTailoring.get(),
                     TmcEventBus.getDefault()
                     );
@@ -30,24 +33,49 @@ public class TmcSettings {
     private PersistableSettings settings;
     private Tailoring tailoring;
     private TmcEventBus eventBus;
+    private final String api_version = "7";
     
     private String unsavedPassword;
+
+    @Override
+    public boolean userDataExists() {
+        return !(this.getUsername().isEmpty() || this.getPassword().isEmpty());
+    }
+
+    @Override
+    public Optional<Course> getCurrentCourse() {
+        if(CourseDb.getInstance().getCurrentCourse() == null){
+            return Optional.absent();
+        } else {
+            return Optional.of(CourseDb.getInstance().getCurrentCourse());
+        }
+    }
+
+    @Override
+    public String apiVersion() {
+        return this.api_version;
+    }
+
+    @Override
+    public String getFormattedUserData() {
+        return this.getUsername() + ":" + this.getPassword();
+    }
     
     public static class SavedEvent implements TmcEvent {}
 
-    public static TmcSettings getDefault() {
+    public static NBTmcSettings getDefault() {
         return defaultInstance;
     }
     
-    public static TmcSettings getTransient() {
-        return new TmcSettings(
-                PersistableSettings.forModule(TmcSettings.class),
+    public static NBTmcSettings getTransient() {
+        return new NBTmcSettings(
+                PersistableSettings.forModule(NBTmcSettings.class),
                 SelectedTailoring.get(),
                 TmcEventBus.getDefault()
                 );
     }
     
-    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
+    /*package*/ NBTmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
         this.settings = settings;
         this.tailoring = tailoring;
         this.eventBus = eventBus;
@@ -64,7 +92,8 @@ public class TmcSettings {
         
     }
 
-    public String getServerBaseUrl() {
+    @Override
+    public String getServerAddress() {
         return settings.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
     }
     
@@ -80,6 +109,7 @@ public class TmcSettings {
         return s;
     }
     
+    @Override
     public String getUsername() {
         return settings.get(PREF_USERNAME, tailoring.getDefaultUsername());
     }
@@ -88,6 +118,7 @@ public class TmcSettings {
         settings.put(PREF_USERNAME, username);
     }
     
+    @Override
     public String getPassword() {
         return unsavedPassword;
     }
@@ -182,3 +213,4 @@ public class TmcSettings {
     }
     
 }
+
