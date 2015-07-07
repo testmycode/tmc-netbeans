@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
@@ -49,9 +50,9 @@ public class SaveSettingsAction extends AbstractAction {
 
             RefreshCoursesAction refresh = new RefreshCoursesAction();
             refresh.addDefaultListener(true, true);
-            refresh.addListener(new BgTaskListener<List<Course>>() {
+            refresh.addListener(new FutureCallback<List<Course>>() {
                 @Override
-                public void bgTaskReady(List<Course> result) {
+                public void onSuccess(List<Course> v) {
                     LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                     if (status.thereIsSomethingToDownload(false)) {
                         DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
@@ -59,11 +60,7 @@ public class SaveSettingsAction extends AbstractAction {
                 }
 
                 @Override
-                public void bgTaskCancelled() {
-                }
-
-                @Override
-                public void bgTaskFailed(Throwable ex) {
+                public void onFailure(Throwable thrwbl) {
                 }
             });
             refresh.run();
