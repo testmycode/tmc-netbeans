@@ -71,7 +71,6 @@ public final class RefreshCoursesAction {
                     Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                     if (currentCourse != null) {
                         try {
-                            System.out.println("DETAILS URL: " + currentCourse.getDetailsUrl());
                             ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
                             Futures.addCallback(courseFuture, new FutureCallback<Course>() {
                                 @Override
