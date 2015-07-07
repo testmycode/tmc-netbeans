@@ -7,12 +7,10 @@ import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
-import org.openide.util.Exceptions;
+import javax.swing.SwingUtilities;
 
 public class SaveSettingsAction extends AbstractAction {
 
@@ -53,10 +51,15 @@ public class SaveSettingsAction extends AbstractAction {
             refresh.addListener(new FutureCallback<List<Course>>() {
                 @Override
                 public void onSuccess(List<Course> v) {
-                    LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
-                    if (status.thereIsSomethingToDownload(false)) {
-                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-                    }
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
+                            if (status.thereIsSomethingToDownload(false)) {
+                                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            }
+                        }
+                    });
                 }
 
                 @Override
@@ -65,7 +68,6 @@ public class SaveSettingsAction extends AbstractAction {
             });
             refresh.run();
         }
-
         settings.save();
     }
 }
