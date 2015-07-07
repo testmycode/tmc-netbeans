@@ -30,7 +30,6 @@ public final class RefreshCoursesAction {
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
 
-    //private BgTaskListenerList<List<Course>> listeners;
     private FutureCallbackList<List<Course>> callbacks;
     private final TmcCore tmcCore;
     private final NBTmcSettings tmcSettings;
@@ -61,47 +60,62 @@ public final class RefreshCoursesAction {
         return this;
     }
 
-    //HUOM metodissa oldRun on vanha toteutus. Se hakee palvelmelta nykyisen kurssin "fullcourse info".
+    /**
+     * Starts downloading course-jsons from TMC-server.
+     * Url of TMC-server is defined in TmcSettings object.
+     * TmcCore includes all logic, callbacks here are run after core-futures are ready.
+     */
     public void run() {
         try {
             ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
-            Futures.addCallback(listCourses, new FutureCallback<List<Course>>() {
-                @Override
-                public void onSuccess(final List<Course> courses) {
-                    Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
-                    if (currentCourse != null) {
-                        try {
-                            ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
-                            Futures.addCallback(courseFuture, new UpdateCourse(courses));
-                        } catch (TmcCoreException ex) {
-                            Exceptions.printStackTrace(ex);
-                            callbacks.onFailure(ex);
-                        }
-                    } else {
-                        callbacks.onSuccess(courses);
-                    }
-                }
-
-                @Override
-                public void onFailure(Throwable ex) {
-                    log.log(Level.INFO, "Failed to download current course info.", ex);
-                    callbacks.onFailure(ex);
-                }
-            }
-            );
+            Futures.addCallback(listCourses, new LoadCourses());
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
             callbacks.onFailure(ex);
         }
     }
 
+    /**
+     * This callBack is run when ListenableFuture (to witch this is attached) is done.
+     * On success method takes list of Course-objects, searches the current course and starts uploading
+     * the details of the course.
+     * If no currentCourse found, no need to update details.
+     */
+    class LoadCourses implements FutureCallback<List<Course>> {
+        @Override
+        public void onSuccess(final List<Course> courses) {
+            Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
+            if (currentCourse != null) {
+                try {
+                    ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
+                    Futures.addCallback(courseFuture, new UpdateCourse(courses));
+                } catch (TmcCoreException ex) {
+                    Exceptions.printStackTrace(ex);
+                    callbacks.onFailure(ex);
+                }
+            } else {
+                callbacks.onSuccess(courses);
+            }
+        }
+
+        @Override
+        public void onFailure(Throwable ex) {
+            log.log(Level.INFO, "Failed to download current course info.", ex);
+            callbacks.onFailure(ex);
+        }
+    }
+
+    /**
+     * When detailed current course is present, courses will be given to FutureCallbackList,
+     * that shares the result to every callback that is attached to that list.
+     */
     class UpdateCourse implements FutureCallback<Course> {
-        
         List<Course> courses;
-        public UpdateCourse(List<Course> courses){
+        
+        public UpdateCourse(List<Course> courses) {
             this.courses = courses;
         }
-        
+
         @Override
         public void onSuccess(Course detailedCourse) {
             detailedCourse.setExercisesLoaded(true);
@@ -123,6 +137,9 @@ public final class RefreshCoursesAction {
         }
     }
 
+    /**
+     * Updates the courseDb after all course-jsons are downloaded.
+     */
     private class DefaultListener implements FutureCallback<List<Course>> {
 
         private final boolean showDialogOnError;
@@ -132,7 +149,7 @@ public final class RefreshCoursesAction {
             this.showDialogOnError = showDialogOnError;
             this.updateCourseDb = updateCourseDb;
         }
-        
+
         @Override
         public void onSuccess(List<Course> result) {
             if (updateCourseDb) {
