@@ -71,29 +71,8 @@ public final class RefreshCoursesAction {
                     Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                     if (currentCourse != null) {
                         try {
-                            System.out.println("DETAILS URL: " + currentCourse.getDetailsUrl());
                             ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
-                            Futures.addCallback(courseFuture, new FutureCallback<Course>() {
-                                @Override
-                                public void onSuccess(Course detailedCourse) {
-                                    detailedCourse.setExercisesLoaded(true);
-                                    ArrayList<Course> finalCourses = new ArrayList<Course>();
-                                    for(Course course: courses){
-                                        if(course.getName().equals(detailedCourse.getName())) {
-                                            finalCourses.add(detailedCourse);
-                                        } else {
-                                            finalCourses.add(course);
-                                        }
-                                    }
-                                    callbacks.onSuccess(finalCourses);
-                                }
-                                
-                                @Override
-                                public void onFailure(Throwable ex) {
-                                    log.log(Level.INFO, "Failed to download current course info.", ex);
-                                    callbacks.onFailure(ex);
-                                }
-                            });
+                            Futures.addCallback(courseFuture, new UpdateCourse(courses));
                         } catch (TmcCoreException ex) {
                             Exceptions.printStackTrace(ex);
                             callbacks.onFailure(ex);
@@ -112,6 +91,34 @@ public final class RefreshCoursesAction {
             );
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
+            callbacks.onFailure(ex);
+        }
+    }
+
+    class UpdateCourse implements FutureCallback<Course> {
+        
+        List<Course> courses;
+        public UpdateCourse(List<Course> courses){
+            this.courses = courses;
+        }
+        
+        @Override
+        public void onSuccess(Course detailedCourse) {
+            detailedCourse.setExercisesLoaded(true);
+            ArrayList<Course> finalCourses = new ArrayList<Course>();
+            for (Course course : courses) {
+                if (course.getName().equals(detailedCourse.getName())) {
+                    finalCourses.add(detailedCourse);
+                } else {
+                    finalCourses.add(course);
+                }
+            }
+            callbacks.onSuccess(finalCourses);
+        }
+
+        @Override
+        public void onFailure(Throwable ex) {
+            log.log(Level.INFO, "Failed to download current course info.", ex);
             callbacks.onFailure(ex);
         }
     }
@@ -172,7 +179,6 @@ public final class RefreshCoursesAction {
 //            }
 //        });
 //    }
-
     private class DefaultListener implements FutureCallback<List<Course>> {
 
         private final boolean showDialogOnError;
@@ -200,7 +206,6 @@ public final class RefreshCoursesAction {
 //                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
 //            }
 //        }
-
         @Override
         public void onSuccess(List<Course> result) {
             if (updateCourseDb) {
