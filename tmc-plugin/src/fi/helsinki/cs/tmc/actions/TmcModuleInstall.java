@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
@@ -62,9 +63,9 @@ public class TmcModuleInstall extends ModuleInstall {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     // Do full refresh.
-                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
+                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(new FutureCallback<List<Course>>() {
                         @Override
-                        public void bgTaskReady(List<Course> result) {
+                        public void onSuccess(List<Course> result) {
                             new CheckForNewExercisesOrUpdates(true, false).run();
                             if (CheckForUnopenedExercises.shouldRunOnStartup()) {
                                 new CheckForUnopenedExercises().run();
@@ -72,11 +73,7 @@ public class TmcModuleInstall extends ModuleInstall {
                         }
 
                         @Override
-                        public void bgTaskCancelled() {
-                        }
-
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
+                        public void onFailure(Throwable thrwbl) {
                         }
                     }).run();
                 }
