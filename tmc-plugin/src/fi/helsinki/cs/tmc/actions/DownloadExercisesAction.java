@@ -1,15 +1,23 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
+import hy.tmc.core.TmcCore;
+import hy.tmc.core.exceptions.TmcCoreException;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,6 +29,7 @@ import javax.swing.SwingUtilities;
  * Downloads and opens the given exercises in the background.
  */
 public class DownloadExercisesAction {
+
     private static final Logger logger = Logger.getLogger(DownloadExercisesAction.class.getName());
 
     private ServerAccess serverAccess;
@@ -29,6 +38,8 @@ public class DownloadExercisesAction {
     private ConvenientDialogDisplayer dialogs;
 
     private List<Exercise> exercisesToDownload;
+    private TmcCore tmcCore;
+    private NBTmcSettings settings;
 
     public DownloadExercisesAction(List<Exercise> exercisesToOpen) {
         this.serverAccess = new ServerAccess();
@@ -37,17 +48,43 @@ public class DownloadExercisesAction {
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         this.exercisesToDownload = exercisesToOpen;
+        this.tmcCore = TmcCoreSingleton.getInstance();
+        this.settings = NBTmcSettings.getDefault();
     }
 
-    public void run() {
-        final AggregatingBgTaskListener<TmcProjectInfo> aggregator =
-                new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
+    public void run() throws TmcCoreException {
+        // final AggregatingBgTaskListener<TmcProjectInfo> aggregator
+        //         = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
-        for (final Exercise exercise : exercisesToDownload) {
-            startDownloading(exercise, aggregator);
-        }
+        ListenableFuture<List<Exercise>> dlFuture = tmcCore.donwloadExercises(exercisesToDownload, settings);
+
+        Futures.addCallback(dlFuture,
+                new FutureCallback<List<Exercise>>() {
+
+                    @Override
+                    public void onSuccess(List<Exercise> downloadedExercises) {
+                        List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
+                        for (Exercise exercise : downloadedExercises) {
+                            projects.add(projectMediator.tryGetProjectForExercise(exercise));
+                        }
+                        projectMediator.openProjects(projects);
+                    }
+
+                    @Override
+                    public void onFailure(Throwable thrwbl) {
+                        logger.log(Level.INFO, "Failed to download exercise file.", thrwbl);
+                        dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(thrwbl));
+
+                    }
+                }
+        );
+
+        //for (final Exercise exercise : exercisesToDownload) {
+        //    startDownloading(exercise, aggregator);
+        //}
     }
 
+    /*
     private void startDownloading(final Exercise exercise, final BgTaskListener<TmcProjectInfo> listener) {
         BgTask.start("Downloading " + exercise.getName(), serverAccess.getDownloadingExerciseZipTask(exercise), new BgTaskListener<byte[]>() {
             @Override
@@ -75,7 +112,7 @@ public class DownloadExercisesAction {
                     }
                 }, listener);
             }
-            
+
             @Override
             public void bgTaskCancelled() {
                 listener.bgTaskCancelled();
@@ -87,7 +124,7 @@ public class DownloadExercisesAction {
             }
         });
     }
-
+    /*
     private BgTaskListener<Collection<TmcProjectInfo>> whenAllDownloadsFinished = new BgTaskListener<Collection<TmcProjectInfo>>() {
         @Override
         public void bgTaskReady(Collection<TmcProjectInfo> projects) {
@@ -104,4 +141,6 @@ public class DownloadExercisesAction {
             dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
         }
     };
+    */
+
 }

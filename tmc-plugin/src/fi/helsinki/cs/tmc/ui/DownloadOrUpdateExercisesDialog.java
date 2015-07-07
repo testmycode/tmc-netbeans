@@ -1,9 +1,11 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.DownloadExercisesAction;
+import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.UnlockExercisesAction;
 import fi.helsinki.cs.tmc.actions.UpdateExercisesAction;
 import hy.tmc.core.domain.Exercise;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -13,6 +15,7 @@ import java.util.HashMap;
 import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
+import org.openide.util.Exceptions;
 import org.openide.windows.WindowManager;
 
 public class DownloadOrUpdateExercisesDialog extends JDialog {
@@ -117,8 +120,14 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
     }
     
     private void doDownloadAndUpdate(List<Exercise> toDownload, List<Exercise> toUpdate) {
-        new DownloadExercisesAction(toDownload).run();
-        new UpdateExercisesAction(toUpdate).run();
+        try {
+            new DownloadExercisesAction(toDownload).run();
+            new UpdateExercisesAction(toUpdate).run();
+        } catch (TmcCoreException ex) {
+            Exceptions.printStackTrace(ex);
+            ConvenientDialogDisplayer.getDefault()
+                .displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+        }
     }
     
     /** This method is called from within the constructor to
