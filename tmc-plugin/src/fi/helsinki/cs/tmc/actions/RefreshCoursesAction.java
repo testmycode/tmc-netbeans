@@ -123,62 +123,6 @@ public final class RefreshCoursesAction {
         }
     }
 
-//    public void run() {
-//        CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
-//        BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
-//
-//            @Override
-//            public void bgTaskReady(final List<Course> courses) {
-//                Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
-//                // CurrentCourseStub on null jos on vanhentunut/ ei enää olemassa servulla
-//                if (currentCourseStub != null) {
-//                    // Jos on olemassa servulla, päivitetään lokaali kurssi servun kurssia vastaavaksi
-//                    CancellableCallable<Course> currentCourseTask = serverAccess.getFullCourseInfoTask(currentCourseStub);
-//
-//                    BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
-//                        @Override
-//                        public void bgTaskReady(Course currentCourse) {
-//                            currentCourse.setExercisesLoaded(true);
-//
-//                            ArrayList<Course> finalCourses = new ArrayList<Course>();
-//                            for (Course course : courses) {
-//                                if (course.getName().equals(currentCourse.getName())) {
-//                                    finalCourses.add(currentCourse);
-//                                } else {
-//                                    finalCourses.add(course);
-//                                }
-//                            }
-//                            listeners.bgTaskReady(finalCourses);
-//                        }
-//
-//                        @Override
-//                        public void bgTaskCancelled() {
-//                            listeners.bgTaskCancelled();
-//                        }
-//
-//                        @Override
-//                        public void bgTaskFailed(Throwable ex) {
-//                            log.log(Level.INFO, "Failed to download current course info.", ex);
-//                            listeners.bgTaskFailed(ex);
-//                        }
-//                    });
-//                } else {
-//                    listeners.bgTaskReady(courses);
-//                }
-//            }
-//
-//            @Override
-//            public void bgTaskCancelled() {
-//                listeners.bgTaskCancelled();
-//            }
-//
-//            @Override
-//            public void bgTaskFailed(Throwable ex) {
-//                log.log(Level.INFO, "Failed to download course list.", ex);
-//                listeners.bgTaskFailed(ex);
-//            }
-//        });
-//    }
     private class DefaultListener implements FutureCallback<List<Course>> {
 
         private final boolean showDialogOnError;
@@ -188,24 +132,7 @@ public final class RefreshCoursesAction {
             this.showDialogOnError = showDialogOnError;
             this.updateCourseDb = updateCourseDb;
         }
-
-//        @Override
-//        public void bgTaskReady(List<Course> result) {
-//            if (updateCourseDb) {
-//                courseDb.setAvailableCourses(result);
-//            }
-//        }
-//
-//        @Override
-//        public void bgTaskCancelled() {
-//        }
-//
-//        @Override
-//        public void bgTaskFailed(Throwable ex) {
-//            if (showDialogOnError) {
-//                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-//            }
-//        }
+        
         @Override
         public void onSuccess(List<Course> result) {
             if (updateCourseDb) {
