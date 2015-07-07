@@ -22,4 +22,5 @@ public interface BgTaskListener<V> {
      * @param e The exception that caused the task to fail.
      */
     public void bgTaskFailed(Throwable ex);
+    
 }

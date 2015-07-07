@@ -108,7 +108,7 @@ public final class RefreshCoursesAction {
         }
     }
 
-    public void run() {
+    /*public void run() {
         CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
 
@@ -163,7 +163,7 @@ public final class RefreshCoursesAction {
                 listeners.bgTaskFailed(ex);
             }
         });
-    }
+    }*/
 
     private class DefaultListener implements BgTaskListener<List<Course>> {
 
