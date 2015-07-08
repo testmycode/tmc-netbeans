@@ -43,7 +43,7 @@ public class DownloadExercisesAction {
         // final AggregatingBgTaskListener<TmcProjectInfo> aggregator
         //         = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
-        ListenableFuture<List<Exercise>> dlFuture = tmcCore.donwloadExercises(exercisesToDownload, settings);
+        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(exercisesToDownload, settings);
 
         Futures.addCallback(dlFuture, new ProjectOpener());
     }
