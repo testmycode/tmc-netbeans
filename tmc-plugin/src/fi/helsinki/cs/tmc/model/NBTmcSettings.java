@@ -142,7 +142,8 @@ public class NBTmcSettings implements TmcSettings {
         return settings.get(PREF_PASSWORD, null) != null;
     }
     
-    public String getProjectRootDir() {
+    @Override
+    public String getTmcMainDirectory() {
         String path = settings.get(PREF_PROJECT_ROOT_DIR, null);
         if (path != null) {
             return path;

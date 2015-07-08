@@ -55,7 +55,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setPassword(settings.getPassword());
         prefUI.setShouldSavePassword(settings.isSavingPassword());
         prefUI.setServerBaseUrl(settings.getServerAddress());
-        prefUI.setProjectDir(settings.getProjectRootDir());
+        prefUI.setProjectDir(settings.getTmcMainDirectory());
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
         prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
         prefUI.setAvailableCourses(courseDb.getAvailableCourses());
