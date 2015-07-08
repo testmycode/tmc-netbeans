@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import hy.tmc.core.domain.Exercise;
@@ -47,9 +48,10 @@ public final class DownloadCompletedExercises implements ActionListener {
 
         RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(true, true);
-        action.addListener(new BgTaskListener<List<Course>>() {
+        action.addListener(new FutureCallback<List<Course>>() {
+
             @Override
-            public void bgTaskReady(List<Course> receivedCourseList) {
+            public void onSuccess(List<Course> receivedCourseList) {
                 LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                 if (!status.downloadableCompleted.isEmpty()) {
                     List<Exercise> emptyList = Collections.emptyList();
@@ -60,11 +62,7 @@ public final class DownloadCompletedExercises implements ActionListener {
             }
 
             @Override
-            public void bgTaskCancelled() {
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
+            public void onFailure(Throwable ex) {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });

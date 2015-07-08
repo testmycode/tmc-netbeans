@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
+import com.google.common.util.concurrent.FutureCallback;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
@@ -422,24 +423,21 @@ import org.apache.commons.lang3.StringUtils;
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {
         final RefreshCoursesAction action = new RefreshCoursesAction(getTransientSettingsForRefresh());
         action.addDefaultListener(!failSilently, false);
-        action.addListener(new BgTaskListener<List<Course>>() {
-            @Override
-            public void bgTaskReady(List<Course> result) {
-                setCourseListRefreshInProgress(false);
-                setAvailableCourses(result);
-            }
+        action.addListener(new FutureCallback<List<Course>>() {
 
             @Override
-            public void bgTaskCancelled() {
+            public void onSuccess(List<Course> result) {
                 setCourseListRefreshInProgress(false);
+                setAvailableCourses(result);            
             }
-
+            
             @Override
-            public void bgTaskFailed(Throwable ex) {
+            public void onFailure(Throwable thrwbl) {
                 setCourseListRefreshInProgress(false);
             }
+            
         });
-
+        
         if (delay) {
             refreshRunner.setTask(new Runnable() {
                 @Override
