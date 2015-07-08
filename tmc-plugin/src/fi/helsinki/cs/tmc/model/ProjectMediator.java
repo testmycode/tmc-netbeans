@@ -115,7 +115,7 @@ public class ProjectMediator {
         String path = 
                 getProjectRootDir() + File.separator +
                 ex.getCourseName() + File.separator +
-                ex.getName().replaceAll("/", "-");
+                ex.getName().replaceAll("-", "/");
         return new File(path);
     }
     
