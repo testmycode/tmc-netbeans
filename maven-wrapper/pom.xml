@@ -24,7 +24,7 @@
         <repository>
             <id>netbeans</id>
             <name>NetBeans</name>
-            <url>http://bits.netbeans.org/maven2/</url>
+            <url>http://bits.netbeans.org/nexus/content/groups/netbeans/</url>
             <snapshots>
                 <enabled>false</enabled>
             </snapshots>
@@ -321,7 +321,6 @@
             <artifactId>javax-websocket-client-impl</artifactId>
             <version>9.2.5.v20141112</version>
         </dependency>
-
     </dependencies>
 
     <build>

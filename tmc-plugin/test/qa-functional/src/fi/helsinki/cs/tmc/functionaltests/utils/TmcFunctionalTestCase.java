@@ -51,6 +51,5 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
     
     protected File getFixtureProjectDir(String projectName) {
         return new File(getDataDir().getPath() + File.separator + projectName + "Fixture");
-    }
-    
+    }   
 }
