@@ -138,6 +138,8 @@ public class TestResultDisplayer {
                                    final boolean returnable,
                                    final Runnable submissionCallback,
                                    final ResultCollector resultCollector) {
+        
+        System.out.println("Näyttämässä lokaalia testitulosta");
 
         resultCollector.setSubmissionCallback(submissionCallback);
 

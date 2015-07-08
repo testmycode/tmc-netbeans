@@ -1,73 +1,112 @@
 package fi.helsinki.cs.tmc.runners;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
-import fi.helsinki.cs.tmc.stylerunner.CheckstyleRunner;
-import fi.helsinki.cs.tmc.stylerunner.exception.TMCCheckstyleException;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import hy.tmc.core.exceptions.TmcCoreException;
 
-import java.util.Locale;
+import javax.swing.SwingUtilities;
 
 import org.netbeans.api.project.Project;
 
 import org.openide.util.Exceptions;
 
-public final class CheckstyleRunHandler implements Runnable {
+public final class CheckstyleRunHandler {
 
     private Project project;
     private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
     private ValidationResult validationResult = new CheckstyleResult();
 
+    /*public void performAction(final ResultCollector resultCollector, final Project project) {
+
+     this.project = project;
+
+     BgTask.start("Running validations", this, new BgTaskListener<Object>() {
+
+     @Override
+     public void bgTaskFailed(final Throwable exception) {
+
+     dialogDisplayer.displayError("Failed to validate the code.");
+     }
+
+     @Override
+     public void bgTaskCancelled() {}
+
+     @Override
+     public void bgTaskReady(final Object nothing) {
+
+     resultCollector.setValidationResult(validationResult);
+     }
+     });
+     }*/
     public void performAction(final ResultCollector resultCollector, final Project project) {
-
         this.project = project;
-
-        BgTask.start("Running validations", this, new BgTaskListener<Object>() {
-
-            @Override
-            public void bgTaskFailed(final Throwable exception) {
-
-                dialogDisplayer.displayError("Failed to validate the code.");
-            }
-
-            @Override
-            public void bgTaskCancelled() {}
-
-            @Override
-            public void bgTaskReady(final Object nothing) {
-
-                resultCollector.setValidationResult(validationResult);
-            }
-        });
-    }
-
-    @Override
-    public void run() {
-
         final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
         final String projectType = projectInfo.getProjectType().name();
-
-        if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
-            return;
-        }
-
-        // Save all files
         ProjectMediator.getInstance().saveAllFiles();
 
         try {
+            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath(), NBTmcSettings.getDefault());
+            Futures.addCallback(result, new FutureCallback<ValidationResult>() {
 
-            final Locale locale = NBTmcSettings.getDefault().getErrorMsgLocale();
-            validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
+                @Override
+                public void onSuccess(final ValidationResult v) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            resultCollector.setValidationResult(v);
+                        }
+                    });
+                }
 
-        } catch (TMCCheckstyleException exception) {
+                @Override
+                public void onFailure(Throwable thrwbl) {
+                    SwingUtilities.invokeLater(new Runnable() {
+                        @Override
+                        public void run() {
+                            dialogDisplayer.displayError("Failed to validate the code.");
+                        }
+                    });
+                }
+
+            });
+
+        } catch (TmcCoreException ex) {
             ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
-            Exceptions.printStackTrace(exception);
+            Exceptions.printStackTrace(ex);
         }
+
     }
+
+    /*@Override
+     public void run() {
+
+     final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
+     final String projectType = projectInfo.getProjectType().name();
+
+     if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
+     return;
+     }
+
+     // Save all files
+     ProjectMediator.getInstance().saveAllFiles();
+
+     try {
+
+     final Locale locale = NBTmcSettings.getDefault().getErrorMsgLocale();
+     validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
+
+     } catch (TMCCheckstyleException exception) {
+     ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
+     Exceptions.printStackTrace(exception);
+     }
+     }*/
 }
