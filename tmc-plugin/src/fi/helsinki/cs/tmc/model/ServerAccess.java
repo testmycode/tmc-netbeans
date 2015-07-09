@@ -109,6 +109,7 @@ public class ServerAccess {
                 !settings.getServerAddress().isEmpty();
     }
     
+    @Deprecated
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
         final CancellableCallable<String> download = createHttpTasks().getForText(getCourseListUrl());
         return new CancellableCallable<List<Course>>() {
@@ -129,6 +130,7 @@ public class ServerAccess {
         };
     }
 
+    @Deprecated
     public CancellableCallable<Course> getFullCourseInfoTask(Course courseStub) {
         String url = addApiCallQueryParameters(courseStub.getDetailsUrl());
         final CancellableCallable<String> download = createHttpTasks().getForText(url);

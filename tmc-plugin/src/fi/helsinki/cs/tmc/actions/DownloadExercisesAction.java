@@ -15,6 +15,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 
 /**
  * Downloads and opens the given exercises in the background.
@@ -43,15 +45,24 @@ public class DownloadExercisesAction {
         // final AggregatingBgTaskListener<TmcProjectInfo> aggregator
         //         = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
+        ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
+                    "Downloading " + exercisesToDownload.size() + " exercises.");
+        exerciseDownload.start();
         ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(exercisesToDownload, settings);
 
-        Futures.addCallback(dlFuture, new ProjectOpener());
+        Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload));
     }
 
     private class ProjectOpener implements FutureCallback<List<Exercise>> {
+        private ProgressHandle lastAction;
 
+        public ProjectOpener(ProgressHandle lastAction) {
+            this.lastAction = lastAction;
+        }
+        
         @Override
         public void onSuccess(List<Exercise> downloadedExercises) {
+            lastAction.finish();
             List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
             for (Exercise exercise : downloadedExercises) {
                 TmcProjectInfo info = projectMediator.tryGetProjectForExercise(exercise);
@@ -65,6 +76,7 @@ public class DownloadExercisesAction {
 
         @Override
         public void onFailure(Throwable thrwbl) {
+            lastAction.finish();
             logger.log(Level.INFO, "Failed to download exercise file.", thrwbl);
             dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(thrwbl));
 

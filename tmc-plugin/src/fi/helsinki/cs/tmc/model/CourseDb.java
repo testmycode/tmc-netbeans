@@ -86,7 +86,7 @@ public class CourseDb {
             if (availableCourses.get(i).getName().equals(course.getName())) {
                 availableCourses.set(i, course);
                 save();
-                break;
+                return;
             }
         }
     }

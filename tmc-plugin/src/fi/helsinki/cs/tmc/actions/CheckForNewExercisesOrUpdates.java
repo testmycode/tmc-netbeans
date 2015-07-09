@@ -23,6 +23,8 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import org.apache.commons.lang3.StringUtils;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -50,7 +52,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
-    private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
@@ -63,7 +64,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
-        this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
@@ -76,12 +76,11 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         run();
     }
 
-    //"Checking for new exercises" päivitä tämä näkymään progressHandleen myöhemmin
-    /**
-     *
-     */
     public void run() {
         try {
+            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
+                    "Checking for new exercises");
+            exerciseRefresh.start();
             final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
             if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
                 return;
@@ -89,7 +88,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
             ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
                     NBTmcSettings.getDefault(), currentCourseBeforeUpdate.getDetailsUrl()
             );
-            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate());
+            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
         }
@@ -113,16 +112,20 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     class UpdateCourseForExerciseUpdate implements FutureCallback<Course> {
+        
+        private ProgressHandle lastAction;
 
         /**
          * This should be attached to listenableFuture. When future is ready,
          * receivedCourse will be saved to courseDb and view will be updated.
          */
-        public UpdateCourseForExerciseUpdate() {
+        public UpdateCourseForExerciseUpdate(ProgressHandle lastAction) {
+            this.lastAction = lastAction;
         }
 
         @Override
         public void onSuccess(Course receivedCourse) {
+            lastAction.finish();
             if (receivedCourse != null) {
                 courseDb.putDetailedCourse(receivedCourse);
                 final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
@@ -131,7 +134,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
 
         private void updateGUI(final LocalExerciseStatus status) {
-            if (status.thereIsSomethingToDownload(false)) {
+            boolean thereIsSomethingToDownload = status.thereIsSomethingToDownload(false);
+            System.out.println("on ladattavaa: " + thereIsSomethingToDownload);
+            if (thereIsSomethingToDownload) {
                 if (beQuiet) {
                     displayNotification(status, new ActionListener() {
                         @Override
@@ -149,6 +154,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         @Override
         public void onFailure(Throwable ex) {
+            lastAction.finish();
             if (!beQuiet || ex instanceof ObsoleteClientException) {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }

@@ -17,6 +17,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
 
 /**
@@ -37,14 +39,14 @@ public final class RefreshCoursesAction {
     public RefreshCoursesAction() {
         this(NBTmcSettings.getDefault());
     }
-    
+
     /**
      * Default constructor.
      */
     public RefreshCoursesAction(NBTmcSettings settings) {
         this(settings, TmcCoreSingleton.getInstance());
     }
-    
+
     /**
      * Dependency inject TmcCore for tests.
      */
@@ -69,34 +71,54 @@ public final class RefreshCoursesAction {
     }
 
     /**
-     * Starts downloading course-jsons from TMC-server.
-     * Url of TMC-server is defined in TmcSettings object.
-     * TmcCore includes all logic, callbacks here are run after core-futures are ready.
+     * Starts downloading course-jsons from TMC-server. Url of TMC-server is
+     * defined in TmcSettings object. TmcCore includes all logic, callbacks here
+     * are run after core-futures are ready.
      */
     public void run() {
         try {
+            ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
+                    "Refreshing course list");
+            courseRefresh.start();
             ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
-            Futures.addCallback(listCourses, new LoadCourses());
+            Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
             callbacks.onFailure(ex);
         }
     }
 
-    /**
-     * This callBack is run when ListenableFuture (to witch this is attached) is done.
-     * On success method takes list of Course-objects, searches the current course and starts uploading
-     * the details of the course.
-     * If no currentCourse found, no need to update details.
-     */
     class LoadCourses implements FutureCallback<List<Course>> {
+
+        private ProgressHandle lastAction;
+
+        /**
+         * This callBack is run when ListenableFuture (to witch this is
+         * attached) is done. On success method takes list of Course-objects,
+         * searches the current course and starts uploading the details of the
+         * course. If no currentCourse found, no need to update details.
+         *
+         * @param ProgressHandle shows to user that action is processing.
+         */
+        public LoadCourses(ProgressHandle lastAction) {
+            this.lastAction = lastAction;
+        }
+
         @Override
         public void onSuccess(final List<Course> courses) {
-            Course currentCourse = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
+            lastAction.finish();
+            Course currentCourse = CourseListUtils.getCourseByName(
+                    courses, courseDb.getCurrentCourseName()
+            );
             if (currentCourse != null) {
                 try {
-                    ListenableFuture<Course> courseFuture = tmcCore.getCourse(tmcSettings, currentCourse.getDetailsUrl());
-                    Futures.addCallback(courseFuture, new UpdateCourse(courses));
+                    ProgressHandle loadingCourse = ProgressHandleFactory.
+                            createSystemHandle("Loading course");
+                    loadingCourse.start();
+                    ListenableFuture<Course> courseFuture = tmcCore.getCourse(
+                            tmcSettings, currentCourse.getDetailsUrl()
+                    );
+                    Futures.addCallback(courseFuture, new UpdateCourse(courses, loadingCourse));
                 } catch (TmcCoreException ex) {
                     Exceptions.printStackTrace(ex);
                     callbacks.onFailure(ex);
@@ -108,24 +130,30 @@ public final class RefreshCoursesAction {
 
         @Override
         public void onFailure(Throwable ex) {
+            lastAction.finish();
             log.log(Level.INFO, "Failed to download current course info.", ex);
             callbacks.onFailure(ex);
         }
     }
 
     /**
-     * When detailed current course is present, courses will be given to FutureCallbackList,
-     * that shares the result to every callback that is attached to that list.
+     * When detailed current course is present, courses will be given to
+     * FutureCallbackList, that shares the result to every callback that is
+     * attached to that list.
      */
     class UpdateCourse implements FutureCallback<Course> {
-        List<Course> courses;
-        
-        public UpdateCourse(List<Course> courses) {
+
+        private List<Course> courses;
+        private ProgressHandle lastAction;
+
+        public UpdateCourse(List<Course> courses, ProgressHandle lastAction) {
             this.courses = courses;
+            this.lastAction = lastAction;
         }
 
         @Override
         public void onSuccess(Course detailedCourse) {
+            lastAction.finish();
             detailedCourse.setExercisesLoaded(true);
             ArrayList<Course> finalCourses = new ArrayList<Course>();
             for (Course course : courses) {
@@ -140,6 +168,7 @@ public final class RefreshCoursesAction {
 
         @Override
         public void onFailure(Throwable ex) {
+            lastAction.finish();
             log.log(Level.INFO, "Failed to download current course info.", ex);
             callbacks.onFailure(ex);
         }

@@ -31,6 +31,7 @@ public class LocalExerciseStatus {
 
         for (Exercise ex : allExercises) {
             if (!ex.hasDeadlinePassed()) {
+                System.out.println("Exercise: " + ex);
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 boolean isDownloaded = proj != null;
                 if (courseDb.isUnlockable(ex)) {
