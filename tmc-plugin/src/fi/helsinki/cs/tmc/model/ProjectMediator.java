@@ -116,7 +116,8 @@ public class ProjectMediator {
                 getProjectRootDir() + File.separator +
                 ex.getCourseName() + File.separator +
                 ex.getName().replaceAll("-", "/");
-        return new File(path);
+        File file = new File(path);
+        return FileUtil.normalizeFile(file);
     }
     
     /**

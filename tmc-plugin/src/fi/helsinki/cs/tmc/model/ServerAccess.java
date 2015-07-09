@@ -84,10 +84,10 @@ public class ServerAccess {
         return addApiCallQueryParameters(settings.getServerAddress() + "/courses.json");
     }
     
-    private String addApiCallQueryParameters(String url) {
+    public static String addApiCallQueryParameters(String url) {
         url = UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
         url = UriUtils.withQueryParam(url, "client", "netbeans_plugin");
-        url = UriUtils.withQueryParam(url, "client_version", clientVersion);
+        url = UriUtils.withQueryParam(url, "client_version", getClientVersion());
         return url;
     }
     
@@ -109,6 +109,7 @@ public class ServerAccess {
                 !settings.getServerAddress().isEmpty();
     }
     
+    @Deprecated
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
         final CancellableCallable<String> download = createHttpTasks().getForText(getCourseListUrl());
         return new CancellableCallable<List<Course>>() {
@@ -129,6 +130,7 @@ public class ServerAccess {
         };
     }
 
+    @Deprecated
     public CancellableCallable<Course> getFullCourseInfoTask(Course courseStub) {
         String url = addApiCallQueryParameters(courseStub.getDetailsUrl());
         final CancellableCallable<String> download = createHttpTasks().getForText(url);

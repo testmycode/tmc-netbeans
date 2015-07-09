@@ -7,8 +7,8 @@ import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.Inflector;
 import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import hy.tmc.core.TmcCore;
+import hy.tmc.core.domain.Exercise;
 import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -23,6 +24,8 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import org.apache.commons.lang3.StringUtils;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -50,7 +53,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
-    private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
@@ -63,7 +65,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
-        this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
@@ -76,23 +77,28 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         run();
     }
 
-    //"Checking for new exercises" päivitä tämä näkymään progressHandleen myöhemmin
-    /**
-     *
-     */
     public void run() {
         try {
             final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
             if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
                 return;
             }
+            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
+                    "Checking for new exercises");
+            exerciseRefresh.start();
             ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
-                    NBTmcSettings.getDefault(), currentCourseBeforeUpdate.getDetailsUrl()
+                    NBTmcSettings.getDefault(), detailUrl(currentCourseBeforeUpdate)
             );
-            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate());
+            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    private String detailUrl(final Course currentCourseBeforeUpdate) {
+        return ServerAccess.addApiCallQueryParameters(
+                currentCourseBeforeUpdate.getDetailsUrl()
+        );
     }
 
     /**
@@ -113,25 +119,37 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     class UpdateCourseForExerciseUpdate implements FutureCallback<Course> {
+        
+        private ProgressHandle lastAction;
 
         /**
          * This should be attached to listenableFuture. When future is ready,
          * receivedCourse will be saved to courseDb and view will be updated.
          */
-        public UpdateCourseForExerciseUpdate() {
+        public UpdateCourseForExerciseUpdate(ProgressHandle lastAction) {
+            this.lastAction = lastAction;
         }
 
         @Override
         public void onSuccess(Course receivedCourse) {
+            lastAction.finish();
             if (receivedCourse != null) {
+                setCourseNameToAllExercises(receivedCourse);
                 courseDb.putDetailedCourse(receivedCourse);
                 final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
                 updateGUI(status);
             }
         }
 
+        private void setCourseNameToAllExercises(Course receivedCourse) {
+            for (Exercise exercise : receivedCourse.getExercises()) {
+                exercise.setCourseName(receivedCourse.getName());
+            }
+        }
+
         private void updateGUI(final LocalExerciseStatus status) {
-            if (status.thereIsSomethingToDownload(false)) {
+            boolean thereIsSomethingToDownload = status.thereIsSomethingToDownload(false);
+            if (thereIsSomethingToDownload) {
                 if (beQuiet) {
                     displayNotification(status, new ActionListener() {
                         @Override
@@ -149,6 +167,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         @Override
         public void onFailure(Throwable ex) {
+            lastAction.finish();
             if (!beQuiet || ex instanceof ObsoleteClientException) {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
