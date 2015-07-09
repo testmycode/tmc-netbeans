@@ -89,7 +89,6 @@ public class NBTmcSettings implements TmcSettings {
         }
         settings.saveAll();
         eventBus.post(new SavedEvent());
-        
     }
 
     @Override

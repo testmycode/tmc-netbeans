@@ -56,8 +56,6 @@ public class DownloadExercisesAction {
             for (Exercise exercise : downloadedExercises) {
                 TmcProjectInfo info = projectMediator.tryGetProjectForExercise(exercise);
                 if (info == null) {
-                    dialogs.displayError(
-                            "Could not find exercise " + exercise.getName() + " from the filesystem");
                     continue;
                 }
                 projects.add(info);

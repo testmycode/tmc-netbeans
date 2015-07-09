@@ -37,17 +37,25 @@ public final class RefreshCoursesAction {
     public RefreshCoursesAction() {
         this(NBTmcSettings.getDefault());
     }
-
+    
+    /**
+     * Default constructor.
+     */
     public RefreshCoursesAction(NBTmcSettings settings) {
+        this(settings, TmcCoreSingleton.getInstance());
+    }
+    
+    /**
+     * Dependency inject TmcCore for tests.
+     */
+    public RefreshCoursesAction(NBTmcSettings settings, TmcCore core) {
         this.tmcSettings = settings;
         this.serverAccess = new ServerAccess(settings);
         this.serverAccess.setSettings(settings);
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
-
-        //this.listeners = new BgTaskListenerList<List<Course>>();
         this.callbacks = new FutureCallbackList<List<Course>>();
-        this.tmcCore = TmcCoreSingleton.getInstance();
+        this.tmcCore = core;
     }
 
     public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
@@ -55,8 +63,8 @@ public final class RefreshCoursesAction {
         return this;
     }
 
-    public RefreshCoursesAction addListener(FutureCallback<List<Course>> callbacks) {
-        this.callbacks.addListener(callbacks);
+    public RefreshCoursesAction addListener(FutureCallback<List<Course>> callback) {
+        this.callbacks.addListener(callback);
         return this;
     }
 
