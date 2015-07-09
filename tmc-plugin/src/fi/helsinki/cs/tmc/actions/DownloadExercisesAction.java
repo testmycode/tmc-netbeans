@@ -36,6 +36,10 @@ public class DownloadExercisesAction {
     private TmcCore tmcCore;
     private NBTmcSettings settings;
 
+    /**
+     * Downloads all exercises of the list from TmcServer, unzips and opens them and 
+     * saves the checksums of each Exercise to courseDb.
+     */
     public DownloadExercisesAction(List<Exercise> exercisesToOpen) {
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -46,9 +50,6 @@ public class DownloadExercisesAction {
     }
 
     public void run() throws TmcCoreException {
-        // final AggregatingBgTaskListener<TmcProjectInfo> aggregator
-        //         = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
-
         ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
                 "Downloading " + exercisesToDownload.size() + " exercises.");
         exerciseDownload.start();
@@ -105,7 +106,6 @@ public class DownloadExercisesAction {
             lastAction.finish();
             logger.log(Level.INFO, "Failed to download exercise file.", thrwbl);
             dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(thrwbl));
-
         }
     }
 }
