@@ -7,8 +7,8 @@ import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -16,6 +16,7 @@ import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.Inflector;
 import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import hy.tmc.core.TmcCore;
+import hy.tmc.core.domain.Exercise;
 import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -78,20 +79,26 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public void run() {
         try {
-            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
-                    "Checking for new exercises");
-            exerciseRefresh.start();
             final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
             if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
                 return;
             }
+            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
+                    "Checking for new exercises");
+            exerciseRefresh.start();
             ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
-                    NBTmcSettings.getDefault(), currentCourseBeforeUpdate.getDetailsUrl()
+                    NBTmcSettings.getDefault(), detailUrl(currentCourseBeforeUpdate)
             );
             Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
         }
+    }
+
+    private String detailUrl(final Course currentCourseBeforeUpdate) {
+        return ServerAccess.addApiCallQueryParameters(
+                currentCourseBeforeUpdate.getDetailsUrl()
+        );
     }
 
     /**
@@ -127,15 +134,21 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         public void onSuccess(Course receivedCourse) {
             lastAction.finish();
             if (receivedCourse != null) {
+                setCourseNameToAllExercises(receivedCourse);
                 courseDb.putDetailedCourse(receivedCourse);
                 final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
                 updateGUI(status);
             }
         }
 
+        private void setCourseNameToAllExercises(Course receivedCourse) {
+            for (Exercise exercise : receivedCourse.getExercises()) {
+                exercise.setCourseName(receivedCourse.getName());
+            }
+        }
+
         private void updateGUI(final LocalExerciseStatus status) {
             boolean thereIsSomethingToDownload = status.thereIsSomethingToDownload(false);
-            System.out.println("on ladattavaa: " + thereIsSomethingToDownload);
             if (thereIsSomethingToDownload) {
                 if (beQuiet) {
                     displayNotification(status, new ActionListener() {

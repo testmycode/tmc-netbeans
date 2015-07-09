@@ -84,10 +84,10 @@ public class ServerAccess {
         return addApiCallQueryParameters(settings.getServerAddress() + "/courses.json");
     }
     
-    private String addApiCallQueryParameters(String url) {
+    public static String addApiCallQueryParameters(String url) {
         url = UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
         url = UriUtils.withQueryParam(url, "client", "netbeans_plugin");
-        url = UriUtils.withQueryParam(url, "client_version", clientVersion);
+        url = UriUtils.withQueryParam(url, "client_version", getClientVersion());
         return url;
     }
     

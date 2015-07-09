@@ -161,16 +161,12 @@ public class ProjectMediator {
      */
     public TmcProjectInfo tryGetProjectForExercise(Exercise exercise) {
         projectManager.clearNonProjectCache(); // Just to be sure.
-        Thread.currentThread().setContextClassLoader(getClass().getClassLoader()); 
         
         File path = getProjectDirForExercise(exercise);
         FileObject fo = FileUtil.toFileObject(path);
-        System.out.println("PATH: " + path);
-        System.out.println("FIlEOBJECT: " + fo);
         if (fo != null) {
             try {
                 Project project = projectManager.findProject(fo);
-                System.out.println("PROJECT: " + project);
                 if (project != null) {
                     return wrapProject(project);
                 } else {
@@ -185,9 +181,6 @@ public class ProjectMediator {
                 return null;
             }
         } else {
-            logger.log(Level.WARNING, "ProjectMediator failed to convert "
-                    + "File to org.openide.filesystems.FileObject. Check "
-                    + "http://bits.netbeans.org/7.4/javadoc/org-openide-filesystems/org/openide/filesystems/FileUtil.html#toFileObject(java.io.File)");
             return null;
         }
     }

@@ -166,7 +166,21 @@ public class CourseDb {
      * Sets the downloaded checksum of the exercise to be the one reported by the server.
      */
     public void exerciseDownloaded(Exercise ex) {
-        downloadedExerciseChecksums.put(ex.getKey(), ex.getChecksum());
+        List<Exercise> exercises = new ArrayList<Exercise>();
+        exercises.add(ex);
+        this.multipleExerciseDownloaded(exercises);
+    }
+    
+    /**
+     * Informs the course database that the exercises are considered downloaded.
+     * 
+     * <p>
+     * Sets the downloaded checksums of the exercises to be the ones reported by the server.
+     */
+    public void multipleExerciseDownloaded(List<Exercise> exercises) {
+        for (Exercise ex : exercises) {
+            downloadedExerciseChecksums.put(ex.getKey(), ex.getChecksum());
+        }
         save();
     }
     
