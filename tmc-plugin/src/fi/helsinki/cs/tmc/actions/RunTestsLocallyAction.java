@@ -32,10 +32,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     protected void performAction(final Node[] nodes) {
-
         if (nodes.length == 1) {
             this.project = projectsFromNodes(nodes).get(0);
-
             WindowManager.getDefault().invokeWhenUIReady(this);
         }
     }

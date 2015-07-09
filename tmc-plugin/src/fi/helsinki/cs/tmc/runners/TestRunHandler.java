@@ -35,6 +35,8 @@ import java.util.List;
 import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.netbeans.api.project.Project;
 import org.openide.util.Exceptions;
 
@@ -72,21 +74,27 @@ public class TestRunHandler {
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
+            final ProgressHandle runningTestsLocally = ProgressHandleFactory.createSystemHandle(
+                    "Running tests.");
+            runningTestsLocally.start();
             try {
                 ListenableFuture<RunResult> result = TmcCoreSingleton.getInstance().test(projectInfo.getProjectDirAbsPath(), NBTmcSettings.getDefault());
                 Futures.addCallback(result, new FutureCallback<RunResult>() {
                     @Override
                     public void onSuccess(final RunResult result) {
+                        runningTestsLocally.finish();
                         explainResults(result, projectInfo, resultCollector);
                     }
 
                     @Override
                     public void onFailure(final Throwable ex) {
+                        runningTestsLocally.finish();
                         explainFailure(ex);
                     }
 
                 });
             } catch (TmcCoreException ex) {
+                runningTestsLocally.finish();
                 Exceptions.printStackTrace(ex);
             }
         }
@@ -120,7 +128,7 @@ public class TestRunHandler {
                     public void run() {
                         exerciseSubmitter.performAction(projectInfo.getProject());
                     }
-                }, resultCollector);              
+                }, resultCollector);
             }
         });
     }
