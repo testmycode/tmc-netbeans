@@ -25,28 +25,6 @@ public final class CheckstyleRunHandler {
     private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
     private ValidationResult validationResult = new CheckstyleResult();
 
-    /*public void performAction(final ResultCollector resultCollector, final Project project) {
-
-     this.project = project;
-
-     BgTask.start("Running validations", this, new BgTaskListener<Object>() {
-
-     @Override
-     public void bgTaskFailed(final Throwable exception) {
-
-     dialogDisplayer.displayError("Failed to validate the code.");
-     }
-
-     @Override
-     public void bgTaskCancelled() {}
-
-     @Override
-     public void bgTaskReady(final Object nothing) {
-
-     resultCollector.setValidationResult(validationResult);
-     }
-     });
-     }*/
     public void performAction(final ResultCollector resultCollector, final Project project) {
         this.project = project;
         final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
@@ -55,29 +33,7 @@ public final class CheckstyleRunHandler {
 
         try {
             ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath(), NBTmcSettings.getDefault());
-            Futures.addCallback(result, new FutureCallback<ValidationResult>() {
-
-                @Override
-                public void onSuccess(final ValidationResult v) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            resultCollector.setValidationResult(v);
-                        }
-                    });
-                }
-
-                @Override
-                public void onFailure(Throwable thrwbl) {
-                    SwingUtilities.invokeLater(new Runnable() {
-                        @Override
-                        public void run() {
-                            dialogDisplayer.displayError("Failed to validate the code.");
-                        }
-                    });
-                }
-
-            });
+            Futures.addCallback(result, new ExplainValidationResult(resultCollector, dialogDisplayer));
 
         } catch (TmcCoreException ex) {
             ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
@@ -86,27 +42,35 @@ public final class CheckstyleRunHandler {
 
     }
 
-    /*@Override
-     public void run() {
+}
 
-     final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
-     final String projectType = projectInfo.getProjectType().name();
+class ExplainValidationResult implements FutureCallback<ValidationResult> {
 
-     if (!projectType.equals("JAVA_SIMPLE") && !projectType.equals("JAVA_MAVEN")) {
-     return;
-     }
+    ResultCollector resultCollector;
+    ConvenientDialogDisplayer dialogDisplayer;
+    
+    public ExplainValidationResult(ResultCollector resultCollector, ConvenientDialogDisplayer dialogDisplayer) {
+        this.resultCollector = resultCollector;
+        this.dialogDisplayer = dialogDisplayer;
+    }
 
-     // Save all files
-     ProjectMediator.getInstance().saveAllFiles();
+    @Override
+    public void onSuccess(final ValidationResult v) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                resultCollector.setValidationResult(v);
+            }
+        });
+    }
 
-     try {
-
-     final Locale locale = NBTmcSettings.getDefault().getErrorMsgLocale();
-     validationResult = new CheckstyleRunner(projectInfo.getProjectDirAsFile(), locale).run();
-
-     } catch (TMCCheckstyleException exception) {
-     ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
-     Exceptions.printStackTrace(exception);
-     }
-     }*/
+    @Override
+    public void onFailure(Throwable thrwbl) {
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                dialogDisplayer.displayError("Failed to validate the code.");
+            }
+        });
+    }
 }

@@ -67,46 +67,9 @@ public class TestRunHandler {
         this.courseDb = CourseDb.getInstance();
     }
 
-    /*public void performAction(final ResultCollector resultCollector, Project... projects) {
-     projectMediator.saveAllFiles();
-     for (final Project project : projects) {
-     final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
-     eventBus.post(new InvokedEvent(projectInfo));
-     final ExerciseRunner runner = getRunner(projectInfo);
-     BgTask.start("Running tests", runner.getTestRunningTask(projectInfo), new BgTaskListener<TestRunResult>() {
-     @Override
-     public void bgTaskReady(TestRunResult result) {
-     if (!result.getCompilationSuccess()) {
-     dialogDisplayer.displayError("The code did not compile.");
-     return;
-     }
-     Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
-     boolean canSubmit = ex.isReturnable();
-     resultDisplayer.showLocalRunResult(result.getTestCaseResults(), canSubmit, new Runnable() {
-     @Override
-     public void run() {
-     exerciseSubmitter.performAction(projectInfo.getProject());
-     }
-     }, resultCollector);
-     }
-
-     @Override
-     public void bgTaskFailed(Throwable ex) {
-     log.log(INFO, "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
-     new Object[]{ex.getMessage(), Throwables.getStackTraceAsString(ex)});
-     dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
-     }
-
-     @Override
-     public void bgTaskCancelled() {
-     }
-     });
-     }
-     }*/
     public void performAction(final ResultCollector resultCollector, Project... projects) {
         projectMediator.saveAllFiles();
         for (final Project project : projects) {
-            System.out.println("Uusi Projekti");
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
             try {
@@ -114,7 +77,6 @@ public class TestRunHandler {
                 Futures.addCallback(result, new FutureCallback<RunResult>() {
                     @Override
                     public void onSuccess(final RunResult result) {
-                        System.out.println("RunResult onnistui");
                         explainResults(result, projectInfo, resultCollector);
                     }
 
@@ -127,13 +89,10 @@ public class TestRunHandler {
             } catch (TmcCoreException ex) {
                 Exceptions.printStackTrace(ex);
             }
-
         }
-
     }
 
     private void explainFailure(final Throwable ex) {
-        System.out.println("Explain failuressa");
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -141,16 +100,14 @@ public class TestRunHandler {
                         new Object[]{ex.getMessage(), Throwables.getStackTraceAsString(ex)});
                 dialogDisplayer.displayError("Failed to run the tests: " + ex.getMessage());
             }
-
         });
     }
 
     private void explainResults(final RunResult result, final TmcProjectInfo projectInfo, final ResultCollector resultCollector) {
-        System.out.println("Explain resultissa");
-        /*SwingUtilities.invokeLater(new Runnable() {
+        SwingUtilities.invokeLater(new Runnable() {
 
             @Override
-            public void run() {*/
+            public void run() {
                 if (result.status == COMPILE_FAILED) {
                     dialogDisplayer.displayError("The code did not compile.");
                     return;
@@ -163,11 +120,9 @@ public class TestRunHandler {
                     public void run() {
                         exerciseSubmitter.performAction(projectInfo.getProject());
                     }
-                }, resultCollector);
-                /*
+                }, resultCollector);              
             }
-
-        });*/
+        });
     }
 
     private List<TestCaseResult> testResultsToTestCaseResults(ImmutableList<TestResult> testresults) {
@@ -178,17 +133,4 @@ public class TestRunHandler {
         }
         return testCaseResults;
     }
-
-    /*private AbstractExerciseRunner getRunner(TmcProjectInfo projectInfo) {
-     switch (projectInfo.getProjectType()) {
-     case JAVA_MAVEN:
-     return new MavenExerciseRunner();
-     case JAVA_SIMPLE:
-     return new AntExerciseRunner();
-     case MAKEFILE:
-     return new MakefileExerciseRunner();
-     default:
-     throw new IllegalArgumentException("Unknown project type: " + projectInfo.getProjectType());
-     }
-     }*/
 }
