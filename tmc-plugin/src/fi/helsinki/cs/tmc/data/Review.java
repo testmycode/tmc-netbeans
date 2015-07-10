@@ -1,43 +1,50 @@
 package fi.helsinki.cs.tmc.data;
 
+import com.google.common.base.Optional;
 import com.google.gson.annotations.SerializedName;
-import java.util.ArrayList;
-import java.util.Date;
+import hy.tmc.core.communication.HttpResult;
+import hy.tmc.core.communication.UrlCommunicator;
+import hy.tmc.core.exceptions.TmcCoreException;
+import java.io.IOException;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class Review {
-    @SerializedName("id")
-    private int id;
+
     @SerializedName("submission_id")
     private int submissionId;
+
     @SerializedName("exercise_name")
     private String exerciseName;
+
+    private int id;
+
     @SerializedName("marked_as_read")
     private boolean markedAsRead;
+
     @SerializedName("reviewer_name")
     private String reviewerName;
+
     @SerializedName("review_body")
     private String reviewBody;
-    @SerializedName("points")
-    private ArrayList<String> points;
+
+    private List<String> points;
+
     @SerializedName("points_not_awarded")
-    private ArrayList<String> pointsNotAwarded;
-    @SerializedName("url")
+    private List<String> pointsNotAwarded;
+
     private String url;
+
     @SerializedName("update_url")
     private String updateUrl;
+
     @SerializedName("created_at")
-    private Date createdAt;
+    private String createdAt;
+
     @SerializedName("updated_at")
-    private Date updatedAt;
+    private String updatedAt;
 
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
-    }
-    
     public int getSubmissionId() {
         return submissionId;
     }
@@ -52,6 +59,14 @@ public class Review {
 
     public void setExerciseName(String exerciseName) {
         this.exerciseName = exerciseName;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public boolean isMarkedAsRead() {
@@ -78,19 +93,19 @@ public class Review {
         this.reviewBody = reviewBody;
     }
 
-    public ArrayList<String> getPoints() {
+    public List<String> getPoints() {
         return points;
     }
 
-    public void setPoints(ArrayList<String> points) {
+    public void setPoints(List<String> points) {
         this.points = points;
     }
 
-    public ArrayList<String> getPointsNotAwarded() {
+    public List<String> getPointsNotAwarded() {
         return pointsNotAwarded;
     }
 
-    public void setPointsNotAwarded(ArrayList<String> pointsNotAwarded) {
+    public void setPointsNotAwarded(List<String> pointsNotAwarded) {
         this.pointsNotAwarded = pointsNotAwarded;
     }
 
@@ -110,20 +125,49 @@ public class Review {
         this.updateUrl = updateUrl;
     }
 
-    public Date getCreatedAt() {
+    public String getCreatedAt() {
         return createdAt;
     }
 
-    public void setCreatedAt(Date createdAt) {
+    public void setCreatedAt(String createdAt) {
         this.createdAt = createdAt;
     }
 
-    public Date getUpdatedAt() {
+    public String getUpdatedAt() {
         return updatedAt;
     }
 
-    public void setUpdatedAt(Date updatedAt) {
+    public void setUpdatedAt(String updatedAt) {
         this.updatedAt = updatedAt;
     }
-    
+
+    public void markAs(boolean read, UrlCommunicator urlCommunicator) throws IOException, TmcCoreException {
+        Map<String, String> headers = addHeaders(read);
+        HttpResult result = urlCommunicator.makePutRequest(putUrl(), Optional.of(headers));
+        if (result.getData().contains("OK")) {
+            this.markedAsRead = read;
+        }
+    }
+
+    private Map<String, String> addHeaders(boolean read) {
+        Map<String, String> headers = new HashMap<String, String>();
+        String readUpdate = "mark_as_";
+        if (read) {
+            readUpdate += "read";
+        } else {
+            readUpdate += "unread";
+        }
+        headers.put(readUpdate, "1");
+        return headers;
+    }
+
+    private String putUrl() {
+        return this.updateUrl + ".json?api_version=7";
+    }
+
+    @Override
+    public String toString() {
+        return exerciseName + " reviewed by " + reviewerName + ":\n" + reviewBody + "\n"
+                + this.url;
+    }
 }

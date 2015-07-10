@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import com.google.gson.Gson;
-import fi.helsinki.cs.tmc.data.Review;
+import hy.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
