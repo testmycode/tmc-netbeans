@@ -1,11 +1,15 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.PastebinDialog;
 import fi.helsinki.cs.tmc.ui.PastebinResponseDialog;
@@ -13,6 +17,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -28,6 +33,7 @@ import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 
 @ActionID(
@@ -38,7 +44,7 @@ import org.openide.util.NbBundle.Messages;
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -17),
     @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330,
-        separatorAfter = 1360)
+            separatorAfter = 1360)
 })
 @Messages("CTL_PastebinAction=Send code to Pastebin")
 //TODO: This is a horribly copypasted, then mangled version of RequestReviewAction
@@ -108,55 +114,26 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     private void submitPaste(final TmcProjectInfo projectInfo, final Exercise exercise,
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
-
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
+        try {
+            ListenableFuture<URI> result = TmcCoreSingleton.getInstance().pasteWithComment(projectInfo.getProjectDirAbsPath(), settings, messageForReviewer);
+            Futures.addCallback(result, new PasteResult());
+        } catch (TmcCoreException ex) {
+            Exceptions.printStackTrace(ex);
+        }
+    }
 
-        BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
-            @Override
-            public byte[] call() throws Exception {
-                RecursiveZipper zipper = new RecursiveZipper(projectInfo.getProjectDirAsFile(), projectInfo.getZippingDecider());
-                return zipper.zipProjectSources();
-            }
-        }, new BgTaskListener<byte[]>() {
-            @Override
-            public void bgTaskReady(byte[] zipData) {
-                Map<String, String> extraParams = new HashMap<String, String>();
-                extraParams.put("error_msg_locale", errorMsgLocale);
-                extraParams.put("paste", "1");
-                if (!messageForReviewer.isEmpty()) {
-                    extraParams.put("message_for_paste", messageForReviewer);
-                }
+    class PasteResult implements FutureCallback<URI> {
 
-                final ServerAccess sa = new ServerAccess();
-                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
-                        .getSubmittingExerciseTask(exercise, zipData, extraParams);
+        @Override
+        public void onSuccess(URI ur) {
+            new PastebinResponseDialog(ur.toString()).setVisible(true);
+        }
 
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
-                    @Override
-                    public void bgTaskReady(ServerAccess.SubmissionResponse result) {
-                        new PastebinResponseDialog(result.pasteUrl.toString()).setVisible(true);
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {
-                    }
-
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        dialogs.displayError("Failed to send exercise to pastebin", ex);
-                    }
-                });
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to zip up exercise", ex);
-            }
-        });
+        @Override
+        public void onFailure(Throwable thrwbl) {
+            dialogs.displayError("Failed to send exercise to pastebin", thrwbl);
+        }
     }
 
     @Override
