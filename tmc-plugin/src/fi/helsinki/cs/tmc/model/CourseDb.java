@@ -18,17 +18,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 /**
- * Stores the list of available courses, the current course and its exercise list.
+ * Stores the list of available courses, the current course and its exercise
+ * list.
  */
 public class CourseDb {
 
-    public static class ChangedEvent implements TmcEvent {}
-    
+    public static class ChangedEvent implements TmcEvent {
+    }
+
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;
-    
+
     public static CourseDb getInstance() {
         if (defaultInstance == null) {
             defaultInstance = new CourseDb();
@@ -45,7 +48,7 @@ public class CourseDb {
     private CourseDb() {
         this(TmcEventBus.getDefault(), new ConfigFile("CourseDb.json"));
     }
-    
+
     public CourseDb(TmcEventBus eventBus, ConfigFile configFile) {
         this.eventBus = eventBus;
         this.configFile = configFile;
@@ -58,7 +61,7 @@ public class CourseDb {
             logger.log(Level.WARNING, "Failed to load course database", e);
         }
     }
-    
+
     public List<Course> getAvailableCourses() {
         return Collections.unmodifiableList(availableCourses);
     }
@@ -102,7 +105,7 @@ public class CourseDb {
 
     /**
      * Returns the exercises from currently selected course.
-     * 
+     *
      * <p>
      * If no course is currently selected then returns the empty collection.
      */
@@ -114,7 +117,7 @@ public class CourseDb {
             return Collections.emptyList();
         }
     }
-    
+
     public Course getCourseByName(String name) {
         for (Course course : availableCourses) {
             if (course.getName().equals(name)) {
@@ -123,7 +126,7 @@ public class CourseDb {
         }
         return null;
     }
-    
+
     public boolean isUnlockable(Exercise ex) {
         Course course = getCourseByName(ex.getCourseName());
         if (course != null) {
@@ -132,9 +135,10 @@ public class CourseDb {
             return false;
         }
     }
-    
+
     /**
-     * Returns all exercises from the current course that can be unlocked (and must be unlocked together).
+     * Returns all exercises from the current course that can be unlocked (and
+     * must be unlocked together).
      */
     public List<Exercise> getCurrentCourseUnlockableExercises() {
         List<Exercise> result = new ArrayList<Exercise>();
@@ -158,24 +162,26 @@ public class CourseDb {
     public String getDownloadedExerciseChecksum(ExerciseKey ex) {
         return downloadedExerciseChecksums.get(ex);
     }
-    
+
     /**
      * Informs the course database that the exercise is considered downloaded.
-     * 
+     *
      * <p>
-     * Sets the downloaded checksum of the exercise to be the one reported by the server.
+     * Sets the downloaded checksum of the exercise to be the one reported by
+     * the server.
      */
     public void exerciseDownloaded(Exercise ex) {
         List<Exercise> exercises = new ArrayList<Exercise>();
         exercises.add(ex);
         this.multipleExerciseDownloaded(exercises);
     }
-    
+
     /**
      * Informs the course database that the exercises are considered downloaded.
-     * 
+     *
      * <p>
-     * Sets the downloaded checksums of the exercises to be the ones reported by the server.
+     * Sets the downloaded checksums of the exercises to be the ones reported by
+     * the server.
      */
     public void multipleExerciseDownloaded(List<Exercise> exercises) {
         for (Exercise ex : exercises) {
@@ -183,9 +189,8 @@ public class CourseDb {
         }
         save();
     }
-    
+
     //TODO: arrange for downloadedExerciseChecksums.put(..., null) when a project is deleted!
-    
     public void save() {
         try {
             saveToFile();
@@ -194,13 +199,14 @@ public class CourseDb {
         }
         eventBus.post(new ChangedEvent());
     }
-    
+
     private static class StoredStuff {
+
         public List<Course> availableCourses;
         public String currentCourseName;
         public Map<ExerciseKey, String> downloadedExerciseChecksums;
     }
-    
+
     private void saveToFile() throws IOException {
         StoredStuff stuff = new StoredStuff();
         stuff.availableCourses = this.availableCourses;
@@ -218,7 +224,7 @@ public class CourseDb {
         if (!configFile.exists()) {
             return;
         }
-        
+
         Reader reader = configFile.getReader();
         StoredStuff stuff;
         try {
@@ -231,16 +237,16 @@ public class CourseDb {
                 this.availableCourses.clear();
                 this.availableCourses.addAll(stuff.availableCourses);
             }
-            
+
             this.currentCourseName = stuff.currentCourseName;
-            
+
             if (stuff.downloadedExerciseChecksums != null) {
                 this.downloadedExerciseChecksums.clear();
                 this.downloadedExerciseChecksums.putAll(stuff.downloadedExerciseChecksums);
             }
         }
     }
-    
+
     private Gson getGson() {
         return new GsonBuilder()
                 .serializeNulls()

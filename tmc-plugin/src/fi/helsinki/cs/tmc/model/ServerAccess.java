@@ -1,8 +1,5 @@
 package fi.helsinki.cs.tmc.model;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
@@ -23,7 +20,6 @@ import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
 import hy.tmc.core.TmcCore;
-import hy.tmc.core.exceptions.TmcCoreException;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -36,7 +32,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
 import org.openide.modules.Modules;
-import org.openide.util.Exceptions;
 
 /**
  * A frontend for the server.
@@ -351,7 +346,7 @@ public class ServerAccess {
         };
     }
 
-    private byte[] eventListToPostBody(List<LoggableEvent> events) throws IOException {
+    public byte[] eventListToPostBody(List<LoggableEvent> events) throws IOException {
         ByteArrayOutputStream bufferBos = new ByteArrayOutputStream();
         GZIPOutputStream gzos = new GZIPOutputStream(bufferBos);
         OutputStreamWriter bufferWriter = new OutputStreamWriter(gzos, Charset.forName("UTF-8"));

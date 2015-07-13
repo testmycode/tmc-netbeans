@@ -1,14 +1,21 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import com.google.common.base.Optional;
 import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.utilities.Cooldown;
+import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import fi.helsinki.cs.tmc.utilities.SingletonTask;
 import fi.helsinki.cs.tmc.utilities.TmcRequestProcessor;
+import hy.tmc.core.communication.HttpResult;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -16,23 +23,26 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
-import java.util.concurrent.ExecutionException;
-import java.util.concurrent.Future;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.util.Exceptions;
 
 /**
- * Buffers {@link LoggableEvent}s and sends them to the server and/or syncs them to the disk periodically.
+ * Buffers {@link LoggableEvent}s and sends them to the server and/or syncs them
+ * to the disk periodically.
  */
 public class EventSendBuffer implements EventReceiver {
+
     private static final Logger log = Logger.getLogger(EventSendBuffer.class.getName());
 
-    public static final long DEFAULT_SEND_INTERVAL = 3*60*1000;
-    public static final long DEFAULT_SAVE_INTERVAL = 1*60*1000;
+    public static final long DEFAULT_SEND_INTERVAL = 3 * 60 * 1000;
+    public static final long DEFAULT_SAVE_INTERVAL = 3 * 60 * 1000;
     public static final int DEFAULT_MAX_EVENTS = 64 * 1024;
     public static final int DEFAULT_AUTOSEND_THREHSOLD = DEFAULT_MAX_EVENTS / 2;
-    public static final int DEFAULT_AUTOSEND_COOLDOWN = 30*1000;
+    public static final int DEFAULT_AUTOSEND_COOLDOWN = 30 * 1000;
 
     private Random random = new Random();
     private SpywareSettings settings;
@@ -46,7 +56,6 @@ public class EventSendBuffer implements EventReceiver {
     private int maxEvents = DEFAULT_MAX_EVENTS;
     private int autosendThreshold = DEFAULT_AUTOSEND_THREHSOLD;
     private Cooldown autosendCooldown;
-
 
     public EventSendBuffer(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb, EventStore eventStore) {
         this.settings = settings;
@@ -172,7 +181,6 @@ public class EventSendBuffer implements EventReceiver {
         }
     }
 
-
     private SingletonTask sendingTask = new SingletonTask(new Runnable() {
         // Sending too many at once may go over the server's POST size limit.
         private static final int MAX_EVENTS_PER_SEND = 500;
@@ -196,7 +204,7 @@ public class EventSendBuffer implements EventReceiver {
                     return;
                 }
 
-                log.log(Level.INFO, "Sending {0} events to {1}", new Object[] { eventsToSend.size(), url });
+                log.log(Level.INFO, "Sending {0} events to {1}", new Object[]{eventsToSend.size(), url});
 
                 doSend(eventsToSend, url);
             } while (shouldSendMore);
@@ -235,32 +243,74 @@ public class EventSendBuffer implements EventReceiver {
             return url;
         }
 
-        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
-            CancellableCallable<Object> task = serverAccess.getSendEventLogJob(url, eventsToSend);
-            Future<Object> future = BgTask.start("Sending stats", task);
-
-            try {
-                future.get();
-            } catch (InterruptedException ex) {
-                future.cancel(true);
-            } catch (ExecutionException ex) {
-                log.log(Level.INFO, "Sending failed", ex);
+        /**
+         * Converts events to data[] and sends it to defined url.
+         * 
+         * @param eventsToSend
+         * @param url 
+         */
+        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {       
+            NBTmcSettings settings = NBTmcSettings.getDefault();
+            Optional<Course> currentCourse = settings.getCurrentCourse();
+            if (!currentCourse.isPresent()) {
                 return;
             }
+            addCorrectSpywareUrl(url, currentCourse);
+            final ProgressHandle progress = ProgressHandleFactory.createSystemHandle("Sending stats");
+            progress.start();
+            try {
+                byte[] data = convertEventsToByteArray(eventsToSend);
+                ListenableFuture<List<HttpResult>> spywareSending = TmcCoreSingleton.getInstance().sendSpywareDiffs(
+                        data, settings
+                );
+                Futures.addCallback(spywareSending, new FutureCallback<List<HttpResult>>() {
+                    @Override
+                    public void onSuccess(List<HttpResult> success) {
+                        clearAfterSend(success);
+                    }
+                    @Override
+                    public void onFailure(Throwable thrwbl) {
+                        clearAfterSend(new ArrayList<HttpResult>());
+                        System.err.println(thrwbl.getMessage());
+                    }
+                    private void clearAfterSend(List<HttpResult> success) {
+                        
+                        progress.finish();
+                        log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[]{eventsToSend.size(), url});
+                        removeSentEventsFromQueue();
+                        // If saving fails now (or is already running and fails later)
+                        // then we may end up sending duplicate events later.
+                        // This will hopefully be very rare.
+                        savingTask.start();
+                    }
+                });
 
-            log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[] { eventsToSend.size(), url });
-
-            removeSentEventsFromQueue();
-
-            // If saving fails now (or is already running and fails later)
-            // then we may end up sending duplicate events later.
-            // This will hopefully be very rare.
-            savingTask.start();
+            } catch (TmcCoreException ex) {
+                progress.finish();
+                Exceptions.printStackTrace(ex);
+            }
         }
 
+        private void addCorrectSpywareUrl(final String url, Optional<Course> currentCourse) {
+            List<String> spywareUrls = new ArrayList<String>();
+            String finalUrl = serverAccess.addApiCallQueryParameters(url);
+            spywareUrls.add(finalUrl);
+            currentCourse.get().setSpywareUrls(spywareUrls);
+        }
+
+        private byte[] convertEventsToByteArray(final ArrayList<LoggableEvent> eventsToSend) throws RuntimeException {
+            byte[] data;
+            try {
+                data = serverAccess.eventListToPostBody(eventsToSend);
+            } catch (IOException ex) {
+                throw ExceptionUtils.toRuntimeException(ex);
+            }
+            return data;
+        }
+        
         private void removeSentEventsFromQueue() {
             synchronized (sendQueue) {
-                assert(eventsToRemoveAfterSend <= sendQueue.size());
+                assert (eventsToRemoveAfterSend <= sendQueue.size());
                 while (eventsToRemoveAfterSend > 0) {
                     sendQueue.pop();
                     eventsToRemoveAfterSend--;
@@ -269,7 +319,6 @@ public class EventSendBuffer implements EventReceiver {
         }
 
     }, TmcRequestProcessor.instance);
-
 
     private SingletonTask savingTask = new SingletonTask(new Runnable() {
         @Override
@@ -285,5 +334,4 @@ public class EventSendBuffer implements EventReceiver {
             }
         }
     }, TmcRequestProcessor.instance);
-
 }
