@@ -23,6 +23,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.SwingUtilities;
 import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
@@ -119,7 +120,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     class UpdateCourseForExerciseUpdate implements FutureCallback<Course> {
-        
+
         private ProgressHandle lastAction;
 
         /**
@@ -131,14 +132,22 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
 
         @Override
-        public void onSuccess(Course receivedCourse) {
-            lastAction.finish();
-            if (receivedCourse != null) {
-                setCourseNameToAllExercises(receivedCourse);
-                courseDb.putDetailedCourse(receivedCourse);
-                final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                updateGUI(status);
-            }
+        public void onSuccess(final Course receivedCourse) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    lastAction.finish();
+                    if (receivedCourse != null) {
+                        setCourseNameToAllExercises(receivedCourse);
+                        courseDb.putDetailedCourse(receivedCourse);
+                        final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                        updateGUI(status);
+                    }
+                }
+
+            });
+
         }
 
         private void setCourseNameToAllExercises(Course receivedCourse) {
@@ -166,11 +175,18 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
 
         @Override
-        public void onFailure(Throwable ex) {
-            lastAction.finish();
-            if (!beQuiet || ex instanceof ObsoleteClientException) {
-                dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-            }
+        public void onFailure(final Throwable ex) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    lastAction.finish();
+                    if (!beQuiet || ex instanceof ObsoleteClientException) {
+                        dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                    }
+                }
+
+            });
         }
     }
 

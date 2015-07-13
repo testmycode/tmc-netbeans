@@ -17,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
@@ -188,17 +189,31 @@ public final class RefreshCoursesAction {
         }
 
         @Override
-        public void onSuccess(List<Course> result) {
-            if (updateCourseDb) {
-                courseDb.setAvailableCourses(result);
-            }
+        public void onSuccess(final List<Course> result) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (updateCourseDb) {
+                        courseDb.setAvailableCourses(result);
+                    }
+                }
+
+            });
         }
 
         @Override
-        public void onFailure(Throwable ex) {
-            if (showDialogOnError) {
-                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-            }
+        public void onFailure(final Throwable ex) {
+            SwingUtilities.invokeLater(new Runnable() {
+
+                @Override
+                public void run() {
+                    if (showDialogOnError) {
+                        dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                    }
+                }
+
+            });
         }
     }
 }
