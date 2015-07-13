@@ -8,7 +8,7 @@ import com.google.gson.reflect.TypeToken;
 import hy.tmc.core.domain.Course;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.Review;
+import hy.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.data.serialization.CourseInfoParser;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.data.serialization.ReviewListParser;
