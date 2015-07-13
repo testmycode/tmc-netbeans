@@ -77,15 +77,23 @@ public final class RefreshCoursesAction {
      */
     public void run() {
         try {
-            ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
+            if (settingsAreSet()) {
+                ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
                     "Refreshing course list");
-            courseRefresh.start();
-            ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
-            Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
+                courseRefresh.start();
+                ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
+                Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
+            }
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
             callbacks.onFailure(ex);
         }
+    }
+
+    private boolean settingsAreSet() {
+        return tmcSettings.userDataExists()
+                && tmcSettings.getServerAddress() != null
+                && !tmcSettings.getServerAddress().trim().isEmpty();
     }
 
     class LoadCourses implements FutureCallback<List<Course>> {

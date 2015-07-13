@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.runners;
 
-import com.google.common.base.Optional;
+import static fi.helsinki.cs.tmc.langs.RunResult.Status.COMPILE_FAILED;
+
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.FutureCallback;
@@ -9,28 +10,20 @@ import com.google.common.util.concurrent.ListenableFuture;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.langs.RunResult;
-import static fi.helsinki.cs.tmc.langs.RunResult.Status.COMPILE_FAILED;
 import fi.helsinki.cs.tmc.langs.TestResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import static fi.helsinki.cs.tmc.model.TmcProjectType.JAVA_MAVEN;
-import static fi.helsinki.cs.tmc.model.TmcProjectType.JAVA_SIMPLE;
-import static fi.helsinki.cs.tmc.model.TmcProjectType.MAKEFILE;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import hy.tmc.core.exceptions.TmcCoreException;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import static java.util.logging.Level.INFO;
 import java.util.logging.Logger;
@@ -82,14 +75,14 @@ public class TestRunHandler {
                 Futures.addCallback(result, new FutureCallback<RunResult>() {
                     @Override
                     public void onSuccess(final RunResult result) {
-                        runningTestsLocally.finish();
                         explainResults(result, projectInfo, resultCollector);
+                        runningTestsLocally.finish();
                     }
 
                     @Override
                     public void onFailure(final Throwable ex) {
-                        runningTestsLocally.finish();
                         explainFailure(ex);
+                        runningTestsLocally.finish();
                     }
 
                 });
@@ -113,7 +106,6 @@ public class TestRunHandler {
 
     private void explainResults(final RunResult result, final TmcProjectInfo projectInfo, final ResultCollector resultCollector) {
         SwingUtilities.invokeLater(new Runnable() {
-
             @Override
             public void run() {
                 if (result.status == COMPILE_FAILED) {
