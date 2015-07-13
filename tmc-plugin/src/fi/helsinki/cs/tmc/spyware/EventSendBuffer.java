@@ -245,9 +245,6 @@ public class EventSendBuffer implements EventReceiver {
 
         /**
          * Converts events to data[] and sends it to defined url.
-         * 
-         * @param eventsToSend
-         * @param url 
          */
         private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {       
             NBTmcSettings settings = NBTmcSettings.getDefault();
