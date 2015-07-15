@@ -110,7 +110,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         @Override
         public void onSuccess(final SubmissionResult result) {
             if(result == null){
-                System.out.println("RESULT ON NULL!!!");
+                System.err.println("Result is null.");
             }
             SwingUtilities.invokeLater(new Runnable() {
 
@@ -119,10 +119,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     dialog.close();
                     final ResultCollector resultCollector = new ResultCollector(exercise);
                     resultCollector.setValidationResult(result.getValidationResult());
-                    
-                    if(result == null){
-                        System.out.println("Result on null");
-                    }
+             
                     resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
                     exercise.setAttempted(true);
                     if (result.isAllTestsPassed()) {
