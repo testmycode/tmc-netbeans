@@ -1,27 +1,27 @@
 package fi.helsinki.cs.tmc.actions;
 
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ExerciseUpdateOverwritingDecider;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
+import hy.tmc.core.TmcCore;
+import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import org.openide.util.Exceptions;
 
 public class UpdateExercisesAction implements ActionListener {
-    
+
     private static final Logger log = Logger.getLogger(UpdateExercisesAction.class.getName());
 
     private List<Exercise> exercisesToUpdate;
@@ -29,84 +29,57 @@ public class UpdateExercisesAction implements ActionListener {
     private ProjectMediator projectMediator;
     private ServerAccess serverAccess;
     private ConvenientDialogDisplayer dialogDisplayer;
-    
+    private TmcCore core;
+
     public UpdateExercisesAction(List<Exercise> exercisesToUpdate) {
         this.exercisesToUpdate = exercisesToUpdate;
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.serverAccess = new ServerAccess();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
+        this.core = TmcCoreSingleton.getInstance();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         run();
     }
-
+    
     public void run() {
-        final AggregatingBgTaskListener<TmcProjectInfo> projectOpener = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToUpdate.size(), new BgTaskListener<Collection<TmcProjectInfo>>() {
-            @Override
-            public void bgTaskReady(Collection<TmcProjectInfo> result) {
-                result = new ArrayList<TmcProjectInfo>(result);
-                
-                // result may contain nulls since some downloads might fail
-                while (result.remove(null)) {
-                }
-                
-                projectMediator.scanForExternalChanges(result);
-                
-                // Open all at once. This is much faster.
-                projectMediator.openProjects(result);
-            }
-
-            // Cancelled and failed are never called since we only call bgTaskReady below manually
-            @Override
-            public void bgTaskCancelled() {
-            }
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-            }
-        });
-        
-        
-        for (final Exercise exercise : exercisesToUpdate) {
-            final File projectDir = projectMediator.getProjectDirForExercise(exercise);
+        try {
+            ListenableFuture<List<Exercise>> downloadFuture = core.downloadExercises(exercisesToUpdate,
+                    NBTmcSettings.getDefault());
+            Futures.addCallback(downloadFuture, new ProjectOpenerCallback());
             
-            BgTask.start("Downloading " + exercise.getName(), serverAccess.getDownloadingExerciseZipTask(exercise), new BgTaskListener<byte[]>() {
-
-                @Override
-                public void bgTaskReady(byte[] data) {
-                    TmcProjectInfo project = null;
-                    try {
-                        try {
-                            ExerciseUpdateOverwritingDecider overwriter = new ExerciseUpdateOverwritingDecider(projectDir);
-                            NbProjectUnzipper unzipper = new NbProjectUnzipper(overwriter);
-                            NbProjectUnzipper.Result result = unzipper.unzipProject(data, projectDir);
-                            log.info("== Exercise unzip result ==\n" + result);
-                        } catch (IOException ex) {
-                            dialogDisplayer.displayError("Failed to update project.", ex);
-                            return;
-                        }
-                        courseDb.exerciseDownloaded(exercise);
-                        
-                        project = projectMediator.tryGetProjectForExercise(exercise);
-                    } finally {
-                        projectOpener.bgTaskReady(project);
-                    }
-                }
-
-                @Override
-                public void bgTaskCancelled() {
-                    projectOpener.bgTaskReady(null);
-                }
-
-                @Override
-                public void bgTaskFailed(Throwable ex) {
-                    projectOpener.bgTaskReady(null);
-                    String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                    dialogDisplayer.displayError("Failed to download updated exercises.\n" + msg, ex);
-                }
-            });
+        } catch (TmcCoreException ex) {
+            Exceptions.printStackTrace(ex);
+            dialogDisplayer.displayError("Error occured while downloading updates", ex);
         }
+    }
+
+    private class ProjectOpenerCallback implements FutureCallback<List<Exercise>> {
+
+        @Override
+        public void onSuccess(List<Exercise> downloadedExercises) {
+            ArrayList<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
+
+            for (Exercise exercise : downloadedExercises) {
+                courseDb.exerciseDownloaded(exercise);
+                TmcProjectInfo project = projectMediator.tryGetProjectForExercise(exercise);
+                if (project != null) {
+                    projects.add(project);
+                }
+            }
+            projectMediator.scanForExternalChanges(projects);
+
+            projectMediator.openProjects(projects);
+        }
+
+        @Override
+        public void onFailure(Throwable ex) {
+            Exceptions.printStackTrace(ex);
+            dialogDisplayer.displayError("Error occured while downloading updates", ex);
+        }
+
     }
 }
