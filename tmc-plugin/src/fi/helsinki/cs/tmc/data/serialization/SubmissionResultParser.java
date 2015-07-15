@@ -9,7 +9,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonParser;
 
-import fi.helsinki.cs.tmc.data.SubmissionResult;
+import hy.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 

@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
+import hy.tmc.core.domain.submission.FeedbackQuestion;
 
 public class FeedbackAnswer {
     private FeedbackQuestion question;

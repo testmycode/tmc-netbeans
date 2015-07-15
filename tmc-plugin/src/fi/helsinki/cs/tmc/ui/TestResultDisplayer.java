@@ -3,17 +3,20 @@ package fi.helsinki.cs.tmc.ui;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.data.SubmissionResult;
+import hy.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.langs.TestResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+import hy.tmc.core.domain.submission.TestCase;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -42,7 +45,7 @@ public class TestResultDisplayer {
     public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
         switch (result.getStatus()) {
             case OK:
-                displayTestCases(result.getTestCases(), false, resultCollector);
+                displayTestCases(convertToTestCaseResults(result.getTestCases()) , false, resultCollector);
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
@@ -54,6 +57,15 @@ public class TestResultDisplayer {
                 displayError(result.getError());
                 break;
         }
+    }
+    
+    private List<TestCaseResult> convertToTestCaseResults(List<TestCase> cases){
+        List<TestCaseResult> resultList = new ArrayList<TestCaseResult>();
+        for (TestCase te : cases) {
+            TestCaseResult testCase = new TestCaseResult(te.getName(), te.isSuccessful(), te.getMessage());
+            resultList.add(testCase);
+        }
+        return resultList;
     }
 
     private void displaySuccessfulSubmissionMsg(Exercise exercise, final SubmissionResult result) {
@@ -110,14 +122,14 @@ public class TestResultDisplayer {
             msg += "There are validation errors.\n";
         }
 
-        switch (result.getTestResultStatus()) {
-            case ALL:
+        switch (result.getStatus()) {
+            case OK:
                 msg += "All tests failed on the server.\nSee below.";
                 break;
-            case SOME:
+            case FAIL:
                 msg += "Some tests failed on the server.\nSee below.";
                 break;
-            case NONE:
+            default:
                 if (result.validationsFailed()) {
                     msg += "See below.";
                 }
@@ -174,8 +186,9 @@ public class TestResultDisplayer {
     }
 
     private List<TestCaseResult> maybeAddValdrindToResults(SubmissionResult result) {
-        String valdrindOutput = result.getValgrindOutput();
-        List<TestCaseResult> resultList = result.getTestCases();
+        String valdrindOutput = result.getValgrind();
+        List<TestCase> testCases = result.getTestCases();
+        List<TestCaseResult> resultList = convertToTestCaseResults(testCases);
 
         if (StringUtils.isNotBlank(valdrindOutput)) {
             TestCaseResult valgrindResult = new TestCaseResult("Valgrind validations", false , "Click show valgrind trace to view valgrind trace", valdrindOutput, true);
