@@ -46,6 +46,9 @@ public class UpdateExercisesAction implements ActionListener {
     }
     
     public void run() {
+        if (exercisesToUpdate.isEmpty()) {
+            return;
+        }
         try {
             ListenableFuture<List<Exercise>> downloadFuture = core.downloadExercises(exercisesToUpdate,
                     NBTmcSettings.getDefault());
