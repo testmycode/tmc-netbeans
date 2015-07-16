@@ -30,6 +30,7 @@ import java.util.logging.Logger;
 
 import org.netbeans.api.project.Project;
 
+@Deprecated
 public class ExerciseSubmitter {
 
     private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());

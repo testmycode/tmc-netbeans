@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.runners;
 
-import static fi.helsinki.cs.tmc.langs.RunResult.Status.COMPILE_FAILED;
+import static fi.helsinki.cs.tmc.langs.domain.RunResult.Status.COMPILE_FAILED;
 
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
@@ -13,8 +13,9 @@ import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
-import fi.helsinki.cs.tmc.langs.RunResult;
-import fi.helsinki.cs.tmc.langs.TestResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
+
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
