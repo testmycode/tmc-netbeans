@@ -8,11 +8,8 @@ import hy.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.ReviewDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import hy.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -20,6 +17,8 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -53,7 +52,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         }
     }
 
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ReviewDb reviewDb;
     private ConvenientDialogDisplayer dialogs;
@@ -66,7 +64,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
     }
 
     CheckForNewReviews(boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
-        this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.reviewDb = ReviewDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -101,22 +98,30 @@ public class CheckForNewReviews implements ActionListener, Runnable {
     }
     
     private void getReviews(Course course){
+        final ProgressHandle progress = ProgressHandleFactory.createHandle("Checking for code reviews");
+        progress.start();
         try {
-            ListenableFuture<List<Review>> reviews = TmcCoreSingleton.getInstance().getNewReviews(course, NBTmcSettings.getDefault());
+            ListenableFuture<List<Review>> reviews = TmcCoreSingleton.getInstance().getNewReviews(
+                    course, NBTmcSettings.getDefault()
+            );
             Futures.addCallback(reviews, new FutureCallback<List<Review>>() {
 
                 @Override
                 public void onSuccess(List<Review> v) {
                     success(v);
+                    progress.finish();
+                    
                 }
 
                 @Override
                 public void onFailure(Throwable thrwbl) {
                     fail(thrwbl);
+                    progress.finish();
                 }
 
             });
         } catch (TmcCoreException ex) {
+            progress.finish();
             Exceptions.printStackTrace(ex);
         }
     }

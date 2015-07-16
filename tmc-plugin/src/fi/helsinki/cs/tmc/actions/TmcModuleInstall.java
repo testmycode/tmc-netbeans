@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import com.google.common.util.concurrent.FutureCallback;
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
@@ -62,7 +63,12 @@ public class TmcModuleInstall extends ModuleInstall {
                 } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
-                    // Do full refresh.
+                    refreshCourses();
+                }
+            }
+
+            private void refreshCourses() {
+                // Do full refresh.
                     new RefreshCoursesAction().addDefaultListener(false, true).addListener(new FutureCallback<List<Course>>() {
                         @Override
                         public void onSuccess(List<Course> result) {
@@ -76,7 +82,6 @@ public class TmcModuleInstall extends ModuleInstall {
                         public void onFailure(Throwable thrwbl) {
                         }
                     }).run();
-                }
             }
         });
     }

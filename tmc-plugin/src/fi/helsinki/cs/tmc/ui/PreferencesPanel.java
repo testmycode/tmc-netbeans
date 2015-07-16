@@ -52,6 +52,10 @@ import org.apache.commons.lang3.StringUtils;
         public boolean isAllSet() {
             return username != null && password != null && baseUrl != null;
         }
+        
+        public boolean noneIsEmpty() {
+            return !username.trim().isEmpty() && !password.trim().isEmpty() && !baseUrl.trim().isEmpty();
+        }
 
         @Override
         public boolean equals(Object obj) {
@@ -409,7 +413,7 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     private boolean canProbablyRefreshCourseList() {
-        return getRefreshSettings().isAllSet();
+        return getRefreshSettings().isAllSet() && getRefreshSettings().noneIsEmpty();
     }
 
     private boolean alreadyRefreshingCourseList() {
@@ -702,10 +706,11 @@ import org.apache.commons.lang3.StringUtils;
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
         NBTmcSettings settings = getTransientSettingsForRefresh();
-        if (settings.getServerAddress() == null || settings.getServerAddress().trim().isEmpty()) {
+        if (!canProbablyRefreshCourseList()) {
             dialogs.displayError("Please set the server address first");
+        } else {
+            startRefreshingCourseList(false, false);
         }
-        startRefreshingCourseList(false, false);
     }//GEN-LAST:event_refreshCoursesBtnActionPerformed
 
     private void serverAddressTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressTextFieldActionPerformed
