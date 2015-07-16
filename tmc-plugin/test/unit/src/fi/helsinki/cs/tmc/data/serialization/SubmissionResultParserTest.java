@@ -2,9 +2,11 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import java.util.List;
 import hy.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.testrunner.CaughtException;
+import hy.tmc.core.domain.submission.FeedbackQuestion;
+import hy.tmc.core.domain.submission.StackTrace;
 import static hy.tmc.core.domain.submission.SubmissionResult.Status.*;
+import hy.tmc.core.domain.submission.TestCase;
+import hy.tmc.core.domain.submission.TestException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
@@ -52,7 +54,7 @@ public class SubmissionResultParserTest {
         assertEquals(1, result.getPoints().size());
         assertEquals("1.1", result.getPoints().get(0));
         
-        List<TestCaseResult> testCases = result.getTestCases();
+        List<TestCase> testCases = result.getTestCases();
         assertEquals(2, testCases.size());
         assertEquals("Some test", testCases.get(0).getName());
         assertEquals("Another test", testCases.get(1).getName());
@@ -71,15 +73,14 @@ public class SubmissionResultParserTest {
         
         SubmissionResult result = parse(input);
         
-        CaughtException cex = result.getTestCases().get(0).getException();
+        TestException cex = result.getTestCases().get(0).getException();
         assertNotNull(cex);
-        assertEquals("FooEx", cex.className);
-        assertEquals("xoo", cex.message);
-        assertNull(null, cex.cause);
+        assertEquals("FooEx", cex.getClassName());
+        assertEquals("xoo", cex.getMessage());
         
-        StackTraceElement[] trace = cex.stackTrace;
+        StackTrace[] trace = cex.getStackTrace();
         assertNotNull(trace);
-        assertEquals("Foo", trace[0].getClassName());
+        assertEquals("Foo", trace[0].getDeclaringClass());
         assertEquals("bar", trace[0].getMethodName());
         assertEquals("Foo.java", trace[0].getFileName());
         assertEquals(123, trace[0].getLineNumber());
@@ -98,8 +99,10 @@ public class SubmissionResultParserTest {
         assertEquals("foo?", result.getFeedbackQuestions().get(0).getQuestion());
         assertTrue(result.getFeedbackQuestions().get(0).isIntRange());
         assertFalse(result.getFeedbackQuestions().get(0).isText());
-        assertEquals(1, result.getFeedbackQuestions().get(0).getIntRangeMin());
-        assertEquals(5, result.getFeedbackQuestions().get(0).getIntRangeMax());
+        FeedbackQuestion feedbackQ = result.getFeedbackQuestions().get(0);
+        feedbackQ.setKind("intrange[1..5]");
+        assertEquals(1, feedbackQ.getIntRangeMin());
+        assertEquals(5, feedbackQ.getIntRangeMax());
         
         assertEquals(7, result.getFeedbackQuestions().get(1).getId());
         assertEquals("bar?", result.getFeedbackQuestions().get(1).getQuestion());
