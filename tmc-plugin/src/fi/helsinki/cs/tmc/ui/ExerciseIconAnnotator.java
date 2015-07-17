@@ -11,6 +11,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -134,8 +135,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         }
         
         if (!exercise.isCompleted() && exercise.getDeadline() != null) {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            parts.add("deadline: " + df.format(exercise.getDeadline()));
+            DateFormat df = new SimpleDateFormat("yyyy-MM-dd'T'hh:mm:ssX");
+            System.out.println("Deadline: " + exercise.getDeadline());
+            parts.add("deadline: " + exercise.getDeadline());
         }
         
         return StringUtils.capitalize(StringUtils.join(parts, " - "));

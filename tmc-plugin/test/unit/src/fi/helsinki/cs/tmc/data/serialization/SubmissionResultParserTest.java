@@ -76,7 +76,6 @@ public class SubmissionResultParserTest {
         assertNotNull(cex);
         assertEquals("FooEx", cex.getClassName());
         assertEquals("xoo", cex.getMessage());
-        assertNull(null, cex.getCause());
         
         StackTrace[] trace = cex.getStackTrace();
         assertNotNull(trace);
