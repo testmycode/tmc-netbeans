@@ -72,7 +72,6 @@ public class SubmissionResultParserTest {
         String input = "{status: \"fail\", test_cases: " + testCasesJson + ", points: []}";
         
         SubmissionResult result = parse(input);
-        
         TestException cex = result.getTestCases().get(0).getException();
         assertNotNull(cex);
         assertEquals("FooEx", cex.getClassName());

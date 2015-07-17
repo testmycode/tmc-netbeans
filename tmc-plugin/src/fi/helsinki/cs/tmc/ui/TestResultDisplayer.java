@@ -1,24 +1,18 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.actions.SendFeedbackAction;
 import hy.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import hy.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.langs.TestResult;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
-import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import hy.tmc.core.domain.submission.TestCase;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -76,24 +70,7 @@ public class TestResultDisplayer {
             public void actionPerformed(ActionEvent e) {
                 List<FeedbackAnswer> answers = dialog.getFeedbackAnswers();
                 if (!answers.isEmpty()) {
-                    CancellableCallable<String> task = new ServerAccess().getFeedbackAnsweringJob(result.getFeedbackAnswerUrl(), answers);
-                    BgTask.start("Sending feedback", task, new BgTaskListener<String>() {
-                        @Override
-                        public void bgTaskReady(String result) {
-                        }
-
-                        @Override
-                        public void bgTaskCancelled() {
-                        }
-
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                            String msg = "Failed to send feedback :-(\n" + ex.getMessage();
-                            String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
-                            log.log(Level.INFO, msgWithBacktrace);
-                            dialogs.displayError(msg);
-                        }
-                    });
+                    new SendFeedbackAction(answers, result).run();
                 }
             }
         });

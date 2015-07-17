@@ -4,8 +4,8 @@ import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
@@ -37,6 +37,13 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     private NBTmcSettings settings;
     private ConvenientDialogDisplayer dialogs;
 
+    public static class InvokedEvent implements TmcEvent {
+        public final TmcProjectInfo projectInfo;
+        public InvokedEvent(TmcProjectInfo projectInfo) {
+            this.projectInfo = projectInfo;
+        }
+    }
+
     public SubmitExerciseAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -65,7 +72,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         Project[] projects = projectsFromNodes(nodes).toArray(new Project[0]);
         for (Project project : projects) {
             TmcProjectInfo info = projectMediator.wrapProject(project);
-            TmcEventBus.getDefault().post(new ExerciseSubmitter.InvokedEvent(info));
+            TmcEventBus.getDefault().post(new SubmitExerciseAction.InvokedEvent(info));
             submitProject(info);
         }
     }
