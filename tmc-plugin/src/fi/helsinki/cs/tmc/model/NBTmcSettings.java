@@ -60,6 +60,16 @@ public class NBTmcSettings implements TmcSettings {
     public String getFormattedUserData() {
         return this.getUsername() + ":" + this.getPassword();
     }
+
+    @Override
+    public String clientName() {
+        return "netbeans_plugin";
+    }
+
+    @Override
+    public String clientVersion() {
+       return "0.8.8";
+    }
     
     public static class SavedEvent implements TmcEvent {}
 

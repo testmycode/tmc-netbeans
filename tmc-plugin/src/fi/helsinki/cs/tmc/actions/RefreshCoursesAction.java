@@ -82,6 +82,7 @@ public final class RefreshCoursesAction {
                 ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
                     "Refreshing course list");
                 courseRefresh.start();
+                System.err.println("URLI: " + tmcSettings.getServerAddress());
                 ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
                 Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
             }
