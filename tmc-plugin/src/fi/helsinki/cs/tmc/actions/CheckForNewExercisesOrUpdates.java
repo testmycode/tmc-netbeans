@@ -97,7 +97,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     private String detailUrl(final Course currentCourseBeforeUpdate) {
-        return ServerAccess.addApiCallQueryParameters(
+        return new ServerAccess().addApiCallQueryParameters(
                 currentCourseBeforeUpdate.getDetailsUrl()
         );
     }

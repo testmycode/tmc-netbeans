@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.spyware;
+/*package fi.helsinki.cs.tmc.spyware;
 
 import hy.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -326,4 +326,4 @@ public class EventSendBufferTest {
         Thread.sleep(100); // Wait for save
         assertEquals(0, savedEvents.getValue().length);
     }
-}
+}   */
