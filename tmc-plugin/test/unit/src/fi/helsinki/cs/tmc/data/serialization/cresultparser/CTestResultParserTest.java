@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
-import hy.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import java.io.File;
 import java.io.IOException;
 import java.io.PrintWriter;

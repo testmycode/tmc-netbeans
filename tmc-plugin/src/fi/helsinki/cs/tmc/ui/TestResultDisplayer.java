@@ -1,13 +1,13 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.SendFeedbackAction;
-import hy.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import hy.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
-import hy.tmc.core.domain.submission.TestCase;
+import fi.helsinki.cs.tmc.core.domain.submission.TestCase;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;

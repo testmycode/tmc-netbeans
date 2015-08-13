@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import com.google.common.util.concurrent.FutureCallback;
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;

@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.model;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonParser;
-import hy.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.serialization.SubmissionResultParser;
 import fi.helsinki.cs.tmc.ui.SubmissionProgressView;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;

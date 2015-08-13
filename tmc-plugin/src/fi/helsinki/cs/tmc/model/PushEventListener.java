@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.model;
 
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;

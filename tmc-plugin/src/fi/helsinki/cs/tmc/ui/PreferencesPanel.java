@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import com.google.common.util.concurrent.FutureCallback;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;

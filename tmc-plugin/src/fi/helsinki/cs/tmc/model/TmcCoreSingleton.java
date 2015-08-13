@@ -1,7 +1,7 @@
 
 package fi.helsinki.cs.tmc.model;
 
-import hy.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.TmcCore;
 
 public class TmcCoreSingleton {
 

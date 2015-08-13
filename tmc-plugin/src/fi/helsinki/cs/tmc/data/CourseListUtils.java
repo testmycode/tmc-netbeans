@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import java.util.List;
 
 public class CourseListUtils {

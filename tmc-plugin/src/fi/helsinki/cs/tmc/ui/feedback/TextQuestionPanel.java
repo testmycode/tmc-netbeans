@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui.feedback;
 
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import hy.tmc.core.domain.submission.FeedbackQuestion;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 
 public class TextQuestionPanel extends FeedbackQuestionPanel {
 

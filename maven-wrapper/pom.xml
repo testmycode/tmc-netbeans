@@ -311,8 +311,8 @@
             <version>0.2.5</version>
         </dependency>
         <dependency>
-            <groupId>hy</groupId>
-            <artifactId>tmc-core</artifactId>
+            <groupId>fi.helsinki.cs.tmc</groupId>
+            <artifactId>core</artifactId>
             <version>1.0-SNAPSHOT</version>
             <type>jar</type>
         </dependency>
@@ -352,7 +352,7 @@
                         <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
-			<publicPackage>hy.tmc.core.*</publicPackage>
+			<publicPackage>fi.helsinki.cs.tmc.core.*</publicPackage>
 			<publicPackage>fi.helsinki.cs.tmc.langs.*</publicPackage>
                         <publicPackage>org.cometd.*</publicPackage>
                         <publicPackage>org.eclipse.jetty.*</publicPackage>

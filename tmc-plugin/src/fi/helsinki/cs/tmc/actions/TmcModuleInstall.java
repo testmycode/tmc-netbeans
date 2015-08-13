@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import com.google.common.util.concurrent.FutureCallback;
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.PushEventListener;
@@ -9,7 +9,7 @@ import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import hy.tmc.core.exceptions.TmcCoreException;
+import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;

@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
-import hy.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 

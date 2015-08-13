@@ -2,9 +2,9 @@ package fi.helsinki.cs.tmc.model;
 
 import java.util.ArrayList;
 import java.util.List;
-import hy.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
-import hy.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import java.io.IOException;

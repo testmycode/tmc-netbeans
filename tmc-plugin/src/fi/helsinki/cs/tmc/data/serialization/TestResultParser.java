@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.data.serialization;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import hy.tmc.core.domain.Exercise.ValgrindStrategy;
+import fi.helsinki.cs.tmc.core.domain.Exercise.ValgrindStrategy;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;

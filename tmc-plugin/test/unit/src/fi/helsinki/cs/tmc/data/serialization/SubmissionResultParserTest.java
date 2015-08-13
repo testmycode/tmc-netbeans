@@ -1,12 +1,12 @@
 package fi.helsinki.cs.tmc.data.serialization;
 
 import java.util.List;
-import hy.tmc.core.domain.submission.SubmissionResult;
-import hy.tmc.core.domain.submission.FeedbackQuestion;
-import hy.tmc.core.domain.submission.StackTrace;
-import static hy.tmc.core.domain.submission.SubmissionResult.Status.*;
-import hy.tmc.core.domain.submission.TestCase;
-import hy.tmc.core.domain.submission.TestException;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
+import fi.helsinki.cs.tmc.core.domain.submission.StackTrace;
+import static fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.Status.*;
+import fi.helsinki.cs.tmc.core.domain.submission.TestCase;
+import fi.helsinki.cs.tmc.core.domain.submission.TestException;
 import org.junit.Test;
 import static org.junit.Assert.*;
 
