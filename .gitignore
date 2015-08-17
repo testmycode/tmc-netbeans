@@ -5,3 +5,4 @@
 /mavenmodules
 /parse_output/*.class
 .DS_Store
+**/tmc-langs.log
