@@ -35,10 +35,11 @@ public class DownloadExercisesAction {
     private List<Exercise> exercisesToDownload;
     private TmcCore tmcCore;
     private NBTmcSettings settings;
+    private int batchSize = 3;
 
     /**
-     * Downloads all exercises of the list from TmcServer, unzips and opens them and 
-     * saves the checksums of each Exercise to courseDb.
+     * Downloads all exercises of the list from TmcServer, unzips and opens them
+     * and saves the checksums of each Exercise to courseDb.
      */
     public DownloadExercisesAction(List<Exercise> exercisesToOpen) {
         this.projectMediator = ProjectMediator.getInstance();
@@ -50,30 +51,43 @@ public class DownloadExercisesAction {
     }
 
     public void run() throws TmcCoreException {
-        ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
-                "Downloading " + exercisesToDownload.size() + " exercises.");
-        exerciseDownload.start();
-        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(exercisesToDownload, settings);
 
-        Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload));
+        int start = 0;
+        int end = Math.min(exercisesToDownload.size(), batchSize);
+
+        List<Exercise> batch = exercisesToDownload.subList(start, end);
+
+        ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
+                "Downloading " + batch.size() + " exercises.");
+        exerciseDownload.start();
+
+        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(batch, settings);
+
+        Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload, end));
     }
 
     private class ProjectOpener implements FutureCallback<List<Exercise>> {
 
         private ProgressHandle lastAction;
-        
+        private int start;
+
         /**
-         * Converts Exercise objects to TmcProjectInfo objects.
-         * Saves them to CourseDb and opens them.
-         * @param lastAction 
+         * Converts Exercise objects to TmcProjectInfo objects. Saves them to
+         * CourseDb and opens them.
+         *
+         * @param lastAction
          */
-        public ProjectOpener(ProgressHandle lastAction) {
+        public ProjectOpener(ProgressHandle lastAction, int start) {
             this.lastAction = lastAction;
+            this.start = start;
         }
 
         @Override
         public void onSuccess(List<Exercise> downloadedExercises) {
             lastAction.finish();
+
+            downloadNextBatch();
+
             List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
             for (Exercise exercise : downloadedExercises) {
                 TmcProjectInfo info = projectMediator.tryGetProjectForExercise(exercise);
@@ -84,6 +98,30 @@ public class DownloadExercisesAction {
             }
             saveDownloadedExercisesToCourseDb(downloadedExercises);
             projectMediator.openProjects(projects);
+        }
+
+        private void downloadNextBatch() {
+            int end = Math.min(exercisesToDownload.size(), start + batchSize);
+            List<Exercise> batch = exercisesToDownload.subList(start, end);
+
+            if (batch.isEmpty()) {
+                return;
+            }
+
+            ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
+                    "Downloading " + batch.size() + " exercises.");
+            exerciseDownload.start();
+
+            ListenableFuture<List<Exercise>> dlFuture;
+            try {
+                dlFuture = tmcCore.downloadExercises(batch, settings);
+            } catch (TmcCoreException ex) {
+                List<Exercise> empty = new ArrayList<Exercise>();
+                dlFuture = Futures.immediateFuture(empty);
+                dialogs.displayError("Could not download exercises: " + batch, ex);
+            }
+
+            Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload, end));
         }
 
         private void saveDownloadedExercisesToCourseDb(final List<Exercise> downloadedExercises) {
