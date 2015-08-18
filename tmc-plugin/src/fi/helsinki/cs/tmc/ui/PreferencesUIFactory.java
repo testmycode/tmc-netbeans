@@ -14,27 +14,27 @@ import org.openide.NotifyDescriptor;
 public class PreferencesUIFactory {
 
     private static PreferencesUIFactory instance;
-    
+
     public static PreferencesUIFactory getInstance() {
         if (instance == null) {
             instance = new PreferencesUIFactory();
         }
         return instance;
     }
-    
+
     private PreferencesPanel panel;
     private Dialog dialog;
-    
+
     /*package*/ PreferencesUIFactory() {
     }
-    
+
     /**
      * Returns the currently visible preferences UI, if any.
      */
     public PreferencesUI getCurrentUI() {
         return panel;
     }
-    
+
     /**
      * Creates a new current preferences UI but does not show it yet.
      */
@@ -42,32 +42,35 @@ public class PreferencesUIFactory {
         this.panel = new PreferencesPanel();
         return this.panel;
     }
-    
+
     public boolean isPreferencesUiVisible() {
         return dialog != null;
     }
-    
+
     public void activateVisiblePreferencesUi() {
         if (dialog == null) {
             throw new IllegalStateException("Preferences UI not visible");
         }
-        dialog.requestFocus();
+        SwingUtilities.invokeLater(new Runnable() {
+            @Override
+            public void run() {
+                dialog.requestFocus();
+            }
+        });
     }
-    
+
     /**
      * Shows the preferences dialog.
-     * 
+     *
      * <p>
-     * This must be called after
-     * {@link #createCurrentPreferencesUI()} but not twice without
-     * creating a new preferences UI in between.
-     * 
+     * This must be called after {@link #createCurrentPreferencesUI()} but not
+     * twice without creating a new preferences UI in between.
+     *
      * <p>
-     * The <code>dialogListener</code> shall receive an event with either
-     * the OK or cancel button constant in <code>DialogDescriptor</code>
-     * as the event source. After the event is processed, the current
-     * panel is forgotten and {@link #getCurrentPanel()} shall return null
-     * again.
+     * The <code>dialogListener</code> shall receive an event with either the OK
+     * or cancel button constant in <code>DialogDescriptor</code> as the event
+     * source. After the event is processed, the current panel is forgotten and
+     * {@link #getCurrentPanel()} shall return null again.
      */
     public void showPreferencesDialog(final ActionListener dialogListener) {
         if (panel == null) {
@@ -76,7 +79,7 @@ public class PreferencesUIFactory {
         if (dialog != null) {
             throw new IllegalStateException("Preferences UI already visible");
         }
-        
+
         ActionListener closeListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
@@ -85,7 +88,7 @@ public class PreferencesUIFactory {
                 dialogListener.actionPerformed(e);
             }
         };
-        
+
         DialogDescriptor descriptor = new DialogDescriptor(
                 panel,
                 "TMC Settings",
