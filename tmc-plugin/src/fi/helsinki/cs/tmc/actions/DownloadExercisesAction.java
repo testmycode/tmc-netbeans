@@ -61,7 +61,7 @@ public class DownloadExercisesAction {
                 "Downloading " + batch.size() + " exercises.");
         exerciseDownload.start();
 
-        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(batch, settings);
+        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(batch);
 
         Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload, end));
     }
@@ -114,7 +114,7 @@ public class DownloadExercisesAction {
 
             ListenableFuture<List<Exercise>> dlFuture;
             try {
-                dlFuture = tmcCore.downloadExercises(batch, settings);
+                dlFuture = tmcCore.downloadExercises(batch);
             } catch (TmcCoreException ex) {
                 List<Exercise> empty = new ArrayList<Exercise>();
                 dlFuture = Futures.immediateFuture(empty);

@@ -50,8 +50,8 @@ public class UpdateExercisesAction implements ActionListener {
             return;
         }
         try {
-            ListenableFuture<List<Exercise>> downloadFuture = core.downloadExercises(exercisesToUpdate,
-                    NBTmcSettings.getDefault());
+            ListenableFuture<List<Exercise>> downloadFuture = 
+                    core.downloadExercises(exercisesToUpdate);
             Futures.addCallback(downloadFuture, new ProjectOpenerCallback());
             
         } catch (TmcCoreException ex) {

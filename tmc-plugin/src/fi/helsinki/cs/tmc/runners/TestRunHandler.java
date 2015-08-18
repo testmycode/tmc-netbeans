@@ -72,7 +72,7 @@ public class TestRunHandler {
                     "Running tests.");
             runningTestsLocally.start();
             try {
-                ListenableFuture<RunResult> result = TmcCoreSingleton.getInstance().test(projectInfo.getProjectDirAbsPath(), NBTmcSettings.getDefault());
+                ListenableFuture<RunResult> result = TmcCoreSingleton.getInstance().test(projectInfo.getProjectDirAbsPath());
                 Futures.addCallback(result, new FutureCallback<RunResult>() {
                     @Override
                     public void onSuccess(final RunResult result) {

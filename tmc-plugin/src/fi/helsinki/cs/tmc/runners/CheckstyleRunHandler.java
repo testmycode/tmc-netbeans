@@ -32,7 +32,7 @@ public final class CheckstyleRunHandler {
         ProjectMediator.getInstance().saveAllFiles();
 
         try {
-            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath(), NBTmcSettings.getDefault());
+            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath());
             Futures.addCallback(result, new ExplainValidationResult(resultCollector, dialogDisplayer));
 
         } catch (TmcCoreException ex) {

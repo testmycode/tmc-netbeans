@@ -82,7 +82,7 @@ public final class RefreshCoursesAction {
                 ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
                     "Refreshing course list");
                 courseRefresh.start();
-                ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses(tmcSettings);
+                ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses();
                 Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
             }
         } catch (TmcCoreException ex) {
@@ -125,7 +125,7 @@ public final class RefreshCoursesAction {
                             createSystemHandle("Loading course");
                     loadingCourse.start();
                     ListenableFuture<Course> courseFuture = tmcCore.getCourse(
-                            tmcSettings, currentCourse.getDetailsUrl()
+                            currentCourse.getDetailsUrl()
                     );
                     Futures.addCallback(courseFuture, new UpdateCourse(courses, loadingCourse));
                 } catch (TmcCoreException ex) {

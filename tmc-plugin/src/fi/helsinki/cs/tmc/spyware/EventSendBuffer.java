@@ -257,9 +257,8 @@ public class EventSendBuffer implements EventReceiver {
             progress.start();
             try {
                 byte[] data = convertEventsToByteArray(eventsToSend);
-                ListenableFuture<List<HttpResult>> spywareSending = TmcCoreSingleton.getInstance().sendSpywareDiffs(
-                        data, settings
-                );
+                ListenableFuture<List<HttpResult>> spywareSending = 
+                        TmcCoreSingleton.getInstance().sendSpywareDiffs(data);
                 Futures.addCallback(spywareSending, new FutureCallback<List<HttpResult>>() {
                     @Override
                     public void onSuccess(List<HttpResult> success) {

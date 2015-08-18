@@ -9,7 +9,7 @@ public class TmcCoreSingleton {
     
     public static TmcCore getInstance() {
         if (defaultInstance == null) {
-            defaultInstance = new TmcCore();
+            defaultInstance = new TmcCore(NBTmcSettings.getDefault());
         }
         return defaultInstance;
     }

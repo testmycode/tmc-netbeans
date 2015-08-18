@@ -88,7 +88,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                     "Checking for new exercises");
             exerciseRefresh.start();
             ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
-                    NBTmcSettings.getDefault(), detailUrl(currentCourseBeforeUpdate)
+                    detailUrl(currentCourseBeforeUpdate)
             );
             Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
         } catch (TmcCoreException ex) {

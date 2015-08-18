@@ -278,7 +278,7 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     private NBTmcSettings getTransientSettingsForRefresh() {
-        NBTmcSettings settings = NBTmcSettings.getTransient();
+        NBTmcSettings settings = NBTmcSettings.getDefault();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());

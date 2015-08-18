@@ -101,9 +101,8 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         final ProgressHandle progress = ProgressHandleFactory.createHandle("Checking for code reviews");
         progress.start();
         try {
-            ListenableFuture<List<Review>> reviews = TmcCoreSingleton.getInstance().getNewReviews(
-                    course, NBTmcSettings.getDefault()
-            );
+            ListenableFuture<List<Review>> reviews = TmcCoreSingleton.getInstance()
+                    .getNewReviews(course);
             Futures.addCallback(reviews, new FutureCallback<List<Review>>() {
 
                 @Override
