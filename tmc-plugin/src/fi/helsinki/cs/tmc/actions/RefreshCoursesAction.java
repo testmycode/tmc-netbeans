@@ -128,7 +128,6 @@ public final class RefreshCoursesAction {
                             createSystemHandle("Loading course");
                     loadingCourse.start();
                     URI uri = new URI(currentCourse.getDetailsUrl());
-                    System.out.println(uri + "  here we go!\n\n\n\n\n\n\n\n\n\n");
                     ListenableFuture<Course> courseFuture = tmcCore.getCourse(uri);
 
                     Futures.addCallback(courseFuture, new UpdateCourse(courses, loadingCourse));
