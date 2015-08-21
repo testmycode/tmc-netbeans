@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import java.nio.file.Paths;
 
 import javax.swing.SwingUtilities;
 
@@ -30,16 +31,16 @@ public final class CheckstyleRunHandler {
         final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
         final String projectType = projectInfo.getProjectType().name();
         ProjectMediator.getInstance().saveAllFiles();
-
         try {
-            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath());
-            Futures.addCallback(result, new ExplainValidationResult(resultCollector, dialogDisplayer));
-
+        ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(
+                Paths.get(
+                        projectInfo.getProjectDirAsFile().getAbsolutePath()
+                ));
+        Futures.addCallback(result, new ExplainValidationResult(resultCollector, dialogDisplayer));
         } catch (TmcCoreException ex) {
             ConvenientDialogDisplayer.getDefault().displayError("Checkstyle audit failed.");
             Exceptions.printStackTrace(ex);
         }
-
     }
 
 }
@@ -48,7 +49,7 @@ class ExplainValidationResult implements FutureCallback<ValidationResult> {
 
     ResultCollector resultCollector;
     ConvenientDialogDisplayer dialogDisplayer;
-    
+
     public ExplainValidationResult(ResultCollector resultCollector, ConvenientDialogDisplayer dialogDisplayer) {
         this.resultCollector = resultCollector;
         this.dialogDisplayer = dialogDisplayer;

@@ -14,6 +14,8 @@ import fi.helsinki.cs.tmc.core.communication.HttpResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,23 +43,23 @@ public class SendFeedbackAction {
         try {
             ListenableFuture<HttpResult> feedbackFuture;
             feedbackFuture = core.sendFeedback(
-                    getFeedbackAnswers(), result.getFeedbackAnswerUrl()
+                    getFeedbackAnswers(), new URI(result.getFeedbackAnswerUrl())
             );
             Futures.addCallback(feedbackFuture, new FeedbackReplyCallback());
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
+        } catch (URISyntaxException ex) {
             Exceptions.printStackTrace(ex);
         }
     }
 
     private Map<String, String> getFeedbackAnswers() {
         Map<String, String> answerMap = new HashMap<String, String>();
-        
+
         for (FeedbackAnswer answer : answers) {
             answerMap.put("" + answer.getQuestion().getId(), answer.getAnswer());
         }
-        
+
         return answerMap;
     }
 

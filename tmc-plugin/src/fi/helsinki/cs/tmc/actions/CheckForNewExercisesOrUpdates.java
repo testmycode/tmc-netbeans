@@ -20,6 +20,8 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -79,8 +81,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     }
 
     public void run() {
+        final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
         try {
-            final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
             if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
                 return;
             }
@@ -93,13 +95,16 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
             Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
+            dialogs.displayError("An exception occurred in tmc core", ex);
+        } catch (URISyntaxException ex) {
+            String illegalUri = currentCourseBeforeUpdate.getDetailsUrl();
+            dialogs.displayError("Illegal uri from server: " + illegalUri, ex);
+            Exceptions.printStackTrace(ex);
         }
     }
 
-    private String detailUrl(final Course currentCourseBeforeUpdate) {
-        return new ServerAccess().addApiCallQueryParameters(
-                currentCourseBeforeUpdate.getDetailsUrl()
-        );
+    private URI detailUrl(final Course currentCourseBeforeUpdate) throws URISyntaxException {
+        return new URI(currentCourseBeforeUpdate.getDetailsUrl());
     }
 
     /**

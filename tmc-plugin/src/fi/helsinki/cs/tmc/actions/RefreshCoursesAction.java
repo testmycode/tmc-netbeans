@@ -13,6 +13,8 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.FutureCallbackList;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -80,8 +82,9 @@ public final class RefreshCoursesAction {
         try {
             if (settingsAreSet()) {
                 ProgressHandle courseRefresh = ProgressHandleFactory.createSystemHandle(
-                    "Refreshing course list");
+                        "Refreshing course list");
                 courseRefresh.start();
+
                 ListenableFuture<List<Course>> listCourses = this.tmcCore.listCourses();
                 Futures.addCallback(listCourses, new LoadCourses(courseRefresh));
             }
@@ -102,7 +105,7 @@ public final class RefreshCoursesAction {
         private ProgressHandle lastAction;
 
         /**
-         * This callBack is run when ListenableFuture (to witch this is
+         * This callBack is run when ListenableFuture (to which this is
          * attached) is done. On success method takes list of Course-objects,
          * searches the current course and starts uploading the details of the
          * course. If no currentCourse found, no need to update details.
@@ -124,11 +127,15 @@ public final class RefreshCoursesAction {
                     ProgressHandle loadingCourse = ProgressHandleFactory.
                             createSystemHandle("Loading course");
                     loadingCourse.start();
-                    ListenableFuture<Course> courseFuture = tmcCore.getCourse(
-                            currentCourse.getDetailsUrl()
-                    );
+                    URI uri = new URI(currentCourse.getDetailsUrl());
+                    System.out.println(uri + "  here we go!\n\n\n\n\n\n\n\n\n\n");
+                    ListenableFuture<Course> courseFuture = tmcCore.getCourse(uri);
+
                     Futures.addCallback(courseFuture, new UpdateCourse(courses, loadingCourse));
                 } catch (TmcCoreException ex) {
+                    Exceptions.printStackTrace(ex);
+                    callbacks.onFailure(ex);
+                } catch (URISyntaxException ex) {
                     Exceptions.printStackTrace(ex);
                     callbacks.onFailure(ex);
                 }
