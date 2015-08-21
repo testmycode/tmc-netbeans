@@ -6,12 +6,17 @@ import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
+import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
+import java.io.File;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 import javax.swing.SwingUtilities;
 
@@ -59,17 +64,33 @@ class ExplainValidationResult implements FutureCallback<ValidationResult> {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
+                System.out.println("style done yay");
                 resultCollector.setValidationResult(v);
             }
         });
     }
 
     @Override
-    public void onFailure(Throwable thrwbl) {
+    public void onFailure(final Throwable ex) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                dialogDisplayer.displayError("Failed to validate the code.");
+                if (ex instanceof UnsupportedOperationException) {
+                    resultCollector.setValidationResult(new ValidationResult() {
+
+                        @Override
+                        public Strategy getStrategy() {
+                            return null;
+                        }
+
+                        @Override
+                        public Map<File, List<ValidationError>> getValidationErrors() {
+                            return new HashMap<File, List<ValidationError>>();
+                        }
+                    });
+                } else {
+                    dialogDisplayer.displayError("Failed to validate the code.");
+                }
             }
         });
     }
