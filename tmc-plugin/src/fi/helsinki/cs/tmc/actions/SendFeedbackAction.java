@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.core.communication.HttpResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.io.IOException;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -41,12 +42,10 @@ public class SendFeedbackAction {
         try {
             ListenableFuture<HttpResult> feedbackFuture;
             feedbackFuture = core.sendFeedback(
-                    getFeedbackAnswers(), result.getFeedbackAnswerUrl()
+                    getFeedbackAnswers(), URI.create(result.getFeedbackAnswerUrl())
             );
             Futures.addCallback(feedbackFuture, new FeedbackReplyCallback());
         } catch (TmcCoreException ex) {
-            Exceptions.printStackTrace(ex);
-        } catch (IOException ex) {
             Exceptions.printStackTrace(ex);
         }
     }

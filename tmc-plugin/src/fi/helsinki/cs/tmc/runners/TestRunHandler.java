@@ -24,6 +24,7 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 import static java.util.logging.Level.INFO;
@@ -72,7 +73,7 @@ public class TestRunHandler {
                     "Running tests.");
             runningTestsLocally.start();
             try {
-                ListenableFuture<RunResult> result = TmcCoreSingleton.getInstance().test(projectInfo.getProjectDirAbsPath());
+                ListenableFuture<RunResult> result = TmcCoreSingleton.getInstance().test(projectInfo.getProjectDirAsPath());
                 Futures.addCallback(result, new FutureCallback<RunResult>() {
                     @Override
                     public void onSuccess(final RunResult result) {

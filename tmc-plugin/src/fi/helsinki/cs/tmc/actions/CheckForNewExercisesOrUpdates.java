@@ -20,6 +20,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.net.URI;
 import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -96,10 +97,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
     }
 
-    private String detailUrl(final Course currentCourseBeforeUpdate) {
-        return new ServerAccess().addApiCallQueryParameters(
-                currentCourseBeforeUpdate.getDetailsUrl()
-        );
+    private URI detailUrl(final Course currentCourseBeforeUpdate) {
+        return URI.create(new ServerAccess().addApiCallQueryParameters(
+                currentCourseBeforeUpdate.getDetailsUrl()));
     }
 
     /**

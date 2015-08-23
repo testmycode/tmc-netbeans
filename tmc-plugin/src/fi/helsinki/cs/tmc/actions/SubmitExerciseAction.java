@@ -83,7 +83,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
         try {
             ListenableFuture<SubmissionResult> result;
-            result = core.submit(info.getProjectDirAbsPath());
+            result = core.submit(info.getProjectDirAsPath());
             Futures.addCallback(result, new SubmissionCallback(exercise, dialog));
         } catch (TmcCoreException ex) {
             String message = "There was an error submitting project " + info.getProjectName();

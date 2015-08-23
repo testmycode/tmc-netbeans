@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.stylerunner.validation.ValidationError;
 import java.io.File;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -37,7 +38,7 @@ public final class CheckstyleRunHandler {
         ProjectMediator.getInstance().saveAllFiles();
 
         try {
-            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsFile().getAbsolutePath());
+            ListenableFuture<ValidationResult> result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsPath());
             Futures.addCallback(result, new ExplainValidationResult(resultCollector, dialogDisplayer));
 
         } catch (TmcCoreException ex) {
