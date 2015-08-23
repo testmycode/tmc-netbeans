@@ -67,7 +67,6 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     public void run() {
-        // TODO(jamo): use bg task
         Exercise exercise = exerciseForProject(project);
         if (exercise != null) {
             ResultCollector resultCollector = new ResultCollector(exercise);
