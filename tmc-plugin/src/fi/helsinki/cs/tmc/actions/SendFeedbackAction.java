@@ -13,7 +13,6 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.HttpResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
-import java.io.IOException;
 import java.net.URI;
 import java.util.HashMap;
 import java.util.List;
@@ -24,12 +23,14 @@ import org.openide.util.Exceptions;
 
 public class SendFeedbackAction {
 
+    private static final Logger log = Logger.getLogger(SendFeedbackAction.class.getName());
+
+    private final SubmissionResult result;
+
     private List<FeedbackAnswer> answers;
     private TmcCore core;
     private ConvenientDialogDisplayer dialogs;
-    private final SubmissionResult result;
     private NbTmcSettings settings = NbTmcSettings.getDefault();
-    private static final Logger log = Logger.getLogger(SendFeedbackAction.class.getName());
 
     public SendFeedbackAction(List<FeedbackAnswer> answers, SubmissionResult result) {
         this.answers = answers;
@@ -52,11 +53,11 @@ public class SendFeedbackAction {
 
     private Map<String, String> getFeedbackAnswers() {
         Map<String, String> answerMap = new HashMap<String, String>();
-        
+
         for (FeedbackAnswer answer : answers) {
             answerMap.put("" + answer.getQuestion().getId(), answer.getAnswer());
         }
-        
+
         return answerMap;
     }
 

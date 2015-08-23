@@ -126,7 +126,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     dialog.close();
                     final ResultCollector resultCollector = new ResultCollector(exercise);
                     resultCollector.setValidationResult(result.getValidationResult());
-             
+
                     resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
                     exercise.setAttempted(true);
                     if (result.isAllTestsPassed()) {
@@ -135,7 +135,6 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     courseDb.save();
                     new CheckForNewExercisesOrUpdates(true, false).run();
                 }
-
             });
         }
 
@@ -154,8 +153,5 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
 
             });
         }
-
     }
-
 }
-
