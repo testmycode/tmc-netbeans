@@ -8,7 +8,7 @@ import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -34,7 +34,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private final TmcCore core;
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private ConvenientDialogDisplayer dialogs;
 
     public static class InvokedEvent implements TmcEvent {
@@ -48,7 +48,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.core = TmcCoreSingleton.getInstance();
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         putValue("noIconInMenu", Boolean.TRUE);

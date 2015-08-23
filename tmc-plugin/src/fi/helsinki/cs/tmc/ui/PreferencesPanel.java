@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.ui;
 import com.google.common.util.concurrent.FutureCallback;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
@@ -26,8 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 /**
  * The settings panel.
  *
- * This is missing the "OK" and "Cancel" buttons because it is placed in
- * a dialog that provides these.
+ * This is missing the "OK" and "Cancel" buttons because it is placed in a
+ * dialog that provides these.
  */
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
 
@@ -39,6 +39,7 @@ import org.apache.commons.lang3.StringUtils;
     private RefreshSettings lastRefreshSettings = null;
 
     private static class RefreshSettings {
+
         private final String username;
         private final String password;
         private final String baseUrl;
@@ -52,7 +53,7 @@ import org.apache.commons.lang3.StringUtils;
         public boolean isAllSet() {
             return username != null && password != null && baseUrl != null;
         }
-        
+
         public boolean noneIsEmpty() {
             return !username.trim().isEmpty() && !password.trim().isEmpty() && !baseUrl.trim().isEmpty();
         }
@@ -60,11 +61,10 @@ import org.apache.commons.lang3.StringUtils;
         @Override
         public boolean equals(Object obj) {
             if (obj instanceof RefreshSettings) {
-                RefreshSettings that = (RefreshSettings)obj;
-                return
-                        ObjectUtils.equals(this.username, that.username) &&
-                        ObjectUtils.equals(this.password, that.password) &&
-                        ObjectUtils.equals(this.baseUrl, that.baseUrl);
+                RefreshSettings that = (RefreshSettings) obj;
+                return ObjectUtils.equals(this.username, that.username)
+                        && ObjectUtils.equals(this.password, that.password)
+                        && ObjectUtils.equals(this.baseUrl, that.baseUrl);
             } else {
                 return false;
             }
@@ -175,7 +175,7 @@ import org.apache.commons.lang3.StringUtils;
     public List<Course> getAvailableCourses() {
         List<Course> result = new ArrayList<Course>(coursesComboBox.getItemCount());
         for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
-            result.add((Course)coursesComboBox.getItemAt(i));
+            result.add((Course) coursesComboBox.getItemAt(i));
         }
         return result;
     }
@@ -183,7 +183,7 @@ import org.apache.commons.lang3.StringUtils;
     @Override
     public void setSelectedCourseName(String courseName) {
         for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
-            if (((Course)coursesComboBox.getItemAt(i)).getName().equals(courseName)) {
+            if (((Course) coursesComboBox.getItemAt(i)).getName().equals(courseName)) {
                 coursesComboBox.setSelectedIndex(i);
                 break;
             }
@@ -194,7 +194,7 @@ import org.apache.commons.lang3.StringUtils;
     public String getSelectedCourseName() {
         Object item = coursesComboBox.getSelectedItem();
         if (item instanceof Course) {
-            return ((Course)item).getName();
+            return ((Course) item).getName();
         } else { // because the combobox isn't populated yet
             return null;
         }
@@ -234,7 +234,7 @@ import org.apache.commons.lang3.StringUtils;
     public Locale getErrorMsgLocale() {
         Object item = errorMsgLocaleComboBox.getSelectedItem();
         if (item != null) {
-            return ((LocaleWrapper)item).getLocale();
+            return ((LocaleWrapper) item).getLocale();
         } else {
             return new Locale("en_US");
         }
@@ -246,7 +246,9 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     private static class LocaleWrapper {
+
         private Locale locale;
+
         public LocaleWrapper(Locale locale) {
             this.locale = locale;
         }
@@ -268,7 +270,7 @@ import org.apache.commons.lang3.StringUtils;
             if (!(obj instanceof LocaleWrapper)) {
                 return false;
             }
-            return this.locale.equals(((LocaleWrapper)obj).locale);
+            return this.locale.equals(((LocaleWrapper) obj).locale);
         }
 
         @Override
@@ -277,8 +279,8 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
 
-    private NBTmcSettings getTransientSettingsForRefresh() {
-        NBTmcSettings settings = NBTmcSettings.getDefault();
+    private NbTmcSettings getTransientSettingsForRefresh() {
+        NbTmcSettings settings = NbTmcSettings.getDefault();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
@@ -289,7 +291,6 @@ import org.apache.commons.lang3.StringUtils;
     private RefreshSettings getRefreshSettings() {
         return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
     }
-
 
     private void setUpErrorMsgLocaleSelection() {
 
@@ -308,7 +309,7 @@ import org.apache.commons.lang3.StringUtils;
                 if (event.getStateChange() == ItemEvent.SELECTED) {
 
                     // Language changed, notify user about restarting
-                    if (!NBTmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                    if (!NbTmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
                         restartMessage.setText("Changing language requires restart");
                     } else {
                         restartMessage.setText("");
@@ -339,10 +340,12 @@ import org.apache.commons.lang3.StringUtils;
             public void insertUpdate(DocumentEvent e) {
                 fieldChanged();
             }
+
             @Override
             public void removeUpdate(DocumentEvent e) {
                 fieldChanged();
             }
+
             @Override
             public void changedUpdate(DocumentEvent e) {
                 fieldChanged();
@@ -427,21 +430,27 @@ import org.apache.commons.lang3.StringUtils;
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {
         final RefreshCoursesAction action = new RefreshCoursesAction(getTransientSettingsForRefresh());
         action.addDefaultListener(!failSilently, false);
-        action.addListener(new FutureCallback<List<Course>>() {
+        action.addListener(new BgTaskListener<List<Course>>() {
 
             @Override
-            public void onSuccess(List<Course> result) {
+            public void bgTaskReady(List<Course> result) {
                 setCourseListRefreshInProgress(false);
-                setAvailableCourses(result);            
+                setAvailableCourses(result);
             }
-            
+
             @Override
-            public void onFailure(Throwable thrwbl) {
+            public void bgTaskFailed(Throwable thrwbl) {
                 setCourseListRefreshInProgress(false);
             }
-            
+
+            @Override
+            public void bgTaskCancelled() {
+                setCourseListRefreshInProgress(false);
+
+            }
+
         });
-        
+
         if (delay) {
             refreshRunner.setTask(new Runnable() {
                 @Override
@@ -460,11 +469,10 @@ import org.apache.commons.lang3.StringUtils;
         action.run();
     }
 
-
-    /** This method is called from within the constructor to
-     * initialize the form.
-     * WARNING: Do NOT modify this code. The content of this method is
-     * always regenerated by the Form Editor.
+    /**
+     * This method is called from within the constructor to initialize the form.
+     * WARNING: Do NOT modify this code. The content of this method is always
+     * regenerated by the Form Editor.
      */
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
@@ -688,8 +696,10 @@ import org.apache.commons.lang3.StringUtils;
     }// </editor-fold>//GEN-END:initComponents
 
     /**
-     * The method is used to select the default save folder for downloaded exercises.
-     * It is called when the user presses the "Browse" button on the preferences window.
+     * The method is used to select the default save folder for downloaded
+     * exercises. It is called when the user presses the "Browse" button on the
+     * preferences window.
+     *
      * @param evt
      */
     private void folderChooserBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_folderChooserBtnActionPerformed
@@ -705,7 +715,7 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        NBTmcSettings settings = getTransientSettingsForRefresh();
+        NbTmcSettings settings = getTransientSettingsForRefresh();
         if (!canProbablyRefreshCourseList()) {
             dialogs.displayError("Please set the server address first");
         } else {

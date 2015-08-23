@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
@@ -28,7 +28,7 @@ public class SendFeedbackAction {
     private TmcCore core;
     private ConvenientDialogDisplayer dialogs;
     private final SubmissionResult result;
-    private NBTmcSettings settings = NBTmcSettings.getDefault();
+    private NbTmcSettings settings = NbTmcSettings.getDefault();
     private static final Logger log = Logger.getLogger(SendFeedbackAction.class.getName());
 
     public SendFeedbackAction(List<FeedbackAnswer> answers, SubmissionResult result) {

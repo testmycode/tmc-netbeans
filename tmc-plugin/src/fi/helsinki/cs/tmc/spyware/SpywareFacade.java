@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.spyware;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
@@ -31,7 +31,7 @@ public class SpywareFacade implements SpywareSettings {
         }
     }
     
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     
     private EventSendBuffer sender;
     
@@ -43,7 +43,7 @@ public class SpywareFacade implements SpywareSettings {
     private TextInsertEventSource textInsertEventSource;
     
     public SpywareFacade() {
-        settings = NBTmcSettings.getDefault();
+        settings = NbTmcSettings.getDefault();
         
         sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
         sender.sendNow();

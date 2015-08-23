@@ -7,7 +7,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.utilities.Cooldown;
@@ -247,7 +247,7 @@ public class EventSendBuffer implements EventReceiver {
          * Converts events to data[] and sends it to defined url.
          */
         private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {       
-            NBTmcSettings settings = NBTmcSettings.getDefault();
+            NbTmcSettings settings = NbTmcSettings.getDefault();
             Optional<Course> currentCourse = settings.getCurrentCourse();
             if (!currentCourse.isPresent()) {
                 return;

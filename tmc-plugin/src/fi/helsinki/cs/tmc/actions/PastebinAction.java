@@ -7,7 +7,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.PastebinDialog;
@@ -44,13 +44,13 @@ import org.openide.util.NbBundle.Messages;
 public final class PastebinAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
 
     public PastebinAction() {
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();

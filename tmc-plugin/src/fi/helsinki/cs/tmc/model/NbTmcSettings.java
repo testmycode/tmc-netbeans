@@ -12,7 +12,7 @@ import java.util.Locale;
 /**
  * A transient saveable collection of all settings of the TMC plugin.
  */
-public class NBTmcSettings implements TmcSettings {
+public class NbTmcSettings implements TmcSettings {
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
@@ -23,9 +23,9 @@ public class NBTmcSettings implements TmcSettings {
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     
-    private static final NBTmcSettings defaultInstance =
-            new NBTmcSettings(
-                    PersistableSettings.forModule(NBTmcSettings.class),
+    private static final NbTmcSettings defaultInstance =
+            new NbTmcSettings(
+                    PersistableSettings.forModule(NbTmcSettings.class),
                     SelectedTailoring.get(),
                     TmcEventBus.getDefault()
                     );
@@ -73,19 +73,19 @@ public class NBTmcSettings implements TmcSettings {
     
     public static class SavedEvent implements TmcEvent {}
 
-    public static NBTmcSettings getDefault() {
+    public static NbTmcSettings getDefault() {
         return defaultInstance;
     }
     
-    public static NBTmcSettings getTransient() {
-        return new NBTmcSettings(
-                PersistableSettings.forModule(NBTmcSettings.class),
+    public static NbTmcSettings getTransient() {
+        return new NbTmcSettings(
+                PersistableSettings.forModule(NbTmcSettings.class),
                 SelectedTailoring.get(),
                 TmcEventBus.getDefault()
                 );
     }
     
-    /*package*/ NBTmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
+    /*package*/ NbTmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
         this.settings = settings;
         this.tailoring = tailoring;
         this.eventBus = eventBus;

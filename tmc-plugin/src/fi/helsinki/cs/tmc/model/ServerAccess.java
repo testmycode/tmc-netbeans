@@ -39,7 +39,7 @@ import org.openide.modules.Modules;
 public class ServerAccess {
     public static final int API_VERSION = 7;
     
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private CourseListParser courseListParser;
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
@@ -47,15 +47,15 @@ public class ServerAccess {
     private TmcCore tmcCore;
     
     public ServerAccess() {
-        this(NBTmcSettings.getDefault());
+        this(NbTmcSettings.getDefault());
     }
 
-    public ServerAccess(NBTmcSettings settings) {
+    public ServerAccess(NbTmcSettings settings) {
         this(settings, new CourseListParser(), new CourseInfoParser(), new ReviewListParser());
     }
 
     public ServerAccess(
-        NBTmcSettings settings,
+        NbTmcSettings settings,
         CourseListParser courseListParser,
         CourseInfoParser courseInfoParser,
         ReviewListParser reviewListParser
@@ -71,7 +71,7 @@ public class ServerAccess {
         return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
     }
     
-    public void setSettings(NBTmcSettings settings) {
+    public void setSettings(NbTmcSettings settings) {
         this.settings = settings;
     }
     

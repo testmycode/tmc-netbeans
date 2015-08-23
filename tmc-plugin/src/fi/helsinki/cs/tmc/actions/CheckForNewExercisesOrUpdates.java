@@ -1,14 +1,12 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import static java.util.logging.Level.INFO;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
-import fi.helsinki.cs.tmc.model.ServerAccess;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -16,25 +14,27 @@ import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.Inflector;
 import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.URI;
-import java.util.ArrayList;
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.SwingUtilities;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.apache.commons.lang3.StringUtils;
-import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
+
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
-import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.NbBundle.Messages;
+
+import java.util.logging.Logger;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.ArrayList;
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
 
 @ActionID(category = "TMC",
         id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
@@ -52,6 +52,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         timer.start();
     }
 
+    private static final Logger logger = Logger.getLogger(CheckForNewExercisesOrUpdates.class.getName());
+
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
@@ -59,7 +61,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
     private boolean backgroundCheck;
-    private TmcCore tmcCore;
+    private final TmcCore tmcCore;
 
     public CheckForNewExercisesOrUpdates() {
         this(false, false);
@@ -76,118 +78,80 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        logger.info("action performed");
         run();
     }
 
     public void run() {
-        try {
-            final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
-            if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
-                return;
-            }
-            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
-                    "Checking for new exercises");
-            exerciseRefresh.start();
-            ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
-                    detailUrl(currentCourseBeforeUpdate)
-            );
-            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
-        } catch (TmcCoreException ex) {
-            Exceptions.printStackTrace(ex);
-        }
-    }
+        final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
 
-    private URI detailUrl(final Course currentCourseBeforeUpdate) {
-        return URI.create(new ServerAccess().addApiCallQueryParameters(
-                currentCourseBeforeUpdate.getDetailsUrl()));
-    }
-
-    /**
-     * If there is something at background or no current course is chosen,
-     * return true.
-     */
-    private boolean backgroundProcessingOrNoCurrentCourse(final Course currentCourseBeforeUpdate) {
-        if (backgroundCheck && !NBTmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
-            return true;
+        if (backgroundCheck && !NbTmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
+            return;
         }
+
         if (currentCourseBeforeUpdate == null) {
             if (!beQuiet) {
                 dialogs.displayMessage("Please select a course in TMC -> Settings.");
             }
-            return true;
-        }
-        return false;
-    }
-
-    class UpdateCourseForExerciseUpdate implements FutureCallback<Course> {
-
-        private ProgressHandle lastAction;
-
-        /**
-         * This should be attached to listenableFuture. When future is ready,
-         * receivedCourse will be saved to courseDb and view will be updated.
-         */
-        public UpdateCourseForExerciseUpdate(ProgressHandle lastAction) {
-            this.lastAction = lastAction;
+            return;
         }
 
-        @Override
-        public void onSuccess(final Course receivedCourse) {
-            SwingUtilities.invokeLater(new Runnable() {
+        BgTaskListener bgTaskListener = new BgTaskListener<Course>() {
+            @Override
+            public void bgTaskReady(Course receivedCourse) {
+                if (receivedCourse != null) {
 
-                @Override
-                public void run() {
-                    lastAction.finish();
-                    if (receivedCourse != null) {
-                        setCourseNameToAllExercises(receivedCourse);
-                        courseDb.putDetailedCourse(receivedCourse);
-                        final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                        updateGUI(status);
-                    }
-                }
+                    courseDb.putDetailedCourse(receivedCourse);
 
-            });
+                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
 
-        }
-
-        private void setCourseNameToAllExercises(Course receivedCourse) {
-            for (Exercise exercise : receivedCourse.getExercises()) {
-                exercise.setCourseName(receivedCourse.getName());
-            }
-        }
-
-        private void updateGUI(final LocalExerciseStatus status) {
-            boolean thereIsSomethingToDownload = status.thereIsSomethingToDownload(false);
-            if (thereIsSomethingToDownload) {
-                if (beQuiet) {
-                    displayNotification(status, new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
+                    if (status.thereIsSomethingToDownload(false)) {
+                        if (beQuiet) {
+                            displayNotification(status, new ActionListener() {
+                                @Override
+                                public void actionPerformed(ActionEvent e) {
+                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                }
+                            });
+                        } else {
                             DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                         }
-                    });
-                } else {
-                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-                }
-            } else if (!beQuiet) {
-                dialogs.displayMessage("No new exercises or updates to download.");
-            }
-        }
-
-        @Override
-        public void onFailure(final Throwable ex) {
-            SwingUtilities.invokeLater(new Runnable() {
-
-                @Override
-                public void run() {
-                    lastAction.finish();
-                    if (!beQuiet || ex instanceof ObsoleteClientException) {
-                        dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                    } else if (!beQuiet) {
+                        dialogs.displayMessage("No new exercises or updates to download.");
                     }
                 }
+            }
 
-            });
-        }
+            @Override
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                if (!beQuiet || ex instanceof ObsoleteClientException) {
+                    dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                }
+            }
+        };
+
+        BgTask.start("Checking for new exercises", new CancellableCallable<Course>() {
+            ListenableFuture<Course> currentCourseFuture;
+
+            @Override
+            public Course call() throws Exception {
+                logger.info("1Downloading course to refresh cache");
+
+                currentCourseFuture = tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrlAsUri());
+                return currentCourseFuture.get();
+            }
+
+            @Override
+            public boolean cancel() {
+                logger.log(INFO, "Get course (refresh list) cancelled.");
+                return currentCourseFuture.cancel(true);
+            }
+        }, bgTaskListener);
+
     }
 
     private void displayNotification(LocalExerciseStatus status, ActionListener action) {

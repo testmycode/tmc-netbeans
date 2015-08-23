@@ -1,26 +1,25 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
-import fi.helsinki.cs.tmc.model.CourseDb;
+import static java.util.logging.Level.INFO;
+
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
-import java.lang.reflect.InvocationTargetException;
-import java.util.ArrayList;
+import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+
+import com.google.common.collect.Lists;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import java.util.Collection;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
-import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
-import org.openide.util.Exceptions;
 
 /**
  * Downloads and opens the given exercises in the background.
@@ -29,13 +28,12 @@ public class DownloadExercisesAction {
 
     private static final Logger logger = Logger.getLogger(DownloadExercisesAction.class.getName());
 
+    private final List<Exercise> exercisesToDownload;
+    private final TmcCore tmcCore;
+    private final NbTmcSettings settings;
+
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
-
-    private List<Exercise> exercisesToDownload;
-    private TmcCore tmcCore;
-    private NBTmcSettings settings;
-    private int batchSize = 3;
 
     /**
      * Downloads all exercises of the list from TmcServer, unzips and opens them
@@ -47,103 +45,53 @@ public class DownloadExercisesAction {
 
         this.exercisesToDownload = exercisesToOpen;
         this.tmcCore = TmcCoreSingleton.getInstance();
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
     }
 
-    public void run() throws TmcCoreException {
+    public void run() {
+        final AggregatingBgTaskListener<TmcProjectInfo> aggregator
+                = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
-        int start = 0;
-        int end = Math.min(exercisesToDownload.size(), batchSize);
-
-        List<Exercise> batch = exercisesToDownload.subList(start, end);
-
-        ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
-                "Downloading " + batch.size() + " exercises.");
-        exerciseDownload.start();
-
-        ListenableFuture<List<Exercise>> dlFuture = tmcCore.downloadExercises(batch);
-
-        Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload, end));
+        for (final Exercise exercise : exercisesToDownload) {
+            startDownloading(exercise, aggregator);
+        }
     }
 
-    private class ProjectOpener implements FutureCallback<List<Exercise>> {
-
-        private ProgressHandle lastAction;
-        private int start;
-
-        /**
-         * Converts Exercise objects to TmcProjectInfo objects. Saves them to
-         * CourseDb and opens them.
-         *
-         * @param lastAction
-         */
-        public ProjectOpener(ProgressHandle lastAction, int start) {
-            this.lastAction = lastAction;
-            this.start = start;
-        }
-
-        @Override
-        public void onSuccess(List<Exercise> downloadedExercises) {
-            lastAction.finish();
-
-            downloadNextBatch();
-
-            List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>();
-            for (Exercise exercise : downloadedExercises) {
-                TmcProjectInfo info = projectMediator.tryGetProjectForExercise(exercise);
-                if (info == null) {
-                    continue;
-                }
-                projects.add(info);
-            }
-            saveDownloadedExercisesToCourseDb(downloadedExercises);
-            projectMediator.openProjects(projects);
-        }
-
-        private void downloadNextBatch() {
-            int end = Math.min(exercisesToDownload.size(), start + batchSize);
-            List<Exercise> batch = exercisesToDownload.subList(start, end);
-
-            if (batch.isEmpty()) {
-                return;
-            }
-
-            ProgressHandle exerciseDownload = ProgressHandleFactory.createSystemHandle(
-                    "Downloading " + batch.size() + " exercises.");
-            exerciseDownload.start();
+    private void startDownloading(final Exercise exercise, final BgTaskListener<TmcProjectInfo> listener) {
+        BgTask.start("Downloading " + exercise.getName(), new CancellableCallable<Void>() {
 
             ListenableFuture<List<Exercise>> dlFuture;
-            try {
-                dlFuture = tmcCore.downloadExercises(batch);
-            } catch (TmcCoreException ex) {
-                List<Exercise> empty = new ArrayList<Exercise>();
-                dlFuture = Futures.immediateFuture(empty);
-                dialogs.displayError("Could not download exercises: " + batch, ex);
+            @Override
+            public Void call() throws Exception {
+                dlFuture = tmcCore.downloadExercises(Lists.newArrayList(exercise));
+                dlFuture.get(); // block the call till the task has completed.
+                return null;
             }
 
-            Futures.addCallback(dlFuture, new ProjectOpener(exerciseDownload, end));
-        }
-
-        private void saveDownloadedExercisesToCourseDb(final List<Exercise> downloadedExercises) {
-            try {
-                SwingUtilities.invokeAndWait(new Runnable() {
-                    @Override
-                    public void run() {
-                        CourseDb.getInstance().multipleExerciseDownloaded(downloadedExercises);
-                    }
-                });
-            } catch (InterruptedException ex) {
-                Exceptions.printStackTrace(ex);
-            } catch (InvocationTargetException ex) {
-                Exceptions.printStackTrace(ex);
+            @Override
+            public boolean cancel() {
+                logger.info("Exercise download was cancelled.");
+                return dlFuture.cancel(true);
             }
+        });
+    }
+
+    private BgTaskListener<Collection<TmcProjectInfo>> whenAllDownloadsFinished = new BgTaskListener<Collection<TmcProjectInfo>>() {
+        @Override
+        public void bgTaskReady(Collection<TmcProjectInfo> projects) {
+            projectMediator.openProjects(projects);
+            logger.log(INFO, "Opening projects.");
         }
 
         @Override
-        public void onFailure(Throwable thrwbl) {
-            lastAction.finish();
-            logger.log(Level.INFO, "Failed to download exercise file.", thrwbl);
-            dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(thrwbl));
+        public void bgTaskCancelled() {
+            logger.log(INFO, "BgTask was cancelled.");
         }
-    }
+
+        @Override
+        public void bgTaskFailed(Throwable ex) {
+            logger.log(INFO, "Failed to download exercise file.", ex);
+            dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+        }
+    };
 }

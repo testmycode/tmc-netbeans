@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,7 +16,7 @@ import org.openide.util.ImageUtilities;
 
 public class CheckForUnopenedExercises implements ActionListener {
     public static boolean shouldRunOnStartup() {
-        return NBTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
+        return NbTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
     }
     
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
@@ -37,6 +37,7 @@ public class CheckForUnopenedExercises implements ActionListener {
     }
     
     public void run() {
+        // TODO(jamo): use bg task
         projects.callWhenProjectsCompletelyOpened(new Runnable() {
             @Override
             public void run() {

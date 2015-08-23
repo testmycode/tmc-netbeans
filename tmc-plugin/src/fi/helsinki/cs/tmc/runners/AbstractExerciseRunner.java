@@ -5,7 +5,7 @@ import fi.helsinki.cs.tmc.data.serialization.TestResultParser;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import java.io.IOException;
 import java.util.concurrent.Callable;
@@ -20,7 +20,7 @@ public abstract class AbstractExerciseRunner implements ExerciseRunner {
     protected static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
     private static final Logger log = Logger.getLogger(AbstractExerciseRunner.class.getName());
 
-    protected NBTmcSettings settings;
+    protected NbTmcSettings settings;
     protected CourseDb courseDb;
     protected ProjectMediator projectMediator;
     protected TestResultParser resultParser;
@@ -28,7 +28,7 @@ public abstract class AbstractExerciseRunner implements ExerciseRunner {
     protected TmcEventBus eventBus;
 
     public AbstractExerciseRunner() {
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.resultParser = new TestResultParser();

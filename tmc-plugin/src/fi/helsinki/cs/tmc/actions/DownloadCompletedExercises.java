@@ -40,6 +40,7 @@ public final class DownloadCompletedExercises implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        // TODO(jamo): use bg task
         final Course currentCourse = courseDb.getCurrentCourse();
         if (currentCourse == null) {
             dialogs.displayMessage("Please select a course in TMC -> Settings.");
@@ -48,10 +49,10 @@ public final class DownloadCompletedExercises implements ActionListener {
 
         RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(true, true);
-        action.addListener(new FutureCallback<List<Course>>() {
+        action.addListener(new BgTaskListener<List<Course>>() {
 
             @Override
-            public void onSuccess(List<Course> receivedCourseList) {
+            public void bgTaskReady(List<Course> result) {
                 LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                 if (!status.downloadableCompleted.isEmpty()) {
                     List<Exercise> emptyList = Collections.emptyList();
@@ -62,7 +63,11 @@ public final class DownloadCompletedExercises implements ActionListener {
             }
 
             @Override
-            public void onFailure(Throwable ex) {
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });

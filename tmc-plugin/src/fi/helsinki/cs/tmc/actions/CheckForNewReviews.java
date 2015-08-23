@@ -6,7 +6,7 @@ import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -79,6 +79,7 @@ public class CheckForNewReviews implements ActionListener, Runnable {
 
     @Override
     public void run() {
+        // TODO(jamo): use bg task
         if (resetNotifications) {
             reviewDb.forgetReviewsNotifiedAbout();
         }
