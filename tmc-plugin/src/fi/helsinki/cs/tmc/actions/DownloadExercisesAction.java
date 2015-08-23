@@ -16,10 +16,13 @@ import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
 import com.google.common.collect.Lists;
 import com.google.common.util.concurrent.ListenableFuture;
+import fi.helsinki.cs.tmc.model.CourseDb;
+import java.util.ArrayList;
 
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 /**
  * Downloads and opens the given exercises in the background.
@@ -31,6 +34,7 @@ public class DownloadExercisesAction {
     private final List<Exercise> exercisesToDownload;
     private final TmcCore tmcCore;
     private final NbTmcSettings settings;
+    private CourseDb courseDb;
 
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
@@ -42,6 +46,7 @@ public class DownloadExercisesAction {
     public DownloadExercisesAction(List<Exercise> exercisesToOpen) {
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.courseDb = CourseDb.getInstance();
 
         this.exercisesToDownload = exercisesToOpen;
         this.tmcCore = TmcCoreSingleton.getInstance();
@@ -49,23 +54,24 @@ public class DownloadExercisesAction {
     }
 
     public void run() {
-        final AggregatingBgTaskListener<TmcProjectInfo> aggregator
-                = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
+//        final AggregatingBgTaskListener<TmcProjectInfo> aggregator
+//                = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
         for (final Exercise exercise : exercisesToDownload) {
-            startDownloading(exercise, aggregator);
+            startDownloading(exercise, whenDownloadsFinished);
         }
     }
 
-    private void startDownloading(final Exercise exercise, final BgTaskListener<TmcProjectInfo> listener) {
-        BgTask.start("Downloading " + exercise.getName(), new CancellableCallable<Void>() {
+    private void startDownloading(final Exercise exercise, final BgTaskListener<Collection<Exercise>> listener) {
+        BgTask.start("Downloading " + exercise.getName(), new CancellableCallable<List<Exercise>>() {
 
             ListenableFuture<List<Exercise>> dlFuture;
+
             @Override
-            public Void call() throws Exception {
+            public List<Exercise> call() throws Exception {
                 dlFuture = tmcCore.downloadExercises(Lists.newArrayList(exercise));
-                dlFuture.get(); // block the call till the task has completed.
-                return null;
+
+                return dlFuture.get();
             }
 
             @Override
@@ -73,14 +79,19 @@ public class DownloadExercisesAction {
                 logger.info("Exercise download was cancelled.");
                 return dlFuture.cancel(true);
             }
-        });
+        }, listener);
     }
 
-    private BgTaskListener<Collection<TmcProjectInfo>> whenAllDownloadsFinished = new BgTaskListener<Collection<TmcProjectInfo>>() {
+    private BgTaskListener<Collection<Exercise>> whenDownloadsFinished = new BgTaskListener<Collection<Exercise>>() {
         @Override
-        public void bgTaskReady(Collection<TmcProjectInfo> projects) {
+        public void bgTaskReady(Collection<Exercise> exercises) {
+            logger.log(INFO, "1Opening projects.");
+            List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>(exercises.size());
+            for (Exercise ex : exercises) {
+                projects.add(projectMediator.tryGetProjectForExercise(ex));
+            }
             projectMediator.openProjects(projects);
-            logger.log(INFO, "Opening projects.");
+            logger.log(INFO, "2Opening projects.");
         }
 
         @Override
