@@ -18,9 +18,10 @@ public class CheckForUnopenedExercises implements ActionListener {
     public static boolean shouldRunOnStartup() {
         return NbTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
     }
-    
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
-    
+
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken =
+            TmcNotificationDisplayer.createSingletonToken();
+
     private ProjectMediator projects;
     private CourseDb courseDb;
     private TmcNotificationDisplayer notifier;
@@ -30,14 +31,13 @@ public class CheckForUnopenedExercises implements ActionListener {
         this.courseDb = CourseDb.getInstance();
         this.notifier = TmcNotificationDisplayer.getDefault();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         run();
     }
-    
+
     public void run() {
-        // TODO(jamo): use bg task
         projects.callWhenProjectsCompletelyOpened(new Runnable() {
             @Override
             public void run() {
@@ -69,7 +69,7 @@ public class CheckForUnopenedExercises implements ActionListener {
         }
         notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
     }
-    
+
     private ActionListener openAction(final List<Exercise> exercises) {
         return new ActionListener() {
             @Override
@@ -83,7 +83,7 @@ public class CheckForUnopenedExercises implements ActionListener {
             }
         };
     }
-    
+
     private Icon getNotificationIcon() {
         return ImageUtilities.loadImageIcon("fi/helsinki/cs/tmc/smile.gif", false);
     }
