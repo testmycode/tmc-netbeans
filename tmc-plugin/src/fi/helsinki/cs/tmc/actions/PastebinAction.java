@@ -13,10 +13,14 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.PastebinDialog;
 import fi.helsinki.cs.tmc.ui.PastebinResponseDialog;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
@@ -47,7 +51,7 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     private NbTmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private ConvenientDialogDisplayer dialogs;
+    private final ConvenientDialogDisplayer dialogs;
 
     public PastebinAction() {
         this.settings = NbTmcSettings.getDefault();
@@ -107,24 +111,37 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
-        try {
-            ListenableFuture<URI> result = TmcCoreSingleton.getInstance().pasteWithComment(projectInfo.getProjectDirAsPath(), messageForReviewer);
-            Futures.addCallback(result, new PasteResult());
-        } catch (TmcCoreException ex) {
-            Exceptions.printStackTrace(ex);
-        }
+        BgTask.start("Sending tmc-paste", new CancellableCallable<URI>() {
+            ListenableFuture<URI> result;
+
+            @Override
+            public URI call() throws Exception {
+                log.log(Level.INFO, "Pre submit");
+                result = TmcCoreSingleton.getInstance().pasteWithComment(projectInfo.getProjectDirAsPath(), messageForReviewer);
+                return result.get();
+            }
+
+            @Override
+            public boolean cancel() {
+                return result.cancel(true);
+            }
+        }, new PasteResult());
     }
 
-    class PasteResult implements FutureCallback<URI> {
+    class PasteResult implements BgTaskListener<URI> {
 
         @Override
-        public void onSuccess(URI ur) {
-            new PastebinResponseDialog(ur.toString()).setVisible(true);
+        public void bgTaskReady(URI uri) {
+            new PastebinResponseDialog(uri.toString()).setVisible(true);
         }
 
         @Override
-        public void onFailure(Throwable thrwbl) {
-            dialogs.displayError("Failed to send exercise to pastebin", thrwbl);
+        public void bgTaskCancelled() {
+        }
+
+        @Override
+        public void bgTaskFailed(Throwable ex) {
+            dialogs.displayError("Failed to send exercise to pastebin", ex);
         }
     }
 
