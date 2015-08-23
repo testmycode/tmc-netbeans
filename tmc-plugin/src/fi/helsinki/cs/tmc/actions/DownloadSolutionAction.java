@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -13,11 +12,9 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper.OverwritingDecider;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.JComponent;
-import javax.swing.JMenuItem;
+
+import com.google.common.base.Function;
+
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -27,6 +24,12 @@ import org.openide.awt.DynamicMenuContent;
 import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle.Messages;
+
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import javax.swing.JComponent;
+import javax.swing.JMenuItem;
 
 @ActionID(category = "TMC",
 id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
@@ -46,7 +49,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
     }
-    
+
     @Override
     public String getName() {
         return "Download suggested &solution";
@@ -66,7 +69,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     protected boolean enabledForMultipleProjects() {
         return true;
     }
-    
+
     @Override
     protected boolean asynchronous() {
         return false;
@@ -76,7 +79,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     public JMenuItem getMenuPresenter() {
         return new ActionMenuItem();
     }
-    
+
     private JMenuItem getOriginalMenuPresenter() {
         return super.getMenuPresenter();
     }
@@ -93,9 +96,8 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
 
     @Override
     protected void performAction(Node[] nodes) {
-        // TODO(jamo): use bg task
         projectMediator.saveAllFiles();
-        
+
         for (final Project project : projectsFromNodes(nodes)) {
             final Exercise ex = exerciseForProject(project);
             if (ex.getSolutionDownloadUrl() == null) {
@@ -104,7 +106,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 this.setEnabled(false);
                 return;
             }
-            
+
             String question = "Are you sure you want to OVERWRITE your copy of\n" + ex.getName() + " with the suggested solution?";
             String title = "Replace with solution?";
             dialogs.askYesNo(question, title, new Function<Boolean, Void>() {
@@ -121,6 +123,8 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
         ServerAccess serverAccess = new ServerAccess(NbTmcSettings.getDefault());
+
+        // TODO: Use tmc-core.
         CancellableCallable<byte[]> downloadTask = serverAccess.getDownloadingExerciseSolutionZipTask(ex);
         BgTask.start("Downloading solution for " + ex.getName(), downloadTask, new BgTaskListener<byte[]>() {
             @Override
@@ -139,7 +143,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
             }
         });
     }
-    
+
     private void unzipSolution(final Exercise ex, final TmcProjectInfo proj, final byte[] data) {
         Callable<Object> task = new Callable<Object>() {
             @Override
@@ -149,7 +153,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 return null;
             }
         };
-        
+
         BgTask.start("Extracting solution", task, new BgTaskListener<Object>() {
             @Override
             public void bgTaskReady(Object result) {
@@ -167,7 +171,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
             }
         });
     }
-    
+
     private OverwritingDecider solutionOverwriting = new OverwritingDecider() {
         @Override
         public boolean mayOverwrite(String relPath) {
@@ -178,12 +182,12 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
             return false;
         }
     };
-    
+
     private class ActionMenuItem extends JMenuItem implements DynamicMenuContent {
         public ActionMenuItem() {
             super(DownloadSolutionAction.this);
         }
-        
+
         @Override
         public JComponent[] getMenuPresenters() {
             if (DownloadSolutionAction.this.isEnabled()) {
@@ -197,6 +201,6 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
         public JComponent[] synchMenuPresenters(JComponent[] jcs) {
             return getMenuPresenters();
         }
-        
+
     }
 }
