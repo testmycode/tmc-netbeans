@@ -23,7 +23,7 @@ import org.cometd.websocket.client.WebSocketTransport;
  */
 public class PushEventListener {
     private static final Logger log = Logger.getLogger(PushEventListener.class.getName());
-    private static final long CONNECTION_CHECK_INTERVAL = 120*1000;
+    private static final long CONNECTION_CHECK_INTERVAL = 120 * 1000;
 
     public static class ReviewAvailableEvent implements TmcEvent {
         public final String exerciseName;
@@ -115,15 +115,7 @@ public class PushEventListener {
         if (cometUrl == null) {
             return;
         }
-
-        ClientTransport transport;
-        try {
-            transport = createWebSocketTransport(cometUrl);
-        } catch (Exception ex) {
-            log.log(Level.WARNING, "Failed to initialize web socket transport.", ex);
-            return;
-        }
-
+        ClientTransport transport = createWebSocketTransport(cometUrl);
         client = new BayeuxClient(cometUrl, transport);
         client.getChannel(Channel.META_HANDSHAKE).addListener(handshakeListener);
         client.getChannel(Channel.META_DISCONNECT).addListener(disconnectListener);
@@ -131,17 +123,17 @@ public class PushEventListener {
         client.addExtension(getAuthenticationExtension(getAuthFields()));
         client.handshake();
     }
-    
-    private ClientTransport createWebSocketTransport(String cometUrl) throws Exception {
+
+    private ClientTransport createWebSocketTransport(String cometUrl) {
         Map<String, Object> transportOpts = new HashMap<String, Object>();
         WebSocketTransport.Factory factory = new WebSocketTransport.Factory();
         return factory.newClientTransport(cometUrl, transportOpts);
     }
     
     private boolean hasEnoughSettings() {
-        return !"".equals(settings.getUsername()) &&
-                !"".equals(settings.getPassword()) &&
-                !"".equals(settings.getServerAddress());
+        return !"".equals(settings.getUsername())
+                && !"".equals(settings.getPassword())
+                && !"".equals(settings.getServerAddress());
     }
     
     public ClientSession.Extension getAuthenticationExtension(final Map<String, Object> fields) {
