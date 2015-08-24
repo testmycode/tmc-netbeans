@@ -22,7 +22,7 @@ public class TmcProjectInfo {
 
     private Project project;
 
-    /*package*/ TmcProjectInfo(Project project) {
+    @VisibleForTesting TmcProjectInfo(Project project) {
         this.project = project;
     }
 

@@ -1,14 +1,12 @@
 package fi.helsinki.cs.tmc.utilities;
 
-import java.util.HashMap;
+import com.google.common.collect.ImmutableMap;
+import java.util.Map;
 
 public class Inflector {
-    private static final HashMap<String, String> specialPlurals;
-    static {
-        specialPlurals = new HashMap<String, String>();
-        specialPlurals.put("is", "are");
-    }
-    
+
+    private static final Map<String, String> specialPlurals = ImmutableMap.of("is", "are");
+
     /**
      * pluralize(1, "foo") -> "foo"; pluralize(3, "foo") -> "foos" plus some special cases.
      */
