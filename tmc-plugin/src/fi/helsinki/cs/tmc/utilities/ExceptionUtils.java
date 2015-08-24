@@ -11,7 +11,7 @@ public class ExceptionUtils {
         t.printStackTrace(new PrintWriter(sw));
         return sw.toString();
     }
-    
+
     public static void logException(Throwable t, Logger log, Level level) {
         String msg = t.getMessage() + "\n" + backtraceToString(t);
         log.log(level, msg);

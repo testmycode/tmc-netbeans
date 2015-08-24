@@ -1,12 +1,14 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import com.google.common.util.concurrent.Futures;
+
+import org.openide.util.RequestProcessor;
+
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Future;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.TimeoutException;
-import org.openide.util.RequestProcessor;
 
 /**
  * A task that can be started repeatedly, but ensures only one instance is running at a time.

@@ -6,14 +6,14 @@ import java.util.logging.Logger;
 
 /**
  * Knows which {@link Tailoring} is set in <code>SelectedTailoring.properties</code>.
- * 
+ *
  * @see <code>SelectedTailoring.properties.sample</code>
  */
 public class SelectedTailoring {
     private static final Logger logger = Logger.getLogger(SelectedTailoring.class.getName());
-    
+
     private static Tailoring tailoring;
-    
+
     public static Tailoring get() {
         if (tailoring == null) {
             try {

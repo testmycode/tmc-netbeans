@@ -21,7 +21,7 @@ public class Inflector {
             } else if (name.startsWith("an ")) {
                 name = name.substring(3);
             }
-            
+
             String special = specialPlurals.get(name);
             if (special != null) {
                 return special;

@@ -1,25 +1,28 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+
+import com.google.gson.Gson;
+
+import org.netbeans.api.project.Project;
+
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.api.project.Project;
 
 public class ProjectActionEventSource implements ProjectActionCaptor.Listener {
     private static final Logger log = Logger.getLogger(ProjectActionEventSource.class.getName());
-    
+
     private final ProjectMediator projects;
     private final CourseDb courseDb;
-    private EventReceiver receiver;
-    
+    private final EventReceiver receiver;
+
     public ProjectActionEventSource(EventReceiver receiver) {
         this.projects = ProjectMediator.getInstance();
         this.courseDb = CourseDb.getInstance();

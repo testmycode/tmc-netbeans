@@ -10,7 +10,7 @@ import java.util.logging.Logger;
 
 public class EventStore {
     private static final Logger log = Logger.getLogger(EventStore.class.getName());
-    
+
     private ConfigFile configFile;
 
     public EventStore() {
@@ -22,7 +22,7 @@ public class EventStore {
         configFile.writeContents(text);
         log.log(Level.INFO, "Saved {0} events", events.length);
     }
-    
+
     public LoggableEvent[] load() throws IOException {
         String text = configFile.readContents();
         LoggableEvent[] result = getGson().fromJson(text, LoggableEvent[].class);
@@ -32,13 +32,13 @@ public class EventStore {
         log.log(Level.INFO, "Loaded {0} events", result.length);
         return result;
     }
-    
+
     private Gson getGson() {
         return new GsonBuilder()
             .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer())
             .create();
     }
-    
+
     public void clear() throws IOException {
         configFile.writeContents("");
     }

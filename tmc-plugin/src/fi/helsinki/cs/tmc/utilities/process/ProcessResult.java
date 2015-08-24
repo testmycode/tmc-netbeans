@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.utilities.process;
 
 public final class ProcessResult {
+
     public final int statusCode;
     public final String output;
     public final String errorOutput;

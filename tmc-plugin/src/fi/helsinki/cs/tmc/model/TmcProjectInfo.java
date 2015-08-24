@@ -1,15 +1,19 @@
 package fi.helsinki.cs.tmc.model;
 
+import com.google.common.annotations.VisibleForTesting;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ProjectUtils;
+import org.netbeans.api.project.ui.OpenProjects;
+
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+
 import java.io.File;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.regex.Pattern;
-import org.netbeans.api.project.Project;
-import org.netbeans.api.project.ProjectUtils;
-import org.netbeans.api.project.ui.OpenProjects;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 
 /**
  * Carries information about a project used in TMC.
@@ -37,11 +41,11 @@ public class TmcProjectInfo {
     public File getProjectDirAsFile() {
         return FileUtil.toFile(getProjectDir());
     }
-    
+
     public Path getProjectDirAsPath() {
         return Paths.get(getProjectDirAbsPath());
     }
-    
+
     public String getProjectDirAbsPath() {
         return FileUtil.toFile(getProjectDir()).getAbsolutePath();
     }

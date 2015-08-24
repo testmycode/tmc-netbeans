@@ -2,9 +2,9 @@ package fi.helsinki.cs.tmc.utilities;
 
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public class TmcStringUtils {
+
     /**
      * Returns a comma separated list, but the last comma is an "and".
      */

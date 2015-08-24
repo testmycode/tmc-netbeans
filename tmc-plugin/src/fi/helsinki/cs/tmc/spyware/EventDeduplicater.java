@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -44,5 +46,4 @@ public class EventDeduplicater implements EventReceiver {
     @Override
     public void close() {
     }
-    
 }

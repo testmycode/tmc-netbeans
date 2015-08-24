@@ -49,7 +49,6 @@ public final class CheckstyleRunHandler implements Runnable {
     public void run() {
         try {
             final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
-            final String projectType = projectInfo.getProjectType().name();
             ProjectMediator.getInstance().saveAllFiles();
             ListenableFuture<ValidationResult> result;
             result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsPath());
@@ -61,6 +60,5 @@ public final class CheckstyleRunHandler implements Runnable {
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
         }
-
     }
 }
