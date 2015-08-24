@@ -63,7 +63,7 @@ public class ProjectMediator {
     }
     
     public String getProjectRootDir() {
-        return NBTmcSettings.getDefault().getTmcMainDirectory();
+        return NbTmcSettings.getDefault().getTmcMainDirectory();
     }
     
     public static String getDefaultProjectRootDir() {

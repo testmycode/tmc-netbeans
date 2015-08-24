@@ -4,7 +4,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -16,11 +16,12 @@ import org.openide.util.ImageUtilities;
 
 public class CheckForUnopenedExercises implements ActionListener {
     public static boolean shouldRunOnStartup() {
-        return NBTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
+        return NbTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
     }
-    
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
-    
+
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken =
+            TmcNotificationDisplayer.createSingletonToken();
+
     private ProjectMediator projects;
     private CourseDb courseDb;
     private TmcNotificationDisplayer notifier;
@@ -30,12 +31,12 @@ public class CheckForUnopenedExercises implements ActionListener {
         this.courseDb = CourseDb.getInstance();
         this.notifier = TmcNotificationDisplayer.getDefault();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         run();
     }
-    
+
     public void run() {
         projects.callWhenProjectsCompletelyOpened(new Runnable() {
             @Override
@@ -68,7 +69,7 @@ public class CheckForUnopenedExercises implements ActionListener {
         }
         notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
     }
-    
+
     private ActionListener openAction(final List<Exercise> exercises) {
         return new ActionListener() {
             @Override
@@ -82,7 +83,7 @@ public class CheckForUnopenedExercises implements ActionListener {
             }
         };
     }
-    
+
     private Icon getNotificationIcon() {
         return ImageUtilities.loadImageIcon("fi/helsinki/cs/tmc/smile.gif", false);
     }

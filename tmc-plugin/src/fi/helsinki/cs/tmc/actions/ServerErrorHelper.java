@@ -12,5 +12,4 @@ public class ServerErrorHelper {
         }
         return t.getMessage();
     }
-
 }

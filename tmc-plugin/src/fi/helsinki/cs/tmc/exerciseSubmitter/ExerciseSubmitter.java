@@ -13,7 +13,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
@@ -41,7 +41,7 @@ public class ExerciseSubmitter {
         }
     }
 
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
@@ -50,7 +50,7 @@ public class ExerciseSubmitter {
     private TmcEventBus eventBus;
 
     public ExerciseSubmitter() {
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();

@@ -6,11 +6,14 @@ import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
@@ -93,50 +96,40 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         if (course.getReviewsUrl() == null) {
             return;
         }
-        getReviews(course);
-
-    }
-    
-    private void getReviews(Course course){
-        final ProgressHandle progress = ProgressHandleFactory.createHandle("Checking for code reviews");
-        progress.start();
-        try {
-            ListenableFuture<List<Review>> reviews = TmcCoreSingleton.getInstance()
-                    .getNewReviews(course);
-            Futures.addCallback(reviews, new FutureCallback<List<Review>>() {
-
-                @Override
-                public void onSuccess(List<Review> v) {
-                    success(v);
-                    progress.finish();
-                    
+        BgTaskListener bgTaskListener = new BgTaskListener<List<Review>>() {
+            @Override
+            public void bgTaskReady(List<Review> result) {
+                boolean newReviews = reviewDb.setReviews(result);
+                if (!newReviews && notifyAboutNoNewReviews) {
+                    dialogs.displayMessage("You have no unread code reviews.");
                 }
+            }
 
-                @Override
-                public void onFailure(Throwable thrwbl) {
-                    fail(thrwbl);
-                    progress.finish();
+            @Override
+            public void bgTaskFailed(final Throwable ex) {
+                final String msg = "Failed to check for code reviews";
+                log.log(Level.INFO, msg, ex);
+                if (!beQuiet) {
+                    dialogs.displayError(msg, ex);
                 }
+            }
 
-            });
-        } catch (TmcCoreException ex) {
-            progress.finish();
-            Exceptions.printStackTrace(ex);
-        }
-    }
+            @Override
+            public void bgTaskCancelled() {
+            }
+        };
+        BgTask.start("Checking for code reviews", new CancellableCallable<List<Review>>() {
+            private ListenableFuture<List<Review>> lf;
+            @Override
+            public List<Review> call() throws Exception {
+                lf = TmcCoreSingleton.getInstance().getNewReviews(courseDb.getCurrentCourse());
+                return lf.get();
+            }
 
-    private void success(List<Review> list) {
-        boolean newReviews = reviewDb.setReviews(list);
-        if (!newReviews && notifyAboutNoNewReviews) {
-            dialogs.displayMessage("You have no unread code reviews.");
-        }
-    }
-
-    private void fail(Throwable thrwbl) {
-        final String msg = "Failed to check for code reviews";
-        log.log(Level.INFO, msg, thrwbl);
-        if (!beQuiet) {
-            dialogs.displayError(msg, thrwbl);
-        }
+            @Override
+            public boolean cancel() {
+                return lf.cancel(true);
+            }
+        }, bgTaskListener);
     }
 }

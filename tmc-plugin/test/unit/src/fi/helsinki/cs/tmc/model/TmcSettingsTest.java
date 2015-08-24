@@ -16,7 +16,7 @@ public class TmcSettingsTest {
     @Mock private Tailoring tailoring;
     private TmcEventBus eventBus;
     
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     
     @Before
     public void setUp() {
@@ -33,8 +33,8 @@ public class TmcSettingsTest {
         store.cancel();
     }
     
-    private NBTmcSettings newSettings() {
-        return new NBTmcSettings(store, tailoring, eventBus);
+    private NbTmcSettings newSettings() {
+        return new NbTmcSettings(store, tailoring, eventBus);
     }
     
     @Test

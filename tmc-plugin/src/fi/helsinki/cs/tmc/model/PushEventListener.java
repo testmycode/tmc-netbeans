@@ -43,20 +43,20 @@ public class PushEventListener {
         }
     }
     
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
     private BayeuxClient client;
     private boolean shouldReconnect;
 
     PushEventListener() {
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
         this.eventBus.subscribeDependent(new TmcEventListener() {
-            public void receive(NBTmcSettings.SavedEvent e) {
+            public void receive(NbTmcSettings.SavedEvent e) {
                 reconnectSoon();
             }
             

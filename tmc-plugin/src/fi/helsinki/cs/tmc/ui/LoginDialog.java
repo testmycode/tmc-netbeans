@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 import org.openide.windows.WindowManager;
@@ -13,7 +13,7 @@ public class LoginDialog extends javax.swing.JDialog {
         dialog.setVisible(true);
     }
 
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private ActionListener onLogin;
 
     /** Creates new form LoginForm */
@@ -23,7 +23,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.usernameField.setText(settings.getUsername());
         this.passwordField.setText(settings.getPassword());
         this.savePasswordCheckbox.setSelected(settings.isSavingPassword());

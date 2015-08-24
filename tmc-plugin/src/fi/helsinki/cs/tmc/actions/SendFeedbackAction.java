@@ -5,7 +5,7 @@ import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
@@ -13,7 +13,6 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.HttpResult;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
-import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.HashMap;
@@ -25,12 +24,14 @@ import org.openide.util.Exceptions;
 
 public class SendFeedbackAction {
 
+    private static final Logger log = Logger.getLogger(SendFeedbackAction.class.getName());
+
+    private final SubmissionResult result;
+
     private List<FeedbackAnswer> answers;
     private TmcCore core;
     private ConvenientDialogDisplayer dialogs;
-    private final SubmissionResult result;
-    private NBTmcSettings settings = NBTmcSettings.getDefault();
-    private static final Logger log = Logger.getLogger(SendFeedbackAction.class.getName());
+    private NbTmcSettings settings = NbTmcSettings.getDefault();
 
     public SendFeedbackAction(List<FeedbackAnswer> answers, SubmissionResult result) {
         this.answers = answers;

@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.resources;
 
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 
 import java.util.ResourceBundle;
 
@@ -12,7 +12,7 @@ public final class LocalizedMessage {
 
     public static String getMessage(final String key) {
 
-        ResourceBundle bundle = ResourceBundle.getBundle(MESSAGES, NBTmcSettings.getDefault().getErrorMsgLocale());
+        ResourceBundle bundle = ResourceBundle.getBundle(MESSAGES, NbTmcSettings.getDefault().getErrorMsgLocale());
 
         return bundle.getString(key);
     }

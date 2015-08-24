@@ -4,9 +4,10 @@ import com.google.common.util.concurrent.FutureCallback;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -31,7 +32,7 @@ public class SaveSettingsAction extends AbstractAction {
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
-        NBTmcSettings settings = NBTmcSettings.getDefault();
+        NbTmcSettings settings = NbTmcSettings.getDefault();
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());
@@ -48,9 +49,9 @@ public class SaveSettingsAction extends AbstractAction {
 
             RefreshCoursesAction refresh = new RefreshCoursesAction();
             refresh.addDefaultListener(true, true);
-            refresh.addListener(new FutureCallback<List<Course>>() {
+            refresh.addListener(new BgTaskListener<List<Course>>() {
                 @Override
-                public void onSuccess(List<Course> v) {
+                public void bgTaskReady(List<Course> v) {
                     SwingUtilities.invokeLater(new Runnable() {
                         @Override
                         public void run() {
@@ -63,7 +64,11 @@ public class SaveSettingsAction extends AbstractAction {
                 }
 
                 @Override
-                public void onFailure(Throwable thrwbl) {
+                public void bgTaskFailed(Throwable thrwbl) {
+                }
+
+                @Override
+                public void bgTaskCancelled() {
                 }
             });
             refresh.run();

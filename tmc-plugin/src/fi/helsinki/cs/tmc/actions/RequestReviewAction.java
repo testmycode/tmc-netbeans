@@ -7,7 +7,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NBTmcSettings;
+import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -44,14 +44,14 @@ import org.openide.util.NbBundle;
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    private NBTmcSettings settings;
+    private NbTmcSettings settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private TmcEventBus eventBus;
 
     public RequestReviewAction() {
-        this.settings = NBTmcSettings.getDefault();
+        this.settings = NbTmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -75,6 +75,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
     @Override
     protected void performAction(Node[] nodes) {
+        // TODO(jamo): use bg task
         List<Project> project = projectsFromNodes(nodes);
         if (project.size() == 1) {
             TmcProjectInfo projectInfo = projectMediator.wrapProject(project.get(0));
