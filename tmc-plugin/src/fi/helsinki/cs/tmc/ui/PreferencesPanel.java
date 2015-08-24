@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.ui;
 
-import com.google.common.util.concurrent.FutureCallback;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.NbTmcSettings;
@@ -15,6 +14,7 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -62,7 +62,7 @@ import org.apache.commons.lang3.StringUtils;
         public boolean equals(Object obj) {
             if (obj instanceof RefreshSettings) {
                 RefreshSettings that = (RefreshSettings) obj;
-                return ObjectUtils.equals(this.username, that.username)
+                return Objects.equals(this.username, that.username)
                         && ObjectUtils.equals(this.password, that.password)
                         && ObjectUtils.equals(this.baseUrl, that.baseUrl);
             } else {

@@ -78,7 +78,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        logger.info("action performed");
         run();
     }
 
@@ -139,8 +138,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
             @Override
             public Course call() throws Exception {
-                logger.info("1Downloading course to refresh cache");
-
+                logger.info("Downloading course to refresh cache");
                 currentCourseFuture = tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrlAsUri());
                 return currentCourseFuture.get();
             }
