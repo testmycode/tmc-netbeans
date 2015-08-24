@@ -1,7 +1,5 @@
 package fi.helsinki.cs.tmc.exerciseSubmitter;
 
-import com.google.common.base.Strings;
-import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
@@ -22,10 +20,14 @@ import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
+import com.google.common.base.Strings;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.netbeans.api.project.Project;
+
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class ExerciseSubmitter {
 

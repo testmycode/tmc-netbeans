@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.model;
 
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -7,18 +10,16 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.io.Writer;
-import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileUtil;
 
 public class ConfigFile {
-    
+
     private final String name;
     private FileObject fileObject;
-    
+
     public ConfigFile(String name) {
         this.name = name;
     }
-    
+
     public FileObject getFileObject() throws IOException {
         if (fileObject == null) {
             FileObject root = FileUtil.getConfigRoot();
@@ -33,7 +34,7 @@ public class ConfigFile {
         }
         return fileObject;
     }
-    
+
     public boolean exists() throws IOException {
         return getFileObject().getSize() > 0;
     }
@@ -41,11 +42,11 @@ public class ConfigFile {
     public Writer getWriter() throws IOException {
         return new OutputStreamWriter(new BufferedOutputStream(getFileObject().getOutputStream()), "UTF-8");
     }
-    
+
     public Reader getReader() throws IOException {
         return new InputStreamReader(new BufferedInputStream(getFileObject().getInputStream()), "UTF-8");
     }
-    
+
     public void writeContents(String s) throws IOException {
         Writer w = getWriter();
         try {
@@ -54,7 +55,7 @@ public class ConfigFile {
             w.close();
         }
     }
-    
+
     public String readContents() throws IOException {
         return getFileObject().asText("UTF-8");
     }
