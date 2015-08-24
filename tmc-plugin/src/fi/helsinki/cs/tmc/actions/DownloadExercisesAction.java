@@ -85,13 +85,13 @@ public class DownloadExercisesAction {
     private BgTaskListener<Collection<Exercise>> whenDownloadsFinished = new BgTaskListener<Collection<Exercise>>() {
         @Override
         public void bgTaskReady(Collection<Exercise> exercises) {
-            logger.log(INFO, "1Opening projects.");
+            logger.log(INFO, "Opening projects.");
             List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>(exercises.size());
             for (Exercise ex : exercises) {
                 projects.add(projectMediator.tryGetProjectForExercise(ex));
             }
             projectMediator.openProjects(projects);
-            logger.log(INFO, "2Opening projects.");
+            logger.log(INFO, "Opening projects.");
         }
 
         @Override
