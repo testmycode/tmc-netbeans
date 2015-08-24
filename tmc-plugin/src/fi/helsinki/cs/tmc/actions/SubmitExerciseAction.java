@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.events.TmcEvent;
-
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -10,7 +9,9 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
+
 import org.netbeans.api.project.Project;
+
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
 

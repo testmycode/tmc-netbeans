@@ -5,7 +5,7 @@ import java.util.regex.Pattern;
 
 public class FeedbackQuestion {
     private static final Pattern intRangeRegex = Pattern.compile("^intrange\\[(-?\\d+)\\.\\.(-?\\d+)\\]$");
-    
+
     private int id;
     private String question;
     private String kind;
@@ -42,15 +42,15 @@ public class FeedbackQuestion {
     public void setKind(String kind) {
         this.kind = kind;
     }
-    
+
     public boolean isText() {
         return kind.equals("text");
     }
-    
+
     public boolean isIntRange() {
         return intRangeMatcher().matches();
     }
-    
+
     public int getIntRangeMin() {
         Matcher matcher = intRangeMatcher();
         if (matcher.matches()) {
@@ -59,7 +59,7 @@ public class FeedbackQuestion {
             throw new IllegalStateException("Not an intrange");
         }
     }
-    
+
     public int getIntRangeMax() {
         Matcher matcher = intRangeMatcher();
         if (matcher.matches()) {
@@ -68,7 +68,7 @@ public class FeedbackQuestion {
             throw new IllegalStateException("Not an intrange");
         }
     }
-    
+
     private Matcher intRangeMatcher() {
         return intRangeRegex.matcher(kind);
     }

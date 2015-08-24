@@ -1,33 +1,30 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
+import static java.util.logging.Level.INFO;
+
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.List;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
-import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.List;
+import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 @ActionID(category = "TMC",
         id = "fi.helsinki.cs.tmc.actions.CheckForNewReviews")
@@ -108,7 +105,7 @@ public class CheckForNewReviews implements ActionListener, Runnable {
             @Override
             public void bgTaskFailed(final Throwable ex) {
                 final String msg = "Failed to check for code reviews";
-                log.log(Level.INFO, msg, ex);
+                log.log(INFO, msg, ex);
                 if (!beQuiet) {
                     dialogs.displayError(msg, ex);
                 }
