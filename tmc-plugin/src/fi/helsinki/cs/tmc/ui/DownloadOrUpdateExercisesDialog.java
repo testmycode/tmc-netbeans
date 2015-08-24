@@ -126,14 +126,8 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
     }
 
     private void doDownloadAndUpdate(List<Exercise> toDownload, List<Exercise> toUpdate) {
-//        try {
             new DownloadExercisesAction(toDownload).run();
             new UpdateExercisesAction(toUpdate).run();
-//        } catch (TmcCoreException ex) {
-//            Exceptions.printStackTrace(ex);
-//            ConvenientDialogDisplayer.getDefault()
-//                .displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-//        }
     }
 
     /**

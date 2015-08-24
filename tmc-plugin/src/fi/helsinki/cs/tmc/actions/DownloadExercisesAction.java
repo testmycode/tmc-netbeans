@@ -54,9 +54,6 @@ public class DownloadExercisesAction {
     }
 
     public void run() {
-//        final AggregatingBgTaskListener<TmcProjectInfo> aggregator
-//                = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
-
         for (final Exercise exercise : exercisesToDownload) {
             startDownloading(exercise, whenDownloadsFinished);
         }
