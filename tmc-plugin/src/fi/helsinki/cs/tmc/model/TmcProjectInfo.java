@@ -59,6 +59,7 @@ public class TmcProjectInfo {
     }
 
     //TODO: a more robust/elegant/extensible project type recognition system
+    @Deprecated
     public TmcProjectType getProjectType() {
         String pd = getProjectDirAbsPath();
         if (new File(pd + File.separatorChar + "pom.xml").exists()) {
@@ -70,6 +71,7 @@ public class TmcProjectInfo {
         }
     }
 
+    @Deprecated
     public RecursiveZipper.ZippingDecider getZippingDecider() {
         if (getProjectType() == TmcProjectType.JAVA_MAVEN) {
             return new MavenZippingDecider(this);
@@ -92,6 +94,7 @@ public class TmcProjectInfo {
         return project.hashCode();
     }
 
+    @Deprecated
     private abstract static class AbstractZippingDecider implements RecursiveZipper.ZippingDecider {
 
         protected TmcProjectInfo projectInfo;
@@ -137,6 +140,7 @@ public class TmcProjectInfo {
         }
     }
 
+    @Deprecated
     private static class DefaultZippingDecider extends AbstractZippingDecider {
 
         public DefaultZippingDecider(TmcProjectInfo projectInfo) {
@@ -149,6 +153,7 @@ public class TmcProjectInfo {
         }
     }
 
+    @Deprecated
     private static class MavenZippingDecider extends AbstractZippingDecider {
 
         private static final Pattern rejectPattern = Pattern.compile("^[^/]+/(target|lib/testrunner)/.*");

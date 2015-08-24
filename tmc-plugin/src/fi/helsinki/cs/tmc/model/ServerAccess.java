@@ -35,21 +35,23 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.GZIPOutputStream;
-import org.openide.modules.Modules;
 
 /**
  * A frontend for the server.
+ *
+ * @deprecated Users are suggested to rely on the tmc-core instead of this implementation.
  */
+@Deprecated
 public class ServerAccess {
     public static final int API_VERSION = 7;
-    
+
     private NbTmcSettings settings;
     private CourseListParser courseListParser;
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
     private String clientVersion;
     private TmcCore tmcCore;
-    
+
     public ServerAccess() {
         this(NbTmcSettings.getDefault());
     }
