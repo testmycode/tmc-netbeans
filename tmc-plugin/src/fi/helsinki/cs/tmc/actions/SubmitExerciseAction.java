@@ -19,6 +19,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -38,7 +40,9 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     private ConvenientDialogDisplayer dialogs;
 
     public static class InvokedEvent implements TmcEvent {
+
         public final TmcProjectInfo projectInfo;
+
         public InvokedEvent(TmcProjectInfo projectInfo) {
             this.projectInfo = projectInfo;
         }
@@ -83,7 +87,8 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
         try {
             ListenableFuture<SubmissionResult> result;
-            result = core.submit(info.getProjectDirAsPath());
+            Path path = Paths.get(info.getProjectDirAbsPath());
+            result = core.submit(path);
             Futures.addCallback(result, new SubmissionCallback(exercise, dialog));
         } catch (TmcCoreException ex) {
             String message = "There was an error submitting project " + info.getProjectName();
@@ -116,7 +121,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
 
         @Override
         public void onSuccess(final SubmissionResult result) {
-            if(result == null){
+            if (result == null) {
                 System.err.println("Result is null.");
             }
             SwingUtilities.invokeLater(new Runnable() {
@@ -126,7 +131,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
                     dialog.close();
                     final ResultCollector resultCollector = new ResultCollector(exercise);
                     resultCollector.setValidationResult(result.getValidationResult());
-             
+
                     resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
                     exercise.setAttempted(true);
                     if (result.isAllTestsPassed()) {
@@ -158,4 +163,3 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     }
 
 }
-

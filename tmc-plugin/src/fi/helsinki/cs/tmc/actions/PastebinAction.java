@@ -16,6 +16,8 @@ import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -108,7 +110,9 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
         projectMediator.saveAllFiles();
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
         try {
-            ListenableFuture<URI> result = TmcCoreSingleton.getInstance().pasteWithComment(projectInfo.getProjectDirAsPath(), messageForReviewer);
+            Path path = Paths.get(projectInfo.getProjectDirAbsPath());
+            ListenableFuture<URI> result = TmcCoreSingleton.getInstance()
+                    .pasteWithComment(path, messageForReviewer);
             Futures.addCallback(result, new PasteResult());
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
