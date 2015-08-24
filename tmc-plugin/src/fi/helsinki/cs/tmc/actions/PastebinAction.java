@@ -111,7 +111,8 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
         try {
             Path path = Paths.get(projectInfo.getProjectDirAbsPath());
-            ListenableFuture<URI> result = TmcCoreSingleton.getInstance().pasteWithComment(path, messageForReviewer);
+            ListenableFuture<URI> result = TmcCoreSingleton.getInstance()
+                    .pasteWithComment(path, messageForReviewer);
             Futures.addCallback(result, new PasteResult());
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
