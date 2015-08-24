@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -14,16 +13,6 @@ import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.Inflector;
 import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.util.ArrayList;
-import javax.swing.AbstractAction;
-import javax.swing.Icon;
-import javax.swing.SwingUtilities;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -93,47 +82,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
-<<<<<<< HEAD
-        try {
-            if (backgroundProcessingOrNoCurrentCourse(currentCourseBeforeUpdate)) {
-                return;
-            }
-            ProgressHandle exerciseRefresh = ProgressHandleFactory.createSystemHandle(
-                    "Checking for new exercises");
-            exerciseRefresh.start();
-            ListenableFuture<Course> currentCourseFuture = this.tmcCore.getCourse(
-                    detailUrl(currentCourseBeforeUpdate)
-            );
-            Futures.addCallback(currentCourseFuture, new UpdateCourseForExerciseUpdate(exerciseRefresh));
-        } catch (TmcCoreException ex) {
-            Exceptions.printStackTrace(ex);
-            dialogs.displayError("An exception occurred in tmc core", ex);
-        } catch (URISyntaxException ex) {
-            String illegalUri = currentCourseBeforeUpdate.getDetailsUrl();
-            dialogs.displayError("Illegal uri from server: " + illegalUri, ex);
-            Exceptions.printStackTrace(ex);
-        }
-    }
-
-    private URI detailUrl(final Course currentCourseBeforeUpdate) throws URISyntaxException {
-        return new URI(currentCourseBeforeUpdate.getDetailsUrl());
-    }
-
-    /**
-     * If there is something at background or no current course is chosen,
-     * return true.
-     */
-    private boolean backgroundProcessingOrNoCurrentCourse(final Course currentCourseBeforeUpdate) {
-        if (backgroundCheck && !NbTmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
-            return;
-        }
-
-        if (currentCourseBeforeUpdate == null) {
-            if (!beQuiet) {
-                dialogs.displayMessage("Please select a course in TMC -> Settings.");
-            }
-            return;
-        }
 
         BgTaskListener bgTaskListener = new BgTaskListener<Course>() {
             @Override
