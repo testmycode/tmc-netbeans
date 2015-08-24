@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
@@ -15,6 +14,12 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+
+import com.google.gson.Gson;
+
+import org.openide.util.Exceptions;
+import org.openide.util.ImageUtilities;
+
 import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,16 +30,14 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.Icon;
 import javax.swing.SwingUtilities;
-import org.openide.util.Exceptions;
-import org.openide.util.ImageUtilities;
 
 public class ReviewEventListener extends TmcEventListener {
     private static final Logger log = Logger.getLogger(ReviewEventListener.class.getName());
 
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
-    
+
     private static ReviewEventListener instance;
-    
+
     public static void start() {
         if (instance == null) {
             instance = new ReviewEventListener();
@@ -48,14 +51,14 @@ public class ReviewEventListener extends TmcEventListener {
     private TmcNotificationDisplayer notifier;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
-    
+
     ReviewEventListener() {
         this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
     }
-    
+
     public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -75,7 +78,7 @@ public class ReviewEventListener extends TmcEventListener {
                 } catch (TmcCoreException ex) {
                     Exceptions.printStackTrace(ex);
                 }
-                
+
                 String title = "Code review";
                 String msg = "Code review for " + review.getExerciseName() + " ready.";
                 Image img;
@@ -95,12 +98,12 @@ public class ReviewEventListener extends TmcEventListener {
             }
         });
     }
-    
+
     private void refreshCourseDb() throws TmcCoreException {
         // Exercise properties have probably changed
         new RefreshCoursesAction().addDefaultListener(false, true).run();
     }
-    
+
     private void showReviewDialog(final Review review) {
         final CodeReviewDialog dialog = new CodeReviewDialog(review);
         dialog.setOkListener(new ActionListener() {
@@ -111,7 +114,7 @@ public class ReviewEventListener extends TmcEventListener {
                     markAsRead(review);
 
                     sendLoggableEvent(review);
-                    
+
                     // The review might have made new exercises available.
                     // We already updated the course DB earlier, but this time
                     // we will also notify the user.
@@ -121,7 +124,7 @@ public class ReviewEventListener extends TmcEventListener {
         });
         dialog.setVisible(true);
     }
-    
+
     private void markAsRead(Review review) {
         CancellableCallable<Void> task = serverAccess.getMarkingReviewAsReadTask(review, true);
         BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
@@ -165,5 +168,4 @@ public class ReviewEventListener extends TmcEventListener {
             this.markedAsRead = review.isMarkedAsRead();
         }
     }
-
 }

@@ -18,35 +18,36 @@ import java.util.zip.ZipInputStream;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
 
+@Deprecated
 public class NbProjectUnzipper {
 
     public static interface OverwritingDecider {
         /**
          * Decides whether the given relative path in the project may be overwritten.
-         * 
+         *
          * <p>
          * Only called for files (not directories) whose content has changed.
-         * 
+         *
          * <p>
          * Note that the given path has platform-specific directory separators.
          */
         public boolean mayOverwrite(String relPath);
-        
+
         /**
          * Decides whether the given relative path in the project may be deleted.
-         * 
+         *
          * <p>
          * Only called for files and directories that are on disk but not in the zip.
-         * 
+         *
          * <p>
          * Note that the given path has platform-specific directory separators.
          */
         public boolean mayDelete(String relPath);
     }
-    
+
     /**
      * Information about the results of an unzip operation.
-     * 
+     *
      * <p>
      * All lists contain paths relative to the project directory.
      * Directories are not included.
@@ -56,38 +57,38 @@ public class NbProjectUnzipper {
          * The project directory to which we extracted.
          */
         public File projectDir;
-        
+
         /**
          * Files that were in the zip but did not exist before.
          * In the usual case of downloading a new project, all files go here.
          */
         public List<String> newFiles = new ArrayList<String>();
-        
+
         /**
          * Files overwritten as permitted by the given {@code OverwritingDecider}.
          */
         public List<String> overwrittenFiles = new ArrayList<String>();
-        
+
         /**
          * Files skipped because the given {@code OverwritingDecider} didn't allow overwriting.
          */
         public List<String> skippedFiles = new ArrayList<String>();
-        
+
         /**
          * Files that existed before but were the same in the zip.
          */
         public List<String> unchangedFiles = new ArrayList<String>();
-        
+
         /**
          * Files that were deleted because they weren't in the zip.
          */
         public List<String> deletedFiles = new ArrayList<String>();
-        
+
         /**
          * Files skipped because the given {@code OverwritingDecider} didn't allow deleting.
          */
         public List<String> skippedDeletingFiles = new ArrayList<String>();
-        
+
         Result(File projectDir) {
             this.projectDir = projectDir;
         }
@@ -104,7 +105,7 @@ public class NbProjectUnzipper {
             return sb.toString();
         }
     }
-    
+
     private static OverwritingDecider neverAllowOverwrites = new OverwritingDecider() {
         @Override
         public boolean mayOverwrite(String relPath) {
@@ -116,44 +117,44 @@ public class NbProjectUnzipper {
             return false;
         }
     };
-    
+
     private OverwritingDecider overwriting;
 
-    
+
     public NbProjectUnzipper() {
         this(neverAllowOverwrites);
     }
-    
+
     public NbProjectUnzipper(OverwritingDecider overwriting) {
         this.overwriting = overwriting;
     }
-    
+
     public Result unzipProject(byte[] data, File projectDir) throws IOException {
         return unzipProject(data, projectDir, true);
     }
-    
+
     public Result unzipProject(byte[] data, File projectDir, boolean reallyWriteFiles) throws IOException {
         Result result = new Result(projectDir);
         Set<String> pathsInZip = new HashSet<String>();
-        
+
         String projectDirInZip = findProjectDirInZip(data);
         if (projectDirInZip == null) {
             throw new IllegalArgumentException("No project directory in zip");
         }
-        
+
         ZipInputStream zis = readZip(data);
         ZipEntry zent;
         while ((zent = zis.getNextEntry()) != null) {
             if (zent.getName().startsWith(projectDirInZip)) {
                 String restOfPath = zent.getName().substring(projectDirInZip.length());
                 restOfPath = trimSlashes(restOfPath);
-                
+
                 String destFileRelativePath = trimSlashes(restOfPath.replace("/", File.separator));
                 pathsInZip.add(destFileRelativePath);
                 File destFile = new File(
                         projectDir.toString() + File.separator + destFileRelativePath
                         );
-                
+
                 if (zent.isDirectory()) {
                     if (reallyWriteFiles) {
                         FileUtils.forceMkdir(destFile);
@@ -186,21 +187,21 @@ public class NbProjectUnzipper {
                 }
             }
         }
-        
+
         deleteFilesNotInZip(projectDir, projectDir, result, pathsInZip, overwriting, reallyWriteFiles);
-        
+
         return result;
     }
-    
+
     private void deleteFilesNotInZip(File projectDir, File curDir, Result result, Set<String> pathsInZip, OverwritingDecider overwriting, boolean reallyWriteFiles) throws IOException {
         for (File file : curDir.listFiles()) {
             String relPath = file.getPath().substring(projectDir.getPath().length());
             relPath = trimSlashes(relPath);
-            
+
             if (file.isDirectory()) {
                 deleteFilesNotInZip(projectDir, file, result, pathsInZip, overwriting, reallyWriteFiles);
             }
-            
+
             if (!pathsInZip.contains(relPath)) {
                 if (overwriting.mayDelete(relPath)) {
                     if (file.isDirectory() && file.listFiles().length > 0) {
@@ -218,7 +219,7 @@ public class NbProjectUnzipper {
             }
         }
     }
-    
+
     private String trimSlashes(String s) {
         while (s.startsWith("/") || s.startsWith(File.separator)) {
             s = s.substring(1);
@@ -228,7 +229,7 @@ public class NbProjectUnzipper {
         }
         return s;
     }
-    
+
     private String findProjectDirInZip(byte[] data) throws IOException {
         ZipInputStream zis = readZip(data);
         ZipEntry zent;
@@ -240,18 +241,18 @@ public class NbProjectUnzipper {
         }
         return null;
     }
-    
+
     private String dirname(String zipPath) {
         while (zipPath.endsWith("/")) {
             zipPath = zipPath.substring(0, zipPath.length() - 1);
         }
         return zipPath.replaceAll("/[^/]+$", "");
     }
-    
+
     private ZipInputStream readZip(byte[] data) {
         return new ZipInputStream(new ByteArrayInputStream(data));
     }
-    
+
     private boolean fileContentEquals(File file, byte[] data) throws IOException {
         InputStream fileIs = new BufferedInputStream(new FileInputStream(file));
         InputStream dataIs = new ByteArrayInputStream(data);

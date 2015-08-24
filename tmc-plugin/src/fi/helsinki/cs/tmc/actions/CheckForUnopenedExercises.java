@@ -6,15 +6,18 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
+
+import org.openide.awt.NotificationDisplayer;
+import org.openide.util.ImageUtilities;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Icon;
-import org.openide.awt.NotificationDisplayer;
-import org.openide.util.ImageUtilities;
 
 public class CheckForUnopenedExercises implements ActionListener {
+
     public static boolean shouldRunOnStartup() {
         return NbTmcSettings.getDefault().isCheckingForUnopenedAtStartup();
     }

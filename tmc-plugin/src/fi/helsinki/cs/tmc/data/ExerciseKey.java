@@ -42,8 +42,8 @@ public final class ExerciseKey {
     public String toString() {
         return courseName + "/" + exerciseName;
     }
-    
-    
+
+
     public static class GsonAdapter implements JsonSerializer<ExerciseKey>, JsonDeserializer<ExerciseKey> {
         @Override
         public JsonElement serialize(ExerciseKey key, Type type, JsonSerializationContext jsc) {

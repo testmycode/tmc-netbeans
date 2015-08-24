@@ -1,11 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
@@ -13,12 +9,18 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.openide.util.Exceptions;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 public class UpdateExercisesAction implements ActionListener {
 
@@ -44,16 +46,16 @@ public class UpdateExercisesAction implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         run();
     }
-    
+
     public void run() {
         if (exercisesToUpdate.isEmpty()) {
             return;
         }
         try {
-            ListenableFuture<List<Exercise>> downloadFuture = 
+            ListenableFuture<List<Exercise>> downloadFuture =
                     core.downloadExercises(exercisesToUpdate);
             Futures.addCallback(downloadFuture, new ProjectOpenerCallback());
-            
+
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);
             dialogDisplayer.displayError("Error occured while downloading updates", ex);
@@ -83,6 +85,5 @@ public class UpdateExercisesAction implements ActionListener {
             Exceptions.printStackTrace(ex);
             dialogDisplayer.displayError("Error occured while downloading updates", ex);
         }
-
     }
 }

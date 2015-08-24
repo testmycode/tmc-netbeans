@@ -7,6 +7,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
+
 import java.awt.event.ActionListener;
 
 public class UnlockExercisesAction {
@@ -24,13 +25,13 @@ public class UnlockExercisesAction {
     public void setSuccessListener(ActionListener successListener) {
         this.successListener = successListener;
     }
-    
+
     public void run() {
         Course course = courseDb.getCurrentCourse();
         if (course == null) {
             return;
         }
-        
+
         CancellableCallable<Void> task = server.getUnlockingTask(course);
         BgTask.start("Unlocking exercises", task, new BgTaskListener<Void>() {
             @Override
