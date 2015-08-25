@@ -36,10 +36,6 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());
-        if(prefUi.getServerBaseUrl() == null){
-            System.out.println("Server address on null");
-        }
-        System.err.println("Server address to set: " + prefUi.getServerBaseUrl());
         settings.setServerBaseUrl(prefUi.getServerBaseUrl());
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
