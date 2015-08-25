@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.FutureCallbackList;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import static fi.helsinki.cs.tmc.model.CourseDb.logger;
 import java.net.URI;
 import java.net.URISyntaxException;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -38,6 +39,8 @@ public final class RefreshCoursesAction {
 
     private final TmcCore tmcCore;
     private final NbTmcSettings tmcSettings;
+    
+    private static final Logger logger = Logger.getLogger(RefreshCoursesAction.class.getName());
 
     public RefreshCoursesAction() {
         this(NbTmcSettings.getDefault());
@@ -183,7 +186,8 @@ public final class RefreshCoursesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             if (showDialogOnError) {
-                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                logger.log(Level.INFO, "Course refresh failed: ", ex);
+                dialogs.displayError("Course refresh failed. Check your server address and credentials\n");
             }
         }
     }
