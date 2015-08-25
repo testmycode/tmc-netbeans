@@ -24,9 +24,7 @@ import java.util.logging.Logger;
  * Refreshes the course list in the background.
  */
 public final class RefreshCoursesAction {
-
     private final static Logger log = Logger.getLogger(RefreshCoursesAction.class.getName());
-
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
