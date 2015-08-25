@@ -57,7 +57,6 @@ public final class RefreshCoursesAction {
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.listeners = new BgTaskListenerList<List<Course>>();
-
         this.tmcCore = core;
     }
 
