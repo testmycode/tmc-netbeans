@@ -1,13 +1,14 @@
 package fi.helsinki.cs.tmc.utilities.http;
 
-import java.io.IOException;
 import org.apache.http.HttpEntity;
 import org.apache.http.util.EntityUtils;
+
+import java.io.IOException;
 
 public class FailedHttpResponseException extends Exception {
     private final int statusCode;
     private final HttpEntity entity;
-    
+
     public FailedHttpResponseException(int statusCode, HttpEntity entity) {
         super("Response code: " + statusCode);
         this.statusCode = statusCode;
@@ -21,7 +22,7 @@ public class FailedHttpResponseException extends Exception {
     public HttpEntity getEntity() {
         return entity;
     }
-    
+
     public String getEntityAsString() {
         try {
             return EntityUtils.toString(entity, "UTF-8");

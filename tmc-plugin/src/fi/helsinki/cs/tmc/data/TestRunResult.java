@@ -25,7 +25,7 @@ public class TestRunResult {
     public List<TestCaseResult> getTestCaseResults() {
         return testCaseResults;
     }
-    
+
     public boolean getCompilationSuccess() {
         return compilationSucceeded;
     }

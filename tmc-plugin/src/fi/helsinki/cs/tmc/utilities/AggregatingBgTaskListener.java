@@ -13,13 +13,13 @@ public class AggregatingBgTaskListener<T> implements BgTaskListener<T> {
     private final BgTaskListener<Collection<T>> aggregateListener;
     private ArrayList<T> received;
     private boolean complete = false;
-    
+
     public AggregatingBgTaskListener(int expectedCount, BgTaskListener<Collection<T>> aggregateListener) {
         this.expectedCount = expectedCount;
         this.aggregateListener = aggregateListener;
         this.received = new ArrayList<T>(expectedCount);
     }
-    
+
     @Override
     public void bgTaskReady(T result) {
         if (!complete) {

@@ -8,7 +8,7 @@ import java.util.concurrent.Callable;
  */
 public class LazyHashMap<K, V> extends HashMap<K, V> {
     private Callable<V> factory;
-    
+
     public LazyHashMap(Callable<V> factory) {
         this.factory = factory;
     }

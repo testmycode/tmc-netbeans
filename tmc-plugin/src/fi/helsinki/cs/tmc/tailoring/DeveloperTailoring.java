@@ -20,7 +20,7 @@ public class DeveloperTailoring extends DefaultTailoring {
     public Locale[] getAvailableErrorMsgLocales() {
         return new Locale[] { new Locale("en"), new Locale("fi") };
     }
-    
+
     @Override
     public Locale getDefaultErrorMsgLocale() {
         return new Locale("fi");

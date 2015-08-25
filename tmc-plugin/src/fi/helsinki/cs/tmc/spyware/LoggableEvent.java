@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
+
 import org.netbeans.api.annotations.common.NullAllowed;
 
 public class LoggableEvent implements TmcEvent {

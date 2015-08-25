@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -15,6 +14,18 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
+import com.google.gson.Gson;
+
+import org.netbeans.api.project.Project;
+
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionReferences;
+import org.openide.awt.ActionRegistration;
+import org.openide.nodes.Node;
+import org.openide.util.NbBundle;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -25,13 +36,6 @@ import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.api.project.Project;
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionReferences;
-import org.openide.awt.ActionRegistration;
-import org.openide.nodes.Node;
-import org.openide.util.NbBundle;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.RequestReviewAction")
 @ActionRegistration(displayName = "#CTL_RequestReviewAction", lazy = false)

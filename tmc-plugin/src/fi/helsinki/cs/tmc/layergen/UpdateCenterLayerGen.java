@@ -4,15 +4,17 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.utilities.urlcallback.CallbackURLStreamHandler;
 import fi.helsinki.cs.tmc.utilities.urlcallback.URLCallback;
+
+import org.openide.filesystems.Repository;
+import org.openide.filesystems.Repository.LayerProvider;
+import org.openide.util.lookup.ServiceProvider;
+
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Collection;
-import org.openide.filesystems.Repository;
-import org.openide.filesystems.Repository.LayerProvider;
-import org.openide.util.lookup.ServiceProvider;
 
 /**
  * Generates an update center instance based on the selected tailoring.
@@ -20,7 +22,7 @@ import org.openide.util.lookup.ServiceProvider;
 @ServiceProvider(service=LayerProvider.class)
 public class UpdateCenterLayerGen extends Repository.LayerProvider {
     private static final String CALLBACK_NAME = "/" + UpdateCenterLayerGen.class.getCanonicalName();
-    
+
     private static URLCallback callback = new URLCallback() {
         @Override
         public String getInputEncoding() {
@@ -36,9 +38,9 @@ public class UpdateCenterLayerGen extends Repository.LayerProvider {
             }
         }
     };
-    
+
     private static boolean callbackRegistered = false;
-    
+
     public UpdateCenterLayerGen() {
         synchronized (UpdateCenterLayerGen.class) {
             if (!callbackRegistered) {
@@ -47,7 +49,7 @@ public class UpdateCenterLayerGen extends Repository.LayerProvider {
             callbackRegistered = true;
         }
     }
-    
+
     @Override
     protected void registerLayers(Collection<? super URL> layers) {
         try {
@@ -56,10 +58,10 @@ public class UpdateCenterLayerGen extends Repository.LayerProvider {
             throw new RuntimeException(ex);
         }
     }
-    
+
     private static String getInstanceXML() {
         Tailoring tailoring = SelectedTailoring.get();
-        
+
         return
                 "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n" +
                 "<!DOCTYPE filesystem PUBLIC \"-//NetBeans//DTD Filesystem 1.2//EN\" \"http://www.netbeans.org/dtds/filesystem-1_2.dtd\">\n" +

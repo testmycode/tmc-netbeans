@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.utilities.zip;
 
+import org.apache.commons.io.IOUtils;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -7,34 +9,34 @@ import java.io.IOException;
 import java.io.FileNotFoundException;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
-import org.apache.commons.io.IOUtils;
 
+@Deprecated
 public class RecursiveZipper {
     private File rootDir;
     private ZippingDecider zippingDecider;
-    
+
     public static interface ZippingDecider {
         /**
          * Tells whether the given file or directory should be zipped.
-         * 
+         *
          * Zip paths are separated by slashes and don't have a starting slash.
          * Directory paths always end in a slash.
          */
         public boolean shouldZip(String zipPath);
     }
-    
+
     public static final ZippingDecider ZIP_ALL_THE_THINGS = new ZippingDecider() {
         @Override
         public boolean shouldZip(String zipPath) {
             return true;
         }
     };
-    
+
     public RecursiveZipper(File rootDir, ZippingDecider zippingDecider) {
         this.rootDir = rootDir;
         this.zippingDecider = zippingDecider;
     }
-    
+
     /**
      * Zip up a project directory, only including stuff decided by the {@link ZippingDecider}.
      */
@@ -42,10 +44,10 @@ public class RecursiveZipper {
         if (!rootDir.exists() || !rootDir.isDirectory()) {
             throw new FileNotFoundException("Root directory " + rootDir + " not found for zipping!");
         }
-        
+
         ByteArrayOutputStream zipBuffer = new ByteArrayOutputStream();
         ZipOutputStream zos = new ZipOutputStream(zipBuffer);
-        
+
         try {
             zipRecursively(rootDir, zos, "");
         } finally {

@@ -11,7 +11,7 @@ public class FeedbackAnswer {
     public FeedbackAnswer(FeedbackQuestion question) {
         this(question, "");
     }
-    
+
     public FeedbackAnswer(FeedbackQuestion question, String answer) {
         this.question = question;
         this.answer = answer;
@@ -32,7 +32,7 @@ public class FeedbackAnswer {
     public void setAnswer(String answer) {
         this.answer = answer;
     }
-    
+
     public String toJson() {
         JsonObject obj = new JsonObject();
         obj.addProperty("question_id", question.getId());

@@ -9,7 +9,6 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
@@ -22,7 +21,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.logging.Logger;
-import javax.swing.SwingUtilities;
 
 /**
  * Downloads and opens the given exercises in the background.
@@ -79,7 +77,7 @@ public class DownloadExercisesAction {
         }, listener);
     }
 
-    private BgTaskListener<Collection<Exercise>> whenDownloadsFinished = new BgTaskListener<Collection<Exercise>>() {
+    private final BgTaskListener<Collection<Exercise>> whenDownloadsFinished = new BgTaskListener<Collection<Exercise>>() {
         @Override
         public void bgTaskReady(Collection<Exercise> exercises) {
             logger.log(INFO, "Opening projects.");

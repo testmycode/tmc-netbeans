@@ -8,8 +8,10 @@ import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSerializationContext;
 import com.google.gson.JsonSerializer;
-import java.lang.reflect.Type;
+
 import org.apache.commons.codec.binary.Base64;
+
+import java.lang.reflect.Type;
 
 /**
  * Converts byte[] to/from base64 in JSON.
