@@ -24,9 +24,7 @@ import java.util.logging.Logger;
  * Refreshes the course list in the background.
  */
 public final class RefreshCoursesAction {
-
     private final static Logger log = Logger.getLogger(RefreshCoursesAction.class.getName());
-
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
@@ -35,6 +33,8 @@ public final class RefreshCoursesAction {
 
     private final TmcCore tmcCore;
     private final NbTmcSettings tmcSettings;
+    
+    private static final Logger logger = Logger.getLogger(RefreshCoursesAction.class.getName());
 
     public RefreshCoursesAction() {
         this(NbTmcSettings.getDefault());
@@ -57,7 +57,6 @@ public final class RefreshCoursesAction {
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.listeners = new BgTaskListenerList<List<Course>>();
-
         this.tmcCore = core;
     }
 
@@ -180,7 +179,8 @@ public final class RefreshCoursesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             if (showDialogOnError) {
-                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                logger.log(Level.INFO, "Course refresh failed: ", ex);
+                dialogs.displayError("Course refresh failed. Check your server address and credentials\n");
             }
         }
     }
