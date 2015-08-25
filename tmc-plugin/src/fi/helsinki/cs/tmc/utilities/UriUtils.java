@@ -31,7 +31,14 @@ public class UriUtils {
         newPairs.add(new BasicNameValuePair(name, value));
         String newQuery = URLEncodedUtils.format(newPairs, "UTF-8");
         try {
-            return new URI(uri.getScheme(), uri.getUserInfo(), uri.getHost(), uri.getPort(), uri.getPath(), newQuery, uri.getFragment());
+            return new URI(
+                    uri.getScheme(),
+                    uri.getUserInfo(),
+                    uri.getHost(),
+                    uri.getPort(),
+                    uri.getPath(),
+                    newQuery,
+                    uri.getFragment());
         } catch (URISyntaxException ex) {
             throw new IllegalArgumentException(ex);
         }

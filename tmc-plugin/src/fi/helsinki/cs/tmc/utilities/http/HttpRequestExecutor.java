@@ -59,7 +59,6 @@ import java.util.logging.Logger;
         if (request.getURI().getUserInfo() != null) {
             credentials = new UsernamePasswordCredentials(request.getURI().getUserInfo());
         }
-
     }
 
     public HttpRequestExecutor setCredentials(String username, String password) {
@@ -76,7 +75,8 @@ import java.util.logging.Logger;
     }
 
     @Override
-    public BufferedHttpEntity call() throws IOException, InterruptedException, FailedHttpResponseException {
+    public BufferedHttpEntity call()
+            throws IOException, InterruptedException, FailedHttpResponseException {
         CloseableHttpClient httpClient = makeHttpClient();
 
         try {
@@ -95,11 +95,12 @@ import java.util.logging.Logger;
             credentialsProvider.setCredentials(AuthScope.ANY, credentials);
         }
 
-        HttpClientBuilder httpClientBuilder = HttpClients.custom()
-                .useSystemProperties()
-                .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
-                .setDefaultCredentialsProvider(credentialsProvider)
-                .setRedirectStrategy(new DefaultRedirectStrategy());
+        HttpClientBuilder httpClientBuilder =
+                HttpClients.custom()
+                        .useSystemProperties()
+                        .setConnectionReuseStrategy(new NoConnectionReuseStrategy())
+                        .setDefaultCredentialsProvider(credentialsProvider)
+                        .setRedirectStrategy(new DefaultRedirectStrategy());
         maybeSetProxy(httpClientBuilder);
 
         return httpClientBuilder.build();
@@ -118,13 +119,16 @@ import java.util.logging.Logger;
         }
     }
 
-    private BufferedHttpEntity executeRequest(HttpClient httpClient) throws IOException, InterruptedException, FailedHttpResponseException {
+    private BufferedHttpEntity executeRequest(HttpClient httpClient)
+            throws IOException, InterruptedException, FailedHttpResponseException {
         HttpResponse response = null;
         HttpContext context = new BasicHttpContext();
 
         try {
             if (this.credentials != null) {
-                request.addHeader(new BasicScheme(Charset.forName("UTF-8")).authenticate(this.credentials, request, context));
+                request.addHeader(
+                        new BasicScheme(Charset.forName("UTF-8"))
+                                .authenticate(this.credentials, request, context));
             }
             response = httpClient.execute(request);
         } catch (IOException ex) {
@@ -142,7 +146,8 @@ import java.util.logging.Logger;
         return handleResponse(response);
     }
 
-    private BufferedHttpEntity handleResponse(HttpResponse response) throws IOException, InterruptedException, FailedHttpResponseException {
+    private BufferedHttpEntity handleResponse(HttpResponse response)
+            throws IOException, InterruptedException, FailedHttpResponseException {
         int responseCode = response.getStatusLine().getStatusCode();
         if (response.getEntity() == null) {
             throw new IOException("HTTP " + responseCode + " with no response");

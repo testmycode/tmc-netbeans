@@ -44,7 +44,9 @@ public class SpywareFacade implements SpywareSettings {
     public SpywareFacade() {
         settings = NbTmcSettings.getDefault();
 
-        sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
+        sender =
+                new EventSendBuffer(
+                        this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
         sender.sendNow();
 
         sourceSnapshotDedup = new EventDeduplicater(sender);
@@ -53,27 +55,29 @@ public class SpywareFacade implements SpywareSettings {
 
         projectActionSource = new ProjectActionEventSource(sender);
         tmcEventBusSource = new TmcEventBusEventSource(sender);
-        TmcSwingUtilities.ensureEdt(new Runnable() {
-            @Override
-            public void run() {
-                ProjectActionCaptor.addListener(projectActionSource);
-                TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
-                textInsertEventSource = new TextInsertEventSource(sender);
-            }
-        });
+        TmcSwingUtilities.ensureEdt(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        ProjectActionCaptor.addListener(projectActionSource);
+                        TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
+                        textInsertEventSource = new TextInsertEventSource(sender);
+                    }
+                });
     }
 
     private void closeImpl() {
         // Close & flush back to front
 
-        TmcSwingUtilities.ensureEdt(new Runnable() {
-            @Override
-            public void run() {
-                textInsertEventSource.close();
-                TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
-                ProjectActionCaptor.removeListener(projectActionSource);
-            }
-        });
+        TmcSwingUtilities.ensureEdt(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        textInsertEventSource.close();
+                        TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
+                        ProjectActionCaptor.removeListener(projectActionSource);
+                    }
+                });
 
         sourceSnapshotSource.close();
 

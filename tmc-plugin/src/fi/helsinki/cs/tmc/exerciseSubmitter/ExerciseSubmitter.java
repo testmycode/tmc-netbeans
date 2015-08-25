@@ -79,62 +79,66 @@ public class ExerciseSubmitter {
         // Oh what a mess :/
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
 
-        CancellableCallable<SubmissionResult> submitAndPollTask = new CancellableCallable<SubmissionResult>() {
+        CancellableCallable<SubmissionResult> submitAndPollTask =
+                new CancellableCallable<SubmissionResult>() {
 
-            ListenableFuture<SubmissionResult> lf;
+                    ListenableFuture<SubmissionResult> lf;
 
-            @Override
-            public SubmissionResult call() throws Exception {
-                lf = TmcCoreSingleton.getInstance().submit(project.getProjectDirAsPath());
-                return lf.get();
-            }
+                    @Override
+                    public SubmissionResult call() throws Exception {
+                        lf = TmcCoreSingleton.getInstance().submit(project.getProjectDirAsPath());
+                        return lf.get();
+                    }
 
-            @Override
-            public boolean cancel() {
-                return lf.cancel(true);
-            }
-        };
+                    @Override
+                    public boolean cancel() {
+                        return lf.cancel(true);
+                    }
+                };
 
         dialog.setTask(submitAndPollTask);
 
-        BgTask.start("Submitting and waiting for results from server.", submitAndPollTask, new BgTaskListener<SubmissionResult>() {
+        BgTask.start(
+                "Submitting and waiting for results from server.",
+                submitAndPollTask,
+                new BgTaskListener<SubmissionResult>() {
 
-            @Override
-            public void bgTaskReady(SubmissionResult result) {
-                dialog.close();
+                    @Override
+                    public void bgTaskReady(SubmissionResult result) {
+                        dialog.close();
 
-                final ResultCollector resultCollector = new ResultCollector(exercise);
-                resultCollector.setValidationResult(result.getValidationResult());
-                resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+                        final ResultCollector resultCollector = new ResultCollector(exercise);
+                        resultCollector.setValidationResult(result.getValidationResult());
+                        resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
 
-                // We change exercise state as a first approximation,
-                // then refresh from the server and potentially notify the user
-                // as we might have unlocked new exercises.
-                exercise.setAttempted(true);
+                        // We change exercise state as a first approximation,
+                        // then refresh from the server and potentially notify the user
+                        // as we might have unlocked new exercises.
+                        exercise.setAttempted(true);
 
-                if (result.getStatus() == SubmissionResult.Status.OK) {
-                    exercise.setCompleted(true);
-                }
+                        if (result.getStatus() == SubmissionResult.Status.OK) {
+                            exercise.setCompleted(true);
+                        }
 
-                courseDb.save();
+                        courseDb.save();
 
-                new CheckForNewExercisesOrUpdates(true, false).run();
-            }
+                        new CheckForNewExercisesOrUpdates(true, false).run();
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-                dialog.close();
-            }
+                    @Override
+                    public void bgTaskCancelled() {
+                        dialog.close();
+                    }
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                log.log(Level.INFO, "Error waiting for results from server.", ex);
-                String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                if (!Strings.isNullOrEmpty(msg)) {
-                    dialogDisplayer.displayError("Error trying to get test results.", ex);
-                }
-                dialog.close();
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        log.log(Level.INFO, "Error waiting for results from server.", ex);
+                        String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                        if (!Strings.isNullOrEmpty(msg)) {
+                            dialogDisplayer.displayError("Error trying to get test results.", ex);
+                        }
+                        dialog.close();
+                    }
+                });
     }
 }

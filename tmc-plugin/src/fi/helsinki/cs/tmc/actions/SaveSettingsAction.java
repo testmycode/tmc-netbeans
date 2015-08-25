@@ -26,8 +26,8 @@ public class SaveSettingsAction extends AbstractAction {
         if (!(e.getSource() instanceof PreferencesUI)) {
             throw new IllegalArgumentException(
                     SaveSettingsAction.class.getSimpleName()
-                    + " expected event source to be a "
-                    + PreferencesUI.class.getSimpleName());
+                            + " expected event source to be a "
+                            + PreferencesUI.class.getSimpleName());
         }
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
@@ -49,28 +49,33 @@ public class SaveSettingsAction extends AbstractAction {
 
             RefreshCoursesAction refresh = new RefreshCoursesAction();
             refresh.addDefaultListener(true, true);
-            refresh.addListener(new BgTaskListener<List<Course>>() {
-                @Override
-                public void bgTaskReady(List<Course> v) {
-                    SwingUtilities.invokeLater(new Runnable() {
+            refresh.addListener(
+                    new BgTaskListener<List<Course>>() {
                         @Override
-                        public void run() {
-                            LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
-                            if (status.thereIsSomethingToDownload(false)) {
-                                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-                            }
+                        public void bgTaskReady(List<Course> v) {
+                            SwingUtilities.invokeLater(
+                                    new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            LocalExerciseStatus status =
+                                                    LocalExerciseStatus.get(
+                                                            courseDb.getCurrentCourseExercises());
+                                            if (status.thereIsSomethingToDownload(false)) {
+                                                DownloadOrUpdateExercisesDialog.display(
+                                                        status.unlockable,
+                                                        status.downloadableUncompleted,
+                                                        status.updateable);
+                                            }
+                                        }
+                                    });
                         }
+
+                        @Override
+                        public void bgTaskFailed(Throwable thrwbl) {}
+
+                        @Override
+                        public void bgTaskCancelled() {}
                     });
-                }
-
-                @Override
-                public void bgTaskFailed(Throwable thrwbl) {
-                }
-
-                @Override
-                public void bgTaskCancelled() {
-                }
-            });
             refresh.run();
         }
         settings.save();

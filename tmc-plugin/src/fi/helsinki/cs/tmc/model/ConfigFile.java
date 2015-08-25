@@ -40,11 +40,13 @@ public class ConfigFile {
     }
 
     public Writer getWriter() throws IOException {
-        return new OutputStreamWriter(new BufferedOutputStream(getFileObject().getOutputStream()), "UTF-8");
+        return new OutputStreamWriter(
+                new BufferedOutputStream(getFileObject().getOutputStream()), "UTF-8");
     }
 
     public Reader getReader() throws IOException {
-        return new InputStreamReader(new BufferedInputStream(getFileObject().getInputStream()), "UTF-8");
+        return new InputStreamReader(
+                new BufferedInputStream(getFileObject().getInputStream()), "UTF-8");
     }
 
     public void writeContents(String s) throws IOException {

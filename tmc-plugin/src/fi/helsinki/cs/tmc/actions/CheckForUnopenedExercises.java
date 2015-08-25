@@ -1,4 +1,4 @@
- package fi.helsinki.cs.tmc.actions;
+package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -41,22 +41,23 @@ public class CheckForUnopenedExercises implements ActionListener {
     }
 
     public void run() {
-        projects.callWhenProjectsCompletelyOpened(new Runnable() {
-            @Override
-            public void run() {
-                List<Exercise> unopenedExercises = new ArrayList<Exercise>();
-                for (Exercise ex : courseDb.getCurrentCourseExercises()) {
-                    TmcProjectInfo project = projects.tryGetProjectForExercise(ex);
-                    if (project != null && !projects.isProjectOpen(project)) {
-                        unopenedExercises.add(ex);
-                    }
-                }
+        projects.callWhenProjectsCompletelyOpened(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        List<Exercise> unopenedExercises = new ArrayList<Exercise>();
+                        for (Exercise ex : courseDb.getCurrentCourseExercises()) {
+                            TmcProjectInfo project = projects.tryGetProjectForExercise(ex);
+                            if (project != null && !projects.isProjectOpen(project)) {
+                                unopenedExercises.add(ex);
+                            }
+                        }
 
-                if (!unopenedExercises.isEmpty()) {
-                    showNotification(unopenedExercises);
-                }
-            }
-        });
+                        if (!unopenedExercises.isEmpty()) {
+                            showNotification(unopenedExercises);
+                        }
+                    }
+                });
     }
 
     private void showNotification(List<Exercise> unopenedExercises) {
@@ -70,7 +71,13 @@ public class CheckForUnopenedExercises implements ActionListener {
             msg = "There are " + count + " exercises that are downloaded but not opened.";
             prompt = "Click here to open them.";
         }
-        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
+        notifier.notify(
+                notifierToken,
+                msg,
+                getNotificationIcon(),
+                prompt,
+                openAction(unopenedExercises),
+                NotificationDisplayer.Priority.LOW);
     }
 
     private ActionListener openAction(final List<Exercise> exercises) {

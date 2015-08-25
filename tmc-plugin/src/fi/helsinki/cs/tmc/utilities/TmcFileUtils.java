@@ -19,7 +19,9 @@ public class TmcFileUtils {
             Project p = FileOwnerQuery.getOwner(fileObject);
             String projectDirectory = p.getProjectDirectory().getPath();
             if (filePath.contains(projectDirectory)) {
-                filePath = filePath.substring(filePath.indexOf(projectDirectory) + projectDirectory.length());
+                filePath =
+                        filePath.substring(
+                                filePath.indexOf(projectDirectory) + projectDirectory.length());
             }
         } catch (Exception e) {
             return null;

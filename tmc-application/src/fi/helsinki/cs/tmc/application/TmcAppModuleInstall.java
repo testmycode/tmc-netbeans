@@ -14,8 +14,8 @@ public class TmcAppModuleInstall extends ModuleInstall {
     private void setApplicationBuildNumberToTmcModuleVersion() {
         // This version number will be shown in the title bar.
         // See http://netbeansrcp.wordpress.com/2009/04/15/change-the-version-number-in-a-netbeans-platform-application/
-        String version = Modules.getDefault().ownerOf(TmcPlugin.class).getSpecificationVersion().toString();
+        String version =
+                Modules.getDefault().ownerOf(TmcPlugin.class).getSpecificationVersion().toString();
         System.setProperty("netbeans.buildnumber", version);
     }
-    
 }

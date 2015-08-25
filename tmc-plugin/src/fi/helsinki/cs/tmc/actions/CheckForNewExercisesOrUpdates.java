@@ -35,25 +35,25 @@ import java.util.ArrayList;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 
-@ActionID(category = "TMC",
-        id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates")
 @ActionRegistration(displayName = "#CTL_CheckForNewExercisesOrUpdates")
-@ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -50)
-})
+@ActionReferences({@ActionReference(path = "Menu/TM&C", position = -50)})
 @Messages("CTL_CheckForNewExercisesOrUpdates=&Download/update exercises")
 public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public static void startTimer() {
         int interval = 20 * 60 * 1000; // 20 minutes
-        javax.swing.Timer timer = new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
+        javax.swing.Timer timer =
+                new javax.swing.Timer(interval, new CheckForNewExercisesOrUpdates(true, true));
         timer.setRepeats(true);
         timer.start();
     }
 
-    private static final Logger logger = Logger.getLogger(CheckForNewExercisesOrUpdates.class.getName());
+    private static final Logger logger =
+            Logger.getLogger(CheckForNewExercisesOrUpdates.class.getName());
 
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken =
+            TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
     private TmcNotificationDisplayer notifier;
@@ -83,61 +83,75 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
 
-        BgTaskListener bgTaskListener = new BgTaskListener<Course>() {
-            @Override
-            public void bgTaskReady(Course receivedCourse) {
-                if (receivedCourse != null) {
+        BgTaskListener bgTaskListener =
+                new BgTaskListener<Course>() {
+                    @Override
+                    public void bgTaskReady(Course receivedCourse) {
+                        if (receivedCourse != null) {
 
-                    courseDb.putDetailedCourse(receivedCourse);
+                            courseDb.putDetailedCourse(receivedCourse);
 
-                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                            final LocalExerciseStatus status =
+                                    LocalExerciseStatus.get(receivedCourse.getExercises());
 
-                    if (status.thereIsSomethingToDownload(false)) {
-                        if (beQuiet) {
-                            displayNotification(status, new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            if (status.thereIsSomethingToDownload(false)) {
+                                if (beQuiet) {
+                                    displayNotification(
+                                            status,
+                                            new ActionListener() {
+                                                @Override
+                                                public void actionPerformed(ActionEvent e) {
+                                                    DownloadOrUpdateExercisesDialog.display(
+                                                            status.unlockable,
+                                                            status.downloadableUncompleted,
+                                                            status.updateable);
+                                                }
+                                            });
+                                } else {
+                                    DownloadOrUpdateExercisesDialog.display(
+                                            status.unlockable,
+                                            status.downloadableUncompleted,
+                                            status.updateable);
                                 }
-                            });
-                        } else {
-                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            } else if (!beQuiet) {
+                                dialogs.displayMessage("No new exercises or updates to download.");
+                            }
                         }
-                    } else if (!beQuiet) {
-                        dialogs.displayMessage("No new exercises or updates to download.");
                     }
-                }
-            }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                if (!beQuiet || ex instanceof ObsoleteClientException) {
-                    dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-                }
-            }
-        };
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        if (!beQuiet || ex instanceof ObsoleteClientException) {
+                            dialogs.displayError(
+                                    "Failed to check for new exercises.\n"
+                                            + ServerErrorHelper.getServerExceptionMsg(ex));
+                        }
+                    }
+                };
 
-        BgTask.start("Checking for new exercises", new CancellableCallable<Course>() {
-            ListenableFuture<Course> currentCourseFuture;
+        BgTask.start(
+                "Checking for new exercises",
+                new CancellableCallable<Course>() {
+                    ListenableFuture<Course> currentCourseFuture;
 
-            @Override
-            public Course call() throws Exception {
-                logger.info("Downloading course to refresh cache");
-                currentCourseFuture = tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrlAsUri());
-                return currentCourseFuture.get();
-            }
+                    @Override
+                    public Course call() throws Exception {
+                        logger.info("Downloading course to refresh cache");
+                        currentCourseFuture =
+                                tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrlAsUri());
+                        return currentCourseFuture.get();
+                    }
 
-            @Override
-            public boolean cancel() {
-                logger.log(INFO, "Get course (refresh list) cancelled.");
-                return currentCourseFuture.cancel(true);
-            }
-        }, bgTaskListener);
-
+                    @Override
+                    public boolean cancel() {
+                        logger.log(INFO, "Get course (refresh list) cancelled.");
+                        return currentCourseFuture.cancel(true);
+                    }
+                },
+                bgTaskListener);
     }
 
     private void displayNotification(LocalExerciseStatus status, ActionListener action) {
@@ -157,10 +171,10 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
             actions.add("update");
         }
 
-        int total
-                = status.unlockable.size()
-                + status.downloadableUncompleted.size()
-                + status.updateable.size();
+        int total =
+                status.unlockable.size()
+                        + status.downloadableUncompleted.size()
+                        + status.updateable.size();
 
         String msg = TmcStringUtils.joinCommaAnd(items);
         msg += " " + Inflector.pluralize(total, "is") + " available.";

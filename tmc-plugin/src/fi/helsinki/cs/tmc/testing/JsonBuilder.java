@@ -44,17 +44,15 @@ public class JsonBuilder {
 
     private static JsonElement toJson(Object value) {
         if (value instanceof JsonElement) {
-            return (JsonElement)value;
+            return (JsonElement) value;
         } else if (value instanceof Jsonable) {
-            return ((Jsonable)value).toJson();
+            return ((Jsonable) value).toJson();
         } else {
             return gson().toJsonTree(value);
         }
     }
 
     private static Gson gson() {
-        return new GsonBuilder()
-                .setPrettyPrinting()
-                .create();
+        return new GsonBuilder().setPrettyPrinting().create();
     }
 }

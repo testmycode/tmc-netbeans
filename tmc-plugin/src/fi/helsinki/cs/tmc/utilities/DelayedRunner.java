@@ -32,12 +32,13 @@ public class DelayedRunner {
      * Schedules (possibly replaces) a task to run after the delay.
      */
     public void setTask(final Runnable task) {
-        setTask(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                task.run();
-            }
-        });
+        setTask(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        task.run();
+                    }
+                });
     }
 
     /**

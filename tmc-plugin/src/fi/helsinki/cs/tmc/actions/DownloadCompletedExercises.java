@@ -45,28 +45,33 @@ public final class DownloadCompletedExercises implements ActionListener {
 
         RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(true, true);
-        action.addListener(new BgTaskListener<List<Course>>() {
+        action.addListener(
+                new BgTaskListener<List<Course>>() {
 
-            @Override
-            public void bgTaskReady(List<Course> result) {
-                LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
-                if (!status.downloadableCompleted.isEmpty()) {
-                    List<Exercise> emptyList = Collections.emptyList();
-                    DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
-                } else {
-                    dialogs.displayMessage("No completed exercises to download.\nDid you only close them and not delete them?");
-                }
-            }
+                    @Override
+                    public void bgTaskReady(List<Course> result) {
+                        LocalExerciseStatus status =
+                                LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
+                        if (!status.downloadableCompleted.isEmpty()) {
+                            List<Exercise> emptyList = Collections.emptyList();
+                            DownloadOrUpdateExercisesDialog.display(
+                                    emptyList, status.downloadableCompleted, emptyList);
+                        } else {
+                            dialogs.displayMessage(
+                                    "No completed exercises to download.\nDid you only close them and not delete them?");
+                        }
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        dialogs.displayError(
+                                "Failed to check for new exercises.\n"
+                                        + ServerErrorHelper.getServerExceptionMsg(ex));
+                    }
+                });
         action.run();
     }
 }

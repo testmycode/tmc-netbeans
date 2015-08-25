@@ -26,12 +26,9 @@ import java.util.List;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
 
-@ActionID(category = "TMC",
-        id = "fi.helsinki.cs.tmc.actions.CheckForNewReviews")
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.CheckForNewReviews")
 @ActionRegistration(displayName = "#CTL_CheckForNewReviews")
-@ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -40)
-})
+@ActionReferences({@ActionReference(path = "Menu/TM&C", position = -40)})
 @NbBundle.Messages("CTL_CheckForNewReviews=Check for new code &reviews")
 public class CheckForNewReviews implements ActionListener, Runnable {
 
@@ -63,7 +60,8 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         this(false, true, true);
     }
 
-    CheckForNewReviews(boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
+    CheckForNewReviews(
+            boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
         this.courseDb = CourseDb.getInstance();
         this.reviewDb = ReviewDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -93,40 +91,46 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         if (course.getReviewsUrl() == null) {
             return;
         }
-        BgTaskListener bgTaskListener = new BgTaskListener<List<Review>>() {
-            @Override
-            public void bgTaskReady(List<Review> result) {
-                boolean newReviews = reviewDb.setReviews(result);
-                if (!newReviews && notifyAboutNoNewReviews) {
-                    dialogs.displayMessage("You have no unread code reviews.");
-                }
-            }
+        BgTaskListener bgTaskListener =
+                new BgTaskListener<List<Review>>() {
+                    @Override
+                    public void bgTaskReady(List<Review> result) {
+                        boolean newReviews = reviewDb.setReviews(result);
+                        if (!newReviews && notifyAboutNoNewReviews) {
+                            dialogs.displayMessage("You have no unread code reviews.");
+                        }
+                    }
 
-            @Override
-            public void bgTaskFailed(final Throwable ex) {
-                final String msg = "Failed to check for code reviews";
-                log.log(INFO, msg, ex);
-                if (!beQuiet) {
-                    dialogs.displayError(msg, ex);
-                }
-            }
+                    @Override
+                    public void bgTaskFailed(final Throwable ex) {
+                        final String msg = "Failed to check for code reviews";
+                        log.log(INFO, msg, ex);
+                        if (!beQuiet) {
+                            dialogs.displayError(msg, ex);
+                        }
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
-        };
-        BgTask.start("Checking for code reviews", new CancellableCallable<List<Review>>() {
-            private ListenableFuture<List<Review>> lf;
-            @Override
-            public List<Review> call() throws Exception {
-                lf = TmcCoreSingleton.getInstance().getNewReviews(courseDb.getCurrentCourse());
-                return lf.get();
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
+                };
+        BgTask.start(
+                "Checking for code reviews",
+                new CancellableCallable<List<Review>>() {
+                    private ListenableFuture<List<Review>> lf;
 
-            @Override
-            public boolean cancel() {
-                return lf.cancel(true);
-            }
-        }, bgTaskListener);
+                    @Override
+                    public List<Review> call() throws Exception {
+                        lf =
+                                TmcCoreSingleton.getInstance()
+                                        .getNewReviews(courseDb.getCurrentCourse());
+                        return lf.get();
+                    }
+
+                    @Override
+                    public boolean cancel() {
+                        return lf.cancel(true);
+                    }
+                },
+                bgTaskListener);
     }
 }

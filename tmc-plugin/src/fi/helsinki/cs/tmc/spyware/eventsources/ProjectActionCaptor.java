@@ -80,8 +80,8 @@ public class ProjectActionCaptor implements ActionProvider {
         try {
             beingCalled = true;
             for (ActionProvider provider : project.getLookup().lookupAll(ActionProvider.class)) {
-                if (Arrays.asList(provider.getSupportedActions()).contains(command) &&
-                        provider.isActionEnabled(command, context)) {
+                if (Arrays.asList(provider.getSupportedActions()).contains(command)
+                        && provider.isActionEnabled(command, context)) {
                     return true;
                 }
             }
@@ -96,9 +96,10 @@ public class ProjectActionCaptor implements ActionProvider {
         if (!beingCalled) {
             beingCalled = true;
             try {
-                for (ActionProvider provider : project.getLookup().lookupAll(ActionProvider.class)) {
-                    if (Arrays.asList(provider.getSupportedActions()).contains(command) &&
-                            provider.isActionEnabled(command, context)) {
+                for (ActionProvider provider :
+                        project.getLookup().lookupAll(ActionProvider.class)) {
+                    if (Arrays.asList(provider.getSupportedActions()).contains(command)
+                            && provider.isActionEnabled(command, context)) {
                         provider.invokeAction(command, context);
                     }
                 }

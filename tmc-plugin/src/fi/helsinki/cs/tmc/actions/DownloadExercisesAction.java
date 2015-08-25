@@ -57,47 +57,54 @@ public class DownloadExercisesAction {
         }
     }
 
-    private void startDownloading(final Exercise exercise, final BgTaskListener<Collection<Exercise>> listener) {
-        BgTask.start("Downloading " + exercise.getName(), new CancellableCallable<List<Exercise>>() {
+    private void startDownloading(
+            final Exercise exercise, final BgTaskListener<Collection<Exercise>> listener) {
+        BgTask.start(
+                "Downloading " + exercise.getName(),
+                new CancellableCallable<List<Exercise>>() {
 
-            ListenableFuture<List<Exercise>> dlFuture;
+                    ListenableFuture<List<Exercise>> dlFuture;
 
-            @Override
-            public List<Exercise> call() throws Exception {
-                dlFuture = tmcCore.downloadExercises(Lists.newArrayList(exercise));
+                    @Override
+                    public List<Exercise> call() throws Exception {
+                        dlFuture = tmcCore.downloadExercises(Lists.newArrayList(exercise));
 
-                return dlFuture.get();
-            }
+                        return dlFuture.get();
+                    }
 
-            @Override
-            public boolean cancel() {
-                logger.info("Exercise download was cancelled.");
-                return dlFuture.cancel(true);
-            }
-        }, listener);
+                    @Override
+                    public boolean cancel() {
+                        logger.info("Exercise download was cancelled.");
+                        return dlFuture.cancel(true);
+                    }
+                },
+                listener);
     }
 
-    private final BgTaskListener<Collection<Exercise>> whenDownloadsFinished = new BgTaskListener<Collection<Exercise>>() {
-        @Override
-        public void bgTaskReady(Collection<Exercise> exercises) {
-            logger.log(INFO, "Opening projects.");
-            List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>(exercises.size());
-            for (Exercise ex : exercises) {
-                projects.add(projectMediator.tryGetProjectForExercise(ex));
-            }
-            projectMediator.openProjects(projects);
-            logger.log(INFO, "Opening projects.");
-        }
+    private final BgTaskListener<Collection<Exercise>> whenDownloadsFinished =
+            new BgTaskListener<Collection<Exercise>>() {
+                @Override
+                public void bgTaskReady(Collection<Exercise> exercises) {
+                    logger.log(INFO, "Opening projects.");
+                    List<TmcProjectInfo> projects = new ArrayList<TmcProjectInfo>(exercises.size());
+                    for (Exercise ex : exercises) {
+                        projects.add(projectMediator.tryGetProjectForExercise(ex));
+                    }
+                    projectMediator.openProjects(projects);
+                    logger.log(INFO, "Opening projects.");
+                }
 
-        @Override
-        public void bgTaskCancelled() {
-            logger.log(INFO, "BgTask was cancelled.");
-        }
+                @Override
+                public void bgTaskCancelled() {
+                    logger.log(INFO, "BgTask was cancelled.");
+                }
 
-        @Override
-        public void bgTaskFailed(Throwable ex) {
-            logger.log(INFO, "Failed to download exercise file.", ex);
-            dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-        }
-    };
+                @Override
+                public void bgTaskFailed(Throwable ex) {
+                    logger.log(INFO, "Failed to download exercise file.", ex);
+                    dialogs.displayError(
+                            "Failed to download exercises.\n"
+                                    + ServerErrorHelper.getServerExceptionMsg(ex));
+                }
+            };
 }

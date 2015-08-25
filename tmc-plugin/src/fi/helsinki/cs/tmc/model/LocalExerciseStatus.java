@@ -18,10 +18,12 @@ public class LocalExerciseStatus {
     public ArrayList<Exercise> unlockable;
 
     public static LocalExerciseStatus get(List<Exercise> allExercises) {
-        return new LocalExerciseStatus(CourseDb.getInstance(), ProjectMediator.getInstance(), allExercises);
+        return new LocalExerciseStatus(
+                CourseDb.getInstance(), ProjectMediator.getInstance(), allExercises);
     }
 
-    private LocalExerciseStatus(CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises) {
+    private LocalExerciseStatus(
+            CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises) {
         open = new ArrayList<Exercise>();
         closed = new ArrayList<Exercise>();
         downloadableUncompleted = new ArrayList<Exercise>();
@@ -44,7 +46,8 @@ public class LocalExerciseStatus {
                 } else if (isDownloaded && projectMediator.isProjectOpen(proj)) {
                     open.add(ex);
                 } else {
-                    closed.add(ex); // TODO: all projects may end up here if this is queried too early
+                    closed.add(
+                            ex); // TODO: all projects may end up here if this is queried too early
                 }
 
                 String downloadedChecksum = courseDb.getDownloadedExerciseChecksum(ex.getKey());
@@ -56,21 +59,31 @@ public class LocalExerciseStatus {
     }
 
     public boolean thereIsSomethingToDownload(boolean includeCompleted) {
-        return !unlockable.isEmpty() ||
-                !downloadableUncompleted.isEmpty() ||
-                !updateable.isEmpty() ||
-                (includeCompleted && !downloadableCompleted.isEmpty());
+        return !unlockable.isEmpty()
+                || !downloadableUncompleted.isEmpty()
+                || !updateable.isEmpty()
+                || (includeCompleted && !downloadableCompleted.isEmpty());
     }
 
     @Override
     public String toString() {
-        return
-                "Unlockable: " + unlockable + "\n" +
-                "Open: " + open + "\n" +
-                "Closed: " + closed + "\n" +
-                "Downloadable uncompleted: " + downloadableUncompleted + "\n" +
-                "Downloadable completed: " + downloadableCompleted + "\n" +
-                "Updateable: " + updateable + "\n";
+        return "Unlockable: "
+                + unlockable
+                + "\n"
+                + "Open: "
+                + open
+                + "\n"
+                + "Closed: "
+                + closed
+                + "\n"
+                + "Downloadable uncompleted: "
+                + downloadableUncompleted
+                + "\n"
+                + "Downloadable completed: "
+                + downloadableCompleted
+                + "\n"
+                + "Updateable: "
+                + updateable
+                + "\n";
     }
-
 }

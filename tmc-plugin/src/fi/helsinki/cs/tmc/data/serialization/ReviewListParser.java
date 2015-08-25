@@ -12,7 +12,7 @@ public class ReviewListParser {
         public int apiVersion;
         public Review[] reviews;
     }
-    
+
     public List<Review> parseFromJson(String json) {
         if (json == null) {
             throw new NullPointerException("Json string is null");
@@ -21,10 +21,10 @@ public class ReviewListParser {
             throw new IllegalArgumentException("Empty input");
         }
         try {
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Date.class, new CustomDateDeserializer())
-                    .create();
-            
+            Gson gson =
+                    new GsonBuilder()
+                            .registerTypeAdapter(Date.class, new CustomDateDeserializer()).create();
+
             Review[] reviews = gson.fromJson(json, ReviewListContainer.class).reviews;
             return Arrays.asList(reviews);
         } catch (RuntimeException e) {

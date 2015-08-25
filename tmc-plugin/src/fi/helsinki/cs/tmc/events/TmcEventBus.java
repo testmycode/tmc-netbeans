@@ -112,8 +112,9 @@ public class TmcEventBus {
         while (iter.hasNext()) {
             TmcEventListener listener = iter.next();
             boolean remove =
-                    (listener == toRemove) ||
-                    (listener instanceof Wrapper && ((Wrapper)listener).wraps(toRemove));
+                    (listener == toRemove)
+                            || (listener instanceof Wrapper
+                                    && ((Wrapper) listener).wraps(toRemove));
             if (remove) {
                 iter.remove();
                 break;

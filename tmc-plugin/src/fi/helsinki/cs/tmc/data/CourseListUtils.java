@@ -16,7 +16,7 @@ public class CourseListUtils {
 
         return null;
     }
-    
+
     public static boolean hasCourseByName(List<Course> courses, String courseName) {
         return getCourseByName(courses, courseName) != null;
     }

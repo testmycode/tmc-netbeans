@@ -19,6 +19,7 @@ public class ReviewDb {
 
     public static class NewUnreadReviewEvent implements TmcEvent {
         public final Review review;
+
         public NewUnreadReviewEvent(Review review) {
             this.review = review;
         }
@@ -35,7 +36,6 @@ public class ReviewDb {
         }
         return instance;
     }
-
 
     private ArrayList<Review> reviews;
     private HashSet<Integer> reviewIdsNotifiedAbout;

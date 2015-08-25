@@ -19,7 +19,7 @@ public class ExceptionUtils {
 
     public static RuntimeException toRuntimeException(Exception ex) {
         if (ex instanceof RuntimeException) {
-            return (RuntimeException)ex;
+            return (RuntimeException) ex;
         } else {
             return new RuntimeException(ex);
         }

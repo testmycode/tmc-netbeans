@@ -34,7 +34,8 @@ import javax.swing.SwingUtilities;
 public class ReviewEventListener extends TmcEventListener {
     private static final Logger log = Logger.getLogger(ReviewEventListener.class.getName());
 
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    private static final TmcNotificationDisplayer.SingletonToken notifierToken =
+            TmcNotificationDisplayer.createSingletonToken();
 
     private static ReviewEventListener instance;
 
@@ -60,43 +61,55 @@ public class ReviewEventListener extends TmcEventListener {
     }
 
     public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                new CheckForNewReviews(true, false, false).run();
-            }
-        });
+        SwingUtilities.invokeLater(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        new CheckForNewReviews(true, false, false).run();
+                    }
+                });
     }
 
     public void receive(ReviewDb.NewUnreadReviewEvent e) throws Throwable {
         final Review review = e.review;
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    refreshCourseDb();
-                } catch (TmcCoreException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
-
-                String title = "Code review";
-                String msg = "Code review for " + review.getExerciseName() + " ready.";
-                Image img;
-                try {
-                    img = ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/code-review.png"));
-                } catch (IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-                Icon icon = ImageUtilities.image2Icon(img);
-
-                notifier.notify(notifierToken, title, icon, msg, new ActionListener() {
+        SwingUtilities.invokeLater(
+                new Runnable() {
                     @Override
-                    public void actionPerformed(ActionEvent e) {
-                        showReviewDialog(review);
+                    public void run() {
+                        try {
+                            refreshCourseDb();
+                        } catch (TmcCoreException ex) {
+                            Exceptions.printStackTrace(ex);
+                        }
+
+                        String title = "Code review";
+                        String msg = "Code review for " + review.getExerciseName() + " ready.";
+                        Image img;
+                        try {
+                            img =
+                                    ImageIO.read(
+                                            getClass()
+                                                    .getClassLoader()
+                                                    .getResource(
+                                                            "fi/helsinki/cs/tmc/ui/code-review.png"));
+                        } catch (IOException ex) {
+                            throw new RuntimeException(ex);
+                        }
+                        Icon icon = ImageUtilities.image2Icon(img);
+
+                        notifier.notify(
+                                notifierToken,
+                                title,
+                                icon,
+                                msg,
+                                new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        showReviewDialog(review);
+                                    }
+                                });
                     }
                 });
-            }
-        });
     }
 
     private void refreshCourseDb() throws TmcCoreException {
@@ -106,41 +119,43 @@ public class ReviewEventListener extends TmcEventListener {
 
     private void showReviewDialog(final Review review) {
         final CodeReviewDialog dialog = new CodeReviewDialog(review);
-        dialog.setOkListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                if (dialog.getMarkAsRead()) {
-                    log.fine("Marking review as read");
-                    markAsRead(review);
+        dialog.setOkListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        if (dialog.getMarkAsRead()) {
+                            log.fine("Marking review as read");
+                            markAsRead(review);
 
-                    sendLoggableEvent(review);
+                            sendLoggableEvent(review);
 
-                    // The review might have made new exercises available.
-                    // We already updated the course DB earlier, but this time
-                    // we will also notify the user.
-                    new CheckForNewExercisesOrUpdates(true, false).run();
-                }
-            }
-        });
+                            // The review might have made new exercises available.
+                            // We already updated the course DB earlier, but this time
+                            // we will also notify the user.
+                            new CheckForNewExercisesOrUpdates(true, false).run();
+                        }
+                    }
+                });
         dialog.setVisible(true);
     }
 
     private void markAsRead(Review review) {
         CancellableCallable<Void> task = serverAccess.getMarkingReviewAsReadTask(review, true);
-        BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
-            @Override
-            public void bgTaskReady(Void result) {
-            }
+        BgTask.start(
+                "Marking review as read",
+                task,
+                new BgTaskListener<Void>() {
+                    @Override
+                    public void bgTaskReady(Void result) {}
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                log.log(Level.INFO, "Failed to mark review as read.", ex);
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        log.log(Level.INFO, "Failed to mark review as read.", ex);
+                    }
+                });
     }
 
     private void sendLoggableEvent(Review review) {
@@ -150,7 +165,9 @@ public class ReviewEventListener extends TmcEventListener {
             String json = new Gson().toJson(dataObject);
             byte[] jsonBytes = json.getBytes(Charset.forName("UTF-8"));
 
-            LoggableEvent event = new LoggableEvent(courseName, review.getExerciseName(), "review_opened", jsonBytes);
+            LoggableEvent event =
+                    new LoggableEvent(
+                            courseName, review.getExerciseName(), "review_opened", jsonBytes);
             eventBus.post(event);
         }
     }

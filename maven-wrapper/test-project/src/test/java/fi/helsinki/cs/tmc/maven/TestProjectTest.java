@@ -8,5 +8,4 @@ public class TestProjectTest {
     public void trivialTestCase() {
         System.out.println("Hello from TestProject trivial test case.");
     }
-
 }

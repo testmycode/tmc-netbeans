@@ -31,7 +31,8 @@ public class BgTask<V> implements CancellableCallable<V> {
         return new BgTask<V>(label, callable).start();
     }
 
-    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
+    public static <V> Future<V> start(
+            String label, Callable<V> callable, BgTaskListener<? super V> listener) {
         return new BgTask<V>(label, callable, listener).start();
     }
 
@@ -40,7 +41,8 @@ public class BgTask<V> implements CancellableCallable<V> {
         return start(label, callable);
     }
 
-    public static Future<Object> start(String label, Runnable runnable, BgTaskListener<Object> listener) {
+    public static Future<Object> start(
+            String label, Runnable runnable, BgTaskListener<Object> listener) {
         Callable<Object> callable = runnableToCallable(runnable);
         return start(label, callable, listener);
     }
@@ -94,12 +96,13 @@ public class BgTask<V> implements CancellableCallable<V> {
     public V call() {
         synchronized (cancelLock) {
             if (cancelled) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.bgTaskCancelled();
-                    }
-                });
+                SwingUtilities.invokeLater(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                listener.bgTaskCancelled();
+                            }
+                        });
                 return null;
             } else {
                 executingThread = Thread.currentThread();
@@ -114,28 +117,31 @@ public class BgTask<V> implements CancellableCallable<V> {
         try {
             final V result = callable.call();
 
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskReady(result);
-                }
-            });
+            SwingUtilities.invokeLater(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.bgTaskReady(result);
+                        }
+                    });
             return result;
         } catch (InterruptedException e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskCancelled();
-                }
-            });
+            SwingUtilities.invokeLater(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.bgTaskCancelled();
+                        }
+                    });
             return null;
         } catch (final Exception ex) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskFailed(ex);
-                }
-            });
+            SwingUtilities.invokeLater(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            listener.bgTaskFailed(ex);
+                        }
+                    });
             throw ExceptionUtils.toRuntimeException(ex);
         } finally {
             synchronized (cancelLock) {

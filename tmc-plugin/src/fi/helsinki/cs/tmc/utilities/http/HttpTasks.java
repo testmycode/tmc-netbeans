@@ -26,7 +26,8 @@ import java.util.Map;
  * with a non-successful status code.
  */
 public class HttpTasks {
-    private static final ContentType UTF8_TEXT_CONTENT_TYPE = ContentType.create("text/plain", "utf-8");
+    private static final ContentType UTF8_TEXT_CONTENT_TYPE =
+            ContentType.create("text/plain", "utf-8");
 
     private UsernamePasswordCredentials credentials = null;
 
@@ -63,11 +64,13 @@ public class HttpTasks {
         return downloadToText(createExecutor(makeRawPostRequest(url, data)));
     }
 
-    public CancellableCallable<String> rawPostForText(String url, byte[] data, Map<String, String> extraHeaders) {
+    public CancellableCallable<String> rawPostForText(
+            String url, byte[] data, Map<String, String> extraHeaders) {
         return downloadToText(createExecutor(makeRawPostRequest(url, data, extraHeaders)));
     }
 
-    public CancellableCallable<String> uploadFileForTextDownload(String url, Map<String, String> params, String fileField, byte[] data) {
+    public CancellableCallable<String> uploadFileForTextDownload(
+            String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = makeFileUploadRequest(url, params, fileField, data);
         return downloadToText(createExecutor(request));
     }
@@ -133,7 +136,8 @@ public class HttpTasks {
         return request;
     }
 
-    private HttpPost makeFileUploadRequest(String url, Map<String, String> params, String fileField, byte[] data) {
+    private HttpPost makeFileUploadRequest(
+            String url, Map<String, String> params, String fileField, byte[] data) {
         HttpPost request = new HttpPost(url);
         MultipartEntityBuilder entityBuilder = MultipartEntityBuilder.create();
         entityBuilder.setMode(HttpMultipartMode.BROWSER_COMPATIBLE);

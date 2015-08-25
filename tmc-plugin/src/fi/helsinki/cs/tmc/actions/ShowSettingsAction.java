@@ -18,12 +18,9 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
 
-@ActionID(category = "TMC",
-id = "fi.helsinki.cs.tmc.actions.ShowSettings")
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.ShowSettings")
 @ActionRegistration(displayName = "#CTL_ShowSettings")
-@ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -100, separatorAfter = -90)
-})
+@ActionReferences({@ActionReference(path = "Menu/TM&C", position = -100, separatorAfter = -90)})
 @Messages("CTL_ShowSettings=&Settings")
 public final class ShowSettingsAction extends AbstractAction {
 
@@ -66,15 +63,17 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
 
-        ActionListener listener = new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent event) {
-                if (event.getSource() == DialogDescriptor.OK_OPTION) {
-                    ActionEvent okEvent = new ActionEvent(prefUI, ActionEvent.ACTION_PERFORMED, null);
-                    saveAction.actionPerformed(okEvent);
-                }
-            }
-        };
+        ActionListener listener =
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent event) {
+                        if (event.getSource() == DialogDescriptor.OK_OPTION) {
+                            ActionEvent okEvent =
+                                    new ActionEvent(prefUI, ActionEvent.ACTION_PERFORMED, null);
+                            saveAction.actionPerformed(okEvent);
+                        }
+                    }
+                };
 
         prefUiFactory.showPreferencesDialog(listener);
     }

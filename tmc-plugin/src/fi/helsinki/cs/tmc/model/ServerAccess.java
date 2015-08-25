@@ -61,11 +61,10 @@ public class ServerAccess {
     }
 
     public ServerAccess(
-        NbTmcSettings settings,
-        CourseListParser courseListParser,
-        CourseInfoParser courseInfoParser,
-        ReviewListParser reviewListParser
-    ) {
+            NbTmcSettings settings,
+            CourseListParser courseListParser,
+            CourseInfoParser courseInfoParser,
+            ReviewListParser reviewListParser) {
         this.settings = settings;
         this.courseListParser = courseListParser;
         this.courseInfoParser = courseInfoParser;
@@ -74,7 +73,10 @@ public class ServerAccess {
     }
 
     private static String getClientVersion() {
-        return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
+        return Modules.getDefault()
+                .ownerOf(ServerAccess.class)
+                .getSpecificationVersion()
+                .toString();
     }
 
     public void setSettings(NbTmcSettings settings) {
@@ -86,7 +88,7 @@ public class ServerAccess {
     }
 
     public String addApiCallQueryParameters(String url) {
-        url = UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
+        url = UriUtils.withQueryParam(url, "api_version", "" + API_VERSION);
         url = UriUtils.withQueryParam(url, "client", "netbeans_plugin");
         url = UriUtils.withQueryParam(url, "client_version", getClientVersion());
         return url;
@@ -97,22 +99,21 @@ public class ServerAccess {
     }
 
     public boolean hasEnoughSettings() {
-        return
-                !settings.getUsername().isEmpty() &&
-                !settings.getPassword().isEmpty() &&
-                !settings.getServerAddress().isEmpty();
+        return !settings.getUsername().isEmpty()
+                && !settings.getPassword().isEmpty()
+                && !settings.getServerAddress().isEmpty();
     }
 
     public boolean needsOnlyPassword() {
-        return
-                !settings.getUsername().isEmpty() &&
-                settings.getPassword().isEmpty() &&
-                !settings.getServerAddress().isEmpty();
+        return !settings.getUsername().isEmpty()
+                && settings.getPassword().isEmpty()
+                && !settings.getServerAddress().isEmpty();
     }
 
     @Deprecated
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
-        final CancellableCallable<String> download = createHttpTasks().getForText(getCourseListUrl());
+        final CancellableCallable<String> download =
+                createHttpTasks().getForText(getCourseListUrl());
         return new CancellableCallable<List<Course>>() {
             @Override
             public List<Course> call() throws Exception {
@@ -155,7 +156,8 @@ public class ServerAccess {
 
     public CancellableCallable<Void> getUnlockingTask(Course course) {
         Map<String, String> params = Collections.emptyMap();
-        final CancellableCallable<String> download = createHttpTasks().postForText(getUnlockUrl(course), params);
+        final CancellableCallable<String> download =
+                createHttpTasks().postForText(getUnlockUrl(course), params);
         return new CancellableCallable<Void>() {
             @Override
             public Void call() throws Exception {
@@ -188,7 +190,8 @@ public class ServerAccess {
         return createHttpTasks().getForBinary(zipUrl);
     }
 
-    public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
+    public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(
+            final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
         final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
 
         Map<String, String> params = new LinkedHashMap<String, String>();
@@ -197,7 +200,9 @@ public class ServerAccess {
         params.putAll(extraParams);
 
         final CancellableCallable<String> upload =
-                createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
+                createHttpTasks()
+                        .uploadFileForTextDownload(
+                                submitUrl, params, "submission[file]", sourceZip);
 
         return new CancellableCallable<SubmissionResponse>() {
             @Override
@@ -211,14 +216,16 @@ public class ServerAccess {
 
                 JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
                 if (respJson.get("error") != null) {
-                    throw new RuntimeException("Server responded with error: " + respJson.get("error"));
+                    throw new RuntimeException(
+                            "Server responded with error: " + respJson.get("error"));
                 } else if (respJson.get("submission_url") != null) {
                     try {
                         URI submissionUrl = new URI(respJson.get("submission_url").getAsString());
                         URI pasteUrl = new URI(respJson.get("paste_url").getAsString());
                         return new SubmissionResponse(submissionUrl, pasteUrl);
                     } catch (Exception e) {
-                        throw new RuntimeException("Server responded with malformed submission url");
+                        throw new RuntimeException(
+                                "Server responded with malformed submission url");
                     }
                 } else {
                     throw new RuntimeException("Server returned unknown response");
@@ -235,6 +242,7 @@ public class ServerAccess {
     public static class SubmissionResponse {
         public final URI submissionUrl;
         public final URI pasteUrl;
+
         public SubmissionResponse(URI submissionUrl, URI pasteUrl) {
             this.submissionUrl = submissionUrl;
             this.pasteUrl = pasteUrl;
@@ -291,7 +299,8 @@ public class ServerAccess {
         };
     }
 
-    public CancellableCallable<String> getFeedbackAnsweringJob(String answerUrl, List<FeedbackAnswer> answers) {
+    public CancellableCallable<String> getFeedbackAnsweringJob(
+            String answerUrl, List<FeedbackAnswer> answers) {
         final String submitUrl = addApiCallQueryParameters(answerUrl);
 
         Map<String, String> params = new HashMap<String, String>();
@@ -321,7 +330,8 @@ public class ServerAccess {
         };
     }
 
-    public CancellableCallable<Object> getSendEventLogJob(String spywareServerUrl, List<LoggableEvent> events) {
+    public CancellableCallable<Object> getSendEventLogJob(
+            String spywareServerUrl, List<LoggableEvent> events) {
         String url = addApiCallQueryParameters(spywareServerUrl);
 
         Map<String, String> extraHeaders = new LinkedHashMap<String, String>();
@@ -336,7 +346,8 @@ public class ServerAccess {
             throw ExceptionUtils.toRuntimeException(e);
         }
 
-        final CancellableCallable<String> upload = createHttpTasks().rawPostForText(url, data, extraHeaders);
+        final CancellableCallable<String> upload =
+                createHttpTasks().rawPostForText(url, data, extraHeaders);
 
         return new CancellableCallable<Object>() {
             @Override
@@ -357,22 +368,28 @@ public class ServerAccess {
         GZIPOutputStream gzos = new GZIPOutputStream(bufferBos);
         OutputStreamWriter bufferWriter = new OutputStreamWriter(gzos, Charset.forName("UTF-8"));
 
-        Gson gson = new GsonBuilder()
-                .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer())
-                .create();
+        Gson gson =
+                new GsonBuilder()
+                        .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer()).create();
 
-        gson.toJson(events, new TypeToken<List<LoggableEvent>>(){}.getType(), bufferWriter);
+        gson.toJson(events, new TypeToken<List<LoggableEvent>>() {}.getType(), bufferWriter);
         bufferWriter.close();
         gzos.close();
 
         return bufferBos.toByteArray();
     }
 
-    private <T> T checkForObsoleteClient(FailedHttpResponseException ex) throws ObsoleteClientException, FailedHttpResponseException {
+    private <T> T checkForObsoleteClient(FailedHttpResponseException ex)
+            throws ObsoleteClientException, FailedHttpResponseException {
         if (ex.getStatusCode() == 404) {
             boolean obsolete;
             try {
-                obsolete = new JsonParser().parse(ex.getEntityAsString()).getAsJsonObject().get("obsolete_client").getAsBoolean();
+                obsolete =
+                        new JsonParser()
+                                .parse(ex.getEntityAsString())
+                                .getAsJsonObject()
+                                .get("obsolete_client")
+                                .getAsBoolean();
             } catch (Exception ex2) {
                 obsolete = false;
             }

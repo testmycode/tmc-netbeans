@@ -9,12 +9,12 @@ import java.util.Date;
 import java.util.List;
 
 public class CourseListParser {
-    
+
     private static class CourseListContainer {
         public int apiVersion;
         public Course[] courses;
     }
-    
+
     public List<Course> parseFromJson(String json) {
         if (json == null) {
             throw new NullPointerException("Json string is null");
@@ -23,10 +23,10 @@ public class CourseListParser {
             throw new IllegalArgumentException("Empty input");
         }
         try {
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Date.class, new CustomDateDeserializer())
-                    .create();
-            
+            Gson gson =
+                    new GsonBuilder()
+                            .registerTypeAdapter(Date.class, new CustomDateDeserializer()).create();
+
             Course[] courses = gson.fromJson(json, CourseListContainer.class).courses;
 
             List<Course> courseList = new ArrayList<Course>();

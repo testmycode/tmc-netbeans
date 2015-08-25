@@ -14,8 +14,7 @@ public class TestCaseResult {
     private String detailedMessage;
     private boolean valgrindFailed;
 
-    public TestCaseResult() {
-    }
+    public TestCaseResult() {}
 
     public TestCaseResult(String name, boolean successful, String message) {
         this.name = name;
@@ -23,7 +22,12 @@ public class TestCaseResult {
         this.message = message;
     }
 
-    public TestCaseResult(String name, boolean successful, String message, String valgrindTrace, boolean valgrindFailed) {
+    public TestCaseResult(
+            String name,
+            boolean successful,
+            String message,
+            String valgrindTrace,
+            boolean valgrindFailed) {
         this(name, successful, message);
         this.detailedMessage = valgrindTrace;
         this.valgrindFailed = valgrindFailed;

@@ -31,15 +31,16 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-@ActionID(
-        category = "TMC",
-        id = "fi.helsinki.cs.tmc.actions.PastebinAction")
-@ActionRegistration(
-        displayName = "#CTL_PastebinAction", lazy = false)
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.PastebinAction")
+@ActionRegistration(displayName = "#CTL_PastebinAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -17),
-    @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330,
-            separatorAfter = 1360)
+    @ActionReference(
+        path = "Projects/Actions",
+        position = 1340,
+        separatorBefore = 1330,
+        separatorAfter = 1360
+    )
 })
 @Messages("CTL_PastebinAction=Send code to Pastebin")
 //TODO: This is a horribly copypasted, then mangled version of RequestReviewAction
@@ -87,43 +88,58 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
             if (exercise != null) {
                 showPasteRequestDialog(projectInfo, exercise);
             } else {
-                log.log(Level.WARNING, "PastebinAction called in a context without a valid TMC project.");
+                log.log(
+                        Level.WARNING,
+                        "PastebinAction called in a context without a valid TMC project.");
             }
         } else {
-            log.log(Level.WARNING, "PastebinAction called in a context with {0} projects", project.size());
+            log.log(
+                    Level.WARNING,
+                    "PastebinAction called in a context with {0} projects",
+                    project.size());
         }
     }
 
     private void showPasteRequestDialog(final TmcProjectInfo projectInfo, final Exercise exercise) {
         final PastebinDialog dialog = new PastebinDialog(exercise);
-        dialog.setOkListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String message = dialog.getMessageForReviewer().trim();
-                submitPaste(projectInfo, exercise, message);
-            }
-        });
+        dialog.setOkListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String message = dialog.getMessageForReviewer().trim();
+                        submitPaste(projectInfo, exercise, message);
+                    }
+                });
         dialog.setVisible(true);
     }
 
-    private void submitPaste(final TmcProjectInfo projectInfo, final Exercise exercise,
+    private void submitPaste(
+            final TmcProjectInfo projectInfo,
+            final Exercise exercise,
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
-        BgTask.start("Sending tmc-paste", new CancellableCallable<URI>() {
-            ListenableFuture<URI> result;
+        BgTask.start(
+                "Sending tmc-paste",
+                new CancellableCallable<URI>() {
+                    ListenableFuture<URI> result;
 
-            @Override
-            public URI call() throws Exception {
-                log.log(Level.INFO, "Pre submit");
-                result = TmcCoreSingleton.getInstance().pasteWithComment(projectInfo.getProjectDirAsPath(), messageForReviewer);
-                return result.get();
-            }
+                    @Override
+                    public URI call() throws Exception {
+                        log.log(Level.INFO, "Pre submit");
+                        result =
+                                TmcCoreSingleton.getInstance()
+                                        .pasteWithComment(
+                                                projectInfo.getProjectDirAsPath(),
+                                                messageForReviewer);
+                        return result.get();
+                    }
 
-            @Override
-            public boolean cancel() {
-                return result.cancel(true);
-            }
-        }, new PasteResult());
+                    @Override
+                    public boolean cancel() {
+                        return result.cancel(true);
+                    }
+                },
+                new PasteResult());
     }
 
     class PasteResult implements BgTaskListener<URI> {
@@ -134,8 +150,7 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
         }
 
         @Override
-        public void bgTaskCancelled() {
-        }
+        public void bgTaskCancelled() {}
 
         @Override
         public void bgTaskFailed(Throwable ex) {

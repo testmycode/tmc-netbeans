@@ -27,8 +27,9 @@ public class ByteArrayGsonSerializer implements JsonSerializer<byte[]>, JsonDese
     }
 
     @Override
-    public byte[] deserialize(JsonElement je, Type type, JsonDeserializationContext jdc) throws JsonParseException {
-        if (je.isJsonPrimitive() && ((JsonPrimitive)je).isString()) {
+    public byte[] deserialize(JsonElement je, Type type, JsonDeserializationContext jdc)
+            throws JsonParseException {
+        if (je.isJsonPrimitive() && ((JsonPrimitive) je).isString()) {
             return Base64.decodeBase64(je.getAsString());
         } else if (je.isJsonNull()) {
             return null;

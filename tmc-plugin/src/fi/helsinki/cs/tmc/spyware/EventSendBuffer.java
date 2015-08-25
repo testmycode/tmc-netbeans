@@ -60,7 +60,11 @@ public class EventSendBuffer implements EventReceiver {
     private int autosendThreshold = DEFAULT_AUTOSEND_THREHSOLD;
     private Cooldown autosendCooldown;
 
-    public EventSendBuffer(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb, EventStore eventStore) {
+    public EventSendBuffer(
+            SpywareSettings settings,
+            ServerAccess serverAccess,
+            CourseDb courseDb,
+            EventStore eventStore) {
         this.settings = settings;
         this.serverAccess = serverAccess;
         this.courseDb = courseDb;
@@ -131,7 +135,8 @@ public class EventSendBuffer implements EventReceiver {
         savingTask.waitUntilFinished(timeout);
     }
 
-    public void waitUntilCurrentSendingFinished(long timeout) throws TimeoutException, InterruptedException {
+    public void waitUntilCurrentSendingFinished(long timeout)
+            throws TimeoutException, InterruptedException {
         sendingTask.waitUntilFinished(timeout);
     }
 
@@ -184,153 +189,179 @@ public class EventSendBuffer implements EventReceiver {
         }
     }
 
-    private SingletonTask sendingTask = new SingletonTask(new Runnable() {
-        // Sending too many at once may go over the server's POST size limit.
-        private static final int MAX_EVENTS_PER_SEND = 500;
+    private SingletonTask sendingTask =
+            new SingletonTask(
+                    new Runnable() {
+                        // Sending too many at once may go over the server's POST size limit.
+                        private static final int MAX_EVENTS_PER_SEND = 500;
 
-        @Override
-        public void run() {
-            boolean shouldSendMore;
+                        @Override
+                        public void run() {
+                            boolean shouldSendMore;
 
-            do {
-                ArrayList<LoggableEvent> eventsToSend = copyEventsToSendFromQueue();
-                if (eventsToSend.isEmpty()) {
-                    return;
-                }
+                            do {
+                                ArrayList<LoggableEvent> eventsToSend = copyEventsToSendFromQueue();
+                                if (eventsToSend.isEmpty()) {
+                                    return;
+                                }
 
-                synchronized (sendQueue) {
-                    shouldSendMore = sendQueue.size() > eventsToSend.size();
-                }
+                                synchronized (sendQueue) {
+                                    shouldSendMore = sendQueue.size() > eventsToSend.size();
+                                }
 
-                String url = pickDestinationUrl();
-                if (url == null) {
-                    return;
-                }
+                                String url = pickDestinationUrl();
+                                if (url == null) {
+                                    return;
+                                }
 
-                log.log(Level.INFO, "Sending {0} events to {1}", new Object[]{eventsToSend.size(), url});
+                                log.log(
+                                        Level.INFO,
+                                        "Sending {0} events to {1}",
+                                        new Object[] {eventsToSend.size(), url});
 
-                doSend(eventsToSend, url);
-            } while (shouldSendMore);
-        }
+                                doSend(eventsToSend, url);
+                            } while (shouldSendMore);
+                        }
 
-        private ArrayList<LoggableEvent> copyEventsToSendFromQueue() {
-            synchronized (sendQueue) {
-                ArrayList<LoggableEvent> eventsToSend = new ArrayList<LoggableEvent>(sendQueue.size());
+                        private ArrayList<LoggableEvent> copyEventsToSendFromQueue() {
+                            synchronized (sendQueue) {
+                                ArrayList<LoggableEvent> eventsToSend =
+                                        new ArrayList<LoggableEvent>(sendQueue.size());
 
-                Iterator<LoggableEvent> i = sendQueue.iterator();
-                while (i.hasNext() && eventsToSend.size() < MAX_EVENTS_PER_SEND) {
-                    eventsToSend.add(i.next());
-                }
+                                Iterator<LoggableEvent> i = sendQueue.iterator();
+                                while (i.hasNext() && eventsToSend.size() < MAX_EVENTS_PER_SEND) {
+                                    eventsToSend.add(i.next());
+                                }
 
-                eventsToRemoveAfterSend = eventsToSend.size();
+                                eventsToRemoveAfterSend = eventsToSend.size();
 
-                return eventsToSend;
-            }
-        }
+                                return eventsToSend;
+                            }
+                        }
 
-        private String pickDestinationUrl() {
-            Course course = courseDb.getCurrentCourse();
-            if (course == null) {
-                log.log(Level.FINE, "Not sending events because no course selected");
-                return null;
-            }
+                        private String pickDestinationUrl() {
+                            Course course = courseDb.getCurrentCourse();
+                            if (course == null) {
+                                log.log(
+                                        Level.FINE,
+                                        "Not sending events because no course selected");
+                                return null;
+                            }
 
-            List<String> urls = course.getSpywareUrls();
-            if (urls == null || urls.isEmpty()) {
-                log.log(Level.INFO, "Not sending events because no URL provided by server");
-                return null;
-            }
+                            List<String> urls = course.getSpywareUrls();
+                            if (urls == null || urls.isEmpty()) {
+                                log.log(
+                                        Level.INFO,
+                                        "Not sending events because no URL provided by server");
+                                return null;
+                            }
 
-            String url = urls.get(random.nextInt(urls.size()));
+                            String url = urls.get(random.nextInt(urls.size()));
 
-            return url;
-        }
+                            return url;
+                        }
 
-        /**
-         * Converts events to data[] and sends it to defined url.
-         */
-        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
-            NbTmcSettings settings = NbTmcSettings.getDefault();
-            Optional<Course> currentCourse = settings.getCurrentCourse();
-            if (!currentCourse.isPresent()) {
-                return;
-            }
-            addCorrectSpywareUrl(url, currentCourse);
-            final ProgressHandle progress = ProgressHandleFactory.createSystemHandle("Sending stats");
-            progress.start();
-            try {
-                byte[] data = convertEventsToByteArray(eventsToSend);
-                ListenableFuture<List<HttpResult>> spywareSending =
-                        TmcCoreSingleton.getInstance().sendSpywareDiffs(data);
-                Futures.addCallback(spywareSending, new FutureCallback<List<HttpResult>>() {
-                    @Override
-                    public void onSuccess(List<HttpResult> success) {
-                        clearAfterSend(success);
-                    }
-                    @Override
-                    public void onFailure(Throwable thrwbl) {
-                        clearAfterSend(new ArrayList<HttpResult>());
-                        System.err.println(thrwbl.getMessage());
-                    }
-                    private void clearAfterSend(List<HttpResult> success) {
+                        /**
+                         * Converts events to data[] and sends it to defined url.
+                         */
+                        private void doSend(
+                                final ArrayList<LoggableEvent> eventsToSend, final String url) {
+                            NbTmcSettings settings = NbTmcSettings.getDefault();
+                            Optional<Course> currentCourse = settings.getCurrentCourse();
+                            if (!currentCourse.isPresent()) {
+                                return;
+                            }
+                            addCorrectSpywareUrl(url, currentCourse);
+                            final ProgressHandle progress =
+                                    ProgressHandleFactory.createSystemHandle("Sending stats");
+                            progress.start();
+                            try {
+                                byte[] data = convertEventsToByteArray(eventsToSend);
+                                ListenableFuture<List<HttpResult>> spywareSending =
+                                        TmcCoreSingleton.getInstance().sendSpywareDiffs(data);
+                                Futures.addCallback(
+                                        spywareSending,
+                                        new FutureCallback<List<HttpResult>>() {
+                                            @Override
+                                            public void onSuccess(List<HttpResult> success) {
+                                                clearAfterSend(success);
+                                            }
 
-                        progress.finish();
-                        log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[]{eventsToSend.size(), url});
-                        removeSentEventsFromQueue();
-                        // If saving fails now (or is already running and fails later)
-                        // then we may end up sending duplicate events later.
-                        // This will hopefully be very rare.
-                        savingTask.start();
-                    }
-                });
+                                            @Override
+                                            public void onFailure(Throwable thrwbl) {
+                                                clearAfterSend(new ArrayList<HttpResult>());
+                                                System.err.println(thrwbl.getMessage());
+                                            }
 
-            } catch (TmcCoreException ex) {
-                progress.finish();
-                Exceptions.printStackTrace(ex);
-            }
-        }
+                                            private void clearAfterSend(List<HttpResult> success) {
 
-        private void addCorrectSpywareUrl(final String url, Optional<Course> currentCourse) {
-            List<String> spywareUrls = new ArrayList<String>();
-            String finalUrl = serverAccess.addApiCallQueryParameters(url);
-            spywareUrls.add(finalUrl);
-            currentCourse.get().setSpywareUrls(spywareUrls);
-        }
+                                                progress.finish();
+                                                log.log(
+                                                        Level.INFO,
+                                                        "Sent {0} events successfully to {1}",
+                                                        new Object[] {eventsToSend.size(), url});
+                                                removeSentEventsFromQueue();
+                                                // If saving fails now (or is already running and fails later)
+                                                // then we may end up sending duplicate events later.
+                                                // This will hopefully be very rare.
+                                                savingTask.start();
+                                            }
+                                        });
 
-        private byte[] convertEventsToByteArray(final ArrayList<LoggableEvent> eventsToSend) throws RuntimeException {
-            byte[] data;
-            try {
-                data = serverAccess.eventListToPostBody(eventsToSend);
-            } catch (IOException ex) {
-                throw ExceptionUtils.toRuntimeException(ex);
-            }
-            return data;
-        }
+                            } catch (TmcCoreException ex) {
+                                progress.finish();
+                                Exceptions.printStackTrace(ex);
+                            }
+                        }
 
-        private void removeSentEventsFromQueue() {
-            synchronized (sendQueue) {
-                assert (eventsToRemoveAfterSend <= sendQueue.size());
-                while (eventsToRemoveAfterSend > 0) {
-                    sendQueue.pop();
-                    eventsToRemoveAfterSend--;
-                }
-            }
-        }
+                        private void addCorrectSpywareUrl(
+                                final String url, Optional<Course> currentCourse) {
+                            List<String> spywareUrls = new ArrayList<String>();
+                            String finalUrl = serverAccess.addApiCallQueryParameters(url);
+                            spywareUrls.add(finalUrl);
+                            currentCourse.get().setSpywareUrls(spywareUrls);
+                        }
 
-    }, TmcRequestProcessor.instance);
+                        private byte[] convertEventsToByteArray(
+                                final ArrayList<LoggableEvent> eventsToSend)
+                                throws RuntimeException {
+                            byte[] data;
+                            try {
+                                data = serverAccess.eventListToPostBody(eventsToSend);
+                            } catch (IOException ex) {
+                                throw ExceptionUtils.toRuntimeException(ex);
+                            }
+                            return data;
+                        }
 
-    private SingletonTask savingTask = new SingletonTask(new Runnable() {
-        @Override
-        public void run() {
-            try {
-                LoggableEvent[] eventsToSave;
-                synchronized (sendQueue) {
-                    eventsToSave = Iterables.toArray(sendQueue, LoggableEvent.class);
-                }
-                eventStore.save(eventsToSave);
-            } catch (IOException ex) {
-                log.log(Level.WARNING, "Failed to save events", ex);
-            }
-        }
-    }, TmcRequestProcessor.instance);
+                        private void removeSentEventsFromQueue() {
+                            synchronized (sendQueue) {
+                                assert (eventsToRemoveAfterSend <= sendQueue.size());
+                                while (eventsToRemoveAfterSend > 0) {
+                                    sendQueue.pop();
+                                    eventsToRemoveAfterSend--;
+                                }
+                            }
+                        }
+                    },
+                    TmcRequestProcessor.instance);
+
+    private SingletonTask savingTask =
+            new SingletonTask(
+                    new Runnable() {
+                        @Override
+                        public void run() {
+                            try {
+                                LoggableEvent[] eventsToSave;
+                                synchronized (sendQueue) {
+                                    eventsToSave =
+                                            Iterables.toArray(sendQueue, LoggableEvent.class);
+                                }
+                                eventStore.save(eventsToSave);
+                            } catch (IOException ex) {
+                                log.log(Level.WARNING, "Failed to save events", ex);
+                            }
+                        }
+                    },
+                    TmcRequestProcessor.instance);
 }

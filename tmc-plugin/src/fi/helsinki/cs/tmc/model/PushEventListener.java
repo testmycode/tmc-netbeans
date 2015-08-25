@@ -28,13 +28,15 @@ public class PushEventListener {
     public static class ReviewAvailableEvent implements TmcEvent {
         public final String exerciseName;
         public final String url;
+
         public ReviewAvailableEvent(String exerciseName, String url) {
             this.exerciseName = exerciseName;
             this.url = url;
         }
     }
-    
+
     private static PushEventListener instance;
+
     public static void start() {
         if (instance == null) {
             instance = new PushEventListener();
@@ -42,7 +44,7 @@ public class PushEventListener {
             log.warning("PushEventListener.start() was called more than once");
         }
     }
-    
+
     private NbTmcSettings settings;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
@@ -54,26 +56,32 @@ public class PushEventListener {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
-        
-        this.eventBus.subscribeDependent(new TmcEventListener() {
-            public void receive(NbTmcSettings.SavedEvent e) {
-                reconnectSoon();
-            }
-            
-            public void receive(CourseDb.ChangedEvent e) {
-                reconnectSoon();
-            }
-        }, this);
-        
+
+        this
+                .eventBus.subscribeDependent(
+                        new TmcEventListener() {
+                            public void receive(NbTmcSettings.SavedEvent e) {
+                                reconnectSoon();
+                            }
+
+                            public void receive(CourseDb.ChangedEvent e) {
+                                reconnectSoon();
+                            }
+                        },
+                        this);
+
         java.util.Timer timer = new java.util.Timer("PushEventListener reconnect", true);
-        timer.schedule(new TimerTask() {
-            @Override
-            public void run() {
-                ensureConnected();
-            }
-        }, 0, CONNECTION_CHECK_INTERVAL);
+        timer.schedule(
+                new TimerTask() {
+                    @Override
+                    public void run() {
+                        ensureConnected();
+                    }
+                },
+                0,
+                CONNECTION_CHECK_INTERVAL);
     }
-    
+
     private synchronized void ensureConnected() {
         if (client == null || client.isDisconnected()) {
             initClientIfPossible();
@@ -81,16 +89,17 @@ public class PushEventListener {
     }
 
     private void reconnectSoon() {
-        Thread t = new Thread() {
-            @Override
-            public void run() {
-                reconnect();
-            }
-        };
+        Thread t =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        reconnect();
+                    }
+                };
         t.setDaemon(true);
         t.start();
     }
-    
+
     private synchronized void reconnect() {
         if (client != null && client.isConnected()) {
             shouldReconnect = true;
@@ -99,7 +108,7 @@ public class PushEventListener {
             initClientIfPossible();
         }
     }
-    
+
     private synchronized void initClientIfPossible() {
         Course course = courseDb.getCurrentCourse();
         if (course == null) {
@@ -110,7 +119,7 @@ public class PushEventListener {
             log.fine("Not connecting to comet since server settings are not set");
             return;
         }
-        
+
         String cometUrl = course.getCometUrl();
         if (cometUrl == null) {
             return;
@@ -129,13 +138,13 @@ public class PushEventListener {
         WebSocketTransport.Factory factory = new WebSocketTransport.Factory();
         return factory.newClientTransport(cometUrl, transportOpts);
     }
-    
+
     private boolean hasEnoughSettings() {
         return !"".equals(settings.getUsername())
                 && !"".equals(settings.getPassword())
                 && !"".equals(settings.getServerAddress());
     }
-    
+
     public ClientSession.Extension getAuthenticationExtension(final Map<String, Object> fields) {
         return new ClientSession.Extension() {
             @Override
@@ -160,7 +169,7 @@ public class PushEventListener {
             }
         };
     }
-    
+
     private Map<String, Object> getAuthFields() {
         HashMap<String, Object> result = new HashMap<String, Object>();
         result.put("username", settings.getUsername());
@@ -168,30 +177,32 @@ public class PushEventListener {
         result.put("serverBaseUrl", settings.getServerAddress());
         return result;
     }
-    
-    private MessageListener handshakeListener = new MessageListener() {
-        @Override
-        public void onMessage(ClientSessionChannel csc, Message msg) {
-            if (msg.isSuccessful()) {
-                subscribeToReviews();
-                log.fine("Comet handshake successful.");
-            } else {
-                log.info("Comet handshake with failed. Will retry.");
-            }
-        }
-    };
-    
-    private MessageListener disconnectListener = new MessageListener() {
-        @Override
-        public void onMessage(ClientSessionChannel csc, Message msg) {
-            if (msg.isSuccessful()) {
-                handleDisconnect();
-            } else {
-                log.warning("WTF, received a failed comet disconnect msg.");
-            }
-        }
-    };
-    
+
+    private MessageListener handshakeListener =
+            new MessageListener() {
+                @Override
+                public void onMessage(ClientSessionChannel csc, Message msg) {
+                    if (msg.isSuccessful()) {
+                        subscribeToReviews();
+                        log.fine("Comet handshake successful.");
+                    } else {
+                        log.info("Comet handshake with failed. Will retry.");
+                    }
+                }
+            };
+
+    private MessageListener disconnectListener =
+            new MessageListener() {
+                @Override
+                public void onMessage(ClientSessionChannel csc, Message msg) {
+                    if (msg.isSuccessful()) {
+                        handleDisconnect();
+                    } else {
+                        log.warning("WTF, received a failed comet disconnect msg.");
+                    }
+                }
+            };
+
     private synchronized void handleDisconnect() {
         if (shouldReconnect) {
             shouldReconnect = false;
@@ -200,22 +211,23 @@ public class PushEventListener {
             log.info("Comet disconnected without plans for immediate reconnect.");
         }
     }
-    
+
     private synchronized void subscribeToReviews() {
         String username = settings.getUsername();
         String channel = "/broadcast/user/" + username + "/review-available";
         client.getChannel(channel).subscribe(reviewAvailableListener);
     }
-    
-    private MessageListener reviewAvailableListener = new MessageListener() {
-        @Override
-        public void onMessage(ClientSessionChannel csc, Message msg) {
-            log.log(Level.INFO, "Comet message on review-available: {0}", msg);
-            Map<String, Object> data = msg.getDataAsMap();
-            eventBus.post(new ReviewAvailableEvent(
-                    data.get("exercise_name").toString(),
-                    data.get("url").toString()
-                    ));
-        }
-    };
+
+    private MessageListener reviewAvailableListener =
+            new MessageListener() {
+                @Override
+                public void onMessage(ClientSessionChannel csc, Message msg) {
+                    log.log(Level.INFO, "Comet message on review-available: {0}", msg);
+                    Map<String, Object> data = msg.getDataAsMap();
+                    eventBus.post(
+                            new ReviewAvailableEvent(
+                                    data.get("exercise_name").toString(),
+                                    data.get("url").toString()));
+                }
+            };
 }

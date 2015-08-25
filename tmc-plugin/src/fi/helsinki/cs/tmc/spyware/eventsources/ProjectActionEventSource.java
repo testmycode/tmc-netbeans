@@ -36,12 +36,14 @@ public class ProjectActionEventSource implements ProjectActionCaptor.Listener {
         if (ex != null) {
             Object data = Collections.singletonMap("command", command);
             String jsonData = new Gson().toJson(data);
-            LoggableEvent event = new LoggableEvent(ex, "project_action", jsonData.getBytes(Charset.forName("UTF-8")));
+            LoggableEvent event =
+                    new LoggableEvent(
+                            ex, "project_action", jsonData.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
-            log.log(Level.FINE, "Project action event {0} for {1}", new Object[] {
-                command,
-                projectInfo.getProjectName()
-            });
+            log.log(
+                    Level.FINE,
+                    "Project action event {0} for {1}",
+                    new Object[] {command, projectInfo.getProjectName()});
         }
     }
 }

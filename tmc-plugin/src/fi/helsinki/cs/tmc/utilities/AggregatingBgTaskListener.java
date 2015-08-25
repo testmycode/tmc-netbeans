@@ -14,7 +14,8 @@ public class AggregatingBgTaskListener<T> implements BgTaskListener<T> {
     private ArrayList<T> received;
     private boolean complete = false;
 
-    public AggregatingBgTaskListener(int expectedCount, BgTaskListener<Collection<T>> aggregateListener) {
+    public AggregatingBgTaskListener(
+            int expectedCount, BgTaskListener<Collection<T>> aggregateListener) {
         this.expectedCount = expectedCount;
         this.aggregateListener = aggregateListener;
         this.received = new ArrayList<T>(expectedCount);
@@ -24,7 +25,8 @@ public class AggregatingBgTaskListener<T> implements BgTaskListener<T> {
     public void bgTaskReady(T result) {
         if (!complete) {
             if (received.size() == expectedCount) {
-                throw new IllegalStateException(this.getClass().getSimpleName() + " expected only " + expectedCount);
+                throw new IllegalStateException(
+                        this.getClass().getSimpleName() + " expected only " + expectedCount);
             }
             received.add(result);
             if (received.size() == expectedCount) {

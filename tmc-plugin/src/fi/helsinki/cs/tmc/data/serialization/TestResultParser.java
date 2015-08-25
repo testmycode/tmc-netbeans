@@ -19,7 +19,7 @@ import org.apache.commons.io.FileUtils;
 
 public class TestResultParser {
 
-  private static final Logger log = Logger.getLogger(TestResultParser.class.getName());
+    private static final Logger log = Logger.getLogger(TestResultParser.class.getName());
 
     public TestRunResult parseTestResults(File resultsFile) throws IOException {
         String resultsJson = FileUtils.readFileToString(resultsFile, "UTF-8");
@@ -27,9 +27,10 @@ public class TestResultParser {
     }
 
     public TestRunResult parseTestResults(String resultsJson) {
-        Gson gson = new GsonBuilder()
-            .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
-            .create();
+        Gson gson =
+                new GsonBuilder()
+                        .registerTypeAdapter(StackTraceElement.class, new StackTraceSerializer())
+                        .create();
 
         TestCaseList testCaseRecords = gson.fromJson(resultsJson, TestCaseList.class);
         if (testCaseRecords == null) {
@@ -43,10 +44,13 @@ public class TestResultParser {
         return new TestRunResult(testCaseResults);
     }
 
-    public TestRunResult parseCTestResults(File resultsFile, File valgrindLog, ValgrindStrategy valgrindStrategy) throws Exception {
+    public TestRunResult parseCTestResults(
+            File resultsFile, File valgrindLog, ValgrindStrategy valgrindStrategy)
+            throws Exception {
         // CTestResultParser could use refactoring. Duplicates parseTestResults and is kinda messy.
         log.log(INFO, "Starting to parse C test results.");
-        CTestResultParser parser = new CTestResultParser(resultsFile, valgrindLog, valgrindStrategy);
+        CTestResultParser parser =
+                new CTestResultParser(resultsFile, valgrindLog, valgrindStrategy);
         log.log(INFO, "C test results parser created.");
         parser.parseTestOutput();
         log.log(INFO, "C test results parsed.");

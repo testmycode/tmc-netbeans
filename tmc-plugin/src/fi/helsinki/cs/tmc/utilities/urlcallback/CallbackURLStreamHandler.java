@@ -18,7 +18,7 @@ import java.util.Map;
  * Handles URLs like {@code callback:///foo} where {@code foo} is a callback
  * registered via {@link #registerCallback(java.lang.String, fi.helsinki.cs.tmc.utilities.urlcallback.URLCallback)}.
  */
-@URLStreamHandlerRegistration(protocol="callback")
+@URLStreamHandlerRegistration(protocol = "callback")
 public class CallbackURLStreamHandler extends URLStreamHandler {
 
     private static final Map<String, URLCallback> callbacks = Maps.newHashMap();

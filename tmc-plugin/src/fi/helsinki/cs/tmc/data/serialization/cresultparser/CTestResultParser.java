@@ -34,7 +34,8 @@ public class CTestResultParser {
     private Exercise.ValgrindStrategy valgrindStrategy;
     private ArrayList<CTestCase> tests;
 
-    public CTestResultParser(File testResults, File valgrindOutput, ValgrindStrategy valgrindStrategy) {
+    public CTestResultParser(
+            File testResults, File valgrindOutput, ValgrindStrategy valgrindStrategy) {
         this.testResults = testResults;
         this.valgrindOutput = valgrindOutput;
         this.valgrindStrategy = valgrindStrategy;
@@ -48,7 +49,6 @@ public class CTestResultParser {
         } else {
             addWarningToValgrindOutput();
         }
-
     }
 
     public List<CTestCase> getTestCases() {
@@ -65,8 +65,8 @@ public class CTestResultParser {
         return tcaseResults;
     }
 
-
-    private ArrayList<CTestCase> parseTestCases(File testOutput) throws ParserConfigurationException, IOException {
+    private ArrayList<CTestCase> parseTestCases(File testOutput)
+            throws ParserConfigurationException, IOException {
         DocumentBuilderFactory dbFactory = DocumentBuilderFactory.newInstance();
 
         DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
@@ -110,25 +110,30 @@ public class CTestResultParser {
         String message;
         String platform = System.getProperty("os.name").toLowerCase();
         if (platform.contains("linux")) {
-            message = "Please install valgrind. For Debian-based distributions, run `sudo apt-get install valgrind`.";
+            message =
+                    "Please install valgrind. For Debian-based distributions, run `sudo apt-get install valgrind`.";
         } else if (platform.contains("mac")) {
-            message = "Please install valgrind. For OS X we recommend using homebrew (http://mxcl.github.com/homebrew/) and `brew install valgrind`.";
+            message =
+                    "Please install valgrind. For OS X we recommend using homebrew (http://mxcl.github.com/homebrew/) and `brew install valgrind`.";
         } else if (platform.contains("windows")) {
             message = "Windows doesn't support valgrind yet.";
         } else {
             message = "Please install valgrind if possible.";
         }
         for (int i = 0; i < tests.size(); i++) {
-            tests.get(i).setValgrindTrace(
-                    "Warning, valgrind not available - unable to run local memory tests\n"
-                    + message
-                    + "\nYou may also submit the exercise to the server to have it memory-tested.");
+            tests
+                    .get(i)
+                    .setValgrindTrace(
+                            "Warning, valgrind not available - unable to run local memory tests\n"
+                                    + message
+                                    + "\nYou may also submit the exercise to the server to have it memory-tested.");
         }
     }
 
     private void addValgrindOutput() throws FileNotFoundException {
         Scanner scanner = new Scanner(valgrindOutput, "UTF-8");
-        String parentOutput = ""; // Contains total amount of memory used and such things. Useful if we later want to add support for testing memory usage
+        String parentOutput =
+                ""; // Contains total amount of memory used and such things. Useful if we later want to add support for testing memory usage
         String[] outputs = new String[tests.size()];
         int[] pids = new int[tests.size()];
         int[] errors = new int[tests.size()];
@@ -154,7 +159,8 @@ public class CTestResultParser {
                 int outputIndex = findIndex(pid, pids);
                 if (outputIndex == -1) {
                     if (!warningLogged) {
-                        log.warning("Valgrind output has more PIDs than the expected (# of test cases + 1).");
+                        log.warning(
+                                "Valgrind output has more PIDs than the expected (# of test cases + 1).");
                         warningLogged = true;
                     }
                     continue;

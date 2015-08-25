@@ -33,22 +33,24 @@ public class UnlockExercisesAction {
         }
 
         CancellableCallable<Void> task = server.getUnlockingTask(course);
-        BgTask.start("Unlocking exercises", task, new BgTaskListener<Void>() {
-            @Override
-            public void bgTaskReady(Void result) {
-                if (successListener != null) {
-                    successListener.actionPerformed(null);
-                }
-            }
+        BgTask.start(
+                "Unlocking exercises",
+                task,
+                new BgTaskListener<Void>() {
+                    @Override
+                    public void bgTaskReady(Void result) {
+                        if (successListener != null) {
+                            successListener.actionPerformed(null);
+                        }
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to unlock exercises.", ex);
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        dialogs.displayError("Failed to unlock exercises.", ex);
+                    }
+                });
     }
 }

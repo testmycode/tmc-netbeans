@@ -29,7 +29,11 @@ import javax.swing.SwingUtilities;
 
 public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
     private enum ChangeType {
-        FILE_CREATE, FOLDER_CREATE, FILE_CHANGE, FILE_DELETE, FILE_RENAME;
+        FILE_CREATE,
+        FOLDER_CREATE,
+        FILE_CHANGE,
+        FILE_DELETE,
+        FILE_RENAME;
     }
 
     private static final Logger log = Logger.getLogger(SourceSnapshotEventSource.class.getName());
@@ -55,17 +59,18 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
      */
     @Override
     public void close() {
-        TmcSwingUtilities.ensureEdt(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    closed = true;
-                    FileUtil.removeFileChangeListener(SourceSnapshotEventSource.this);
-                    snapshotterThreads.joinAll();
-                } catch (InterruptedException ex) {
-                }
-            }
-        });
+        TmcSwingUtilities.ensureEdt(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        try {
+                            closed = true;
+                            FileUtil.removeFileChangeListener(SourceSnapshotEventSource.this);
+                            snapshotterThreads.joinAll();
+                        } catch (InterruptedException ex) {
+                        }
+                    }
+                });
     }
 
     @Override
@@ -94,50 +99,52 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
 
     @Override
-    public void fileAttributeChanged(FileAttributeEvent fae) {
-    }
+    public void fileAttributeChanged(FileAttributeEvent fae) {}
 
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
         String filePath = TmcFileUtils.tryGetPathRelativeToProject(fileObject);
-        if(filePath == null) {
+        if (filePath == null) {
             return;
         }
-        String metadata = JsonMaker.create()
-                .add("cause", changeType.name().toLowerCase())
-                .add("file", filePath)
-                .toString();
+        String metadata =
+                JsonMaker.create()
+                        .add("cause", changeType.name().toLowerCase())
+                        .add("file", filePath)
+                        .toString();
         invokeSnapshotThreadViaEdt(fileObject, metadata);
     }
 
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
         String filePath = TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile());
-        if(filePath == null) {
+        if (filePath == null) {
             return;
         }
-        String metadata = JsonMaker.create()
-                .add("cause", changeType.name().toLowerCase())
-                .add("file", filePath)
-                .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt())
-                .toString();
+        String metadata =
+                JsonMaker.create()
+                        .add("cause", changeType.name().toLowerCase())
+                        .add("file", filePath)
+                        .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt())
+                        .toString();
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
     }
 
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
     private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final String metadata) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                if (closed) {
-                    return;
-                }
-                try {
-                    startSnapshotThread(fileObject, metadata);
-                } catch (Exception e) {
-                    log.log(Level.WARNING, "Failed to start snapshot thread", e);
-                }
-            }
-        });
+        SwingUtilities.invokeLater(
+                new Runnable() {
+                    @Override
+                    public void run() {
+                        if (closed) {
+                            return;
+                        }
+                        try {
+                            startSnapshotThread(fileObject, metadata);
+                        } catch (Exception e) {
+                            log.log(Level.WARNING, "Failed to start snapshot thread", e);
+                        }
+                    }
+                });
     }
 
     private void startSnapshotThread(FileObject changedFile, String metadata) {
@@ -172,7 +179,11 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         private final TmcProjectInfo projectInfo;
         private final String metadata;
 
-        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo, String metadata) {
+        private SnapshotThread(
+                EventReceiver receiver,
+                Exercise exercise,
+                TmcProjectInfo projectInfo,
+                String metadata) {
             super("Source snapshot");
             this.receiver = receiver;
             this.exercise = exercise;
@@ -186,7 +197,8 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             // For now we just accept that. Not sure if the FileObject API would allow some sort of
             // global locking of the project.
             File projectDir = projectInfo.getProjectDirAsFile();
-            RecursiveZipper.ZippingDecider zippingDecider = new ZippingDeciderWrapper(projectInfo, projectInfo.getZippingDecider());
+            RecursiveZipper.ZippingDecider zippingDecider =
+                    new ZippingDeciderWrapper(projectInfo, projectInfo.getZippingDecider());
             RecursiveZipper zipper = new RecursiveZipper(projectDir, zippingDecider);
             try {
                 byte[] data = zipper.zipProjectSources();
@@ -223,7 +235,8 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         private final TmcProjectInfo projectInfo;
         private final RecursiveZipper.ZippingDecider subdecider;
 
-        public ZippingDeciderWrapper(TmcProjectInfo projectInfo, RecursiveZipper.ZippingDecider subdecider) {
+        public ZippingDeciderWrapper(
+                TmcProjectInfo projectInfo, RecursiveZipper.ZippingDecider subdecider) {
             this.projectInfo = projectInfo;
             this.subdecider = subdecider;
         }

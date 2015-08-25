@@ -21,28 +21,31 @@ import java.util.concurrent.ExecutionException;
 public final class CheckstyleRunHandler implements Runnable {
 
     private Project project;
-    private final ConvenientDialogDisplayer dialogDisplayer = ConvenientDialogDisplayer.getDefault();
+    private final ConvenientDialogDisplayer dialogDisplayer =
+            ConvenientDialogDisplayer.getDefault();
     private ValidationResult validationResult = new CheckstyleResult();
 
     public void performAction(final ResultCollector resultCollector, final Project project) {
         this.project = project;
 
-        BgTask.start("Running validations", this, new BgTaskListener<Object>() {
+        BgTask.start(
+                "Running validations",
+                this,
+                new BgTaskListener<Object>() {
 
-            @Override
-            public void bgTaskFailed(final Throwable exception) {
-                dialogDisplayer.displayError("Failed to validate the code.");
-            }
+                    @Override
+                    public void bgTaskFailed(final Throwable exception) {
+                        dialogDisplayer.displayError("Failed to validate the code.");
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskReady(final Object nothing) {
-                resultCollector.setValidationResult(validationResult);
-            }
-        });
+                    @Override
+                    public void bgTaskReady(final Object nothing) {
+                        resultCollector.setValidationResult(validationResult);
+                    }
+                });
     }
 
     @Override
@@ -51,7 +54,8 @@ public final class CheckstyleRunHandler implements Runnable {
             final TmcProjectInfo projectInfo = ProjectMediator.getInstance().wrapProject(project);
             ProjectMediator.getInstance().saveAllFiles();
             ListenableFuture<ValidationResult> result;
-            result = TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsPath());
+            result =
+                    TmcCoreSingleton.getInstance().runCheckstyle(projectInfo.getProjectDirAsPath());
             validationResult = result.get();
         } catch (InterruptedException ex) {
             Exceptions.printStackTrace(ex);

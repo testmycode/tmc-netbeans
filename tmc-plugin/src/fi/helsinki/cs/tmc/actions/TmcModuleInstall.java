@@ -34,62 +34,75 @@ public class TmcModuleInstall extends ModuleInstall {
 
     @Override
     public void restored() {
-        WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
-            @Override
-            public void run() {
-                CheckForNewExercisesOrUpdates.startTimer();
-                CheckForNewReviews.startTimer();
-                ReviewEventListener.start();
-                PushEventListener.start();
-                SpywareFacade.start();
+        WindowManager.getDefault()
+                .invokeWhenUIReady(
+                        new Runnable() {
+                            @Override
+                            public void run() {
+                                CheckForNewExercisesOrUpdates.startTimer();
+                                CheckForNewReviews.startTimer();
+                                ReviewEventListener.start();
+                                PushEventListener.start();
+                                SpywareFacade.start();
 
-                Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
+                                Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
 
-                SpecificationVersion currentVersion = getCurrentModuleVersion();
-                SpecificationVersion prevVersion = new SpecificationVersion(prefs.get(PREF_MODULE_VERSION, "0.0.0"));
-                if (!currentVersion.equals(prevVersion)) {
-                    try {
-                        doUpdateFromPreviousVersion(prevVersion);
-                    } catch (Exception ex) {
-                        log.log(Level.WARNING, "Error while upgrading from previous version", ex);
-                    }
-                    prefs.put(PREF_MODULE_VERSION, currentVersion.toString());
-                }
+                                SpecificationVersion currentVersion = getCurrentModuleVersion();
+                                SpecificationVersion prevVersion =
+                                        new SpecificationVersion(
+                                                prefs.get(PREF_MODULE_VERSION, "0.0.0"));
+                                if (!currentVersion.equals(prevVersion)) {
+                                    try {
+                                        doUpdateFromPreviousVersion(prevVersion);
+                                    } catch (Exception ex) {
+                                        log.log(
+                                                Level.WARNING,
+                                                "Error while upgrading from previous version",
+                                                ex);
+                                    }
+                                    prefs.put(PREF_MODULE_VERSION, currentVersion.toString());
+                                }
 
-                boolean isFirstRun = prefs.getBoolean(PREF_FIRST_RUN, true);
-                if (isFirstRun) {
-                    doFirstRun();
-                    prefs.putBoolean(PREF_FIRST_RUN, false);
-                } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
-                    LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
-                } else {
-                    refreshCourses();
-                }
-            }
-
-            private void refreshCourses() {
-                // Do full refresh.
-                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(
-                            new BgTaskListener<List<Course>>() {
-                                
-                        @Override
-                        public void bgTaskReady(List<Course> result) {
-                            new CheckForNewExercisesOrUpdates(true, false).run();
-                            if (CheckForUnopenedExercises.shouldRunOnStartup()) {
-                                new CheckForUnopenedExercises().run();
+                                boolean isFirstRun = prefs.getBoolean(PREF_FIRST_RUN, true);
+                                if (isFirstRun) {
+                                    doFirstRun();
+                                    prefs.putBoolean(PREF_FIRST_RUN, false);
+                                } else if (new ServerAccess().needsOnlyPassword()
+                                        && CourseDb.getInstance().getCurrentCourse() != null) {
+                                    LoginDialog.display(
+                                            new CheckForNewExercisesOrUpdates(false, false));
+                                } else {
+                                    refreshCourses();
+                                }
                             }
-                        }
 
-                        @Override
-                        public void bgTaskCancelled() {
-                        }
+                            private void refreshCourses() {
+                                // Do full refresh.
+                                new RefreshCoursesAction()
+                                        .addDefaultListener(false, true)
+                                        .addListener(
+                                                new BgTaskListener<List<Course>>() {
 
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                        }
-                    }).run();
-            }
-        });
+                                                    @Override
+                                                    public void bgTaskReady(List<Course> result) {
+                                                        new CheckForNewExercisesOrUpdates(
+                                                                        true, false)
+                                                                .run();
+                                                        if (CheckForUnopenedExercises
+                                                                .shouldRunOnStartup()) {
+                                                            new CheckForUnopenedExercises().run();
+                                                        }
+                                                    }
+
+                                                    @Override
+                                                    public void bgTaskCancelled() {}
+
+                                                    @Override
+                                                    public void bgTaskFailed(Throwable ex) {}
+                                                })
+                                        .run();
+                            }
+                        });
     }
 
     private SpecificationVersion getCurrentModuleVersion() {
@@ -121,13 +134,18 @@ public class TmcModuleInstall extends ModuleInstall {
 
     private void removeOldUpdateCenterFromBefore031() {
         ArrayList<UpdateUnitProvider> providersToRemove = new ArrayList<UpdateUnitProvider>();
-        for (UpdateUnitProvider provider : UpdateUnitProviderFactory.getDefault().getUpdateUnitProviders(false)) {
+        for (UpdateUnitProvider provider :
+                UpdateUnitProviderFactory.getDefault().getUpdateUnitProviders(false)) {
             if (provider == null || provider.getProviderURL() == null) {
                 continue; // Users have had NPEs here :(
             }
             String url = provider.getProviderURL().toString();
-            if (url.startsWith("http://tmc.mooc.fi/updates") && !url.contains("tmc-netbeans-author")) {
-                log.log(Level.INFO, "Removing obsolete update center: {0}", provider.getDisplayName());
+            if (url.startsWith("http://tmc.mooc.fi/updates")
+                    && !url.contains("tmc-netbeans-author")) {
+                log.log(
+                        Level.INFO,
+                        "Removing obsolete update center: {0}",
+                        provider.getDisplayName());
                 providersToRemove.add(provider);
             }
         }

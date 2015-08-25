@@ -92,16 +92,16 @@ public class AdHocHttpServer {
     }
 
     private void setupHttpClientIncantations() {
-        HttpProcessor proc = new ImmutableHttpProcessor(new HttpResponseInterceptor[]{
-            new ResponseDate(),
-            new ResponseServer(),
-            new ResponseContent(),
-            new ResponseConnControl()
-        });
+        HttpProcessor proc =
+                new ImmutableHttpProcessor(
+                        new HttpResponseInterceptor[] {
+                            new ResponseDate(),
+                            new ResponseServer(),
+                            new ResponseContent(),
+                            new ResponseConnControl()
+                        });
 
-        httpService = new HttpService(
-                proc,
-                handlers);
+        httpService = new HttpService(proc, handlers);
     }
 
     private void startThread() {
@@ -130,50 +130,52 @@ public class AdHocHttpServer {
         }
     }
 
-    private Runnable inThread = new Runnable() {
-        @Override
-        public void run() {
-            while (!Thread.interrupted()) {
-                Socket socket = null;
-                try {
-                    debug("Accepting at port " + serverSocket.getLocalPort());
-                    try {
-                        socket = serverSocket.accept();
-                    } catch (SocketException ex) {
-                        if (Thread.interrupted()) {
-                            break;
-                        } else {
-                            throw ex;
-                        }
-                    }
+    private Runnable inThread =
+            new Runnable() {
+                @Override
+                public void run() {
+                    while (!Thread.interrupted()) {
+                        Socket socket = null;
+                        try {
+                            debug("Accepting at port " + serverSocket.getLocalPort());
+                            try {
+                                socket = serverSocket.accept();
+                            } catch (SocketException ex) {
+                                if (Thread.interrupted()) {
+                                    break;
+                                } else {
+                                    throw ex;
+                                }
+                            }
 
-                    debug("Got connection");
-                    DefaultBHttpServerConnection conn = new DefaultBHttpServerConnection(5000);
-                    conn.bind(socket);
-                    HttpContext ctx = new BasicHttpContext(null);
-                    while (!Thread.currentThread().isInterrupted() && conn.isOpen()) {
-                        httpService.handleRequest(conn, ctx);
-                        requestCounter.release();
-                    }
-                    debug("Connection processed");
-                } catch (ConnectionClosedException ex) {
-                    // No problem I think
-                } catch (Exception ex) {
-                    inThreadException = ex;
-                    debug("Exception: " + ex);
-                    break;
-                } finally {
-                    try {
-                        if (socket != null) {
-                            socket.close();
+                            debug("Got connection");
+                            DefaultBHttpServerConnection conn =
+                                    new DefaultBHttpServerConnection(5000);
+                            conn.bind(socket);
+                            HttpContext ctx = new BasicHttpContext(null);
+                            while (!Thread.currentThread().isInterrupted() && conn.isOpen()) {
+                                httpService.handleRequest(conn, ctx);
+                                requestCounter.release();
+                            }
+                            debug("Connection processed");
+                        } catch (ConnectionClosedException ex) {
+                            // No problem I think
+                        } catch (Exception ex) {
+                            inThreadException = ex;
+                            debug("Exception: " + ex);
+                            break;
+                        } finally {
+                            try {
+                                if (socket != null) {
+                                    socket.close();
+                                }
+                            } catch (IOException ex) {
+                                Exceptions.printStackTrace(ex);
+                            }
                         }
-                    } catch (IOException ex) {
-                        Exceptions.printStackTrace(ex);
                     }
                 }
-            }
-        }
-    };
+            };
 
     protected void debug(Object msg) {
         if (debugEnabled) {

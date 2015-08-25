@@ -48,7 +48,13 @@ public final class ResultCollector {
 
         boolean ready = testCaseResultsSet && validationResultsSet;
         if (ready) {
-            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, isSubmittable());
+            TestResultWindow.get()
+                    .showResults(
+                            exercise,
+                            testCaseResults,
+                            validationResults,
+                            submissionCallback,
+                            isSubmittable());
         }
     }
 

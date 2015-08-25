@@ -23,7 +23,7 @@ public class LazyHashMap<K, V> extends HashMap<K, V> {
             } catch (Exception ex) {
                 throw ExceptionUtils.toRuntimeException(ex);
             }
-            put((K)key, v);
+            put((K) key, v);
         }
         return v;
     }

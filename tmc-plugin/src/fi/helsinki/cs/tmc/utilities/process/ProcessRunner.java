@@ -43,7 +43,11 @@ public class ProcessRunner implements Callable<ProcessResult> {
         String processTreeIdentifier = UUID.randomUUID().toString();
 
         @SuppressWarnings("unchecked")
-        String[] envp = makeEnvp(System.getenv(), Collections.singletonMap(PROCESS_TREE_IDENTIFIER_NAME, processTreeIdentifier));
+        String[] envp =
+                makeEnvp(
+                        System.getenv(),
+                        Collections.singletonMap(
+                                PROCESS_TREE_IDENTIFIER_NAME, processTreeIdentifier));
 
         Process process = Runtime.getRuntime().exec(command, envp, workDir);
 
@@ -67,12 +71,14 @@ public class ProcessRunner implements Callable<ProcessResult> {
 
             statusCode = process.waitFor();
         } catch (InterruptedException e) {
-            Map<String, String> destroyEnv = Collections.singletonMap(PROCESS_TREE_IDENTIFIER_NAME, processTreeIdentifier);
+            Map<String, String> destroyEnv =
+                    Collections.singletonMap(PROCESS_TREE_IDENTIFIER_NAME, processTreeIdentifier);
             ExternalProcessSupport.destroy(process, destroyEnv);
             throw e;
         }
 
-        return new ProcessResult(statusCode, stdoutBuf.toString("UTF-8"), stderrBuf.toString("UTF-8"));
+        return new ProcessResult(
+                statusCode, stdoutBuf.toString("UTF-8"), stderrBuf.toString("UTF-8"));
     }
 
     private String[] makeEnvp(Map<String, String>... envs) {
@@ -93,19 +99,20 @@ public class ProcessRunner implements Callable<ProcessResult> {
     }
 
     private Thread startReaderThread(final InputStream is, final OutputStream os) {
-        Thread thread = new Thread() {
-            @Override
-            public void run() {
-                try {
-                    FileUtil.copy(is, os);
-                } catch (IOException e) {
-                }
-                try {
-                    os.close();
-                } catch (IOException e) {
-                }
-            }
-        };
+        Thread thread =
+                new Thread() {
+                    @Override
+                    public void run() {
+                        try {
+                            FileUtil.copy(is, os);
+                        } catch (IOException e) {
+                        }
+                        try {
+                            os.close();
+                        } catch (IOException e) {
+                        }
+                    }
+                };
         thread.setDaemon(true);
         thread.start();
         return thread;

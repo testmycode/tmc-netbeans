@@ -33,7 +33,7 @@ public final class RefreshCoursesAction {
 
     private final TmcCore tmcCore;
     private final NbTmcSettings tmcSettings;
-    
+
     private static final Logger logger = Logger.getLogger(RefreshCoursesAction.class.getName());
 
     public RefreshCoursesAction() {
@@ -60,7 +60,8 @@ public final class RefreshCoursesAction {
         this.tmcCore = core;
     }
 
-    public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
+    public RefreshCoursesAction addDefaultListener(
+            boolean showDialogOnError, boolean updateCourseDb) {
         this.listeners.addListener(new DefaultListener(showDialogOnError, updateCourseDb));
         return this;
     }
@@ -71,88 +72,108 @@ public final class RefreshCoursesAction {
     }
 
     public void run() {
-        CancellableCallable<List<Course>> courseListTask = new CancellableCallable<List<Course>>() {
+        CancellableCallable<List<Course>> courseListTask =
+                new CancellableCallable<List<Course>>() {
 
-            ListenableFuture<List<Course>> lf;
-            @Override
-            public List<Course> call() throws Exception {
-                lf = tmcCore.listCourses();
-                return lf.get();
-            }
+                    ListenableFuture<List<Course>> lf;
 
-            @Override
-            public boolean cancel() {
-                return lf.cancel(true);
-            }
-        };
+                    @Override
+                    public List<Course> call() throws Exception {
+                        lf = tmcCore.listCourses();
+                        return lf.get();
+                    }
 
-        BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
+                    @Override
+                    public boolean cancel() {
+                        return lf.cancel(true);
+                    }
+                };
 
-            @Override
-            public void bgTaskReady(final List<Course> courses) {
-                final Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
-                if (currentCourseStub != null) {
-                    CancellableCallable<Course> currentCourseTask = new CancellableCallable<Course>() {
+        BgTask.start(
+                "Refreshing course list",
+                courseListTask,
+                new BgTaskListener<List<Course>>() {
 
-                        ListenableFuture<Course> lf;
-                        @Override
-                        public Course call() throws Exception {
-                            lf = tmcCore.getCourse(currentCourseStub.getDetailsUrlAsUri());
-                            return lf.get();
+                    @Override
+                    public void bgTaskReady(final List<Course> courses) {
+                        final Course currentCourseStub =
+                                CourseListUtils.getCourseByName(
+                                        courses, courseDb.getCurrentCourseName());
+                        if (currentCourseStub != null) {
+                            CancellableCallable<Course> currentCourseTask =
+                                    new CancellableCallable<Course>() {
+
+                                        ListenableFuture<Course> lf;
+
+                                        @Override
+                                        public Course call() throws Exception {
+                                            lf =
+                                                    tmcCore.getCourse(
+                                                            currentCourseStub.getDetailsUrlAsUri());
+                                            return lf.get();
+                                        }
+
+                                        @Override
+                                        public boolean cancel() {
+                                            lf.cancel(true);
+                                            listeners.bgTaskCancelled();
+                                            return true;
+                                        }
+                                    };
+
+                            BgTask.start(
+                                    "Loading course",
+                                    currentCourseTask,
+                                    new BgTaskListener<Course>() {
+                                        @Override
+                                        public void bgTaskReady(Course currentCourse) {
+                                            currentCourse.setExercisesLoaded(true);
+
+                                            ArrayList<Course> finalCourses =
+                                                    new ArrayList<Course>();
+                                            for (Course course : courses) {
+                                                if (course
+                                                        .getName()
+                                                        .equals(currentCourse.getName())) {
+                                                    finalCourses.add(currentCourse);
+                                                } else {
+                                                    finalCourses.add(course);
+                                                }
+                                            }
+                                            listeners.bgTaskReady(finalCourses);
+                                        }
+
+                                        @Override
+                                        public void bgTaskCancelled() {
+                                            listeners.bgTaskCancelled();
+                                        }
+
+                                        @Override
+                                        public void bgTaskFailed(Throwable ex) {
+                                            log.log(
+                                                    Level.INFO,
+                                                    "Failed to download current course info.",
+                                                    ex);
+                                            listeners.bgTaskFailed(ex);
+                                        }
+                                    });
+
+                        } else {
+                            listeners.bgTaskReady(courses);
                         }
+                    }
 
-                        @Override
-                        public boolean cancel() {
-                            lf.cancel(true);
-                            listeners.bgTaskCancelled();
-                            return true;
-                        }
-                    };
+                    @Override
+                    public void bgTaskCancelled() {
+                        listeners.bgTaskCancelled();
+                    }
 
-                    BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
-                        @Override
-                        public void bgTaskReady(Course currentCourse) {
-                            currentCourse.setExercisesLoaded(true);
-
-                            ArrayList<Course> finalCourses = new ArrayList<Course>();
-                            for (Course course : courses) {
-                                if (course.getName().equals(currentCourse.getName())) {
-                                    finalCourses.add(currentCourse);
-                                } else {
-                                    finalCourses.add(course);
-                                }
-                            }
-                            listeners.bgTaskReady(finalCourses);
-                        }
-
-                        @Override
-                        public void bgTaskCancelled() {
-                            listeners.bgTaskCancelled();
-                        }
-
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                            log.log(Level.INFO, "Failed to download current course info.", ex);
-                            listeners.bgTaskFailed(ex);
-                        }
-                    });
-
-                } else {
-                    listeners.bgTaskReady(courses);
-                }
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-                listeners.bgTaskCancelled();
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                log.log(Level.INFO, "Failed to download course list.", ex);
-                listeners.bgTaskFailed(ex);
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        log.log(Level.INFO, "Failed to download course list.", ex);
+                        listeners.bgTaskFailed(ex);
+                    }
+                });
     }
 
     private class DefaultListener implements BgTaskListener<List<Course>> {
@@ -173,14 +194,14 @@ public final class RefreshCoursesAction {
         }
 
         @Override
-        public void bgTaskCancelled() {
-        }
+        public void bgTaskCancelled() {}
 
         @Override
         public void bgTaskFailed(Throwable ex) {
             if (showDialogOnError) {
                 logger.log(Level.INFO, "Course refresh failed: ", ex);
-                dialogs.displayError("Course refresh failed. Check your server address and credentials\n");
+                dialogs.displayError(
+                        "Course refresh failed. Check your server address and credentials\n");
             }
         }
     }

@@ -37,7 +37,6 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 
-
 /**
  * Records large inserts into documents. These are often, but not always,
  * pastes.
@@ -51,166 +50,191 @@ public class TextInsertEventSource implements Closeable {
     private JTextComponent currentComponent;
     private Map<Document, String> documentCache;
 
-    private DocumentListener docListener = new DocumentListener() {
-        @Override
-        public void insertUpdate(DocumentEvent e) {
-            handleEvent(e);
-        }
-
-        @Override
-        public void removeUpdate(DocumentEvent e) {
-            handleEvent(e);
-        }
-
-        @Override
-        public void changedUpdate(DocumentEvent e) {
-            // These are attribute changes and don't interest us.
-        }
-
-        private FileObject cachedFile = null;
-        private Exercise cachedExercise = null;
-
-        private Exercise exerciseContainingFile(FileObject fo) {
-            if (cachedFile == null || !cachedFile.equals(fo)) {
-                cachedFile = fo;
-                ProjectMediator pm = ProjectMediator.getInstance();
-                TmcProjectInfo project = pm.tryGetProjectOwningFile(fo);
-                if (project != null) {
-                    cachedExercise = pm.tryGetExerciseForProject(project, CourseDb.getInstance());
+    private DocumentListener docListener =
+            new DocumentListener() {
+                @Override
+                public void insertUpdate(DocumentEvent e) {
+                    handleEvent(e);
                 }
-            }
 
-            return cachedExercise;
-        }
+                @Override
+                public void removeUpdate(DocumentEvent e) {
+                    handleEvent(e);
+                }
 
-        private void handleEvent(DocumentEvent e) {
-            Document doc = e.getDocument();
+                @Override
+                public void changedUpdate(DocumentEvent e) {
+                    // These are attribute changes and don't interest us.
+                }
 
-            FileObject fo = NbEditorUtilities.getFileObject(doc);
-            if (fo == null) {
-                log.log(Level.FINER, "Document has no associated file object");
-                return;
-            }
+                private FileObject cachedFile = null;
+                private Exercise cachedExercise = null;
 
-            Exercise ex = exerciseContainingFile(fo);
-            if (ex == null) {
-                log.log(Level.FINER, "Unable to determine exercise for document");
-                return;
-            }
+                private Exercise exerciseContainingFile(FileObject fo) {
+                    if (cachedFile == null || !cachedFile.equals(fo)) {
+                        cachedFile = fo;
+                        ProjectMediator pm = ProjectMediator.getInstance();
+                        TmcProjectInfo project = pm.tryGetProjectOwningFile(fo);
+                        if (project != null) {
+                            cachedExercise =
+                                    pm.tryGetExerciseForProject(project, CourseDb.getInstance());
+                        }
+                    }
 
-            createAndSendPatchEvent(e, fo, doc, ex);
-        }
+                    return cachedExercise;
+                }
 
-        private void createAndSendPatchEvent(DocumentEvent e, FileObject fo, Document doc, Exercise ex) {
-            List<Patch> patches;
+                private void handleEvent(DocumentEvent e) {
+                    Document doc = e.getDocument();
 
-            // if the document is not in cache, the patch will
-            // contain the full document
-            boolean patchContainsFullDocument = !documentCache.containsKey(doc);
+                    FileObject fo = NbEditorUtilities.getFileObject(doc);
+                    if (fo == null) {
+                        log.log(Level.FINER, "Document has no associated file object");
+                        return;
+                    }
 
-            try {
-                // generatePatches will cache the current version for future
-                // patches; if the document was not in the cache previously, the patch will
-                // contain the full document content
-                patches = generatePatches(doc);
-            } catch (BadLocationException exp) {
-                log.log(Level.WARNING, "Unable to generate patches from {0}.", fo.getName());
-                return;
-            }
+                    Exercise ex = exerciseContainingFile(fo);
+                    if (ex == null) {
+                        log.log(Level.FINER, "Unable to determine exercise for document");
+                        return;
+                    }
 
-            // Remove event is handled here as the getText-method can cause
-            // an error as the document state is the state after the event. As
-            // the offsets are from the actual event, they may reference content
-            // that is no longer in the current document.
-            if (e.getType().equals(EventType.REMOVE)) {
-                sendEvent(ex, "text_remove", generatePatchDescription(fo, patches, patchContainsFullDocument));
-                return;
-            }
+                    createAndSendPatchEvent(e, fo, doc, ex);
+                }
 
-            String text;
-            try {
-                text = doc.getText(e.getOffset(), e.getLength());
-            } catch (BadLocationException exp) {
-                log.log(Level.WARNING, "Document {0} event with bad location. ", e.getType());
-                return;
-            }
+                private void createAndSendPatchEvent(
+                        DocumentEvent e, FileObject fo, Document doc, Exercise ex) {
+                    List<Patch> patches;
 
-            if (isPasteEvent(text)) {
-                sendEvent(ex, "text_paste", generatePatchDescription(fo, patches, patchContainsFullDocument));
-            } else if (e.getType() == EventType.INSERT) {
-                sendEvent(ex, "text_insert", generatePatchDescription(fo, patches, patchContainsFullDocument));
-            }
-        }
+                    // if the document is not in cache, the patch will
+                    // contain the full document
+                    boolean patchContainsFullDocument = !documentCache.containsKey(doc);
 
-        private void sendEvent(Exercise ex, String eventType, String text) {
-            LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
-            receiver.receiveEvent(event);
-        }
+                    try {
+                        // generatePatches will cache the current version for future
+                        // patches; if the document was not in the cache previously, the patch will
+                        // contain the full document content
+                        patches = generatePatches(doc);
+                    } catch (BadLocationException exp) {
+                        log.log(
+                                Level.WARNING,
+                                "Unable to generate patches from {0}.",
+                                fo.getName());
+                        return;
+                    }
 
-        private String generatePatchDescription(FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
-            String filePath = TmcFileUtils.tryGetPathRelativeToProject(fo);
-            if (filePath != null) {
-                return JsonMaker.create()
-                    .add("file", filePath)
-                    .add("patches", PATCH_GENERATOR.patch_toText(patches))
-                    .add("full_document", patchContainsFullDocument)
-                    .toString();
-            } else {
-                return "{}";
-            }
-        }
+                    // Remove event is handled here as the getText-method can cause
+                    // an error as the document state is the state after the event. As
+                    // the offsets are from the actual event, they may reference content
+                    // that is no longer in the current document.
+                    if (e.getType().equals(EventType.REMOVE)) {
+                        sendEvent(
+                                ex,
+                                "text_remove",
+                                generatePatchDescription(fo, patches, patchContainsFullDocument));
+                        return;
+                    }
 
-        private boolean isPasteEvent(String text) throws HeadlessException {
-            if (text.length() <= 2 || isWhiteSpace(text)) {
-                // if a short text or whitespace is inserted,
-                // we skip checking for paste
-                return false;
-            }
+                    String text;
+                    try {
+                        text = doc.getText(e.getOffset(), e.getLength());
+                    } catch (BadLocationException exp) {
+                        log.log(
+                                Level.WARNING,
+                                "Document {0} event with bad location. ",
+                                e.getType());
+                        return;
+                    }
 
-            try {
-                String clipboardData = (String) Lookup.getDefault().
-                        lookup(ExClipboard.class).getData(DataFlavor.stringFlavor);
-                return text.equals(clipboardData);
-            } catch (Exception exp) {
-            }
+                    if (isPasteEvent(text)) {
+                        sendEvent(
+                                ex,
+                                "text_paste",
+                                generatePatchDescription(fo, patches, patchContainsFullDocument));
+                    } else if (e.getType() == EventType.INSERT) {
+                        sendEvent(
+                                ex,
+                                "text_insert",
+                                generatePatchDescription(fo, patches, patchContainsFullDocument));
+                    }
+                }
 
-            return false;
-        }
+                private void sendEvent(Exercise ex, String eventType, String text) {
+                    LoggableEvent event =
+                            new LoggableEvent(
+                                    ex, eventType, text.getBytes(Charset.forName("UTF-8")));
+                    receiver.receiveEvent(event);
+                }
 
-        private boolean isWhiteSpace(String text) {
-            // If an insert is just whitespace, it's probably an autoindent
+                private String generatePatchDescription(
+                        FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
+                    String filePath = TmcFileUtils.tryGetPathRelativeToProject(fo);
+                    if (filePath != null) {
+                        return JsonMaker.create()
+                                .add("file", filePath)
+                                .add("patches", PATCH_GENERATOR.patch_toText(patches))
+                                .add("full_document", patchContainsFullDocument)
+                                .toString();
+                    } else {
+                        return "{}";
+                    }
+                }
 
-            for (int i = 0; i < text.length(); ++i) {
-                if (!Character.isWhitespace(text.charAt(i))) {
+                private boolean isPasteEvent(String text) throws HeadlessException {
+                    if (text.length() <= 2 || isWhiteSpace(text)) {
+                        // if a short text or whitespace is inserted,
+                        // we skip checking for paste
+                        return false;
+                    }
+
+                    try {
+                        String clipboardData =
+                                (String)
+                                        Lookup.getDefault()
+                                                .lookup(ExClipboard.class)
+                                                .getData(DataFlavor.stringFlavor);
+                        return text.equals(clipboardData);
+                    } catch (Exception exp) {
+                    }
+
                     return false;
                 }
-            }
 
-            return true;
-        }
+                private boolean isWhiteSpace(String text) {
+                    // If an insert is just whitespace, it's probably an autoindent
 
-        // currently, if a document is not existing, the patch will
-        // contain the full file
-        private List<Patch> generatePatches(Document doc) throws BadLocationException {
-            String previous = "";
-            if (documentCache.containsKey(doc)) {
-                previous = documentCache.get(doc);
-            }
+                    for (int i = 0; i < text.length(); ++i) {
+                        if (!Character.isWhitespace(text.charAt(i))) {
+                            return false;
+                        }
+                    }
 
-            documentCache.put(doc, doc.getText(0, doc.getLength()));
-            String current = documentCache.get(doc);
+                    return true;
+                }
 
-            return PATCH_GENERATOR.patch_make(previous, current);
-        }
-    };
+                // currently, if a document is not existing, the patch will
+                // contain the full file
+                private List<Patch> generatePatches(Document doc) throws BadLocationException {
+                    String previous = "";
+                    if (documentCache.containsKey(doc)) {
+                        previous = documentCache.get(doc);
+                    }
 
-    private PropertyChangeListener propListener = new PropertyChangeListener() {
-        @Override
-        public void propertyChange(PropertyChangeEvent evt) {
-            deregister();
-            register();
-        }
-    };
+                    documentCache.put(doc, doc.getText(0, doc.getLength()));
+                    String current = documentCache.get(doc);
+
+                    return PATCH_GENERATOR.patch_make(previous, current);
+                }
+            };
+
+    private PropertyChangeListener propListener =
+            new PropertyChangeListener() {
+                @Override
+                public void propertyChange(PropertyChangeEvent evt) {
+                    deregister();
+                    register();
+                }
+            };
 
     public TextInsertEventSource(EventReceiver receiver) {
         this.receiver = receiver;

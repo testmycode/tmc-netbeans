@@ -18,7 +18,13 @@ public class CTestCase {
     private boolean checkedForMemoryLeaks;
     private int maxBytesAllocated = -1;
 
-    public CTestCase(String name, String result, String message, String points, String valgrindTrace, ValgrindStrategy valgrindStrategy) {
+    public CTestCase(
+            String name,
+            String result,
+            String message,
+            String points,
+            String valgrindTrace,
+            ValgrindStrategy valgrindStrategy) {
         this(name);
         this.result = result;
         this.message = message;
@@ -28,7 +34,8 @@ public class CTestCase {
         this.checkedForMemoryLeaks = false;
     }
 
-    public CTestCase(String name, String result, String message, ValgrindStrategy valgrindStrategy) {
+    public CTestCase(
+            String name, String result, String message, ValgrindStrategy valgrindStrategy) {
         this(name, result, message, null, null, valgrindStrategy);
     }
 
@@ -51,11 +58,12 @@ public class CTestCase {
         boolean successful = resultsSuccessful && !valgrindFailed;
         boolean failedOnlyBecauseOfValgrind = resultsSuccessful && valgrindFailed;
         if (failedOnlyBecauseOfValgrind) {
-            msg += " - Failed due to errors in valgrind log; see log below. Try submitting to server, some leaks might be platform dependent";
+            msg +=
+                    " - Failed due to errors in valgrind log; see log below. Try submitting to server, some leaks might be platform dependent";
         }
 
-
-        return new TestCaseResult(name, successful, msg, valgrindTrace, failedOnlyBecauseOfValgrind);
+        return new TestCaseResult(
+                name, successful, msg, valgrindTrace, failedOnlyBecauseOfValgrind);
     }
 
     public String getName() {
@@ -117,5 +125,4 @@ public class CTestCase {
     public void setCheckedForMemoryLeaks(boolean checkedForMemoryLeaks) {
         this.checkedForMemoryLeaks = checkedForMemoryLeaks;
     }
-
 }

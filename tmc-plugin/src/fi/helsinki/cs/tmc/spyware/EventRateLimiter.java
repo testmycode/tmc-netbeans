@@ -21,7 +21,7 @@ import java.util.concurrent.Callable;
  */
 @Deprecated // Decided against using it for now. Might will use later, so won't delete yet (20120513).
 public class EventRateLimiter implements EventReceiver {
-    public static final long DEFAULT_COOLDOWN = 30*1000;
+    public static final long DEFAULT_COOLDOWN = 30 * 1000;
 
     private class EventKeyRecord {
         private long cooldownLength = DEFAULT_COOLDOWN;
@@ -34,12 +34,14 @@ public class EventRateLimiter implements EventReceiver {
                 nextReceiver.receiveEvent(ev);
 
                 cooldownTimer = new Timer("EventRateLimiter cooldown", true);
-                cooldownTimer.schedule(new TimerTask() {
-                    @Override
-                    public void run() {
-                        forwardFromTimer();
-                    }
-                }, cooldownLength);
+                cooldownTimer.schedule(
+                        new TimerTask() {
+                            @Override
+                            public void run() {
+                                forwardFromTimer();
+                            }
+                        },
+                        cooldownLength);
             } else {
                 newestUnsent = ev;
             }
@@ -71,12 +73,14 @@ public class EventRateLimiter implements EventReceiver {
 
     private final EventReceiver nextReceiver;
 
-    private final LazyHashMap<String, EventKeyRecord> recordsByKey = new LazyHashMap<String, EventKeyRecord>(new Callable<EventKeyRecord>() {
-        @Override
-        public EventKeyRecord call() throws Exception {
-            return new EventKeyRecord();
-        }
-    });
+    private final LazyHashMap<String, EventKeyRecord> recordsByKey =
+            new LazyHashMap<String, EventKeyRecord>(
+                    new Callable<EventKeyRecord>() {
+                        @Override
+                        public EventKeyRecord call() throws Exception {
+                            return new EventKeyRecord();
+                        }
+                    });
 
     public EventRateLimiter(EventReceiver nextReceiver) {
         this.nextReceiver = nextReceiver;

@@ -22,7 +22,8 @@ public class TmcProjectInfo {
 
     private Project project;
 
-    @VisibleForTesting TmcProjectInfo(Project project) {
+    @VisibleForTesting
+    TmcProjectInfo(Project project) {
         this.project = project;
     }
 
@@ -114,7 +115,10 @@ public class TmcProjectInfo {
 
         protected boolean isExplicitlyStudentFile(String zipPath) {
             // TODO: make glob patterns like 'foo/bar/*/baz/**/xoox.*' possible
-            return projectInfo.getTmcProjectFile().getExtraStudentFiles().contains(withoutRootDir(zipPath));
+            return projectInfo
+                    .getTmcProjectFile()
+                    .getExtraStudentFiles()
+                    .contains(withoutRootDir(zipPath));
         }
 
         protected boolean hasNoSubmitFile(File dir) {
@@ -156,7 +160,8 @@ public class TmcProjectInfo {
     @Deprecated
     private static class MavenZippingDecider extends AbstractZippingDecider {
 
-        private static final Pattern rejectPattern = Pattern.compile("^[^/]+/(target|lib/testrunner)/.*");
+        private static final Pattern rejectPattern =
+                Pattern.compile("^[^/]+/(target|lib/testrunner)/.*");
 
         public MavenZippingDecider(TmcProjectInfo projectInfo) {
             super(projectInfo);

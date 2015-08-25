@@ -4,14 +4,14 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class FeedbackQuestion {
-    private static final Pattern intRangeRegex = Pattern.compile("^intrange\\[(-?\\d+)\\.\\.(-?\\d+)\\]$");
+    private static final Pattern intRangeRegex =
+            Pattern.compile("^intrange\\[(-?\\d+)\\.\\.(-?\\d+)\\]$");
 
     private int id;
     private String question;
     private String kind;
 
-    public FeedbackQuestion() {
-    }
+    public FeedbackQuestion() {}
 
     public FeedbackQuestion(int id, String question, String kind) {
         this.id = id;

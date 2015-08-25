@@ -35,8 +35,7 @@ public class EventStore {
 
     private Gson getGson() {
         return new GsonBuilder()
-            .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer())
-            .create();
+                .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer()).create();
     }
 
     public void clear() throws IOException {

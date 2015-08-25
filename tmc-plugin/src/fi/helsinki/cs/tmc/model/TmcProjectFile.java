@@ -52,7 +52,10 @@ public class TmcProjectFile {
             throw new FileNotFoundException(file.getPath());
         }
         try {
-            Reader reader = new InputStreamReader(new BufferedInputStream(new FileInputStream(file)), Charset.forName("UTF-8"));
+            Reader reader =
+                    new InputStreamReader(
+                            new BufferedInputStream(new FileInputStream(file)),
+                            Charset.forName("UTF-8"));
             try {
                 Object root = new Yaml().load(reader);
                 TmcProjectFile result = new TmcProjectFile();
@@ -62,7 +65,10 @@ public class TmcProjectFile {
                 reader.close();
             }
         } catch (IOException e) {
-            log.log(Level.WARNING, "Failed to read {0}: {1}", new Object[]{file.getPath(), e.getMessage()});
+            log.log(
+                    Level.WARNING,
+                    "Failed to read {0}: {1}",
+                    new Object[] {file.getPath(), e.getMessage()});
             throw e;
         }
     }

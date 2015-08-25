@@ -27,9 +27,9 @@ import org.openide.filesystems.FileUtil;
 public class ProjectMediator {
     // This is a difficult thing to test because the NetBeans Project API
     // is so very unmockable.
-    
+
     private static final Logger logger = Logger.getLogger(ProjectMediator.class.getName());
-    
+
     private static ProjectMediator instance;
 
     public static ProjectMediator getInstance() {
@@ -38,22 +38,22 @@ public class ProjectMediator {
         }
         return instance;
     }
-    
+
     private OpenProjects openProjects;
     private ProjectManager projectManager;
-    
+
     public ProjectMediator() {
         this.openProjects = OpenProjects.getDefault();
         this.projectManager = ProjectManager.getDefault();
     }
-    
+
     public TmcProjectInfo wrapProject(Project p) {
         if (p == null) {
             throw new NullPointerException();
         }
         return new TmcProjectInfo(p);
     }
-    
+
     public List<TmcProjectInfo> wrapProjects(List<Project> projects) {
         List<TmcProjectInfo> result = new ArrayList<TmcProjectInfo>();
         for (Project p : projects) {
@@ -61,27 +61,28 @@ public class ProjectMediator {
         }
         return result;
     }
-    
+
     public String getProjectRootDir() {
         return NbTmcSettings.getDefault().getTmcMainDirectory();
     }
-    
+
     public static String getDefaultProjectRootDir() {
         File candidate;
-        
+
         candidate = ProjectChooser.getProjectsFolder();
         if (candidate.isDirectory()) {
             return candidate.getAbsolutePath();
         }
-        
+
         candidate = getDirectoryContainingMainProject();
         if (candidate.isDirectory()) {
             return candidate.getAbsolutePath();
         }
-        
-        return new File(System.getProperty("user.home") + File.separator + "NetBeansProjects").getAbsolutePath();
+
+        return new File(System.getProperty("user.home") + File.separator + "NetBeansProjects")
+                .getAbsolutePath();
     }
-    
+
     private static File getDirectoryContainingMainProject() {
         Project project = OpenProjects.getDefault().getMainProject();
         if (project != null) {
@@ -90,36 +91,38 @@ public class ProjectMediator {
             return null;
         }
     }
-    
+
     /**
      * Saves all unsaved files.
      */
     public void saveAllFiles() {
         LifecycleManager.getDefault().saveAll();
     }
-    
+
     /**
      * Returns the directory to which exercises are to be downloaded.
      */
     public File getCourseRootDir(String courseName) {
         return new File(getProjectRootDir() + File.separator + courseName);
     }
-    
+
     /**
      * Returns the intended project directory of an exercise.
-     * 
+     *
      * <p>
      * The exercise must have a course name set.
      */
     public File getProjectDirForExercise(Exercise ex) {
-        String path = 
-                getProjectRootDir() + File.separator +
-                ex.getCourseName() + File.separator +
-                ex.getName().replaceAll("-", "/");
+        String path =
+                getProjectRootDir()
+                        + File.separator
+                        + ex.getCourseName()
+                        + File.separator
+                        + ex.getName().replaceAll("-", "/");
         File file = new File(path);
         return FileUtil.normalizeFile(file);
     }
-    
+
     /**
      * Returns the exercise associated with the given project, or null if none.
      */
@@ -132,7 +135,7 @@ public class ProjectMediator {
         }
         return null;
     }
-    
+
     /**
      * Attempts to find the project owning the given file object.
      */
@@ -152,16 +155,16 @@ public class ProjectMediator {
         }
         return null;
     }
-    
+
     /**
      * Returns the project for the exercise, or null if not yet created.
-     * 
+     *
      * <p>
      * The exercise must have a course name set.
      */
     public TmcProjectInfo tryGetProjectForExercise(Exercise exercise) {
         projectManager.clearNonProjectCache(); // Just to be sure.
-        
+
         File path = getProjectDirForExercise(exercise);
         FileObject fo = FileUtil.toFileObject(path);
         if (fo != null) {
@@ -176,26 +179,25 @@ public class ProjectMediator {
                 logger.log(
                         Level.WARNING,
                         "Finding project for exercise {0} failed",
-                        new Object[] { exercise.toString(), ioe }
-                        );
+                        new Object[] {exercise.toString(), ioe});
                 return null;
             }
         } else {
             return null;
         }
     }
-    
+
     public void openProject(TmcProjectInfo project) {
-        openProjects.open(new Project[] { project.getProject() }, true, true);
+        openProjects.open(new Project[] {project.getProject()}, true, true);
     }
-    
+
     public void openProjects(Collection<TmcProjectInfo> projects) {
         final Project[] nbProjects = new Project[projects.size()];
         int i = 0;
         for (TmcProjectInfo projectInfo : projects) {
             nbProjects[i++] = projectInfo.getProject();
         }
-        
+
         new Thread("Project opener") {
             @Override
             public void run() {
@@ -203,31 +205,32 @@ public class ProjectMediator {
             }
         }.start();
     }
-    
+
     public Collection<TmcProjectInfo> getOpenProjects() {
         Project[] projects = openProjects.getOpenProjects();
         return wrapProjects(Arrays.asList(projects));
     }
-    
+
     /**
      * Waits for projects to be fully opened and then calls the given runnable in the EDT.
      */
     public void callWhenProjectsCompletelyOpened(final Runnable whenOpen) {
-        Thread waitingThread = new Thread("callWhenProjectsCompletelyOpened() thread") {
-            @Override
-            public void run() {
-                try {
-                    openProjects.openProjects().get();
-                } catch (Exception ex) {
-                    throw ExceptionUtils.toRuntimeException(ex);
-                }
-                SwingUtilities.invokeLater(whenOpen);
-            }
-        };
+        Thread waitingThread =
+                new Thread("callWhenProjectsCompletelyOpened() thread") {
+                    @Override
+                    public void run() {
+                        try {
+                            openProjects.openProjects().get();
+                        } catch (Exception ex) {
+                            throw ExceptionUtils.toRuntimeException(ex);
+                        }
+                        SwingUtilities.invokeLater(whenOpen);
+                    }
+                };
         waitingThread.setDaemon(true);
         waitingThread.start();
     }
-    
+
     public boolean isProjectOpen(TmcProjectInfo project) {
         return openProjects.isProjectOpen(project.getProject());
     }
@@ -241,7 +244,7 @@ public class ProjectMediator {
         } catch (Exception ex) {
         }
     }
-    
+
     /**
      * Refreshes NB's file cache like "Source -> Scan for External Changes".
      */

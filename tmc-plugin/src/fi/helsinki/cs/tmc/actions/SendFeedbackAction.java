@@ -43,9 +43,8 @@ public class SendFeedbackAction {
     public void run() {
         try {
             ListenableFuture<HttpResult> feedbackFuture;
-            feedbackFuture = core.sendFeedback(
-                    getFeedbackAnswers(), new URI(result.getFeedbackAnswerUrl())
-            );
+            feedbackFuture =
+                    core.sendFeedback(getFeedbackAnswers(), new URI(result.getFeedbackAnswerUrl()));
             Futures.addCallback(feedbackFuture, new FeedbackReplyCallback());
         } catch (TmcCoreException ex) {
             Exceptions.printStackTrace(ex);

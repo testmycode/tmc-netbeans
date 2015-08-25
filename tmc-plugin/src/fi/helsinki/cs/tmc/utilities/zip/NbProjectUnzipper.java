@@ -107,20 +107,20 @@ public class NbProjectUnzipper {
         }
     }
 
-    private static OverwritingDecider neverAllowOverwrites = new OverwritingDecider() {
-        @Override
-        public boolean mayOverwrite(String relPath) {
-            return false;
-        }
+    private static OverwritingDecider neverAllowOverwrites =
+            new OverwritingDecider() {
+                @Override
+                public boolean mayOverwrite(String relPath) {
+                    return false;
+                }
 
-        @Override
-        public boolean mayDelete(String relPath) {
-            return false;
-        }
-    };
+                @Override
+                public boolean mayDelete(String relPath) {
+                    return false;
+                }
+            };
 
     private OverwritingDecider overwriting;
-
 
     public NbProjectUnzipper() {
         this(neverAllowOverwrites);
@@ -134,7 +134,8 @@ public class NbProjectUnzipper {
         return unzipProject(data, projectDir, true);
     }
 
-    public Result unzipProject(byte[] data, File projectDir, boolean reallyWriteFiles) throws IOException {
+    public Result unzipProject(byte[] data, File projectDir, boolean reallyWriteFiles)
+            throws IOException {
         Result result = new Result(projectDir);
         Set<String> pathsInZip = new HashSet<String>();
 
@@ -152,9 +153,8 @@ public class NbProjectUnzipper {
 
                 String destFileRelativePath = trimSlashes(restOfPath.replace("/", File.separator));
                 pathsInZip.add(destFileRelativePath);
-                File destFile = new File(
-                        projectDir.toString() + File.separator + destFileRelativePath
-                        );
+                File destFile =
+                        new File(projectDir.toString() + File.separator + destFileRelativePath);
 
                 if (zent.isDirectory()) {
                     if (reallyWriteFiles) {
@@ -189,18 +189,27 @@ public class NbProjectUnzipper {
             }
         }
 
-        deleteFilesNotInZip(projectDir, projectDir, result, pathsInZip, overwriting, reallyWriteFiles);
+        deleteFilesNotInZip(
+                projectDir, projectDir, result, pathsInZip, overwriting, reallyWriteFiles);
 
         return result;
     }
 
-    private void deleteFilesNotInZip(File projectDir, File curDir, Result result, Set<String> pathsInZip, OverwritingDecider overwriting, boolean reallyWriteFiles) throws IOException {
+    private void deleteFilesNotInZip(
+            File projectDir,
+            File curDir,
+            Result result,
+            Set<String> pathsInZip,
+            OverwritingDecider overwriting,
+            boolean reallyWriteFiles)
+            throws IOException {
         for (File file : curDir.listFiles()) {
             String relPath = file.getPath().substring(projectDir.getPath().length());
             relPath = trimSlashes(relPath);
 
             if (file.isDirectory()) {
-                deleteFilesNotInZip(projectDir, file, result, pathsInZip, overwriting, reallyWriteFiles);
+                deleteFilesNotInZip(
+                        projectDir, file, result, pathsInZip, overwriting, reallyWriteFiles);
             }
 
             if (!pathsInZip.contains(relPath)) {
@@ -236,7 +245,9 @@ public class NbProjectUnzipper {
         ZipEntry zent;
         while ((zent = zis.getNextEntry()) != null) {
             String name = zent.getName();
-            if (name.endsWith("/nbproject/") || name.endsWith("/pom.xml") || name.endsWith(".universal/")) {
+            if (name.endsWith("/nbproject/")
+                    || name.endsWith("/pom.xml")
+                    || name.endsWith(".universal/")) {
                 return dirname(zent.getName());
             }
         }

@@ -21,15 +21,21 @@ import org.openide.util.actions.NodeAction;
 public abstract class AbstractExerciseSensitiveAction extends NodeAction {
 
     public AbstractExerciseSensitiveAction() {
-        TmcEventBus.getDefault().subscribeDependent(new TmcEventListener() {
-            public void receive(CourseDb.ChangedEvent event) throws Throwable {
-                boolean enable = AbstractExerciseSensitiveAction.this.enable(getActivatedNodes());
-                setEnabled(enable);
-            }
-        }, this);
+        TmcEventBus.getDefault()
+                .subscribeDependent(
+                        new TmcEventListener() {
+                            public void receive(CourseDb.ChangedEvent event) throws Throwable {
+                                boolean enable =
+                                        AbstractExerciseSensitiveAction.this
+                                                .enable(getActivatedNodes());
+                                setEnabled(enable);
+                            }
+                        },
+                        this);
     }
 
     protected abstract ProjectMediator getProjectMediator();
+
     protected abstract CourseDb getCourseDb();
 
     @Override
@@ -48,7 +54,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
     }
 
     /*package (for tests)*/
-    public boolean enable(Project ... projects) {
+    public boolean enable(Project... projects) {
         if (projects.length == 0) {
             return false;
         }
@@ -115,6 +121,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
     }
 
     protected Exercise exerciseForProject(Project project) {
-        return getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(project), getCourseDb());
+        return getProjectMediator()
+                .tryGetExerciseForProject(getProjectMediator().wrapProject(project), getCourseDb());
     }
 }

@@ -25,8 +25,7 @@ import java.util.logging.Logger;
  */
 public class CourseDb {
 
-    public static class ChangedEvent implements TmcEvent {
-    }
+    public static class ChangedEvent implements TmcEvent {}
 
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;

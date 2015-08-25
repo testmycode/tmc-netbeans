@@ -16,7 +16,8 @@ public class SourceFileLookup {
     private final ProjectMediator projectMediator;
     private final GlobalPathRegistry globalPathRegistry;
 
-    private SourceFileLookup(ProjectMediator projectMediator, GlobalPathRegistry globalPathRegistry) {
+    private SourceFileLookup(
+            ProjectMediator projectMediator, GlobalPathRegistry globalPathRegistry) {
         this.projectMediator = projectMediator;
         this.globalPathRegistry = globalPathRegistry;
     }

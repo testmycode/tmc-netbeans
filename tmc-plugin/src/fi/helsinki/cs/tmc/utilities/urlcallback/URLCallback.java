@@ -4,5 +4,6 @@ import java.io.InputStream;
 
 public interface URLCallback {
     public String getInputEncoding();
+
     public InputStream openInputStream();
 }

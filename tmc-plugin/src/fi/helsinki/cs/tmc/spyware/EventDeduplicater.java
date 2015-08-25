@@ -44,6 +44,5 @@ public class EventDeduplicater implements EventReceiver {
     }
 
     @Override
-    public void close() {
-    }
+    public void close() {}
 }

@@ -20,14 +20,14 @@ public class CourseInfoParser {
             throw new IllegalArgumentException("Empty input");
         }
         try {
-            Gson gson = new GsonBuilder()
-                    .registerTypeAdapter(Date.class, new CustomDateDeserializer())
-                    .create();
+            Gson gson =
+                    new GsonBuilder()
+                            .registerTypeAdapter(Date.class, new CustomDateDeserializer()).create();
 
             Course course = gson.fromJson(json, CourseInfoContainer.class).course;
 
             course.setExercisesLoaded(true);
-            
+
             for (Exercise ex : course.getExercises()) {
                 ex.setCourseName(course.getName());
             }

@@ -41,8 +41,12 @@ import java.util.logging.Logger;
 @ActionRegistration(displayName = "#CTL_RequestReviewAction", lazy = false)
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -5, separatorAfter = 0),
-    @ActionReference(path = "Projects/Actions", position = 1350, separatorBefore = 1330,
-        separatorAfter = 1360) // Positioning y u no work?
+    @ActionReference(
+        path = "Projects/Actions",
+        position = 1350,
+        separatorBefore = 1330,
+        separatorAfter = 1360
+    ) // Positioning y u no work?
 })
 @NbBundle.Messages("CTL_RequestReviewAction=Request code review")
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
@@ -87,81 +91,100 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             if (exercise != null) {
                 showReviewRequestDialog(projectInfo, exercise);
             } else {
-                log.log(Level.WARNING, "RequestReviewAction called in a context without a valid TMC project.");
+                log.log(
+                        Level.WARNING,
+                        "RequestReviewAction called in a context without a valid TMC project.");
             }
         } else {
-            log.log(Level.WARNING, "RequestReviewAction called in a context with {0} projects", project.size());
+            log.log(
+                    Level.WARNING,
+                    "RequestReviewAction called in a context with {0} projects",
+                    project.size());
         }
     }
 
-    private void showReviewRequestDialog(final TmcProjectInfo projectInfo, final Exercise exercise) {
+    private void showReviewRequestDialog(
+            final TmcProjectInfo projectInfo, final Exercise exercise) {
         final CodeReviewRequestDialog dialog = new CodeReviewRequestDialog(exercise);
-        dialog.setOkListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String message = dialog.getMessageForReviewer().trim();
-                requestCodeReviewFor(projectInfo, exercise, message);
-            }
-        });
+        dialog.setOkListener(
+                new ActionListener() {
+                    @Override
+                    public void actionPerformed(ActionEvent e) {
+                        String message = dialog.getMessageForReviewer().trim();
+                        requestCodeReviewFor(projectInfo, exercise, message);
+                    }
+                });
         dialog.setVisible(true);
     }
 
-    private void requestCodeReviewFor(final TmcProjectInfo projectInfo, final Exercise exercise,
+    private void requestCodeReviewFor(
+            final TmcProjectInfo projectInfo,
+            final Exercise exercise,
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
 
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
 
-        BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
-            @Override
-            public byte[] call() throws Exception {
-                RecursiveZipper zipper = new RecursiveZipper(projectInfo.getProjectDirAsFile(), projectInfo.getZippingDecider());
-                return zipper.zipProjectSources();
-            }
-        }, new BgTaskListener<byte[]>() {
-            @Override
-            public void bgTaskReady(byte[] zipData) {
-                Map<String, String> extraParams = new HashMap<String, String>();
-                extraParams.put("error_msg_locale", errorMsgLocale);
-
-                extraParams.put("request_review", "1");
-                if (!messageForReviewer.isEmpty()) {
-                    extraParams.put("message_for_reviewer", messageForReviewer);
-                }
-
-                final ServerAccess sa = new ServerAccess();
-                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
-                        .getSubmittingExerciseTask(exercise, zipData, extraParams);
-
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
+        BgTask.start(
+                "Zipping up " + exercise.getName(),
+                new Callable<byte[]>() {
                     @Override
-                    public void bgTaskReady(ServerAccess.SubmissionResponse result) {
-                        sendLoggableEvent(exercise, result.submissionUrl);
+                    public byte[] call() throws Exception {
+                        RecursiveZipper zipper =
+                                new RecursiveZipper(
+                                        projectInfo.getProjectDirAsFile(),
+                                        projectInfo.getZippingDecider());
+                        return zipper.zipProjectSources();
+                    }
+                },
+                new BgTaskListener<byte[]>() {
+                    @Override
+                    public void bgTaskReady(byte[] zipData) {
+                        Map<String, String> extraParams = new HashMap<String, String>();
+                        extraParams.put("error_msg_locale", errorMsgLocale);
 
-                        dialogs.displayMessage("Code submitted for review.\n"
-                                + "You will be notified when an instructor has reviewed your code.");
+                        extraParams.put("request_review", "1");
+                        if (!messageForReviewer.isEmpty()) {
+                            extraParams.put("message_for_reviewer", messageForReviewer);
+                        }
+
+                        final ServerAccess sa = new ServerAccess();
+                        CancellableCallable<ServerAccess.SubmissionResponse> submitTask =
+                                sa.getSubmittingExerciseTask(exercise, zipData, extraParams);
+
+                        BgTask.start(
+                                "Sending " + exercise.getName(),
+                                submitTask,
+                                new BgTaskListener<ServerAccess.SubmissionResponse>() {
+                                    @Override
+                                    public void bgTaskReady(
+                                            ServerAccess.SubmissionResponse result) {
+                                        sendLoggableEvent(exercise, result.submissionUrl);
+
+                                        dialogs.displayMessage(
+                                                "Code submitted for review.\n"
+                                                        + "You will be notified when an instructor has reviewed your code.");
+                                    }
+
+                                    @Override
+                                    public void bgTaskCancelled() {}
+
+                                    @Override
+                                    public void bgTaskFailed(Throwable ex) {
+                                        dialogs.displayError(
+                                                "Failed to submit exercise for code review", ex);
+                                    }
+                                });
                     }
 
                     @Override
-                    public void bgTaskCancelled() {
-                    }
+                    public void bgTaskCancelled() {}
 
                     @Override
                     public void bgTaskFailed(Throwable ex) {
-                        dialogs.displayError("Failed to submit exercise for code review", ex);
+                        dialogs.displayError("Failed to zip up exercise", ex);
                     }
                 });
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to zip up exercise", ex);
-            }
-        });
     }
 
     @Override
@@ -176,7 +199,12 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             String json = new Gson().toJson(dataObject);
             byte[] jsonBytes = json.getBytes(Charset.forName("UTF-8"));
 
-            LoggableEvent event = new LoggableEvent(exercise.getCourseName(), exercise.getName(), "review_requested", jsonBytes);
+            LoggableEvent event =
+                    new LoggableEvent(
+                            exercise.getCourseName(),
+                            exercise.getName(),
+                            "review_requested",
+                            jsonBytes);
             eventBus.post(event);
         }
     }
