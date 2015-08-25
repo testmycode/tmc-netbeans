@@ -1,9 +1,10 @@
 package fi.helsinki.cs.tmc.testing;
 
+import org.apache.commons.io.FileUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.concurrent.atomic.AtomicInteger;
-import org.apache.commons.io.FileUtils;
 
 public class TempTestDir {
     private static AtomicInteger counter = new AtomicInteger(1);
@@ -15,15 +16,15 @@ public class TempTestDir {
         FileUtils.forceDelete(dir);
         FileUtils.forceMkdir(dir);
     }
-    
+
     public File get() {
         return dir;
     }
-    
+
     public String getPath() {
         return get().getAbsolutePath();
     }
-    
+
     public void destroy() throws IOException {
         try {
             FileUtils.forceDelete(dir);

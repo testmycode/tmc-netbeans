@@ -8,6 +8,17 @@ import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
+
+import name.fraser.neil.plaintext.diff_match_patch;
+import name.fraser.neil.plaintext.diff_match_patch.Patch;
+
+import org.netbeans.api.editor.EditorRegistry;
+import org.netbeans.modules.editor.NbEditorUtilities;
+
+import org.openide.filesystems.FileObject;
+import org.openide.util.Lookup;
+import org.openide.util.datatransfer.ExClipboard;
+
 import java.awt.HeadlessException;
 import java.awt.datatransfer.DataFlavor;
 import java.beans.PropertyChangeEvent;
@@ -25,25 +36,21 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import name.fraser.neil.plaintext.diff_match_patch;
-import name.fraser.neil.plaintext.diff_match_patch.Patch;
-import org.netbeans.api.editor.EditorRegistry;
-import org.netbeans.modules.editor.NbEditorUtilities;
-import org.openide.filesystems.FileObject;
-import org.openide.util.Lookup;
-import org.openide.util.datatransfer.ExClipboard;
+
 
 /**
  * Records large inserts into documents. These are often, but not always,
  * pastes.
  */
 public class TextInsertEventSource implements Closeable {
-    
+
     private static final Logger log = Logger.getLogger(TextInsertEventSource.class.getName());
     private static final diff_match_patch PATCH_GENERATOR = new diff_match_patch();
+
     private EventReceiver receiver;
     private JTextComponent currentComponent;
     private Map<Document, String> documentCache;
+
     private DocumentListener docListener = new DocumentListener() {
         @Override
         public void insertUpdate(DocumentEvent e) {
@@ -59,7 +66,7 @@ public class TextInsertEventSource implements Closeable {
         public void changedUpdate(DocumentEvent e) {
             // These are attribute changes and don't interest us.
         }
-        
+
         private FileObject cachedFile = null;
         private Exercise cachedExercise = null;
 
@@ -96,7 +103,7 @@ public class TextInsertEventSource implements Closeable {
 
         private void createAndSendPatchEvent(DocumentEvent e, FileObject fo, Document doc, Exercise ex) {
             List<Patch> patches;
-            
+
             // if the document is not in cache, the patch will
             // contain the full document
             boolean patchContainsFullDocument = !documentCache.containsKey(doc);
@@ -112,8 +119,8 @@ public class TextInsertEventSource implements Closeable {
             }
 
             // Remove event is handled here as the getText-method can cause
-            // an error as the document state is the state after the event. As 
-            // the offsets are from the actual event, they may reference content 
+            // an error as the document state is the state after the event. As
+            // the offsets are from the actual event, they may reference content
             // that is no longer in the current document.
             if (e.getType().equals(EventType.REMOVE)) {
                 sendEvent(ex, "text_remove", generatePatchDescription(fo, patches, patchContainsFullDocument));
@@ -127,7 +134,7 @@ public class TextInsertEventSource implements Closeable {
                 log.log(Level.WARNING, "Document {0} event with bad location. ", e.getType());
                 return;
             }
-            
+
             if (isPasteEvent(text)) {
                 sendEvent(ex, "text_paste", generatePatchDescription(fo, patches, patchContainsFullDocument));
             } else if (e.getType() == EventType.INSERT) {
@@ -139,7 +146,7 @@ public class TextInsertEventSource implements Closeable {
             LoggableEvent event = new LoggableEvent(ex, eventType, text.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
         }
-        
+
         private String generatePatchDescription(FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
             String filePath = TmcFileUtils.tryGetPathRelativeToProject(fo);
             if (filePath != null) {
@@ -196,7 +203,7 @@ public class TextInsertEventSource implements Closeable {
             return PATCH_GENERATOR.patch_make(previous, current);
         }
     };
-    
+
     private PropertyChangeListener propListener = new PropertyChangeListener() {
         @Override
         public void propertyChange(PropertyChangeEvent evt) {

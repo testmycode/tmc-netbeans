@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.utilities;
 
 public class Cooldown {
+    
     private long durationMillis;
     private long startTime;
 

@@ -1,10 +1,5 @@
 package fi.helsinki.cs.tmc.spyware;
 
-import com.google.common.base.Optional;
-import com.google.common.collect.Iterables;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.NbTmcSettings;
@@ -16,6 +11,17 @@ import fi.helsinki.cs.tmc.utilities.SingletonTask;
 import fi.helsinki.cs.tmc.utilities.TmcRequestProcessor;
 import fi.helsinki.cs.tmc.core.communication.HttpResult;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+
+import com.google.common.base.Optional;
+import com.google.common.collect.Iterables;
+import com.google.common.util.concurrent.FutureCallback;
+import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.ListenableFuture;
+
+import org.netbeans.api.progress.ProgressHandle;
+import org.netbeans.api.progress.ProgressHandleFactory;
+import org.openide.util.Exceptions;
+
 import java.io.IOException;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -26,9 +32,6 @@ import java.util.Random;
 import java.util.concurrent.TimeoutException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.api.progress.ProgressHandle;
-import org.netbeans.api.progress.ProgressHandleFactory;
-import org.openide.util.Exceptions;
 
 /**
  * Buffers {@link LoggableEvent}s and sends them to the server and/or syncs them
@@ -246,7 +249,7 @@ public class EventSendBuffer implements EventReceiver {
         /**
          * Converts events to data[] and sends it to defined url.
          */
-        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {       
+        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
             NbTmcSettings settings = NbTmcSettings.getDefault();
             Optional<Course> currentCourse = settings.getCurrentCourse();
             if (!currentCourse.isPresent()) {
@@ -257,7 +260,7 @@ public class EventSendBuffer implements EventReceiver {
             progress.start();
             try {
                 byte[] data = convertEventsToByteArray(eventsToSend);
-                ListenableFuture<List<HttpResult>> spywareSending = 
+                ListenableFuture<List<HttpResult>> spywareSending =
                         TmcCoreSingleton.getInstance().sendSpywareDiffs(data);
                 Futures.addCallback(spywareSending, new FutureCallback<List<HttpResult>>() {
                     @Override
@@ -270,7 +273,7 @@ public class EventSendBuffer implements EventReceiver {
                         System.err.println(thrwbl.getMessage());
                     }
                     private void clearAfterSend(List<HttpResult> success) {
-                        
+
                         progress.finish();
                         log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[]{eventsToSend.size(), url});
                         removeSentEventsFromQueue();
@@ -303,7 +306,7 @@ public class EventSendBuffer implements EventReceiver {
             }
             return data;
         }
-        
+
         private void removeSentEventsFromQueue() {
             synchronized (sendQueue) {
                 assert (eventsToRemoveAfterSend <= sendQueue.size());

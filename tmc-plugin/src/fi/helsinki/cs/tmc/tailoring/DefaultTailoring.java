@@ -7,18 +7,18 @@ public class DefaultTailoring implements Tailoring {
     public String getDefaultServerUrl() {
         return "";
     }
-    
+
     @Override
     public String getDefaultUsername() {
         return "";
     }
-    
+
     @Override
     public String getUsernameFieldName() {
         return "username";
     }
-    
-    
+
+
     protected String getSystemUsername() {
         String user = System.getenv("USER"); // Unix
         if (user == null) {
@@ -34,17 +34,17 @@ public class DefaultTailoring implements Tailoring {
     public boolean isSpywareEnabledByDefault() {
         return true;
     }
-        
+
     @Override
     public boolean isDetailedSpywareEnabledByDefault() {
         return true;
     }
-    
+
     @Override
     public Locale[] getAvailableErrorMsgLocales() {
         return new Locale[] { new Locale("en"), new Locale("fi") };
     }
-    
+
     @Override
     public Locale getDefaultErrorMsgLocale() {
         Locale def = Locale.getDefault();

@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.utilities;
 
-import com.google.common.util.concurrent.FutureCallback;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,5 +41,4 @@ public class BgTaskListenerList<T> implements BgTaskListener<T> {
             listener.bgTaskFailed(ex);
         }
     }
-
 }

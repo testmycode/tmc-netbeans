@@ -1,5 +1,13 @@
 package fi.helsinki.cs.tmc.utilities.process;
 
+import org.apache.commons.io.output.TeeOutputStream;
+import org.apache.commons.io.output.WriterOutputStream;
+
+import org.netbeans.api.extexecution.ExternalProcessSupport;
+
+import org.openide.filesystems.FileUtil;
+import org.openide.windows.InputOutput;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
@@ -9,11 +17,6 @@ import java.util.Collections;
 import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.Callable;
-import org.apache.commons.io.output.TeeOutputStream;
-import org.apache.commons.io.output.WriterOutputStream;
-import org.netbeans.api.extexecution.ExternalProcessSupport;
-import org.openide.filesystems.FileUtil;
-import org.openide.windows.InputOutput;
 
 /**
  * Used to run subprocesses with a timeout and capture their output.
@@ -107,5 +110,4 @@ public class ProcessRunner implements Callable<ProcessResult> {
         thread.start();
         return thread;
     }
-
 }

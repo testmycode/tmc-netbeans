@@ -1,11 +1,5 @@
 package fi.helsinki.cs.tmc.testing;
 
-import java.io.IOException;
-import java.net.InetSocketAddress;
-import java.net.ServerSocket;
-import java.net.Socket;
-import java.net.SocketException;
-import java.util.concurrent.Semaphore;
 import org.apache.http.ConnectionClosedException;
 import org.apache.http.HttpResponseInterceptor;
 import org.apache.http.impl.DefaultBHttpServerConnection;
@@ -21,7 +15,15 @@ import org.apache.http.protocol.ResponseContent;
 import org.apache.http.protocol.ResponseDate;
 import org.apache.http.protocol.ResponseServer;
 import org.apache.http.protocol.UriHttpRequestHandlerMapper;
+
 import org.openide.util.Exceptions;
+
+import java.io.IOException;
+import java.net.InetSocketAddress;
+import java.net.ServerSocket;
+import java.net.Socket;
+import java.net.SocketException;
+import java.util.concurrent.Semaphore;
 
 public class AdHocHttpServer {
 
@@ -101,33 +103,33 @@ public class AdHocHttpServer {
                 proc,
                 handlers);
     }
-    
+
     private void startThread() {
         thread = new Thread(inThread, "FakeServer");
         thread.setDaemon(true);
         thread.start();
     }
-    
+
     public void waitForRequestToComplete() throws Exception {
         requestCounter.acquire();
     }
-    
+
     public synchronized void stop() throws Exception {
         if (!isStarted()) {
             return;
         }
-        
+
         debug("Stopping");
         thread.interrupt();
         serverSocket.close();
         thread.join();
         debug("Stopped");
-        
+
         if (inThreadException != null) {
             throw inThreadException;
         }
     }
-    
+
     private Runnable inThread = new Runnable() {
         @Override
         public void run() {
@@ -172,7 +174,7 @@ public class AdHocHttpServer {
             }
         }
     };
-    
+
     protected void debug(Object msg) {
         if (debugEnabled) {
             System.out.println(this.getClass().getSimpleName() + ": " + msg.toString());

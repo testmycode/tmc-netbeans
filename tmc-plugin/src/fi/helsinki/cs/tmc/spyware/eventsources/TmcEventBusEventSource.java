@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
@@ -10,6 +9,9 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+
+import com.google.gson.Gson;
+
 import java.nio.charset.Charset;
 import java.util.Collections;
 
@@ -17,6 +19,7 @@ import java.util.Collections;
  * Records LoggableEvents sent over TmcEventBus, as well as some TMC action invocation events.
  */
 public class TmcEventBusEventSource extends TmcEventListener {
+
     private ProjectMediator projects;
     private CourseDb courseDb;
     private EventReceiver receiver;
