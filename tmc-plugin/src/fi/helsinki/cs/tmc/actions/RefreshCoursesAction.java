@@ -108,8 +108,8 @@ public final class RefreshCoursesAction {
                                         @Override
                                         public Course call() throws Exception {
                                             lf =
-                                                    tmcCore.getCourse(
-                                                            currentCourseStub.getDetailsUrlAsUri());
+                                                    tmcCore.getCourseByName(
+                                                            currentCourseStub.getName());
                                             return lf.get();
                                         }
 

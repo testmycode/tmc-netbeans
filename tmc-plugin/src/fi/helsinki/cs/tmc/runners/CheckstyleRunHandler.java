@@ -4,14 +4,14 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
-import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import com.google.common.util.concurrent.ListenableFuture;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
 
 import org.netbeans.api.project.Project;
 
@@ -43,7 +43,7 @@ public final class CheckstyleRunHandler implements Runnable {
 
                     @Override
                     public void bgTaskReady(final Object nothing) {
-                        resultCollector.setValidationResult(validationResult);
+                        resultCollector.setValidationResult((fi.helsinki.cs.tmc.langs.abstraction.ValidationResult) validationResult);
                     }
                 });
     }

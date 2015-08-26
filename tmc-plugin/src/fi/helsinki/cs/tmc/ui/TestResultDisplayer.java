@@ -6,8 +6,8 @@ import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
 import fi.helsinki.cs.tmc.core.domain.submission.TestCase;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -52,7 +52,7 @@ public class TestResultDisplayer {
                 break;
         }
     }
-    
+
     private List<TestCaseResult> convertToTestCaseResults(List<TestCase> cases){
         List<TestCaseResult> resultList = new ArrayList<TestCaseResult>();
         for (TestCase te : cases) {
@@ -127,7 +127,7 @@ public class TestResultDisplayer {
                                    final boolean returnable,
                                    final Runnable submissionCallback,
                                    final ResultCollector resultCollector) {
-        
+
         System.out.println("Näyttämässä lokaalia testitulosta");
 
         resultCollector.setSubmissionCallback(submissionCallback);
@@ -174,5 +174,4 @@ public class TestResultDisplayer {
 
         return resultList;
     }
-
 }
