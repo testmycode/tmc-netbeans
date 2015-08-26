@@ -3,17 +3,15 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.NbTmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper.OverwritingDecider;
+import fi.helsinki.cs.tmc.model.TmcCoreSingleton;
 
 import com.google.common.base.Function;
+import com.google.common.util.concurrent.ListenableFuture;
 
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
@@ -25,17 +23,17 @@ import org.openide.nodes.Node;
 import org.openide.util.HelpCtx;
 import org.openide.util.NbBundle.Messages;
 
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
 @ActionRegistration(displayName = "#CTL_DownloadSolutionAction", lazy = false)
-@ActionReferences({@ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)})
+@ActionReferences({
+    @ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)})
 @Messages("CTL_DownloadSolutionAction=Download suggested &solution")
 public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
+
     private static final Logger logger = Logger.getLogger(DownloadSolutionAction.class.getName());
     private ProjectMediator projectMediator;
     private CourseDb courseDb;
@@ -104,10 +102,10 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 return;
             }
 
-            String question =
-                    "Are you sure you want to OVERWRITE your copy of\n"
-                            + ex.getName()
-                            + " with the suggested solution?";
+            String question
+                    = "Are you sure you want to OVERWRITE your copy of\n"
+                    + ex.getName()
+                    + " with the suggested solution?";
             String title = "Replace with solution?";
             dialogs.askYesNo(
                     question,
@@ -125,80 +123,40 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     }
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
-        ServerAccess serverAccess = new ServerAccess(NbTmcSettings.getDefault());
+        BgTask.start("Downloading solution for " + ex.getName(), new CancellableCallable<Boolean>() {
 
-        // TODO: Use tmc-core.
-        CancellableCallable<byte[]> downloadTask =
-                serverAccess.getDownloadingExerciseSolutionZipTask(ex);
-        BgTask.start(
-                "Downloading solution for " + ex.getName(),
-                downloadTask,
-                new BgTaskListener<byte[]>() {
-                    @Override
-                    public void bgTaskReady(byte[] result) {
-                        unzipSolution(ex, proj, result);
-                    }
+            ListenableFuture<Boolean> lf;
+            @Override
+            public Boolean call() throws Exception {
+                System.err.println("loading");
+                ListenableFuture<Boolean> lf  = TmcCoreSingleton.getInstance().downloadModelSolution(ex);
+                return lf.get();
+            }
 
-                    @Override
-                    public void bgTaskCancelled() {}
+            @Override
+            public boolean cancel() {
+                return lf.cancel(true);
+            }
+        }, new BgTaskListener<Boolean>() {
 
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        logger.log(Level.INFO, "Failed to download solution.", ex);
-                        dialogs.displayError(
-                                "Failed to download solution.\n"
-                                        + ServerErrorHelper.getServerExceptionMsg(ex));
-                    }
-                });
+            @Override
+            public void bgTaskReady(Boolean result) {
+                System.err.println("ready");
+                projectMediator.scanForExternalChanges(proj);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+            }
+        });
     }
-
-    private void unzipSolution(final Exercise ex, final TmcProjectInfo proj, final byte[] data) {
-        Callable<Object> task =
-                new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        NbProjectUnzipper unzipper = new NbProjectUnzipper(solutionOverwriting);
-                        unzipper.unzipProject(data, proj.getProjectDirAsFile());
-                        return null;
-                    }
-                };
-
-        BgTask.start(
-                "Extracting solution",
-                task,
-                new BgTaskListener<Object>() {
-                    @Override
-                    public void bgTaskReady(Object result) {
-                        projectMediator.scanForExternalChanges(proj);
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {}
-
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        logger.log(Level.INFO, "Failed to extract solution.", ex);
-                        dialogs.displayError(
-                                "Failed to extract solution.\n"
-                                        + ServerErrorHelper.getServerExceptionMsg(ex));
-                    }
-                });
-    }
-
-    private OverwritingDecider solutionOverwriting =
-            new OverwritingDecider() {
-                @Override
-                public boolean mayOverwrite(String relPath) {
-                    return true;
-                }
-
-                @Override
-                public boolean mayDelete(String relPath) {
-                    return false;
-                }
-            };
 
     private class ActionMenuItem extends JMenuItem implements DynamicMenuContent {
+
         public ActionMenuItem() {
             super(DownloadSolutionAction.this);
         }
@@ -206,7 +164,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
         @Override
         public JComponent[] getMenuPresenters() {
             if (DownloadSolutionAction.this.isEnabled()) {
-                return new JComponent[] {getOriginalMenuPresenter()};
+                return new JComponent[]{getOriginalMenuPresenter()};
             } else {
                 return new JComponent[0];
             }
