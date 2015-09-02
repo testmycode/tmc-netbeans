@@ -1,3 +1,6 @@
+Legacy-ohjelmointiprojekti: TMC
+This a fork for issue 111
+
 # Test My Code NetBeans plugin #
 
 This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading, testing and submitting exercises directly from the IDE.
