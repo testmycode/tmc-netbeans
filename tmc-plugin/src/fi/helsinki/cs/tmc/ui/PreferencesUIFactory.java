@@ -80,8 +80,7 @@ public class PreferencesUIFactory {
         ActionListener closeListener = new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                panel = null;
-                dialog = null;
+                destroyDialog();
                 dialogListener.actionPerformed(e);
             }
         };
@@ -97,8 +96,7 @@ public class PreferencesUIFactory {
         dialog.addWindowListener(new WindowAdapter() {
             @Override
             public void windowClosed(WindowEvent we) {
-                panel = null;
-                dialog = null;
+                destroyDialog();
             }
         });
         SwingUtilities.invokeLater(new Runnable() {
@@ -107,5 +105,10 @@ public class PreferencesUIFactory {
                 dialog.setVisible(true);
             }
         });
+    }
+
+    private void destroyDialog() {
+        panel = null;
+        dialog = null;
     }
 }
