@@ -73,6 +73,10 @@ public class SettingsOperator {
         new JButtonOperator(dialog, "Cancel").doClick();
     }
     
+    public void closeDialogWindow(){
+        dialog.close();
+    }
+    
     public void setProjectDownloadDirToTestWorkDir(NbTestCase testCase) throws IOException {
         // doClick blocks waiting for the file chooser so we send it to the background
         SwingUtilities.invokeLater(new Runnable() {
