@@ -23,6 +23,7 @@ import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Exceptions;
 
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -248,7 +249,7 @@ public class EventSendBuffer implements EventReceiver {
                                 return null;
                             }
 
-                            List<String> urls = course.getSpywareUrls();
+                            List<URI> urls = course.getSpywareUrls();
                             if (urls == null || urls.isEmpty()) {
                                 log.log(
                                         Level.INFO,
@@ -256,7 +257,7 @@ public class EventSendBuffer implements EventReceiver {
                                 return null;
                             }
 
-                            String url = urls.get(random.nextInt(urls.size()));
+                            String url = urls.get(random.nextInt(urls.size())).toString();
 
                             return url;
                         }
@@ -316,8 +317,8 @@ public class EventSendBuffer implements EventReceiver {
 
                         private void addCorrectSpywareUrl(
                                 final String url, Optional<Course> currentCourse) {
-                            List<String> spywareUrls = new ArrayList<String>();
-                            String finalUrl = serverAccess.addApiCallQueryParameters(url);
+                            List<URI> spywareUrls = new ArrayList<URI>();
+                            URI finalUrl = URI.create(serverAccess.addApiCallQueryParameters(url));
                             spywareUrls.add(finalUrl);
                             currentCourse.get().setSpywareUrls(spywareUrls);
                         }

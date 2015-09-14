@@ -59,7 +59,7 @@ public class CodeReviewDialog extends javax.swing.JDialog {
     
     private void openInBrowser() {
         try {
-            HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(review.getUrl()));
+            HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(review.getUrl().toString()));
         } catch (MalformedURLException ex) {
             log.log(Level.WARNING, "Malformed URL: " + ex.getMessage(), ex);
         }

@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
+import java.net.URI;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
@@ -120,12 +121,12 @@ public class PushEventListener {
             return;
         }
 
-        String cometUrl = course.getCometUrl();
+        URI cometUrl = course.getCometUrl();
         if (cometUrl == null) {
             return;
         }
-        ClientTransport transport = createWebSocketTransport(cometUrl);
-        client = new BayeuxClient(cometUrl, transport);
+        ClientTransport transport = createWebSocketTransport(cometUrl.toString());
+        client = new BayeuxClient(cometUrl.toString(), transport);
         client.getChannel(Channel.META_HANDSHAKE).addListener(handshakeListener);
         client.getChannel(Channel.META_DISCONNECT).addListener(disconnectListener);
 

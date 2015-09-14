@@ -11,6 +11,7 @@ import fi.helsinki.cs.tmc.core.domain.ExerciseKey;
 import java.io.IOException;
 import java.io.Reader;
 import java.io.Writer;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -142,13 +143,13 @@ public class CourseDb {
         List<Exercise> result = new ArrayList<Exercise>();
         Course course = getCurrentCourse();
         if (course != null) {
-            List<String> unlockables = course.getUnlockables();
+            List<URI> unlockables = course.getUnlockables();
             if (unlockables == null) {
                 unlockables = Collections.emptyList();
             }
-            for (String exerciseName : unlockables) {
+            for (URI exerciseName : unlockables) {
                 for (Exercise ex : course.getExercises()) {
-                    if (ex.getName().equals(exerciseName)) {
+                    if (ex.getName().equals(exerciseName.toString())) {
                         result.add(ex);
                     }
                 }
