@@ -25,6 +25,8 @@ import java.beans.PropertyChangeEvent;
 import java.beans.PropertyChangeListener;
 import java.io.Closeable;
 import java.nio.charset.Charset;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -168,10 +170,10 @@ public class TextInsertEventSource implements Closeable {
 
                 private String generatePatchDescription(
                         FileObject fo, List<Patch> patches, boolean patchContainsFullDocument) {
-                    String filePath = TmcFileUtils.tryGetPathRelativeToProject(fo);
+                    Path filePath = Paths.get(TmcFileUtils.tryGetPathRelativeToProject(fo));
                     if (filePath != null) {
                         return JsonMaker.create()
-                                .add("file", filePath)
+                                .add("file", filePath.toString())
                                 .add("patches", PATCH_GENERATOR.patch_toText(patches))
                                 .add("full_document", patchContainsFullDocument)
                                 .toString();

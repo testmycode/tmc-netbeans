@@ -23,6 +23,8 @@ import org.openide.filesystems.FileUtil;
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -102,27 +104,27 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     public void fileAttributeChanged(FileAttributeEvent fae) {}
 
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
-        String filePath = TmcFileUtils.tryGetPathRelativeToProject(fileObject);
+        Path filePath = Paths.get(TmcFileUtils.tryGetPathRelativeToProject(fileObject));
         if (filePath == null) {
             return;
         }
         String metadata =
                 JsonMaker.create()
                         .add("cause", changeType.name().toLowerCase())
-                        .add("file", filePath)
+                        .add("file", filePath.toString())
                         .toString();
         invokeSnapshotThreadViaEdt(fileObject, metadata);
     }
 
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
-        String filePath = TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile());
+        Path filePath = Paths.get(TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile()));
         if (filePath == null) {
             return;
         }
         String metadata =
                 JsonMaker.create()
                         .add("cause", changeType.name().toLowerCase())
-                        .add("file", filePath)
+                        .add("file", filePath.toString())
                         .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt())
                         .toString();
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
