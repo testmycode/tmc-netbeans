@@ -2,6 +2,9 @@ package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
+
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.openide.filesystems.FileObject;
 
@@ -24,13 +27,13 @@ public class SourceFileLookup {
 
     public FileObject findSourceFileFor(Exercise exercise, String className) {
         String outerClassName = className.replaceAll("\\$.*$", "");
-        String path = outerClassName.replace('.', '/') + ".java";
+        Path path = Paths.get(outerClassName.replace('.', '/') + ".java");
 
         TmcProjectInfo correctProject = projectMediator.tryGetProjectForExercise(exercise);
         for (FileObject sr : globalPathRegistry.getSourceRoots()) {
             TmcProjectInfo p = projectMediator.tryGetProjectOwningFile(sr);
             if (p != null && p.equals(correctProject)) {
-                FileObject result = sr.getFileObject(path);
+                FileObject result = sr.getFileObject(path.toString());
                 if (result != null) {
                     return result;
                 }
@@ -38,6 +41,6 @@ public class SourceFileLookup {
         }
 
         // Fall back to findResource picking a source root from any project.
-        return GlobalPathRegistry.getDefault().findResource(path);
+        return GlobalPathRegistry.getDefault().findResource(path.toString());
     }
 }

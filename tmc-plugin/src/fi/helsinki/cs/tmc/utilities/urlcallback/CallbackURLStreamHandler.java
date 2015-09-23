@@ -9,6 +9,7 @@ import java.io.InputStream;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLStreamHandler;
+import java.nio.file.Path;
 import java.util.Map;
 
 /**
@@ -23,11 +24,11 @@ public class CallbackURLStreamHandler extends URLStreamHandler {
 
     private static final Map<String, URLCallback> callbacks = Maps.newHashMap();
 
-    public static void registerCallback(String path, URLCallback callback) {
+    public static void registerCallback(Path path, URLCallback callback) {
         if (callback == null) {
-            callbacks.remove(path);
+            callbacks.remove(path.toString());
         } else {
-            callbacks.put(path, callback);
+            callbacks.put(path.toString(), callback);
         }
     }
 

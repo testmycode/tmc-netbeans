@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URL;
+import java.nio.file.Paths;
 import java.util.Collection;
 
 /**
@@ -44,7 +45,7 @@ public class UpdateCenterLayerGen extends Repository.LayerProvider {
     public UpdateCenterLayerGen() {
         synchronized (UpdateCenterLayerGen.class) {
             if (!callbackRegistered) {
-                CallbackURLStreamHandler.registerCallback(CALLBACK_NAME, callback);
+                CallbackURLStreamHandler.registerCallback(Paths.get(CALLBACK_NAME), callback);
             }
             callbackRegistered = true;
         }
