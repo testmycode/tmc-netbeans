@@ -146,7 +146,7 @@ public class NbTmcSettings implements TmcSettings {
         if (shouldSave) {
             settings.put(PREF_PASSWORD, unsavedPassword);
         } else {
-                settings.remove(PREF_PASSWORD);
+            settings.remove(PREF_PASSWORD);
         }
     }
 
