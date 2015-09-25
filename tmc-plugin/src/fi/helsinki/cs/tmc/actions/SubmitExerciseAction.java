@@ -51,7 +51,11 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         return "fi/helsinki/cs/tmc/actions/submit.png";
     }
 <<<<<<< HEAD
+<<<<<<< HEAD
 }
 =======
 }
 >>>>>>> 7fd9e4e... Send snapshots on each submit to make sure to have all relevant
+=======
+}
+>>>>>>> Send snapshots on each submit to make sure to have all relevant
