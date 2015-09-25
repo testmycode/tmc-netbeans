@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
@@ -35,6 +37,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     @Override
     protected void performAction(Node[] nodes) {
         new ExerciseSubmitter().performAction(projectsFromNodes(nodes).toArray(new Project[0]));
+        SpywareFacade.sendNow();
     }
 
     @Override
@@ -47,5 +50,8 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
         // The setting in layer.xml doesn't work with NodeAction
         return "fi/helsinki/cs/tmc/actions/submit.png";
     }
-    
+<<<<<<< HEAD
 }
+=======
+}
+>>>>>>> 7fd9e4e... Send snapshots on each submit to make sure to have all relevant

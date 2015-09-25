@@ -16,42 +16,59 @@ public class SpywareFacade implements SpywareSettings {
     private static final Logger log = Logger.getLogger(SpywareFacade.class.getName());
 
     private static SpywareFacade instance;
-    
+
     public static void start() {
         if (instance != null) {
             throw new IllegalStateException("SpywareFacade.start() called twice");
         }
         instance = new SpywareFacade();
     }
-    
+
     public static void close() {
         if (instance != null) {
             instance.closeImpl();
             instance = null;
         }
     }
-    
+
+    /**
+     * Allows tasks to force send snapshots. Used e.g. in Submit task, so that
+     * we can make sure that all of the snapshot data has been sent to the server
+     * alongside submission and not lost in cases like when user submits it's last
+     * exercise while using a guest account.
+     *
+     * We don't want to delay closing NetBeans by then sending snapshots...
+     */
+    public static void sendNow() {
+        TmcSwingUtilities.ensureEdt(new Runnable() {
+            @Override
+            public void run() {
+                instance.sender.sendNow();
+            }
+        });
+    }
+
     private TmcSettings settings;
-    
+
     private EventSendBuffer sender;
-    
+
     private EventDeduplicater sourceSnapshotDedup;
-    
+
     private SourceSnapshotEventSource sourceSnapshotSource;
     private ProjectActionEventSource projectActionSource;
     private TmcEventBusEventSource tmcEventBusSource;
     private TextInsertEventSource textInsertEventSource;
-    
+
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
-        
+
         sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
         sender.sendNow();
-        
+
         sourceSnapshotDedup = new EventDeduplicater(sender);
         sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);
         sourceSnapshotSource.startListeningToFileChanges();
-        
+
         projectActionSource = new ProjectActionEventSource(sender);
         tmcEventBusSource = new TmcEventBusEventSource(sender);
         TmcSwingUtilities.ensureEdt(new Runnable() {
@@ -63,10 +80,10 @@ public class SpywareFacade implements SpywareSettings {
             }
         });
     }
-    
+
     private void closeImpl() {
         // Close & flush back to front
-        
+
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
@@ -75,13 +92,13 @@ public class SpywareFacade implements SpywareSettings {
                 ProjectActionCaptor.removeListener(projectActionSource);
             }
         });
-        
+
         sourceSnapshotSource.close();
-        
+
         sourceSnapshotDedup.close();
         sender.close();
     }
-    
+
     @Override
     public boolean isSpywareEnabled() {
         return settings.isSpywareEnabled();
