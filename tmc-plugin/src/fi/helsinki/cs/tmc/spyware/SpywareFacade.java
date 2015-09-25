@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.spyware.eventsources.WindowStatechangesEventSource;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -62,6 +63,7 @@ public class SpywareFacade implements SpywareSettings {
     private ProjectActionEventSource projectActionSource;
     private TmcEventBusEventSource tmcEventBusSource;
     private TextInsertEventSource textInsertEventSource;
+    private WindowStatechangesEventSource windowStatechangesEventSource;
 
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
@@ -75,6 +77,8 @@ public class SpywareFacade implements SpywareSettings {
 
         projectActionSource = new ProjectActionEventSource(sender);
         tmcEventBusSource = new TmcEventBusEventSource(sender);
+
+        windowStatechangesEventSource = new WindowStatechangesEventSource(sender);
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {

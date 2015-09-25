@@ -18,15 +18,20 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import org.openide.filesystems.*;
+import org.openide.filesystems.FileAttributeEvent;
+import org.openide.filesystems.FileChangeListener;
+import org.openide.filesystems.FileEvent;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileRenameEvent;
+import org.openide.filesystems.FileUtil;
 
 public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
     private enum ChangeType {
         FILE_CREATE, FOLDER_CREATE, FILE_CHANGE, FILE_DELETE, FILE_RENAME;
     }
-    
+
     private static final Logger log = Logger.getLogger(SourceSnapshotEventSource.class.getName());
-    
+
     private SpywareSettings settings;
     private EventReceiver receiver;
     private ActiveThreadSet snapshotterThreads;
@@ -35,14 +40,14 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     public SourceSnapshotEventSource(SpywareSettings settings, EventReceiver receiver) {
         this.settings = settings;
         this.receiver = receiver;
-        
+
         this.snapshotterThreads = new ActiveThreadSet();
     }
-    
+
     public void startListeningToFileChanges() {
         FileUtil.addFileChangeListener(this);
     }
-    
+
     /**
      * Waits for all pending events to be sent.
      */
@@ -60,7 +65,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             }
         });
     }
-    
+
     @Override
     public void fileFolderCreated(FileEvent fe) {
         reactToChange(ChangeType.FOLDER_CREATE, fe.getFile());
@@ -89,26 +94,26 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     @Override
     public void fileAttributeChanged(FileAttributeEvent fae) {
     }
-    
+
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
         String filePath = TmcFileUtils.tryGetPathRelativeToProject(fileObject);
         if(filePath == null) {
             return;
         }
-        
+
         String metadata = JsonMaker.create()
                 .add("cause", changeType.name().toLowerCase())
                 .add("file", filePath)
                 .toString();
         invokeSnapshotThreadViaEdt(fileObject, metadata);
-    }    
-    
+    }
+
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
         String filePath = TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile());
         if(filePath == null) {
             return;
         }
-        
+
         String metadata = JsonMaker.create()
                 .add("cause", changeType.name().toLowerCase())
                 .add("file", filePath)
@@ -116,7 +121,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 .toString();
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
     }
-    
+
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
     private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final String metadata) {
@@ -126,7 +131,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
                 if (closed) {
                     return;
                 }
-                
+
                 try {
                     startSnapshotThread(fileObject, metadata);
                 } catch (Exception e) {
@@ -135,14 +140,14 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             }
         });
     }
-    
+
     private void startSnapshotThread(FileObject changedFile, String metadata) {
         if (!settings.isSpywareEnabled()) {
             return;
         }
-        
+
         log.log(Level.FINE, "Changed file: {0}", changedFile);
-        
+
         ProjectMediator pm = ProjectMediator.getInstance();
         TmcProjectInfo project = pm.tryGetProjectOwningFile(changedFile);
         log.log(Level.FINE, "Project: {0}", project);
@@ -150,10 +155,10 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         if (project != null) {
             CourseDb courseDb = CourseDb.getInstance();
             Exercise exercise = pm.tryGetExerciseForProject(project, courseDb);
-            
+
             if (exercise != null) {
                 log.log(Level.FINER, "Exercise: {0}", exercise);
-                
+
                 SnapshotThread thread = new SnapshotThread(receiver, exercise, project, metadata);
                 snapshotterThreads.addThread(thread);
                 thread.setDaemon(true);
@@ -161,7 +166,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             }
         }
     }
-    
+
     private static class SnapshotThread extends Thread {
         private final EventReceiver receiver;
         private final Exercise exercise;
