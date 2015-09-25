@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -13,6 +15,7 @@ import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import java.util.logging.Logger;
 
 public class SpywareFacade implements SpywareSettings {
+
     private static final Logger log = Logger.getLogger(SpywareFacade.class.getName());
 
     private static SpywareFacade instance;
@@ -22,6 +25,7 @@ public class SpywareFacade implements SpywareSettings {
             throw new IllegalStateException("SpywareFacade.start() called twice");
         }
         instance = new SpywareFacade();
+        TmcEventBus.getDefault().post(new InvokedEvent("spyware_loaded"));
     }
 
     public static void close() {
@@ -33,9 +37,9 @@ public class SpywareFacade implements SpywareSettings {
 
     /**
      * Allows tasks to force send snapshots. Used e.g. in Submit task, so that
-     * we can make sure that all of the snapshot data has been sent to the server
-     * alongside submission and not lost in cases like when user submits it's last
-     * exercise while using a guest account.
+     * we can make sure that all of the snapshot data has been sent to the
+     * server alongside submission and not lost in cases like when user submits
+     * it's last exercise while using a guest account.
      *
      * We don't want to delay closing NetBeans by then sending snapshots...
      */
@@ -87,6 +91,7 @@ public class SpywareFacade implements SpywareSettings {
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
+                TmcEventBus.getDefault().post(new InvokedEvent("spyware_unloaded"));
                 textInsertEventSource.close();
                 TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
                 ProjectActionCaptor.removeListener(projectActionSource);
@@ -107,5 +112,14 @@ public class SpywareFacade implements SpywareSettings {
     @Override
     public boolean isDetailedSpywareEnabled() {
         return settings.isDetailedSpywareEnabled();
+    }
+
+    public static class InvokedEvent implements TmcEvent {
+
+        public final String message;
+
+        public InvokedEvent(String message) {
+            this.message = message;
+        }
     }
 }

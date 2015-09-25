@@ -30,9 +30,9 @@ public class ReviewEventListener extends TmcEventListener {
     private static final Logger log = Logger.getLogger(ReviewEventListener.class.getName());
 
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
-    
+
     private static ReviewEventListener instance;
-    
+
     public static void start() {
         if (instance == null) {
             instance = new ReviewEventListener();
@@ -46,14 +46,14 @@ public class ReviewEventListener extends TmcEventListener {
     private TmcNotificationDisplayer notifier;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
-    
+
     ReviewEventListener() {
         this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
     }
-    
+
     public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
@@ -69,7 +69,7 @@ public class ReviewEventListener extends TmcEventListener {
             @Override
             public void run() {
                 refreshCourseDb();
-                
+
                 String title = "Code review";
                 String msg = "Code review for " + review.getExerciseName() + " ready.";
                 Image img;
@@ -89,12 +89,12 @@ public class ReviewEventListener extends TmcEventListener {
             }
         });
     }
-    
+
     private void refreshCourseDb() {
         // Exercise properties have probably changed
         new RefreshCoursesAction().addDefaultListener(false, true).run();
     }
-    
+
     private void showReviewDialog(final Review review) {
         final CodeReviewDialog dialog = new CodeReviewDialog(review);
         dialog.setOkListener(new ActionListener() {
@@ -105,7 +105,7 @@ public class ReviewEventListener extends TmcEventListener {
                     markAsRead(review);
 
                     sendLoggableEvent(review);
-                    
+
                     // The review might have made new exercises available.
                     // We already updated the course DB earlier, but this time
                     // we will also notify the user.
@@ -115,7 +115,7 @@ public class ReviewEventListener extends TmcEventListener {
         });
         dialog.setVisible(true);
     }
-    
+
     private void markAsRead(Review review) {
         CancellableCallable<Void> task = serverAccess.getMarkingReviewAsReadTask(review, true);
         BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
@@ -159,5 +159,4 @@ public class ReviewEventListener extends TmcEventListener {
             this.markedAsRead = review.isMarkedAsRead();
         }
     }
-
 }

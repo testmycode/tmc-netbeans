@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ExerciseUpdateOverwritingDecider;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -21,7 +23,7 @@ import java.util.List;
 import java.util.logging.Logger;
 
 public class UpdateExercisesAction implements ActionListener {
-    
+
     private static final Logger log = Logger.getLogger(UpdateExercisesAction.class.getName());
 
     private List<Exercise> exercisesToUpdate;
@@ -29,13 +31,15 @@ public class UpdateExercisesAction implements ActionListener {
     private ProjectMediator projectMediator;
     private ServerAccess serverAccess;
     private ConvenientDialogDisplayer dialogDisplayer;
-    
+    private TmcEventBus eventBus;
+
     public UpdateExercisesAction(List<Exercise> exercisesToUpdate) {
         this.exercisesToUpdate = exercisesToUpdate;
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.serverAccess = new ServerAccess();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
     }
 
     @Override
@@ -48,13 +52,13 @@ public class UpdateExercisesAction implements ActionListener {
             @Override
             public void bgTaskReady(Collection<TmcProjectInfo> result) {
                 result = new ArrayList<TmcProjectInfo>(result);
-                
+
                 // result may contain nulls since some downloads might fail
                 while (result.remove(null)) {
                 }
-                
+
                 projectMediator.scanForExternalChanges(result);
-                
+
                 // Open all at once. This is much faster.
                 projectMediator.openProjects(result);
             }
@@ -63,15 +67,16 @@ public class UpdateExercisesAction implements ActionListener {
             @Override
             public void bgTaskCancelled() {
             }
+
             @Override
             public void bgTaskFailed(Throwable ex) {
             }
         });
-        
-        
+
         for (final Exercise exercise : exercisesToUpdate) {
             final File projectDir = projectMediator.getProjectDirForExercise(exercise);
-            
+            eventBus.post(new InvokedEvent(exercise));
+
             BgTask.start("Downloading " + exercise.getName(), serverAccess.getDownloadingExerciseZipTask(exercise), new BgTaskListener<byte[]>() {
 
                 @Override
@@ -88,7 +93,7 @@ public class UpdateExercisesAction implements ActionListener {
                             return;
                         }
                         courseDb.exerciseDownloaded(exercise);
-                        
+
                         project = projectMediator.tryGetProjectForExercise(exercise);
                     } finally {
                         projectOpener.bgTaskReady(project);
@@ -107,6 +112,15 @@ public class UpdateExercisesAction implements ActionListener {
                     dialogDisplayer.displayError("Failed to download updated exercises.\n" + msg, ex);
                 }
             });
+        }
+    }
+
+    public static class InvokedEvent implements TmcEvent {
+
+        public final Exercise exercise;
+
+        public InvokedEvent(Exercise exercise) {
+            this.exercise = exercise;
         }
     }
 }

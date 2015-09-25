@@ -15,11 +15,11 @@ import org.netbeans.api.project.Project;
 
 public class ProjectActionEventSource implements ProjectActionCaptor.Listener {
     private static final Logger log = Logger.getLogger(ProjectActionEventSource.class.getName());
-    
+
     private final ProjectMediator projects;
     private final CourseDb courseDb;
     private EventReceiver receiver;
-    
+
     public ProjectActionEventSource(EventReceiver receiver) {
         this.projects = ProjectMediator.getInstance();
         this.courseDb = CourseDb.getInstance();

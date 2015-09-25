@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.TmcSettings;
@@ -14,9 +16,10 @@ import javax.swing.AbstractAction;
 public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
-    
+    private TmcEventBus eventBus;
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
+        this.eventBus = TmcEventBus.getDefault();
     }
 
     @Override
@@ -40,6 +43,8 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
         settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
+
+        eventBus.post(new InvokedEvent());
 
         if (prefUi.getSelectedCourseName() != null) {
             courseDb.setAvailableCourses(prefUi.getAvailableCourses());
@@ -66,7 +71,9 @@ public class SaveSettingsAction extends AbstractAction {
             });
             refresh.run();
         }
-        
+
         settings.save();
     }
+
+    public static class InvokedEvent implements TmcEvent {}
 }

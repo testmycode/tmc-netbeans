@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -10,6 +12,7 @@ import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -21,12 +24,14 @@ import javax.swing.SwingUtilities;
  * Downloads and opens the given exercises in the background.
  */
 public class DownloadExercisesAction {
+
     private static final Logger logger = Logger.getLogger(DownloadExercisesAction.class.getName());
 
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
+    private TmcEventBus eventBus;
 
     private List<Exercise> exercisesToDownload;
 
@@ -35,15 +40,17 @@ public class DownloadExercisesAction {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
 
         this.exercisesToDownload = exercisesToOpen;
     }
 
     public void run() {
-        final AggregatingBgTaskListener<TmcProjectInfo> aggregator =
-                new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
+        final AggregatingBgTaskListener<TmcProjectInfo> aggregator
+                = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToDownload.size(), whenAllDownloadsFinished);
 
         for (final Exercise exercise : exercisesToDownload) {
+            eventBus.post(new InvokedEvent(exercise));
             startDownloading(exercise, aggregator);
         }
     }
@@ -75,7 +82,7 @@ public class DownloadExercisesAction {
                     }
                 }, listener);
             }
-            
+
             @Override
             public void bgTaskCancelled() {
                 listener.bgTaskCancelled();
@@ -104,4 +111,13 @@ public class DownloadExercisesAction {
             dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
         }
     };
+
+    public static class InvokedEvent implements TmcEvent {
+
+        public final Exercise exercise;
+
+        public InvokedEvent(Exercise exercise) {
+            this.exercise = exercise;
+        }
+    }
 }

@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -38,7 +39,7 @@ import org.openide.util.NbBundle;
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -5, separatorAfter = 0),
     @ActionReference(path = "Projects/Actions", position = 1350, separatorBefore = 1330,
-        separatorAfter = 1360) // Positioning y u no work?
+            separatorAfter = 1360) // Positioning y u no work?
 })
 @NbBundle.Messages("CTL_RequestReviewAction=Request code review")
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
@@ -177,6 +178,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
     }
 
     private static class ReviewRequested {
+
         public final String courseName;
         public final String exerciseName;
         public final String submissionUrl;

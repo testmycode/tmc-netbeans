@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -13,15 +15,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.net.URI;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.Callable;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -29,6 +23,15 @@ import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionRegistration;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 @ActionID(
         category = "TMC",
@@ -38,7 +41,7 @@ import org.openide.util.NbBundle.Messages;
 @ActionReferences({
     @ActionReference(path = "Menu/TM&C", position = -17),
     @ActionReference(path = "Projects/Actions", position = 1340, separatorBefore = 1330,
-        separatorAfter = 1360)
+            separatorAfter = 1360)
 })
 @Messages("CTL_PastebinAction=Send code to Pastebin")
 //TODO: This is a horribly copypasted, then mangled version of RequestReviewAction
@@ -50,12 +53,15 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
+    private TmcEventBus eventBus;
+
 
     public PastebinAction() {
         this.settings = TmcSettings.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
     }
 
     @Override
@@ -84,6 +90,7 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
             TmcProjectInfo projectInfo = projectMediator.wrapProject(project.get(0));
             Exercise exercise = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
             if (exercise != null) {
+                eventBus.post(new PastebinAction.InvokedEvent(projectInfo));
                 showPasteRequestDialog(projectInfo, exercise);
             } else {
                 log.log(Level.WARNING, "PastebinAction called in a context without a valid TMC project.");
@@ -162,5 +169,14 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     @Override
     public String getName() {
         return "Send code to TMC Pastebin";
+    }
+
+    public static class InvokedEvent implements TmcEvent {
+
+        public final TmcProjectInfo projectInfo;
+
+        public InvokedEvent(TmcProjectInfo projectInfo) {
+            this.projectInfo = projectInfo;
+        }
     }
 }

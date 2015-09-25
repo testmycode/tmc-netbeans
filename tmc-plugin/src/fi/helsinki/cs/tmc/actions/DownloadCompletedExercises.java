@@ -1,23 +1,25 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
-import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.util.Collections;
-import java.util.List;
+
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle.Messages;
+
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.util.Collections;
+import java.util.List;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadCompletedExercises")
 @ActionRegistration(displayName = "#CTL_DownloadCompletedExercises")
@@ -28,13 +30,15 @@ public final class DownloadCompletedExercises implements ActionListener {
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
-    
+    private TmcEventBus eventBus;
+
     public DownloadCompletedExercises() {
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
+        this.eventBus = TmcEventBus.getDefault();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
         final Course currentCourse = courseDb.getCurrentCourse();
@@ -43,6 +47,7 @@ public final class DownloadCompletedExercises implements ActionListener {
             return;
         }
 
+        eventBus.post(new InvokedEvent(currentCourse));
         RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(true, true);
         action.addListener(new BgTaskListener<List<Course>>() {
@@ -67,5 +72,14 @@ public final class DownloadCompletedExercises implements ActionListener {
             }
         });
         action.run();
+    }
+
+    public static class InvokedEvent implements TmcEvent {
+
+        public Course course;
+
+        public InvokedEvent(Course currentCourse) {
+            this.course = currentCourse;
+        }
     }
 }

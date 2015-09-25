@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
@@ -14,6 +16,7 @@ import org.openide.windows.WindowManager;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")
 public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction implements Runnable {
+
     protected static final Logger log = Logger.getLogger(RunTestsLocallyAction.class.getName());
 
     private CourseDb courseDb;
@@ -27,6 +30,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
         this.projectMediator = ProjectMediator.getInstance();
         this.checkstyleRunHandler = new CheckstyleRunHandler();
         this.testRunHandler = new TestRunHandler();
+
         putValue("noIconInMenu", Boolean.TRUE);
     }
 

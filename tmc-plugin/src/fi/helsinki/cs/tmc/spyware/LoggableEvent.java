@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import org.netbeans.api.annotations.common.NullAllowed;
@@ -15,8 +16,16 @@ public class LoggableEvent implements TmcEvent {
     private long systemNanotime;
     private transient String key;
 
+    public LoggableEvent(String eventType, byte[] data) {
+        this("", "", eventType, data, null);
+    }
+
     public LoggableEvent(Exercise exercise, String eventType, byte[] data) {
         this(exercise, eventType, data, null);
+    }
+
+    public LoggableEvent(Course course, String eventType, byte[] data) {
+        this(course.getName(), "", eventType, data, null);
     }
 
     public LoggableEvent(Exercise exercise, String eventType, byte[] data, String metadata) {

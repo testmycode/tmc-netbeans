@@ -28,25 +28,25 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
             }
         }, this);
     }
-    
+
     protected abstract ProjectMediator getProjectMediator();
     protected abstract CourseDb getCourseDb();
-    
+
     @Override
     protected boolean enable(Node[] nodes) {
         return enable(projectsFromNodes(nodes).toArray(new Project[0]));
     }
-    
+
     @Override
     public HelpCtx getHelpCtx() {
         return HelpCtx.DEFAULT_HELP;
     }
-    
+
     @Override
     protected boolean asynchronous() {
         return false;
     }
-    
+
     /*package (for tests)*/
     public boolean enable(Project ... projects) {
         if (projects.length == 0) {
@@ -56,7 +56,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         if (projects.length != 1 && !enabledForMultipleProjects()) {
             return false;
         }
-        
+
         for (Project project : projects) {
             Exercise exercise = exerciseForProject(project);
             if (exercise != null && enabledFor(exercise)) {
@@ -69,11 +69,11 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
     protected boolean enabledForMultipleProjects() {
         return false;
     }
-    
+
     protected boolean enabledFor(Exercise exercise) {
         return (exercise.isReturnable() && !exercise.hasDeadlinePassed());
     }
-    
+
     protected List<Project> projectsFromNodes(Node[] nodes) {
         ArrayList<Project> result = new ArrayList<Project>();
         for (Node node : nodes) {
@@ -84,7 +84,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         removeDuplicates(result);
         return result;
     }
-    
+
     private <T> void removeDuplicates(List<T> list) {
         int n = 0;
         Iterator<T> i = list.iterator();
@@ -97,7 +97,7 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
             }
         }
     }
-    
+
     private List<Project> projectsFromDataObjects(Collection<? extends DataObject> dataObjects) {
         ArrayList<Project> result = new ArrayList<Project>();
         for (DataObject dataObj : dataObjects) {
@@ -108,12 +108,12 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         }
         return result;
     }
-    
+
     private Project projectFromDataObject(DataObject dataObj) {
         FileObject fileObj = dataObj.getPrimaryFile();
         return FileOwnerQuery.getOwner(fileObj);
     }
-    
+
     protected Exercise exerciseForProject(Project project) {
         return getProjectMediator().tryGetExerciseForProject(getProjectMediator().wrapProject(project), getCourseDb());
     }
