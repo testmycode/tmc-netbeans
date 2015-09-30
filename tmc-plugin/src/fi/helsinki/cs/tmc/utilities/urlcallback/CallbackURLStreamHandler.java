@@ -22,13 +22,13 @@ import java.util.Map;
 @URLStreamHandlerRegistration(protocol = "callback")
 public class CallbackURLStreamHandler extends URLStreamHandler {
 
-    private static final Map<String, URLCallback> callbacks = Maps.newHashMap();
+    private static final Map<Path, URLCallback> callbacks = Maps.newHashMap();
 
     public static void registerCallback(Path path, URLCallback callback) {
         if (callback == null) {
-            callbacks.remove(path.toString());
+            callbacks.remove(path);
         } else {
-            callbacks.put(path.toString(), callback);
+            callbacks.put(path, callback);
         }
     }
 
