@@ -33,12 +33,9 @@ import java.util.logging.Logger;
 import javax.swing.JComponent;
 import javax.swing.JMenuItem;
 
-@ActionID(category = "TMC",
-        id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
+@ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadSolutionAction")
 @ActionRegistration(displayName = "#CTL_DownloadSolutionAction", lazy = false)
-@ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)
-})
+@ActionReferences({@ActionReference(path = "Menu/TM&C", position = -35, separatorAfter = -30)})
 @Messages("CTL_DownloadSolutionAction=Download suggested &solution")
 public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
 
@@ -112,81 +109,98 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 return;
             }
 
-            String question = "Are you sure you want to OVERWRITE your copy of\n" + ex.getName() + " with the suggested solution?";
+            String question =
+                    "Are you sure you want to OVERWRITE your copy of\n"
+                            + ex.getName()
+                            + " with the suggested solution?";
             String title = "Replace with solution?";
-            dialogs.askYesNo(question, title, new Function<Boolean, Void>() {
-                @Override
-                public Void apply(Boolean yes) {
-                    if (yes) {
-                        eventBus.post(new InvokedEvent(ex));
-                        downloadSolution(ex, projectMediator.wrapProject(project));
-                    }
-                    return null;
-                }
-            });
+            dialogs.askYesNo(
+                    question,
+                    title,
+                    new Function<Boolean, Void>() {
+                        @Override
+                        public Void apply(Boolean yes) {
+                            if (yes) {
+                                eventBus.post(new InvokedEvent(ex));
+                                downloadSolution(ex, projectMediator.wrapProject(project));
+                            }
+                            return null;
+                        }
+                    });
         }
     }
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
         ServerAccess serverAccess = new ServerAccess(TmcSettings.getDefault());
-        CancellableCallable<byte[]> downloadTask = serverAccess.getDownloadingExerciseSolutionZipTask(ex);
-        BgTask.start("Downloading solution for " + ex.getName(), downloadTask, new BgTaskListener<byte[]>() {
-            @Override
-            public void bgTaskReady(byte[] result) {
-                unzipSolution(ex, proj, result);
-            }
+        CancellableCallable<byte[]> downloadTask =
+                serverAccess.getDownloadingExerciseSolutionZipTask(ex);
+        BgTask.start(
+                "Downloading solution for " + ex.getName(),
+                downloadTask,
+                new BgTaskListener<byte[]>() {
+                    @Override
+                    public void bgTaskReady(byte[] result) {
+                        unzipSolution(ex, proj, result);
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                logger.log(Level.INFO, "Failed to download solution.", ex);
-                dialogs.displayError("Failed to download solution.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        logger.log(Level.INFO, "Failed to download solution.", ex);
+                        dialogs.displayError(
+                                "Failed to download solution.\n"
+                                        + ServerErrorHelper.getServerExceptionMsg(ex));
+                    }
+                });
     }
 
     private void unzipSolution(final Exercise ex, final TmcProjectInfo proj, final byte[] data) {
-        Callable<Object> task = new Callable<Object>() {
-            @Override
-            public Object call() throws Exception {
-                NbProjectUnzipper unzipper = new NbProjectUnzipper(solutionOverwriting);
-                unzipper.unzipProject(data, proj.getProjectDirAsFile());
-                return null;
-            }
-        };
+        Callable<Object> task =
+                new Callable<Object>() {
+                    @Override
+                    public Object call() throws Exception {
+                        NbProjectUnzipper unzipper = new NbProjectUnzipper(solutionOverwriting);
+                        unzipper.unzipProject(data, proj.getProjectDirAsFile());
+                        return null;
+                    }
+                };
 
-        BgTask.start("Extracting solution", task, new BgTaskListener<Object>() {
-            @Override
-            public void bgTaskReady(Object result) {
-                projectMediator.scanForExternalChanges(proj);
-            }
+        BgTask.start(
+                "Extracting solution",
+                task,
+                new BgTaskListener<Object>() {
+                    @Override
+                    public void bgTaskReady(Object result) {
+                        projectMediator.scanForExternalChanges(proj);
+                    }
 
-            @Override
-            public void bgTaskCancelled() {
-            }
+                    @Override
+                    public void bgTaskCancelled() {}
 
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                logger.log(Level.INFO, "Failed to extract solution.", ex);
-                dialogs.displayError("Failed to extract solution.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
-            }
-        });
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        logger.log(Level.INFO, "Failed to extract solution.", ex);
+                        dialogs.displayError(
+                                "Failed to extract solution.\n"
+                                        + ServerErrorHelper.getServerExceptionMsg(ex));
+                    }
+                });
     }
 
-    private OverwritingDecider solutionOverwriting = new OverwritingDecider() {
-        @Override
-        public boolean mayOverwrite(String relPath) {
-            return true;
-        }
+    private OverwritingDecider solutionOverwriting =
+            new OverwritingDecider() {
+                @Override
+                public boolean mayOverwrite(String relPath) {
+                    return true;
+                }
 
-        @Override
-        public boolean mayDelete(String relPath) {
-            return false;
-        }
-    };
+                @Override
+                public boolean mayDelete(String relPath) {
+                    return false;
+                }
+            };
 
     private class ActionMenuItem extends JMenuItem implements DynamicMenuContent {
 
@@ -197,7 +211,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
         @Override
         public JComponent[] getMenuPresenters() {
             if (DownloadSolutionAction.this.isEnabled()) {
-                return new JComponent[]{getOriginalMenuPresenter()};
+                return new JComponent[] {getOriginalMenuPresenter()};
             } else {
                 return new JComponent[0];
             }
@@ -207,7 +221,6 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
         public JComponent[] synchMenuPresenters(JComponent[] jcs) {
             return getMenuPresenters();
         }
-
     }
 
     public static class InvokedEvent implements TmcEvent {
