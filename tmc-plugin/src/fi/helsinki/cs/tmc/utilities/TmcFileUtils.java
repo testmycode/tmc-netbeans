@@ -14,7 +14,7 @@ public class TmcFileUtils {
      *
      * Otherwise returns null.
      */
-    public static String tryGetPathRelativeToProject(FileObject fileObject) {
+    public static Path tryGetPathRelativeToProject(FileObject fileObject) {
         Path filePath = Paths.get(fileObject.getPath());
 
         try {
@@ -29,6 +29,6 @@ public class TmcFileUtils {
             return null;
         }
 
-        return filePath.toString();
+        return filePath;
     }
 }

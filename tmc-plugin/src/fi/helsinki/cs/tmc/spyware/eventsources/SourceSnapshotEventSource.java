@@ -24,7 +24,6 @@ import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -104,7 +103,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     public void fileAttributeChanged(FileAttributeEvent fae) {}
 
     private void reactToChange(final ChangeType changeType, final FileObject fileObject) {
-        Path filePath = Paths.get(TmcFileUtils.tryGetPathRelativeToProject(fileObject));
+        Path filePath = TmcFileUtils.tryGetPathRelativeToProject(fileObject);
         if (filePath == null) {
             return;
         }
@@ -117,7 +116,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
 
     private void reactToRename(final ChangeType changeType, final FileRenameEvent renameEvent) {
-        Path filePath = Paths.get(TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile()));
+        Path filePath = TmcFileUtils.tryGetPathRelativeToProject(renameEvent.getFile());
         if (filePath == null) {
             return;
         }

@@ -156,9 +156,10 @@ public class NbTmcSettings implements TmcSettings {
 
     @Override
     public String getTmcMainDirectory() {
-        Path path = Paths.get(settings.get(PREF_PROJECT_ROOT_DIR, null));
-        if (path != null) {
-            return path.toString();
+        String target = settings.get(PREF_PROJECT_ROOT_DIR, null);
+        //TODO: Change String to Path in TmcSettings
+        if (target != null) {
+            return target;
         } else {
             // Can sometimes take a while. That's why we don't pass it as a default above.
             return ProjectMediator.getDefaultProjectRootDir();
