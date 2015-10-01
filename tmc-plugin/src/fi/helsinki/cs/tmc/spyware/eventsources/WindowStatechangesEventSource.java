@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
 import com.google.common.base.CaseFormat;
+import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
@@ -94,8 +95,14 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                 .add("new_state", event.getNewState())
                 .add("old_state", event.getOldState())
                 .toString();
-        receiver.receiveEvent(
-                new LoggableEvent(courseDb.getCurrentCourse(), action, data.getBytes(Charset.forName("UTF-8"))));
+        Course course = courseDb.getCurrentCourse();
+        if (course == null) {
+            receiver.receiveEvent(
+                    new LoggableEvent(course, action, data.getBytes(Charset.forName("UTF-8"))));
+        } else {
+            receiver.receiveEvent(
+                    new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
+        }
     }
 
     @Override
