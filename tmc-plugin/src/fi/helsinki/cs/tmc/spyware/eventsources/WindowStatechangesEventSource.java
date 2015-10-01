@@ -95,13 +95,17 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                 .add("new_state", event.getNewState())
                 .add("old_state", event.getOldState())
                 .toString();
-        Course course = courseDb.getCurrentCourse();
-        if (course == null) {
-            receiver.receiveEvent(
-                    new LoggableEvent(course, action, data.getBytes(Charset.forName("UTF-8"))));
+        if (courseDb != null) {
+            Course course = courseDb.getCurrentCourse();
+            if (course != null) {
+                receiver.receiveEvent(
+                        new LoggableEvent(course, action, data.getBytes(Charset.forName("UTF-8"))));
+            } else {
+                receiver.receiveEvent(
+                        new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
+            }
         } else {
-            receiver.receiveEvent(
-                    new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
+            log.log(Level.WARNING, "Coursedb is null");
         }
     }
 
@@ -165,7 +169,8 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     /**
-     * Returns {@link FileObject} representing the last active file for each event.
+     * Returns {@link FileObject} representing the last active file for each
+     * event.
      */
     private FileObject getChangedFile() {
         JTextComponent jtc = EditorRegistry.lastFocusedComponent();
