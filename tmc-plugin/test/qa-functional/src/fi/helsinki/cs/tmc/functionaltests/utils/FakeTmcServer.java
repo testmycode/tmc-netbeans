@@ -92,8 +92,6 @@ public class FakeTmcServer extends AdHocHttpServer {
                     m.matches();
                     String id = m.group(1);
 
-                    System.out.println(courseDetails);
-                    System.out.println(id);
                     String response = courseDetails.get(id);
                     if (response != null) {
                         authenticate(params);
