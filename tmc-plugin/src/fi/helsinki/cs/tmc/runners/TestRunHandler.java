@@ -75,8 +75,7 @@ public class TestRunHandler {
                                 dialogDisplayer.displayError("The code did not compile.");
                                 return;
                             }
-                            Exercise ex
-                            = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+                            Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
                             boolean canSubmit = ex.isReturnable();
                             resultDisplayer.showLocalRunResult(
                                     testResultsToTestCaseResults(result.testResults),
