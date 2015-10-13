@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.runners;
 import static fi.helsinki.cs.tmc.langs.domain.RunResult.Status.COMPILE_FAILED;
 import static java.util.logging.Level.INFO;
 
+import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
@@ -21,6 +22,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
+import com.google.common.base.Strings;
 import com.google.common.base.Throwables;
 import com.google.common.collect.ImmutableList;
 import com.google.common.util.concurrent.ListenableFuture;
@@ -65,16 +67,16 @@ public class TestRunHandler {
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
-            BgTaskListener bgTaskListener =
-                    new BgTaskListener<RunResult>() {
+            BgTaskListener bgTaskListener
+                    = new BgTaskListener<RunResult>() {
                         @Override
                         public void bgTaskReady(RunResult result) {
                             if (result.status == COMPILE_FAILED) {
                                 dialogDisplayer.displayError("The code did not compile.");
                                 return;
                             }
-                            Exercise ex =
-                                    projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+                            Exercise ex
+                            = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
                             boolean canSubmit = ex.isReturnable();
                             resultDisplayer.showLocalRunResult(
                                     testResultsToTestCaseResults(result.testResults),
@@ -94,15 +96,19 @@ public class TestRunHandler {
                             log.log(
                                     INFO,
                                     "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
-                                    new Object[] {
+                                    new Object[]{
                                         ex.getMessage(), Throwables.getStackTraceAsString(ex)
                                     });
-                            dialogDisplayer.displayError(
-                                    "Failed to run the tests: " + ex.getMessage());
+                            String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                            if (!Strings.isNullOrEmpty(msg)) {
+                                dialogDisplayer.displayError(
+                                        "Failed to run the tests: " + ex.getMessage());
+                            }
                         }
 
                         @Override
-                        public void bgTaskCancelled() {}
+                        public void bgTaskCancelled() {
+                        }
                     };
             BgTask.start(
                     "Running tests",
@@ -112,9 +118,9 @@ public class TestRunHandler {
 
                         @Override
                         public RunResult call() throws Exception {
-                            result =
-                                    TmcCoreSingleton.getInstance()
-                                            .test(projectInfo.getProjectDirAsPath());
+                            result
+                            = TmcCoreSingleton.getInstance()
+                            .test(projectInfo.getProjectDirAsPath());
                             return result.get();
                         }
 
@@ -131,8 +137,8 @@ public class TestRunHandler {
             ImmutableList<TestResult> testresults) {
         List<TestCaseResult> testCaseResults = new ArrayList<TestCaseResult>();
         for (TestResult result : testresults) {
-            TestCaseResult testCase =
-                    new TestCaseResult(result.name, result.passed, result.errorMessage);
+            TestCaseResult testCase
+                    = new TestCaseResult(result.name, result.passed, result.errorMessage);
             testCaseResults.add(testCase);
         }
         return testCaseResults;
