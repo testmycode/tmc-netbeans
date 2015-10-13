@@ -67,48 +67,47 @@ public class TestRunHandler {
         for (final Project project : projects) {
             final TmcProjectInfo projectInfo = projectMediator.wrapProject(project);
             eventBus.post(new InvokedEvent(projectInfo));
-            BgTaskListener bgTaskListener
-                    = new BgTaskListener<RunResult>() {
-                        @Override
-                        public void bgTaskReady(RunResult result) {
-                            if (result.status == COMPILE_FAILED) {
-                                dialogDisplayer.displayError("The code did not compile.");
-                                return;
-                            }
-                            Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
-                            boolean canSubmit = ex.isReturnable();
-                            resultDisplayer.showLocalRunResult(
-                                    testResultsToTestCaseResults(result.testResults),
-                                    canSubmit,
-                                    new Runnable() {
-                                        @Override
-                                        public void run() {
-                                            exerciseSubmitter.performAction(
-                                                    projectInfo.getProject());
-                                        }
-                                    },
-                                    resultCollector);
-                        }
+            BgTaskListener bgTaskListener = new BgTaskListener<RunResult>() {
+                @Override
+                public void bgTaskReady(RunResult result) {
+                    if (result.status == COMPILE_FAILED) {
+                        dialogDisplayer.displayError("The code did not compile.");
+                        return;
+                    }
+                    Exercise ex = projectMediator.tryGetExerciseForProject(projectInfo, courseDb);
+                    boolean canSubmit = ex.isReturnable();
+                    resultDisplayer.showLocalRunResult(
+                            testResultsToTestCaseResults(result.testResults),
+                            canSubmit,
+                            new Runnable() {
+                                @Override
+                                public void run() {
+                                    exerciseSubmitter.performAction(
+                                            projectInfo.getProject());
+                                }
+                            },
+                            resultCollector);
+                }
 
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                            log.log(
-                                    INFO,
-                                    "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
-                                    new Object[]{
-                                        ex.getMessage(), Throwables.getStackTraceAsString(ex)
-                                    });
-                            String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                            if (!Strings.isNullOrEmpty(msg)) {
-                                dialogDisplayer.displayError(
-                                        "Failed to run the tests: " + ex.getMessage());
-                            }
-                        }
+                @Override
+                public void bgTaskFailed(Throwable ex) {
+                    log.log(
+                            INFO,
+                            "performAction of TestRunHandler failed with message: {0}, \ntrace: {1}",
+                            new Object[]{
+                                ex.getMessage(), Throwables.getStackTraceAsString(ex)
+                            });
+                    String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                    if (!Strings.isNullOrEmpty(msg)) {
+                        dialogDisplayer.displayError(
+                                "Failed to run the tests: " + ex.getMessage());
+                    }
+                }
 
-                        @Override
-                        public void bgTaskCancelled() {
-                        }
-                    };
+                @Override
+                public void bgTaskCancelled() {
+                }
+            };
             BgTask.start(
                     "Running tests",
                     new CancellableCallable<RunResult>() {
@@ -117,8 +116,7 @@ public class TestRunHandler {
 
                         @Override
                         public RunResult call() throws Exception {
-                            result
-                            = TmcCoreSingleton.getInstance()
+                            result = TmcCoreSingleton.getInstance()
                             .test(projectInfo.getProjectDirAsPath());
                             return result.get();
                         }
@@ -136,8 +134,7 @@ public class TestRunHandler {
             ImmutableList<TestResult> testresults) {
         List<TestCaseResult> testCaseResults = new ArrayList<TestCaseResult>();
         for (TestResult result : testresults) {
-            TestCaseResult testCase
-                    = new TestCaseResult(result.name, result.passed, result.errorMessage);
+            TestCaseResult testCase = new TestCaseResult(result.name, result.passed, result.errorMessage);
             testCaseResults.add(testCase);
         }
         return testCaseResults;
