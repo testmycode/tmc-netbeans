@@ -72,7 +72,7 @@ public class SendFeedbackAction {
 
         @Override
         public void onFailure(Throwable ex) {
-            String msg = "Failed to send feedback :-(\n" + ex.getMessage();
+            String msg = "Failed to send feedback :-(\n" + ServerErrorHelper.getServerExceptionMsg(ex);
             String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
             log.log(Level.INFO, msgWithBacktrace);
             dialogs.displayError(msg);

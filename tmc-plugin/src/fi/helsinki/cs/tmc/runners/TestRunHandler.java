@@ -100,7 +100,7 @@ public class TestRunHandler {
                     String msg = ServerErrorHelper.getServerExceptionMsg(ex);
                     if (!Strings.isNullOrEmpty(msg)) {
                         dialogDisplayer.displayError(
-                                "Failed to run the tests: " + ex.getMessage());
+                                "Failed to run the tests: \n" + msg);
                     }
                 }
 
