@@ -1,5 +1,25 @@
+sudo: false
 language: java
 jdk:
   - oraclejdk7
-  - openjdk7
-  - openjdk6
+    #- openjdk7
+    #- openjdk6
+
+cache:
+  directories:
+    - $HOME/.m2
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  - wget http://download.netbeans.org/netbeans/8.0.2/final/zip/netbeans-8.0.2-201411181905.zip -O netbeans.zip
+  - unzip -q netbeans.zip
+  - mvn -q dependency:get -Dartifact=junit:junit:4.8.2 -DrepoUrl=http://repo1.maven.org/maven2/
+  # To reduce amout of log
+  - cd maven-wrapper/ && mvn -q install && cd ..
+
+script:
+  - ant -Dcontinue.after.failing.tests=true -Dnbplatform.nb802.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb802.harness.dir=$PWD/netbeans/harness test
+
+
