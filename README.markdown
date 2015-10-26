@@ -1,5 +1,8 @@
 # Test My Code NetBeans plugin #
 
+[![Build
+Status](https://travis-ci.org/testmycode/tmc-netbeans.svg?branch=core_integration)](https://travis-ci.org/testmycode/tmc-netbeans)
+
 This is a NetBeans plugin for the [Test My Code server](https://github.com/testmycode/tmc-server). It allows downloading, testing and submitting exercises directly from the IDE.
 
 ## Developer setup ##

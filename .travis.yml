@@ -1,14 +1,30 @@
 sudo: false
+language: java
+jdk:
+  - oraclejdk8
+  - oraclejdk7
+  - openjdk7
+
+before_install:
+  - git clone https://github.com/rage/tmc-langs.git
+  - mvn clean install -q -U -Dmaven.test.skip=true -f tmc-langs/pom.xml
+  - git clone https://github.com/rage/tmc-core.git
+  - mvn clean install -q -U -Dmaven.test.skip=true -f tmc-core/pom.xml
+
 cache:
   directories:
     - $HOME/.m2
-language: java
-jdk:
-  - oraclejdk7
-  - openjdk7
-  - openjdk6
-before_install:
-  - ./before_install.sh
+
+before_script:
+  - "export DISPLAY=:99.0"
+  - "sh -e /etc/init.d/xvfb start"
+  - sleep 3 # give xvfb some time to start
+  - wget http://download.netbeans.org/netbeans/8.0.2/final/zip/netbeans-8.0.2-201411181905.zip -O netbeans.zip
+  - unzip -q netbeans.zip
+  - mvn -q dependency:get -Dartifact=junit:junit:4.8.2 -DrepoUrl=http://repo1.maven.org/maven2/
+  # To reduce amout of log
+  - cd maven-wrapper/ && mvn -q install && cd ..
+
 script:
-  - mvn clean test
-  - mvn verify
+  - ant -Dcontinue.after.failing.tests=true -Dnbplatform.nb802.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb802.harness.dir=$PWD/netbeans/harness test
+
