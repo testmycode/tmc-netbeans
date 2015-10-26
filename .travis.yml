@@ -1,9 +1,9 @@
 sudo: false
 language: java
 jdk:
+  - oraclejdk8
   - oraclejdk7
-    #- openjdk7
-    #- openjdk6
+  - openjdk7
 
 cache:
   directories:
@@ -22,4 +22,6 @@ before_script:
 script:
   - ant -Dcontinue.after.failing.tests=true -Dnbplatform.nb802.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb802.harness.dir=$PWD/netbeans/harness test
 
-
+notifications:
+  slack:
+    secure: RAYLit1PKRmeWYeEonVh9oFlFpL6PP9t6aulpLqa3/RYOR/CYZjkDvPxhNOOyPnPfxNojA16xp4grgU8q0F5vUBQ3FpLsyBIl3JMAFtyBPbdKK8/F2ZClWZMBLE2qf13FqJtNEnLu3btBVP1sB8MOrGmiyn+2wHQdwWytAMyzdE=
