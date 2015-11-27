@@ -135,7 +135,7 @@ public class ExerciseSubmitter {
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.INFO, "Error submitting exercise.", ex);
                 String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                dialogDisplayer.displayError("Error submitting exercise.", ex);
+                dialogDisplayer.displayError("Error submitting exercise\n" + msg);
                 dialog.close();
             }
         };
