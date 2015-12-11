@@ -134,8 +134,8 @@ public class ServerAccess {
 
     @Deprecated
     public CancellableCallable<Course> getFullCourseInfoTask(Course courseStub) {
-        String url = addApiCallQueryParameters(courseStub.getDetailsUrl());
-        final CancellableCallable<String> download = createHttpTasks().getForText(url);
+        URI url = URI.create(addApiCallQueryParameters(courseStub.getDetailsUrl().toString()));
+        final CancellableCallable<String> download = createHttpTasks().getForText(url.toString());
         return new CancellableCallable<Course>() {
             @Override
             public Course call() throws Exception {
@@ -177,22 +177,22 @@ public class ServerAccess {
     }
 
     private String getUnlockUrl(Course course) {
-        return addApiCallQueryParameters(course.getUnlockUrl());
+        return addApiCallQueryParameters(course.getUnlockUrl().toString());
     }
 
     public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {
-        String zipUrl = exercise.getDownloadUrl();
-        return createHttpTasks().getForBinary(zipUrl);
+        URI zipUrl = exercise.getDownloadUrl();
+        return createHttpTasks().getForBinary(zipUrl.toString());
     }
 
     public CancellableCallable<byte[]> getDownloadingExerciseSolutionZipTask(Exercise exercise) {
-        String zipUrl = exercise.getSolutionDownloadUrl();
-        return createHttpTasks().getForBinary(zipUrl);
+        URI zipUrl = exercise.getSolutionDownloadUrl();
+        return createHttpTasks().getForBinary(zipUrl.toString());
     }
 
     public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(
             final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
-        final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
+        final URI submitUrl = URI.create(addApiCallQueryParameters(exercise.getReturnUrl().toString()));
 
         Map<String, String> params = new LinkedHashMap<String, String>();
         params.put("client_time", "" + (System.currentTimeMillis() / 1000L));
@@ -202,7 +202,7 @@ public class ServerAccess {
         final CancellableCallable<String> upload =
                 createHttpTasks()
                         .uploadFileForTextDownload(
-                                submitUrl, params, "submission[file]", sourceZip);
+                                submitUrl.toString(), params, "submission[file]", sourceZip);
 
         return new CancellableCallable<SubmissionResponse>() {
             @Override
@@ -254,8 +254,8 @@ public class ServerAccess {
     }
 
     public CancellableCallable<List<Review>> getDownloadingReviewListTask(Course course) {
-        String url = addApiCallQueryParameters(course.getReviewsUrl());
-        final CancellableCallable<String> download = createHttpTasks().getForText(url);
+        URI url = URI.create(addApiCallQueryParameters(course.getReviewsUrl().toString()));
+        final CancellableCallable<String> download = createHttpTasks().getForText(url.toString());
         return new CancellableCallable<List<Review>>() {
             @Override
             public List<Review> call() throws Exception {

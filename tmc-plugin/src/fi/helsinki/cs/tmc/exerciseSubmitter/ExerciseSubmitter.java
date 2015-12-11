@@ -135,7 +135,7 @@ public class ExerciseSubmitter {
                         log.log(Level.INFO, "Error waiting for results from server.", ex);
                         String msg = ServerErrorHelper.getServerExceptionMsg(ex);
                         if (!Strings.isNullOrEmpty(msg)) {
-                            dialogDisplayer.displayError("Error trying to get test results.", ex);
+                            dialogDisplayer.displayError("Error trying to get test results. \n" + msg);
                         }
                         dialog.close();
                     }

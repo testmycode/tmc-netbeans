@@ -172,7 +172,8 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                                     @Override
                                     public void bgTaskFailed(Throwable ex) {
                                         dialogs.displayError(
-                                                "Failed to submit exercise for code review", ex);
+                                                "Failed to submit exercise for code review \n"
+                                                        + ServerErrorHelper.getServerExceptionMsg(ex));
                                     }
                                 });
                     }

@@ -24,6 +24,7 @@ import java.awt.Image;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -175,7 +176,7 @@ public class ReviewEventListener extends TmcEventListener {
     private static class ReviewOpened {
         public final int id;
         public final int submissionId;
-        public final String url;
+        public final URI url;
         public final boolean markedAsRead;
 
         public ReviewOpened(Review review) {

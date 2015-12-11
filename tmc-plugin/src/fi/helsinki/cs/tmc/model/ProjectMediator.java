@@ -2,8 +2,11 @@ package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -113,13 +116,13 @@ public class ProjectMediator {
      * The exercise must have a course name set.
      */
     public File getProjectDirForExercise(Exercise ex) {
-        String path =
+        Path path = Paths.get(
                 getProjectRootDir()
                         + File.separator
                         + ex.getCourseName()
                         + File.separator
-                        + ex.getName().replaceAll("-", "/");
-        File file = new File(path);
+                        + ex.getName().replaceAll("-", "/"));
+        File file = path.toFile();
         return FileUtil.normalizeFile(file);
     }
 

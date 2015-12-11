@@ -141,7 +141,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                     public Course call() throws Exception {
                         logger.info("Downloading course to refresh cache");
                         currentCourseFuture =
-                                tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrlAsUri());
+                                tmcCore.getCourse(currentCourseBeforeUpdate.getDetailsUrl());
                         return currentCourseFuture.get();
                     }
 

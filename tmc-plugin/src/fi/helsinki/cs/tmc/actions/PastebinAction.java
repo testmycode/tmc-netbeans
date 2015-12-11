@@ -154,7 +154,8 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
 
         @Override
         public void bgTaskFailed(Throwable ex) {
-            dialogs.displayError("Failed to send exercise to pastebin", ex);
+            dialogs.displayError("Failed to send exercise to pastebin. \n" 
+                    + ServerErrorHelper.getServerExceptionMsg(ex));
         }
     }
 
