@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import static com.google.common.base.Preconditions.checkArgument;
+
 import com.google.common.collect.Iterables;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -33,6 +35,7 @@ public class EventSendBuffer implements EventReceiver {
     public static final int DEFAULT_MAX_EVENTS = 64 * 1024;
     public static final int DEFAULT_AUTOSEND_THREHSOLD = DEFAULT_MAX_EVENTS / 2;
     public static final int DEFAULT_AUTOSEND_COOLDOWN = 30*1000;
+    public static final int DEFAULT_MAX_EVENTS_PER_SEND = 500;
 
     private Random random = new Random();
     private SpywareSettings settings;
@@ -45,6 +48,7 @@ public class EventSendBuffer implements EventReceiver {
     private int eventsToRemoveAfterSend = 0;
     private int maxEvents = DEFAULT_MAX_EVENTS;
     private int autosendThreshold = DEFAULT_AUTOSEND_THREHSOLD;
+    private int maxEventsPerSend = DEFAULT_MAX_EVENTS_PER_SEND;  // Servers have POST size limits
     private Cooldown autosendCooldown;
 
 
@@ -70,17 +74,17 @@ public class EventSendBuffer implements EventReceiver {
     }
 
     public void setSendingInterval(long interval) {
+        checkArgument(interval >= 0);
         this.sendingTask.setInterval(interval);
     }
 
     public void setSavingInterval(long interval) {
+        checkArgument(interval >= 0);
         this.savingTask.setInterval(interval);
     }
 
     public void setMaxEvents(int newMaxEvents) {
-        if (newMaxEvents <= 0) {
-            throw new IllegalArgumentException();
-        }
+        checkArgument(newMaxEvents > 0);
 
         synchronized (sendQueue) {
             if (newMaxEvents < maxEvents) {
@@ -107,7 +111,17 @@ public class EventSendBuffer implements EventReceiver {
     }
 
     public void setAutosendCooldown(long durationMillis) {
-        this.autosendCooldown.setDurationMillis(durationMillis);
+        checkArgument(durationMillis > 0);
+        synchronized (sendQueue) {
+            this.autosendCooldown.setDurationMillis(durationMillis);
+        }
+    }
+
+    public void setMaxEventsPerSend(int maxEventsPerSend) {
+        checkArgument(maxEventsPerSend > 0);
+        synchronized (sendQueue) {
+            this.maxEventsPerSend = maxEventsPerSend;
+        }
     }
 
     public void sendNow() {
@@ -174,9 +188,6 @@ public class EventSendBuffer implements EventReceiver {
 
 
     private SingletonTask sendingTask = new SingletonTask(new Runnable() {
-        // Sending too many at once may go over the server's POST size limit.
-        private static final int MAX_EVENTS_PER_SEND = 500;
-
         @Override
         public void run() {
             boolean shouldSendMore;
@@ -198,7 +209,9 @@ public class EventSendBuffer implements EventReceiver {
 
                 log.log(Level.INFO, "Sending {0} events to {1}", new Object[] { eventsToSend.size(), url });
 
-                doSend(eventsToSend, url);
+                if (!tryToSend(eventsToSend, url)) {
+                    shouldSendMore = false;
+                }
             } while (shouldSendMore);
         }
 
@@ -207,7 +220,7 @@ public class EventSendBuffer implements EventReceiver {
                 ArrayList<LoggableEvent> eventsToSend = new ArrayList<LoggableEvent>(sendQueue.size());
 
                 Iterator<LoggableEvent> i = sendQueue.iterator();
-                while (i.hasNext() && eventsToSend.size() < MAX_EVENTS_PER_SEND) {
+                while (i.hasNext() && eventsToSend.size() < maxEventsPerSend) {
                     eventsToSend.add(i.next());
                 }
 
@@ -235,7 +248,7 @@ public class EventSendBuffer implements EventReceiver {
             return url;
         }
 
-        private void doSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
+        private boolean tryToSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
             CancellableCallable<Object> task = serverAccess.getSendEventLogJob(url, eventsToSend);
             Future<Object> future = BgTask.start("Sending stats", task);
 
@@ -245,7 +258,7 @@ public class EventSendBuffer implements EventReceiver {
                 future.cancel(true);
             } catch (ExecutionException ex) {
                 log.log(Level.INFO, "Sending failed", ex);
-                return;
+                return false;
             }
 
             log.log(Level.INFO, "Sent {0} events successfully to {1}", new Object[] { eventsToSend.size(), url });
@@ -256,6 +269,7 @@ public class EventSendBuffer implements EventReceiver {
             // then we may end up sending duplicate events later.
             // This will hopefully be very rare.
             savingTask.start();
+            return true;
         }
 
         private void removeSentEventsFromQueue() {

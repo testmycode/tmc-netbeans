@@ -11,6 +11,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeoutException;
+import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -42,8 +43,8 @@ public class EventSendBufferTest {
     private long sendDuration;
     private Semaphore sendStartSemaphore; // released when a send starts
     private Exception sendException;
-    private volatile int sendOperationsStarted;
-    private volatile int sendOperationsFinished;
+    private AtomicInteger sendOperationsStarted;
+    private AtomicInteger sendOperationsFinished;
 
     @Captor
     private ArgumentCaptor<LoggableEvent[]> savedEvents;
@@ -64,18 +65,18 @@ public class EventSendBufferTest {
         sendDuration = 0;
         sendStartSemaphore = new Semaphore(0);
         sendException = null;
-        sendOperationsStarted = 0;
-        sendOperationsFinished = 0;
+        sendOperationsStarted = new AtomicInteger(0);
+        sendOperationsFinished = new AtomicInteger(0);
         when(serverAccess.getSendEventLogJob(spywareServerUrl.capture(), sentEvents.capture())).thenReturn(new CancellableCallable<Object>() {
             @Override
             public Object call() throws Exception {
-                sendOperationsStarted++;
+                sendOperationsStarted.incrementAndGet();
                 sendStartSemaphore.release();
                 Thread.sleep(sendDuration);
                 if (sendException != null) {
                     throw sendException;
                 }
-                sendOperationsFinished++;
+                sendOperationsFinished.incrementAndGet();
                 return null;
             }
 
@@ -165,7 +166,7 @@ public class EventSendBufferTest {
         sender.receiveEvent(ev2);
         Thread.sleep(250);
 
-        assertTrue(sendOperationsFinished >= 2);
+        assertTrue(sendOperationsFinished.get() >= 2);
     }
 
     @Test
@@ -192,12 +193,12 @@ public class EventSendBufferTest {
         sender.receiveEvent(ev1);
         sender.receiveEvent(ev2);
         Thread.sleep(50);
-        assertEquals(0, sendOperationsFinished);
+        assertEquals(0, sendOperationsFinished.get());
 
         sender.receiveEvent(ev3);
         sender.waitUntilCurrentSendingFinished(1000);
 
-        assertEquals(1, sendOperationsFinished);
+        assertEquals(1, sendOperationsFinished.get());
         LoggableEvent[] expecteds = new LoggableEvent[] { ev1, ev2, ev3 };
         assertArrayEquals(expecteds, sentEvents.getValue().toArray(new LoggableEvent[0]));
     }
@@ -214,12 +215,26 @@ public class EventSendBufferTest {
         sender.receiveEvent(ev4);
         sender.waitUntilCurrentSendingFinished(1000);
 
-        assertEquals(1, sendOperationsStarted);
+        assertEquals(1, sendOperationsStarted.get());
         LoggableEvent[] expecteds = new LoggableEvent[] { ev1, ev2, ev3 };
         assertArrayEquals(expecteds, sentEvents.getValue().toArray(new LoggableEvent[0]));
     }
 
-    @Test
+    @Test  // Issue #125
+    public void retryLoopRespectAutosendIntervalOnFailureEvenIfThereIsMoreToSend() throws TimeoutException, InterruptedException {
+        sendException = new RuntimeException("Sending failed");
+        sender.setMaxEventsPerSend(2);
+        sender.receiveEvent(ev1);
+        sender.receiveEvent(ev2);
+        sender.receiveEvent(ev3);
+        sender.sendNow();
+        sender.waitUntilCurrentSendingFinished(1000);
+
+        assertEquals(1, sendOperationsStarted.get());
+        assertEquals(0, sendOperationsFinished.get());
+    }
+
+    @Test  // FIXME: this test appears to be flaky
     public void discardsOldestEventsOnOverflow() throws TimeoutException, InterruptedException {
         sender.setMaxEvents(3);
 
@@ -251,7 +266,7 @@ public class EventSendBufferTest {
         sender.sendNow();
         sender.waitUntilCurrentSendingFinished(1000);
 
-        assertEquals(2, sendOperationsFinished);
+        assertEquals(2, sendOperationsFinished.get());
         assertEquals(2, sentEvents.getAllValues().size());
 
         assertArrayEquals(new LoggableEvent[] { ev1 }, sentEvents.getAllValues().get(0).toArray(new LoggableEvent[0]));
@@ -286,7 +301,7 @@ public class EventSendBufferTest {
         sender.sendNow();
         sender.waitUntilCurrentSendingFinished(1000);
 
-        assertEquals(3, sendOperationsFinished);
+        assertEquals(3, sendOperationsFinished.get());
         assertEquals(3, sentEvents.getAllValues().size());
 
         assertArrayEquals(new LoggableEvent[] { ev1 }, sentEvents.getAllValues().get(0).toArray(new LoggableEvent[0]));
@@ -320,7 +335,7 @@ public class EventSendBufferTest {
         sender.waitUntilCurrentSendingFinished(1000);
 
         assertEquals(2, sendStartSemaphore.availablePermits());
-        assertEquals(1, sendOperationsFinished);
+        assertEquals(1, sendOperationsFinished.get());
         assertArrayEquals(new LoggableEvent[] { ev1 }, sentEvents.getValue().toArray(new LoggableEvent[0]));
 
         Thread.sleep(100); // Wait for save
