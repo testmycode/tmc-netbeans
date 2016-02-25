@@ -6,6 +6,8 @@ import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.spyware.eventsources.OutputActionCaptor;
+import fi.helsinki.cs.tmc.spyware.eventsources.OutputActionEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
@@ -63,6 +65,7 @@ public class SpywareFacade implements SpywareSettings {
 
     private SourceSnapshotEventSource sourceSnapshotSource;
     private ProjectActionEventSource projectActionSource;
+    private OutputActionEventSource outputActionSource;
     private TmcEventBusEventSource tmcEventBusSource;
     private TextInsertEventSource textInsertEventSource;
     private WindowStatechangesEventSource windowStatechangesEventSource;
@@ -104,6 +107,7 @@ public class SpywareFacade implements SpywareSettings {
 
         projectActionSource = new ProjectActionEventSource(taggingSender);
         tmcEventBusSource = new TmcEventBusEventSource(taggingSender);
+        outputActionSource = new OutputActionEventSource(taggingSender);
 
         windowStatechangesEventSource = new WindowStatechangesEventSource(taggingSender);
         TmcSwingUtilities.ensureEdt(new Runnable() {
@@ -112,6 +116,7 @@ public class SpywareFacade implements SpywareSettings {
                 ProjectActionCaptor.addListener(projectActionSource);
                 TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
                 textInsertEventSource = new TextInsertEventSource(taggingSender);
+                OutputActionCaptor.addListener(outputActionSource);
             }
         });
     }
@@ -126,6 +131,7 @@ public class SpywareFacade implements SpywareSettings {
                 textInsertEventSource.close();
                 TmcEventBus.getDefault().unsubscribe(tmcEventBusSource);
                 ProjectActionCaptor.removeListener(projectActionSource);
+                OutputActionCaptor.removeListener(outputActionSource);
             }
         });
 
