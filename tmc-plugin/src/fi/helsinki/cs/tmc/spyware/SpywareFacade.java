@@ -70,9 +70,9 @@ public class SpywareFacade implements SpywareSettings {
       private static final class TaggingEventReceiver implements EventReceiver {
 
         private final EventReceiver nextReceiver;
-        private final int hostId;
+        private final String hostId;
 
-        public TaggingEventReceiver(EventReceiver nextReceiver, int hostId) {
+        public TaggingEventReceiver(EventReceiver nextReceiver, String hostId) {
             this.nextReceiver = nextReceiver;
             this.hostId = hostId;
         }
@@ -96,7 +96,7 @@ public class SpywareFacade implements SpywareSettings {
         sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
         sender.sendNow();
 
-        int hostId = new HostInformationGenerator().updateHostInformation();
+        String hostId = new HostInformationGenerator().updateHostInformation(sender);
         taggingSender = new TaggingEventReceiver(sender, hostId);
         sourceSnapshotDedup = new EventDeduplicater(taggingSender);
         sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);

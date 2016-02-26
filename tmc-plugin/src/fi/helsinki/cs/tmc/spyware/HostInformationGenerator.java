@@ -1,37 +1,40 @@
 package fi.helsinki.cs.tmc.spyware;
 
-import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import java.net.NetworkInterface;
 import java.nio.charset.Charset;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.crypto.Mac;
 
 /**
- * Generates host information used by spyware to identify requests coming from single host.
- *
- * HostInformation is linked by hopefully unique enough small identifier which is calculated from
- * host information.
+ * Generates host information used by spyware to identify requests coming from
+ * single host.
  */
 public class HostInformationGenerator {
 
     private static final Logger log = Logger.getLogger(HostInformationGenerator.class.getName());
+    private static final Charset UTF8 = Charset.forName("UTF-8");
 
-    public int updateHostInformation() {
+    public String updateHostInformation(EventReceiver receiver) {
         JsonMaker data = getStaticHostInformation();
         // Should be unique enough not to collapse among singe users machines.
-        int hostId = data.toString().hashCode();
+
+
+        String hostId = trySecureHash(data.toString());
 
         data.add("hostId", hostId);
 
-        LoggableEvent event =
-                new LoggableEvent(
+        LoggableEvent event
+                = new LoggableEvent(
                         "host_information_update",
                         data.toString().getBytes(Charset.forName("UTF-8")));
-        TmcEventBus.getDefault().post(event);
+        receiver.receiveEvent(event);
 
         return hostId;
     }
@@ -52,13 +55,8 @@ public class HostInformationGenerator {
             List<String> macs = new ArrayList<String>(2);
             while (iterator.hasMoreElements()) {
                 NetworkInterface networkInterface = iterator.nextElement();
-                if (networkInterface.isUp() && !networkInterface.isLoopback()) {
-                    byte[] mac = networkInterface.getHardwareAddress();
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mac.length; i++) {
-                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));
-                    }
-                    macs.add(sb.toString());
+                if (!networkInterface.isLoopback()) {
+                    macs.add(trySecureHash(networkInterface.getHardwareAddress()));
                 }
             }
             builder.add("mac_addresses", macs);
@@ -78,4 +76,31 @@ public class HostInformationGenerator {
 
         return builder;
     }
+
+    /**
+     * Attempt to provide a reasonably ok hash of mac address. Should the
+     * algorithm be missing original string is returned.
+     */
+    private static String trySecureHash(String mac) {
+        return trySecureHash(mac.getBytes(UTF8));
+    }
+
+    private static String trySecureHash(byte[] mac) {
+        try {
+            byte[] bytes = MessageDigest.getInstance("SHA-256").digest(mac);
+            return byteToHex(bytes);
+        } catch (NoSuchAlgorithmException ex) {
+            log.log(Level.WARNING, "Missing sha256 hash: {0}", ex);
+            return byteToHex(mac);
+        }
+    }
+
+    private static String byteToHex(byte[] bytes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < bytes.length; i++) {
+            sb.append(String.format("%02X", bytes[i]));
+        }
+        return sb.toString();
+    }
+
 }
