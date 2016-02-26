@@ -16,6 +16,8 @@ import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.utilities.ByteArrayGsonSerializer;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import fi.helsinki.cs.tmc.utilities.JsonMakerGsonSerializer;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
@@ -37,13 +39,13 @@ import org.openide.modules.Modules;
  */
 public class ServerAccess {
     public static final int API_VERSION = 7;
-    
+
     private TmcSettings settings;
     private CourseListParser courseListParser;
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
     private String clientVersion;
-    
+
     public ServerAccess() {
         this(TmcSettings.getDefault());
     }
@@ -64,30 +66,30 @@ public class ServerAccess {
         this.reviewListParser = reviewListParser;
         this.clientVersion = getClientVersion();
     }
-    
+
     private static String getClientVersion() {
         return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
     }
-    
+
     public void setSettings(TmcSettings settings) {
         this.settings = settings;
     }
-    
+
     private String getCourseListUrl() {
         return addApiCallQueryParameters(settings.getServerBaseUrl() + "/courses.json");
     }
-    
+
     private String addApiCallQueryParameters(String url) {
         url = UriUtils.withQueryParam(url, "api_version", ""+API_VERSION);
         url = UriUtils.withQueryParam(url, "client", "netbeans_plugin");
         url = UriUtils.withQueryParam(url, "client_version", clientVersion);
         return url;
     }
-    
+
     private HttpTasks createHttpTasks() {
         return new HttpTasks().setCredentials(settings.getUsername(), settings.getPassword());
     }
-    
+
     public boolean hasEnoughSettings() {
         return
                 !settings.getUsername().isEmpty() &&
@@ -101,7 +103,7 @@ public class ServerAccess {
                 settings.getPassword().isEmpty() &&
                 !settings.getServerBaseUrl().isEmpty();
     }
-    
+
     public CancellableCallable<List<Course>> getDownloadingCourseListTask() {
         final CancellableCallable<String> download = createHttpTasks().getForText(getCourseListUrl());
         return new CancellableCallable<List<Course>>() {
@@ -142,7 +144,7 @@ public class ServerAccess {
             }
         };
     }
-    
+
     public CancellableCallable<Void> getUnlockingTask(Course course) {
         Map<String, String> params = Collections.emptyMap();
         final CancellableCallable<String> download = createHttpTasks().postForText(getUnlockUrl(course), params);
@@ -163,16 +165,16 @@ public class ServerAccess {
             }
         };
     }
-    
+
     private String getUnlockUrl(Course course) {
         return addApiCallQueryParameters(course.getUnlockUrl());
     }
-    
+
     public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {
         String zipUrl = exercise.getDownloadUrl();
         return createHttpTasks().getForBinary(zipUrl);
     }
-    
+
     public CancellableCallable<byte[]> getDownloadingExerciseSolutionZipTask(Exercise exercise) {
         String zipUrl = exercise.getSolutionDownloadUrl();
         return createHttpTasks().getForBinary(zipUrl);
@@ -188,7 +190,7 @@ public class ServerAccess {
 
         final CancellableCallable<String> upload =
                 createHttpTasks().uploadFileForTextDownload(submitUrl, params, "submission[file]", sourceZip);
-        
+
         return new CancellableCallable<SubmissionResponse>() {
             @Override
             public SubmissionResponse call() throws Exception {
@@ -198,7 +200,7 @@ public class ServerAccess {
                 } catch (FailedHttpResponseException ex) {
                     return checkForObsoleteClient(ex);
                 }
-                
+
                 JsonObject respJson = new JsonParser().parse(response).getAsJsonObject();
                 if (respJson.get("error") != null) {
                     throw new RuntimeException("Server responded with error: " + respJson.get("error"));
@@ -230,11 +232,11 @@ public class ServerAccess {
             this.pasteUrl = pasteUrl;
         }
     }
-    
+
     public CancellableCallable<String> getSubmissionFetchTask(String submissionUrl) {
         return createHttpTasks().getForText(submissionUrl);
     }
-    
+
     public CancellableCallable<List<Review>> getDownloadingReviewListTask(Course course) {
         String url = addApiCallQueryParameters(course.getReviewsUrl());
         final CancellableCallable<String> download = createHttpTasks().getForText(url);
@@ -255,7 +257,7 @@ public class ServerAccess {
             }
         };
     }
-    
+
     public CancellableCallable<Void> getMarkingReviewAsReadTask(Review review, boolean read) {
         String url = addApiCallQueryParameters(review.getUpdateUrl() + ".json");
         Map<String, String> params = new HashMap<String, String>();
@@ -265,7 +267,7 @@ public class ServerAccess {
         } else {
             params.put("mark_as_unread", "1");
         }
-        
+
         final CancellableCallable<String> task = createHttpTasks().postForText(url, params);
         return new CancellableCallable<Void>() {
             @Override
@@ -280,10 +282,10 @@ public class ServerAccess {
             }
         };
     }
-    
+
     public CancellableCallable<String> getFeedbackAnsweringJob(String answerUrl, List<FeedbackAnswer> answers) {
         final String submitUrl = addApiCallQueryParameters(answerUrl);
-        
+
         Map<String, String> params = new HashMap<String, String>();
         for (int i = 0; i < answers.size(); ++i) {
             String keyPrefix = "answers[" + i + "]";
@@ -291,9 +293,9 @@ public class ServerAccess {
             params.put(keyPrefix + "[question_id]", "" + answer.getQuestion().getId());
             params.put(keyPrefix + "[answer]", answer.getAnswer());
         }
-        
+
         final CancellableCallable<String> upload = createHttpTasks().postForText(submitUrl, params);
-        
+
         return new CancellableCallable<String>() {
             @Override
             public String call() throws Exception {
@@ -310,7 +312,7 @@ public class ServerAccess {
             }
         };
     }
-    
+
     public CancellableCallable<Object> getSendEventLogJob(String spywareServerUrl, List<LoggableEvent> events) {
         String url = addApiCallQueryParameters(spywareServerUrl);
 
@@ -347,8 +349,10 @@ public class ServerAccess {
         GZIPOutputStream gzos = new GZIPOutputStream(bufferBos);
         OutputStreamWriter bufferWriter = new OutputStreamWriter(gzos, Charset.forName("UTF-8"));
 
+
         Gson gson = new GsonBuilder()
                 .registerTypeAdapter(byte[].class, new ByteArrayGsonSerializer())
+                .registerTypeAdapter(JsonMaker.class, new JsonMakerGsonSerializer())
                 .create();
 
         gson.toJson(events, new TypeToken<List<LoggableEvent>>(){}.getType(), bufferWriter);
@@ -357,7 +361,7 @@ public class ServerAccess {
 
         return bufferBos.toByteArray();
     }
-    
+
     private <T> T checkForObsoleteClient(FailedHttpResponseException ex) throws ObsoleteClientException, FailedHttpResponseException {
         if (ex.getStatusCode() == 404) {
             boolean obsolete;
