@@ -3,15 +3,22 @@ package fi.helsinki.cs.tmc.spyware;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
-import org.netbeans.api.annotations.common.NullAllowed;
+import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import java.util.List;
+import java.util.logging.Logger;
 
 public class LoggableEvent implements TmcEvent {
+
+    private static final Logger log = Logger.getLogger(LoggableEvent.class.getName());
 
     private String courseName;
     private String exerciseName;
     private String eventType;
+
     private byte[] data;
-    @NullAllowed private String metadata;
+
+    private JsonMaker metadata;
+
     private long happenedAt; // millis from epoch
     private long systemNanotime;
     private transient String key;
@@ -28,7 +35,7 @@ public class LoggableEvent implements TmcEvent {
         this(course.getName(), "", eventType, data, null);
     }
 
-    public LoggableEvent(Exercise exercise, String eventType, byte[] data, String metadata) {
+    public LoggableEvent(Exercise exercise, String eventType, byte[] data, JsonMaker metadata) {
         this(exercise.getCourseName(), exercise.getName(), eventType, data, metadata);
     }
 
@@ -36,12 +43,12 @@ public class LoggableEvent implements TmcEvent {
         this(courseName, exerciseName, eventType, data, null);
     }
 
-    public LoggableEvent(String courseName, String exerciseName, String eventType, byte[] data, String metadata) {
+    public LoggableEvent(String courseName, String exerciseName, String eventType, byte[] data, JsonMaker metadata) {
         this.courseName = courseName;
         this.exerciseName = exerciseName;
         this.eventType = eventType;
         this.data = data;
-        this.metadata = metadata;
+        this.metadata = JsonMaker.create().merge(metadata);
         this.happenedAt = System.currentTimeMillis();
         this.systemNanotime = System.nanoTime();
 
@@ -68,7 +75,32 @@ public class LoggableEvent implements TmcEvent {
      * Optional JSON metadata.
      */
     public String getMetadata() {
-        return metadata;
+        return metadata.toString();
+    }
+
+    public LoggableEvent addMetadata(String name, String value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, long value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, boolean value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, List<String> values) {
+        metadata.add(name, values);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(JsonMaker metadata) {
+        this.metadata.merge(metadata);
+        return this;
     }
 
     /**

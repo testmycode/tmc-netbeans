@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.spyware.eventsources.WindowStatechangesEventSource;
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -13,6 +12,7 @@ import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.SourceSnapshotEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.TmcEventBusEventSource;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
+import java.io.IOException;
 import java.util.logging.Logger;
 
 public class SpywareFacade implements SpywareSettings {
@@ -27,6 +27,7 @@ public class SpywareFacade implements SpywareSettings {
         }
         instance = new SpywareFacade();
         TmcEventBus.getDefault().post(new InvokedEvent("spyware_loaded"));
+
     }
 
     public static void close() {
@@ -56,6 +57,7 @@ public class SpywareFacade implements SpywareSettings {
     private TmcSettings settings;
 
     private EventSendBuffer sender;
+    private EventReceiver taggingSender;
 
     private EventDeduplicater sourceSnapshotDedup;
 
@@ -65,26 +67,51 @@ public class SpywareFacade implements SpywareSettings {
     private TextInsertEventSource textInsertEventSource;
     private WindowStatechangesEventSource windowStatechangesEventSource;
 
+      private static final class TaggingEventReceiver implements EventReceiver {
+
+        private final EventReceiver nextReceiver;
+        private final String hostId;
+
+        public TaggingEventReceiver(EventReceiver nextReceiver, String hostId) {
+            this.nextReceiver = nextReceiver;
+            this.hostId = hostId;
+        }
+
+        @Override
+        public void receiveEvent(LoggableEvent event) {
+            event.addMetadata("host_id", hostId);
+            nextReceiver.receiveEvent(event);
+        }
+
+        @Override
+        public void close() throws IOException {
+            nextReceiver.close();
+        }
+    }
+
+
     public SpywareFacade() {
         settings = TmcSettings.getDefault();
 
         sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
         sender.sendNow();
 
-        sourceSnapshotDedup = new EventDeduplicater(sender);
+        String hostId = new HostInformationGenerator().updateHostInformation(sender);
+        taggingSender = new TaggingEventReceiver(sender, hostId);
+        sourceSnapshotDedup = new EventDeduplicater(taggingSender);
         sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);
         sourceSnapshotSource.startListeningToFileChanges();
 
-        projectActionSource = new ProjectActionEventSource(sender);
-        tmcEventBusSource = new TmcEventBusEventSource(sender);
+        projectActionSource = new ProjectActionEventSource(taggingSender);
+        tmcEventBusSource = new TmcEventBusEventSource(taggingSender);
 
-        windowStatechangesEventSource = new WindowStatechangesEventSource(sender);
+        windowStatechangesEventSource = new WindowStatechangesEventSource(taggingSender);
         TmcSwingUtilities.ensureEdt(new Runnable() {
             @Override
             public void run() {
                 ProjectActionCaptor.addListener(projectActionSource);
                 TmcEventBus.getDefault().subscribeStrongly(tmcEventBusSource);
-                textInsertEventSource = new TextInsertEventSource(sender);
+                textInsertEventSource = new TextInsertEventSource(taggingSender);
             }
         });
     }
