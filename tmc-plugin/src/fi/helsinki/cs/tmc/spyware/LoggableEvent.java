@@ -18,8 +18,6 @@ public class LoggableEvent implements TmcEvent {
 
     private static final Logger log = Logger.getLogger(LoggableEvent.class.getName());
 
-    private static int GLOBAL_HOST_ID;
-
     private String courseName;
     private String exerciseName;
     private String eventType;
@@ -62,7 +60,6 @@ public class LoggableEvent implements TmcEvent {
         this.happenedAt = System.currentTimeMillis();
         this.systemNanotime = System.nanoTime();
 
-        this.hostId = LoggableEvent.GLOBAL_HOST_ID;
         this.key = courseName + "|" + exerciseName + "|" + eventType;
     }
 
@@ -88,14 +85,6 @@ public class LoggableEvent implements TmcEvent {
 
     public void setHostId(int hostId) {
         this.hostId = hostId;
-    }
-
-    public static void setGlobalHostId(int globalHostId) {
-        LoggableEvent.GLOBAL_HOST_ID = globalHostId;
-    }
-
-    public static int getGlobalHostId() {
-        return GLOBAL_HOST_ID;
     }
 
     /**
