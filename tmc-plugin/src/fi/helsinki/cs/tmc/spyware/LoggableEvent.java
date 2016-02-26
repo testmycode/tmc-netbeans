@@ -4,15 +4,8 @@ import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.utilities.JsonMaker;
-import java.net.NetworkInterface;
-import java.net.SocketException;
-import java.net.UnknownHostException;
-import java.util.ArrayList;
-import java.util.Enumeration;
 import java.util.List;
-import java.util.logging.Level;
 import java.util.logging.Logger;
-import org.netbeans.api.annotations.common.NullAllowed;
 
 public class LoggableEvent implements TmcEvent {
 
@@ -21,12 +14,11 @@ public class LoggableEvent implements TmcEvent {
     private String courseName;
     private String exerciseName;
     private String eventType;
-    private int hostId;
 
     private byte[] data;
 
-    @NullAllowed
-    private String metadata;
+    private JsonMaker metadata;
+
     private long happenedAt; // millis from epoch
     private long systemNanotime;
     private transient String key;
@@ -43,7 +35,7 @@ public class LoggableEvent implements TmcEvent {
         this(course.getName(), "", eventType, data, null);
     }
 
-    public LoggableEvent(Exercise exercise, String eventType, byte[] data, String metadata) {
+    public LoggableEvent(Exercise exercise, String eventType, byte[] data, JsonMaker metadata) {
         this(exercise.getCourseName(), exercise.getName(), eventType, data, metadata);
     }
 
@@ -51,12 +43,12 @@ public class LoggableEvent implements TmcEvent {
         this(courseName, exerciseName, eventType, data, null);
     }
 
-    public LoggableEvent(String courseName, String exerciseName, String eventType, byte[] data, String metadata) {
+    public LoggableEvent(String courseName, String exerciseName, String eventType, byte[] data, JsonMaker metadata) {
         this.courseName = courseName;
         this.exerciseName = exerciseName;
         this.eventType = eventType;
         this.data = data;
-        this.metadata = metadata;
+        this.metadata = JsonMaker.create().merge(metadata);
         this.happenedAt = System.currentTimeMillis();
         this.systemNanotime = System.nanoTime();
 
@@ -79,19 +71,36 @@ public class LoggableEvent implements TmcEvent {
         return data;
     }
 
-    public int getHostId() {
-        return hostId;
-    }
-
-    public void setHostId(int hostId) {
-        this.hostId = hostId;
-    }
-
     /**
      * Optional JSON metadata.
      */
     public String getMetadata() {
-        return metadata;
+        return metadata.toString();
+    }
+
+    public LoggableEvent addMetadata(String name, String value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, long value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, boolean value) {
+        metadata.add(name, value);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(String name, List<String> values) {
+        metadata.add(name, values);
+        return this;
+    }
+
+    public LoggableEvent addMetadata(JsonMaker metadata) {
+        this.metadata.merge(metadata);
+        return this;
     }
 
     /**
@@ -113,51 +122,8 @@ public class LoggableEvent implements TmcEvent {
         return systemNanotime;
     }
 
-
-
-
     @Override
     public String toString() {
         return "LoggableEvent{" + "courseName=" + courseName + ", exerciseName=" + exerciseName + ", eventType=" + eventType + ", happenedAt=" + happenedAt + ", systemNanotime=" + systemNanotime + ", key=" + key + ", metadata=" + metadata + ", data=" + new String(data) + "}";
-    }
-
-    /**
-     * Generates information which should mostly be static throughout netbeans
-     * session. However, the ip address sure could change.
-     */
-    private static String getStaticHostInformation() {
-        JsonMaker builder = JsonMaker.create();
-
-        try {
-            java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
-            builder.add("hostAddress", localMachine.getHostAddress());
-            builder.add("hostName", localMachine.getHostName());
-        } catch (UnknownHostException ex) {
-            log.log(Level.WARNING, "Exception while getting host name information: {0}", ex);
-        }
-
-        try {
-            Enumeration<NetworkInterface> iterator = NetworkInterface.getNetworkInterfaces();
-            List<String> macs = new ArrayList<String>(2);
-            while (iterator.hasMoreElements()) {
-                NetworkInterface networkInterface = iterator.nextElement();
-                if (networkInterface.isUp() && !networkInterface.isLoopback()) {
-                    byte[] mac = networkInterface.getHardwareAddress();
-                    StringBuilder sb = new StringBuilder();
-                    for (int i = 0; i < mac.length; i++) {
-                        sb.append(String.format("%02X%s", mac[i], (i < mac.length - 1) ? ":" : ""));
-                    }
-                    macs.add(sb.toString());
-                }
-
-            }
-            builder.add("mac", macs);
-
-        } catch (SocketException ex) {
-            log.log(Level.WARNING, "Exception while getting host mac information: {0}", ex);
-        }
-
-        builder.add("hostUsername", System.getProperty("user.name"));
-        return builder.toString();
     }
 }

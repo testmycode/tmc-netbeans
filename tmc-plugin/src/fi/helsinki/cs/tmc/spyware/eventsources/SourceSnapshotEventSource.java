@@ -101,10 +101,9 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
 
-        String metadata = JsonMaker.create()
+        JsonMaker metadata = JsonMaker.create()
                 .add("cause", changeType.name().toLowerCase())
-                .add("file", filePath)
-                .toString();
+                .add("file", filePath);
         invokeSnapshotThreadViaEdt(fileObject, metadata);
     }
 
@@ -114,17 +113,16 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             return;
         }
 
-        String metadata = JsonMaker.create()
+        JsonMaker metadata = JsonMaker.create()
                 .add("cause", changeType.name().toLowerCase())
                 .add("file", filePath)
-                .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt())
-                .toString();
+                .add("previous_name", renameEvent.getName() + "." + renameEvent.getExt());
         invokeSnapshotThreadViaEdt(renameEvent.getFile(), metadata);
     }
 
     // I have no idea what thread FileUtil callbacks are made in,
     // so I'll go to the EDT to safely read the global state.
-    private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final String metadata) {
+    private void invokeSnapshotThreadViaEdt(final FileObject fileObject, final JsonMaker metadata) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -141,7 +139,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         });
     }
 
-    private void startSnapshotThread(FileObject changedFile, String metadata) {
+    private void startSnapshotThread(FileObject changedFile, JsonMaker metadata) {
         if (!settings.isSpywareEnabled()) {
             return;
         }
@@ -171,9 +169,9 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
         private final EventReceiver receiver;
         private final Exercise exercise;
         private final TmcProjectInfo projectInfo;
-        private final String metadata;
+        private final JsonMaker metadata;
 
-        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo, String metadata) {
+        private SnapshotThread(EventReceiver receiver, Exercise exercise, TmcProjectInfo projectInfo, JsonMaker metadata) {
             super("Source snapshot");
             this.receiver = receiver;
             this.exercise = exercise;

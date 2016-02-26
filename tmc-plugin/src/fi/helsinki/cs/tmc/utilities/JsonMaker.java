@@ -5,6 +5,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonPrimitive;
 import java.util.List;
+import java.util.Map;
 
 /**
  * A convenient way to build ad-hoc JSON objects.
@@ -57,4 +58,18 @@ public class JsonMaker {
     public String toString() {
         return toplevel.toString();
     }
+
+    private JsonObject asJsonObject() {
+        return toplevel;
+    }
+    public JsonMaker merge(JsonMaker merge) {
+        if (merge == null) {
+            return this;
+        }
+        for (Map.Entry<String, JsonElement> element : merge.asJsonObject().entrySet()) {
+            toplevel.add(element.getKey(), element.getValue());
+        }
+        return this;
+    }
+
 }

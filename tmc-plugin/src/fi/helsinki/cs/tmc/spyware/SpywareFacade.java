@@ -79,7 +79,7 @@ public class SpywareFacade implements SpywareSettings {
 
         @Override
         public void receiveEvent(LoggableEvent event) {
-            event.setHostId(hostId);
+            event.addMetadata("host_id", hostId);
             nextReceiver.receiveEvent(event);
         }
 
