@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.spyware;
 
 import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import java.net.InetAddress;
 import java.net.NetworkInterface;
 import java.nio.charset.Charset;
 import java.security.MessageDigest;
@@ -23,8 +24,6 @@ public class HostInformationGenerator {
 
     public String updateHostInformation(EventReceiver receiver) {
         JsonMaker data = getStaticHostInformation();
-        // Should be unique enough not to collapse among singe users machines.
-
 
         String hostId = trySecureHash(data.toString());
 
@@ -43,7 +42,7 @@ public class HostInformationGenerator {
         JsonMaker builder = JsonMaker.create();
 
         try {
-            java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
+            InetAddress localMachine = java.net.InetAddress.getLocalHost();
             builder.add("hostAddress", localMachine.getHostAddress());
             builder.add("hostName", localMachine.getHostName());
         } catch (Exception ex) {
