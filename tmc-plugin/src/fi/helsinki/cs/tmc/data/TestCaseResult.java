@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.data;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import static fi.helsinki.cs.tmc.testrunner.TestCase.Status.*;
-import org.netbeans.api.annotations.common.CheckForNull;
+//import org.netbeans.api.annotations.common.CheckForNull;
 
 public class TestCaseResult {
 
@@ -37,17 +37,17 @@ public class TestCaseResult {
         return successful;
     }
 
-    @CheckForNull
+//    @CheckForNull
     public String getMessage() {
         return message;
     }
 
-    @CheckForNull
+//    @CheckForNull
     public CaughtException getException() {
         return exception;
     }
 
-    @CheckForNull
+//    @CheckForNull
     public String getDetailedMessage() {
         return detailedMessage;
     }
