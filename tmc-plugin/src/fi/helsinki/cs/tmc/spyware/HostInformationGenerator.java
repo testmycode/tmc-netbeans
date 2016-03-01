@@ -91,6 +91,13 @@ public class HostInformationGenerator {
         } catch (NoSuchAlgorithmException ex) {
             log.log(Level.WARNING, "Missing sha256 hash: {0}", ex);
             return byteToHex(mac);
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Exception while hashing: {0}", e);
+            try {
+                return byteToHex(mac);
+            } catch (Exception ex) {
+                return "error, e: " + ex.toString();
+            }
         }
     }
 
