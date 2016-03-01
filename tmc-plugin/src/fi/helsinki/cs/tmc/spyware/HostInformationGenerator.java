@@ -11,7 +11,6 @@ import java.util.Enumeration;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import javax.crypto.Mac;
 
 /**
  * Generates host information used by spyware to identify requests coming from
@@ -55,7 +54,11 @@ public class HostInformationGenerator {
             while (iterator.hasMoreElements()) {
                 NetworkInterface networkInterface = iterator.nextElement();
                 if (!networkInterface.isLoopback()) {
-                    macs.add(trySecureHash(networkInterface.getHardwareAddress()));
+                    byte[] address = networkInterface.getHardwareAddress();
+                    if (address == null) {
+                        continue;
+                    }
+                    macs.add(trySecureHash(address));
                 }
             }
             builder.add("mac_addresses", macs);
@@ -81,10 +84,20 @@ public class HostInformationGenerator {
      * algorithm be missing original string is returned.
      */
     private static String trySecureHash(String mac) {
-        return trySecureHash(mac.getBytes(UTF8));
+        if (mac == null) {
+            return "mac_is_null";
+        }
+        try {
+            return trySecureHash(mac.getBytes(UTF8));
+        } catch (Exception e) {
+            return "error";
+        }
     }
 
     private static String trySecureHash(byte[] mac) {
+        if (mac == null) {
+            return "bmac_is_null";
+        }
         try {
             byte[] bytes = MessageDigest.getInstance("SHA-256").digest(mac);
             return byteToHex(bytes);
@@ -96,12 +109,15 @@ public class HostInformationGenerator {
             try {
                 return byteToHex(mac);
             } catch (Exception ex) {
-                return "error, e: " + ex.toString();
+                return "error";
             }
         }
     }
 
     private static String byteToHex(byte[] bytes) {
+        if (bytes == null) {
+            return "byte_to_hex_null";
+        }
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < bytes.length; i++) {
             sb.append(String.format("%02X", bytes[i]));
