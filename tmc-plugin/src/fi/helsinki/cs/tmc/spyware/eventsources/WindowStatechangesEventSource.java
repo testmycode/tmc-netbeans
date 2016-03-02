@@ -12,7 +12,6 @@ import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 
 import org.netbeans.api.editor.EditorRegistry;
-import org.netbeans.editor.GuardedDocument;
 import org.netbeans.modules.editor.NbEditorDocument;
 import org.openide.filesystems.FileObject;
 import org.openide.loaders.DataObject;
@@ -27,7 +26,6 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.accessibility.Accessible;
-import javax.swing.JEditorPane;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.annotations.common.NullAllowed;
