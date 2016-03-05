@@ -44,7 +44,7 @@ public class OutputActionEventSource implements OutputActionCaptor.Listener {
     @Override
     public void input(Exercise exercise, char[] characters) {
         if (exercise != null) {
-            Object data = Collections.singletonMap("char", characters);
+            Object data = Collections.singletonMap("charArray", characters);
             String jsonData = new Gson().toJson(data);
             LoggableEvent event = new LoggableEvent(exercise, "output_action", jsonData.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
@@ -58,7 +58,7 @@ public class OutputActionEventSource implements OutputActionCaptor.Listener {
     @Override
     public void input(Exercise exercise, CharBuffer characters) {
         if (exercise != null) {
-            Object data = Collections.singletonMap("char", characters);
+            Object data = Collections.singletonMap("charBuf", characters);
             String jsonData = new Gson().toJson(data);
             LoggableEvent event = new LoggableEvent(exercise, "output_action", jsonData.getBytes(Charset.forName("UTF-8")));
             receiver.receiveEvent(event);
