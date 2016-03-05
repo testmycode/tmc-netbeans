@@ -31,7 +31,7 @@ public class HostInformationGenerator {
         LoggableEvent event
                 = new LoggableEvent(
                         "host_information_update",
-                        data.toString().getBytes(Charset.forName("UTF-8")));
+                        data.toString().getBytes(UTF8));
         receiver.receiveEvent(event);
 
         return hostId;
@@ -39,14 +39,6 @@ public class HostInformationGenerator {
 
     private static JsonMaker getStaticHostInformation() {
         JsonMaker builder = JsonMaker.create();
-
-        try {
-            InetAddress localMachine = java.net.InetAddress.getLocalHost();
-            builder.add("hostAddress", localMachine.getHostAddress());
-            builder.add("hostName", localMachine.getHostName());
-        } catch (Exception ex) {
-            log.log(Level.WARNING, "Exception while getting host name information: {0}", ex);
-        }
 
         try {
             Enumeration<NetworkInterface> iterator = NetworkInterface.getNetworkInterfaces();
@@ -124,5 +116,5 @@ public class HostInformationGenerator {
         }
         return sb.toString();
     }
-
 }
+
