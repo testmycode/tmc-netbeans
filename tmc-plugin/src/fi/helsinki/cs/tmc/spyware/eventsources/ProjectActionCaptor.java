@@ -14,7 +14,7 @@ import static org.netbeans.spi.project.ActionProvider.*;
 /**
  * Acts as a proxy to a project's default ActionProvider and provides
  * a simple interface for listeners.
- * 
+ *
  * <p>
  * Implementation details:
  * This is registered in layer.xml instead of with <code>@ProjectServiceProvider</code>,
@@ -27,21 +27,21 @@ public class ProjectActionCaptor implements ActionProvider {
         public void actionInvoked(Project project, String command);
     }
     private static List<Listener> listeners = new ArrayList<Listener>();
-    
+
     public synchronized static void addListener(Listener listener) {
         listeners.add(listener);
     }
-    
+
     public synchronized static void removeListener(Listener listener) {
         listeners.remove(listener);
     }
-    
+
     private synchronized static void fireEvent(Project p, String cmd) {
         for (Listener listener : listeners) {
             listener.actionInvoked(p, cmd);
         }
     }
-    
+
     private final Project project;
     private boolean beingCalled; // Prevent recursion when proxying
 
@@ -49,7 +49,7 @@ public class ProjectActionCaptor implements ActionProvider {
         this.project = project;
         this.beingCalled = false;
     }
-    
+
     @Override
     public String[] getSupportedActions() {
         return new String[] {
@@ -66,13 +66,13 @@ public class ProjectActionCaptor implements ActionProvider {
             COMMAND_TEST_SINGLE,
         };
     }
-    
+
     @Override
     public boolean isActionEnabled(String command, Lookup context) throws IllegalArgumentException {
         if (beingCalled) {
             return false;
         }
-        
+
         try {
             beingCalled = true;
             for (ActionProvider provider : project.getLookup().lookupAll(ActionProvider.class)) {
@@ -91,6 +91,9 @@ public class ProjectActionCaptor implements ActionProvider {
     public void invokeAction(String command, Lookup context) throws IllegalArgumentException {
         if (!beingCalled) {
             beingCalled = true;
+            if (command.equals(COMMAND_RUN)){
+                int a = 1+1;
+            }
             try {
                 for (ActionProvider provider : project.getLookup().lookupAll(ActionProvider.class)) {
                     if (Arrays.asList(provider.getSupportedActions()).contains(command) &&
