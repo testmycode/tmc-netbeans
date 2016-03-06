@@ -7,8 +7,6 @@ jdk:
   - oraclejdk7
   - openjdk7
 
-env:
-  - ANT_OPTS="-XX:MaxPermSize=1024m -XX:+CMSClassUnloadingEnabled -XX:+HeapDumpOnOutOfMemoryError -Xmx2048m"
 cache:
   directories:
     - $HOME/.m2
@@ -16,15 +14,15 @@ cache:
 before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
-  - sleep 3 # give xvfb some time to start
+  - sleep 10 # give xvfb some time to start
   - wget http://download.netbeans.org/netbeans/8.1/final/zip/netbeans-8.1-201510222201.zip -O netbeans.zip
   - unzip -q netbeans.zip
-  - mvn -q dependency:get -Dartifact=junit:junit:4.8.2 -DrepoUrl=http://repo1.maven.org/maven2/
+    #- mvn -q dependency:get -Dartifact=junit:junit:4.8.2 -DrepoUrl=http://repo1.maven.org/maven2/
   # To reduce amout of log
   - cd maven-wrapper/ && mvn -q install && cd ..
 
 script:
-  - ant -Dcontinue.after.failing.tests=true -Dnbplatform.nb81.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb81.harness.dir=$PWD/netbeans/harness -Dfork=on test
+  - ant -Dnbplatform.nb81.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb81.harness.dir=$PWD/netbeans/harness -Dfork=true test
 
 notifications:
   slack:
