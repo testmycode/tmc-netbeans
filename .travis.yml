@@ -7,6 +7,10 @@ jdk:
   - oraclejdk7
   - openjdk7
 
+matrix:
+  allowed_failures:
+    -oraclejdk7
+    -openjdk7
 cache:
   directories:
     - $HOME/.m2
