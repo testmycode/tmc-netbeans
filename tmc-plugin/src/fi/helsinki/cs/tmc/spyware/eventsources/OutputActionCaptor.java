@@ -23,8 +23,10 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.Action;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
+import org.openide.windows.IOContainer;
 
 /**
  * Provides tmc-spyware access to Output of netbeans and allows us to sniff all
@@ -63,6 +65,48 @@ public class OutputActionCaptor extends IOProvider {
             }
 
             InputOutput inputOutput = provider.getIO(string, bln);
+            return new TmcInputOutputProxy(inputOutput);
+        }
+        log.log(Level.WARNING, "Failed to get IO. Please contact TestMyCode authors/teacher");
+        throw new RuntimeException("Failed to get IO. Please contact TestMyCode authors/teacher");
+    }
+
+    @Override
+    public InputOutput getIO(String string, Action[] actions) {
+        for (IOProvider provider : Lookup.getDefault().lookupAll(IOProvider.class)) {
+            if (provider.getName().equals(NAME)) {
+                continue;
+            }
+
+            InputOutput inputOutput = provider.getIO(string, actions);
+            return new TmcInputOutputProxy(inputOutput);
+        }
+        log.log(Level.WARNING, "Failed to get IO. Please contact TestMyCode authors/teacher");
+        throw new RuntimeException("Failed to get IO. Please contact TestMyCode authors/teacher");
+    }
+
+    @Override
+    public InputOutput getIO(String string, boolean bln, Action[] actions, IOContainer ioc) {
+        for (IOProvider provider : Lookup.getDefault().lookupAll(IOProvider.class)) {
+            if (provider.getName().equals(NAME)) {
+                continue;
+            }
+
+            InputOutput inputOutput = provider.getIO(string, actions, ioc);
+            return new TmcInputOutputProxy(inputOutput);
+        }
+        log.log(Level.WARNING, "Failed to get IO. Please contact TestMyCode authors/teacher");
+        throw new RuntimeException("Failed to get IO. Please contact TestMyCode authors/teacher");
+    }
+
+    @Override
+    public InputOutput getIO(String name, Action[] actions, IOContainer ioContainer) {
+        for (IOProvider provider : Lookup.getDefault().lookupAll(IOProvider.class)) {
+            if (provider.getName().equals(NAME)) {
+                continue;
+            }
+
+            InputOutput inputOutput = provider.getIO(name, actions, ioContainer);
             return new TmcInputOutputProxy(inputOutput);
         }
         log.log(Level.WARNING, "Failed to get IO. Please contact TestMyCode authors/teacher");
