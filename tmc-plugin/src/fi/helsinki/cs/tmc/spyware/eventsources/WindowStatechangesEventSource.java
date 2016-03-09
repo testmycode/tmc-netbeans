@@ -26,6 +26,7 @@ import java.nio.charset.Charset;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.accessibility.Accessible;
+import javax.accessibility.AccessibleContext;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
 import org.netbeans.api.annotations.common.NullAllowed;
@@ -58,52 +59,61 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
-        FileObject changedFile = getChangedFile();
+        try {
+            FileObject changedFile = getChangedFile();
 
-        Exercise exercise = getExercise(changedFile);
-        String eventName = underscorify(evt.getPropertyName());
+            Exercise exercise = getExercise(changedFile);
+            String eventName = underscorify(evt.getPropertyName());
 
-        LoggableEvent event;
-        if (exercise != null) {
-            log.log(Level.FINER, "Exercise: {0}", exercise);
-            String filePath = TmcFileUtils.tryGetPathRelativeToProject(changedFile);
-            String data = JsonMaker.create()
-                    .add("new_value", toStringWithObjects(evt.getNewValue()))
-                    .add("old_value", toStringWithObjects(evt.getOldValue()))
-                    .add("file", toStringWithObjects(filePath))
-                    .toString();
-            event = new LoggableEvent(exercise, eventName, data.getBytes(Charset.forName("UTF-8")));
-        } else {
-            String data = JsonMaker.create()
-                    .add("new_value", toStringWithObjects(evt.getNewValue()))
-                    .add("old_value", toStringWithObjects(evt.getOldValue()))
-                    .add("non_tmc_project", true)
-                    .toString();
-            event = new LoggableEvent(eventName, data.getBytes(Charset.forName("UTF-8")));
+            LoggableEvent event;
+            if (exercise != null) {
+                log.log(Level.FINER, "Exercise: {0}", exercise);
+                String filePath = TmcFileUtils.tryGetPathRelativeToProject(changedFile);
+                String data = JsonMaker.create()
+                        .add("new_value", toStringWithObjects(evt.getNewValue()))
+                        .add("old_value", toStringWithObjects(evt.getOldValue()))
+                        .add("file", toStringWithObjects(filePath))
+                        .toString();
+
+                event = new LoggableEvent(exercise, eventName, data.getBytes(Charset.forName("UTF-8")));
+            } else {
+                String data = JsonMaker.create()
+                        .add("new_value", toStringWithObjects(evt.getNewValue()))
+                        .add("old_value", toStringWithObjects(evt.getOldValue()))
+                        .add("non_tmc_project", true)
+                        .toString();
+                event = new LoggableEvent(eventName, data.getBytes(Charset.forName("UTF-8")));
+            }
+
+            receiver.receiveEvent(event);
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Error in window event listener: {0}", e);
         }
-
-        receiver.receiveEvent(event);
     }
 
     /**
      * Logs window events.
      */
     private void reactToEvent(String action, WindowEvent event) {
-        String data = JsonMaker.create()
-                .add("new_state", event.getNewState())
-                .add("old_state", event.getOldState())
-                .toString();
-        if (courseDb != null) {
-            Course course = courseDb.getCurrentCourse();
-            if (course != null) {
-                receiver.receiveEvent(
-                        new LoggableEvent(course, action, data.getBytes(Charset.forName("UTF-8"))));
+        try {
+            String data = JsonMaker.create()
+                    .add("new_state", event.getNewState())
+                    .add("old_state", event.getOldState())
+                    .toString();
+            if (courseDb != null) {
+                Course course = courseDb.getCurrentCourse();
+                if (course != null) {
+                    receiver.receiveEvent(
+                            new LoggableEvent(course, action, data.getBytes(Charset.forName("UTF-8"))));
+                } else {
+                    receiver.receiveEvent(
+                            new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
+                }
             } else {
-                receiver.receiveEvent(
-                        new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
+                log.log(Level.WARNING, "Coursedb is null");
             }
-        } else {
-            log.log(Level.WARNING, "Coursedb is null");
+        } catch (Exception e) {
+            log.log(Level.WARNING, "Error in window event listener: {0}", e);
         }
     }
 
@@ -152,14 +162,30 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     private String toStringWithObjects(Object object) {
-        if (object == null) {
-            return "null";
-        } else if (object instanceof Mode) {
-            return ((Mode) object).getName();
-        } else if (object instanceof Accessible) {
-            return ((Accessible) object).getAccessibleContext().getAccessibleName();
+        try {
+            if (object == null) {
+                return "null";
+            } else if (object instanceof Mode) {
+                return ((Mode) object).getName();
+            } else if (object instanceof Accessible) {
+                try {
+                    Accessible acc = (Accessible) object;
+                    AccessibleContext context = acc.getAccessibleContext();
+                    if (context != null) {
+                        String str = context.getAccessibleName();
+                        if (str != null) {
+                            return str;
+                        }
+                    }
+                } catch (Exception e) {
+                    log.log(Level.WARNING, "Windowstate exception error: {0}", e);
+                    return "accessible_exception";
+                }
+            }
+            return object.toString();
+        } catch (Exception e) {
+            return "error";
         }
-        return object.toString();
     }
 
     private String underscorify(String string) {
