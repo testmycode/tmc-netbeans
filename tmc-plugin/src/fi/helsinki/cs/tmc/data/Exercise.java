@@ -68,7 +68,21 @@ public class Exercise implements Serializable {
         NONE,
         @SerializedName("fail")
         FAIL
-     }
+    }
+    
+    @SerializedName("checkstyle_strategy")
+    private CheckstyleStrategy checkstyleStrategy = CheckstyleStrategy.DISABLED;
+
+    public enum CheckstyleStrategy {
+        @SerializedName("disabled")
+        DISABLED,
+        @SerializedName("none")
+        NONE,
+        @SerializedName("warn")
+        WARN,
+        @SerializedName("fail")
+        FAIL
+    }
 
     public Exercise() {
     }
@@ -267,7 +281,15 @@ public class Exercise implements Serializable {
     public ValgrindStrategy getValgrindStrategy() {
         return valgrindStrategy;
     }
+    
+    public CheckstyleStrategy getCheckstyleStrategy() {
+        return checkstyleStrategy;
+    }
 
+    public boolean isCheckstyleEnabled() {
+        return checkstyleStrategy.equals(CheckstyleStrategy.FAIL) || checkstyleStrategy.equals(CheckstyleStrategy.WARN);
+    }
+    
     public boolean isCodeReviewRequestsEnabled() {
         return codeReviewRequestsEnabled;
     }
