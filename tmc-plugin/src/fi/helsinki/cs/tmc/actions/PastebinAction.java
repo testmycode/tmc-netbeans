@@ -84,6 +84,11 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
     }
 
     @Override
+    protected boolean enabledFor(Exercise exercise) {
+        return exercise.getReturnable();
+    }
+
+    @Override
     protected void performAction(Node[] nodes) {
         List<Project> project = projectsFromNodes(nodes);
         if (project.size() == 1) {

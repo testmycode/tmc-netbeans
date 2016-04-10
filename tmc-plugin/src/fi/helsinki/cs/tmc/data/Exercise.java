@@ -200,6 +200,10 @@ public class Exercise implements Serializable {
         this.returnable = returnable;
     }
 
+    public boolean getReturnable() {
+        return this.returnable;
+    }
+
     public boolean requiresReview() {
         return requiresReview;
     }
