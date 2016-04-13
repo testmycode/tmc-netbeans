@@ -4,6 +4,7 @@ import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ItemEvent;

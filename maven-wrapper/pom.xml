@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -298,6 +298,12 @@
                     <artifactId>checkstyle</artifactId>
                 </exclusion>
             </exclusions>
+        </dependency>
+         <!-- Checkstyle -->
+        <dependency>
+            <groupId>com.puppycrawl.tools</groupId>
+            <artifactId>checkstyle</artifactId>
+            <version>6.17</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>

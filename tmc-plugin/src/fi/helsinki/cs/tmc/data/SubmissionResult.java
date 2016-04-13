@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
 import com.google.gson.annotations.SerializedName;
-
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 
 import java.util.Collections;

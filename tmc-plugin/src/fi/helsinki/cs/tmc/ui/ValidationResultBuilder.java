@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.resources.LocalizedMessage;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationError;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.resources.LocalizedMessage;
 
 import java.awt.Color;
 import java.io.File;

@@ -11,6 +11,7 @@ import com.google.gson.JsonParser;
 
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.stylerunner.validation.CheckstyleResult;
+
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 
 import java.io.IOException;
