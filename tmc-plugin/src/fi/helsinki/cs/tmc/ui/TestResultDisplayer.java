@@ -6,7 +6,7 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
