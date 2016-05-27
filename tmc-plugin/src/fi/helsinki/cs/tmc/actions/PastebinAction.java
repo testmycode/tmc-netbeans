@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -7,7 +9,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.PastebinDialog;
 import fi.helsinki.cs.tmc.ui.PastebinResponseDialog;
@@ -50,14 +51,14 @@ import java.util.logging.Logger;
 public final class PastebinAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private TmcEventBus eventBus;
 
     public PastebinAction() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = ((TmcCoreSettingsImpl)TmcSettingsHolder.get());
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();

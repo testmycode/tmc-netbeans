@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.data;
 
-import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
 import java.util.List;

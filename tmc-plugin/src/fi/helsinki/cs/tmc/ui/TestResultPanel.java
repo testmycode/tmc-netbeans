@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;

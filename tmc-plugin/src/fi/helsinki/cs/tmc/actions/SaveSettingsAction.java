@@ -1,14 +1,18 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -17,9 +21,11 @@ public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
     private TmcEventBus eventBus;
+    private TmcCore tmcCore;
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
+        this.tmcCore = TmcCore.get();
     }
 
     @Override
@@ -33,7 +39,9 @@ public class SaveSettingsAction extends AbstractAction {
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
-        TmcSettings settings = TmcSettings.getDefault();
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
+        
+//        TmcSettings settings = TmcSettings.getDefault();
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());

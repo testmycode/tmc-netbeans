@@ -1,6 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+
 import com.google.gson.Gson;
+
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -8,7 +12,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -16,6 +19,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -45,14 +49,14 @@ import org.openide.util.NbBundle;
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private TmcEventBus eventBus;
 
     public RequestReviewAction() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();

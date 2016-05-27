@@ -1,10 +1,14 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
+
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
@@ -21,6 +25,7 @@ import fi.helsinki.cs.tmc.utilities.JsonMakerGsonSerializer;
 import fi.helsinki.cs.tmc.utilities.UriUtils;
 import fi.helsinki.cs.tmc.utilities.http.FailedHttpResponseException;
 import fi.helsinki.cs.tmc.utilities.http.HttpTasks;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
@@ -40,22 +45,22 @@ import org.openide.modules.Modules;
 public class ServerAccess {
     public static final int API_VERSION = 7;
 
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseListParser courseListParser;
     private CourseInfoParser courseInfoParser;
     private ReviewListParser reviewListParser;
     private String clientVersion;
 
     public ServerAccess() {
-        this(TmcSettings.getDefault());
+        this((TmcCoreSettingsImpl)TmcSettingsHolder.get());
     }
 
-    public ServerAccess(TmcSettings settings) {
+    public ServerAccess(TmcCoreSettingsImpl settings) {
         this(settings, new CourseListParser(), new CourseInfoParser(), new ReviewListParser());
     }
 
     public ServerAccess(
-        TmcSettings settings,
+        TmcCoreSettingsImpl settings,
         CourseListParser courseListParser,
         CourseInfoParser courseInfoParser,
         ReviewListParser reviewListParser
@@ -71,7 +76,7 @@ public class ServerAccess {
         return Modules.getDefault().ownerOf(ServerAccess.class).getSpecificationVersion().toString();
     }
 
-    public void setSettings(TmcSettings settings) {
+    public void setSettings(TmcCoreSettingsImpl settings) {
         this.settings = settings;
     }
 

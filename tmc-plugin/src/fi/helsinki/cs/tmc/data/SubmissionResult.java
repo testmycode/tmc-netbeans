@@ -1,8 +1,9 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+
 import com.google.gson.annotations.SerializedName;
 
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
 
 import java.util.Collections;
 import java.util.List;

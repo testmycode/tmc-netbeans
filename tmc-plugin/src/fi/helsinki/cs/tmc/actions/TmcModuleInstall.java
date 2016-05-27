@@ -1,14 +1,20 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -35,12 +41,16 @@ public class TmcModuleInstall extends ModuleInstall {
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
             public void run() {
+                TmcLangsHolder.set(new TaskExecutorImpl());
+                TmcSettingsHolder.set(new TmcCoreSettingsImpl());
+                TmcCore.setInstance(new TmcCore());
+                
                 CheckForNewExercisesOrUpdates.startTimer();
                 CheckForNewReviews.startTimer();
                 ReviewEventListener.start();
                 PushEventListener.start();
                 SpywareFacade.start();
-
+                
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
 
                 SpecificationVersion currentVersion = getCurrentModuleVersion();

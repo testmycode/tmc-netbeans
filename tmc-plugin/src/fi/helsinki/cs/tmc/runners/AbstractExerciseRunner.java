@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.runners;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.serialization.TestResultParser;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
+
 import java.io.IOException;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
@@ -20,7 +23,7 @@ public abstract class AbstractExerciseRunner implements ExerciseRunner {
     protected static final String ERROR_MSG_LOCALE_SETTING = "fi.helsinki.cs.tmc.edutestutils.defaultLocale";
     private static final Logger log = Logger.getLogger(AbstractExerciseRunner.class.getName());
 
-    protected TmcSettings settings;
+    protected TmcCoreSettingsImpl settings;
     protected CourseDb courseDb;
     protected ProjectMediator projectMediator;
     protected TestResultParser resultParser;
@@ -28,7 +31,7 @@ public abstract class AbstractExerciseRunner implements ExerciseRunner {
     protected TmcEventBus eventBus;
 
     public AbstractExerciseRunner() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.resultParser = new TestResultParser();

@@ -1,9 +1,12 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
@@ -43,20 +46,20 @@ public class PushEventListener {
         }
     }
     
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
     private BayeuxClient client;
     private boolean shouldReconnect;
 
     PushEventListener() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
         this.eventBus.subscribeDependent(new TmcEventListener() {
-            public void receive(TmcSettings.SavedEvent e) {
+            public void receive(TmcCoreSettingsImpl.SavedEvent e) {
                 reconnectSoon();
             }
             

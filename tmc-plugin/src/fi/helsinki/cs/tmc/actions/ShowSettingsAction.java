@@ -1,11 +1,13 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import javax.swing.AbstractAction;
@@ -50,7 +52,7 @@ public final class ShowSettingsAction extends AbstractAction {
 
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
-        TmcSettings settings = TmcSettings.getDefault();
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         prefUI.setUsername(settings.getUsername());
         prefUI.setPassword(settings.getPassword());
         prefUI.setShouldSavePassword(settings.isSavingPassword());

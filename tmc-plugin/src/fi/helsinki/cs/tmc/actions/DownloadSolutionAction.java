@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -7,7 +9,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -131,7 +132,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     }
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
-        ServerAccess serverAccess = new ServerAccess(TmcSettings.getDefault());
+        ServerAccess serverAccess = new ServerAccess(((TmcCoreSettingsImpl)TmcSettingsHolder.get()));
         CancellableCallable<byte[]> downloadTask =
                 serverAccess.getDownloadingExerciseSolutionZipTask(ex);
         BgTask.start(

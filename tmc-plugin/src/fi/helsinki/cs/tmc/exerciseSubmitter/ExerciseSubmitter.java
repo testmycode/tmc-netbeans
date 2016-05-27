@@ -3,6 +3,8 @@ package fi.helsinki.cs.tmc.exerciseSubmitter;
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.data.SubmissionResult;
@@ -13,7 +15,6 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.SubmissionResultWaiter;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
@@ -41,7 +42,6 @@ public class ExerciseSubmitter {
         }
     }
 
-    private TmcSettings settings;
     private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
@@ -50,7 +50,6 @@ public class ExerciseSubmitter {
     private TmcEventBus eventBus;
 
     public ExerciseSubmitter() {
-        this.settings = TmcSettings.getDefault();
         this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
@@ -140,7 +139,7 @@ public class ExerciseSubmitter {
             }
         };
 
-        final String errorMsgLocale = settings.getErrorMsgLocale().toString();
+        final String errorMsgLocale = ((TmcCoreSettingsImpl)TmcSettingsHolder.get()).getErrorMsgLocale().toString();
 
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override

@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+
 import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
 import org.openide.windows.WindowManager;
@@ -13,7 +15,7 @@ public class LoginDialog extends javax.swing.JDialog {
         dialog.setVisible(true);
     }
 
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private ActionListener onLogin;
 
     /** Creates new form LoginForm */
@@ -23,7 +25,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.usernameField.setText(settings.getUsername());
         this.passwordField.setText(settings.getPassword());
         this.savePasswordCheckbox.setSelected(settings.isSavingPassword());

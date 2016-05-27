@@ -1,11 +1,14 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -272,8 +275,8 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
 
-    private TmcSettings getTransientSettingsForRefresh() {
-        TmcSettings settings = TmcSettings.getTransient();
+    private TmcCoreSettingsImpl getTransientSettingsForRefresh() {
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
@@ -303,7 +306,7 @@ import org.apache.commons.lang3.StringUtils;
                 if (event.getStateChange() == ItemEvent.SELECTED) {
 
                     // Language changed, notify user about restarting
-                    if (!TmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                    if (!((TmcCoreSettingsImpl)TmcSettingsHolder.get()).getErrorMsgLocale().equals(getErrorMsgLocale())) {
                         restartMessage.setText("Changing language requires restart");
                     } else {
                         restartMessage.setText("");
@@ -703,7 +706,7 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        TmcSettings settings = getTransientSettingsForRefresh();
+        TmcCoreSettingsImpl settings = getTransientSettingsForRefresh();
         if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first");
         }
