@@ -3,9 +3,11 @@ package fi.helsinki.cs.tmc.data;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
-import java.util.List;
+import com.google.common.collect.ImmutableList;
 
 /**
  * Waits for test and validation results and shows the result view only when
@@ -14,7 +16,7 @@ import java.util.List;
 public final class ResultCollector {
 
     private final Exercise exercise;
-    private List<TestCaseResult> testCaseResults;
+    private ImmutableList<TestResult> testCaseResults;
     private ValidationResult validationResults;
 
     private boolean testCaseResultsSet = false;
@@ -35,7 +37,7 @@ public final class ResultCollector {
         showResultsIfReady();
     }
 
-    public void setTestCaseResults(final List<TestCaseResult> results) {
+    public void setTestCaseResults(final ImmutableList<TestResult> results) {
 
         this.testCaseResults = results;
         this.testCaseResultsSet = true;
@@ -43,6 +45,10 @@ public final class ResultCollector {
         showResultsIfReady();
     }
 
+    public void setLocalTestResults(RunResult runResult) {
+        setTestCaseResults(runResult.testResults);
+    }
+    
     private void showResultsIfReady() {
 
         boolean ready = testCaseResultsSet && validationResultsSet;
@@ -63,9 +69,8 @@ public final class ResultCollector {
 
     private boolean isSubmittable() {
 
-        for (TestCaseResult result : testCaseResults) {
-
-            if (!result.isSuccessful()) {
+        for (TestResult result : testCaseResults) {
+            if (!result.passed) {
                 return false;
             }
         }
@@ -80,4 +85,6 @@ public final class ResultCollector {
 
         return isReturnable;
     }
+
+    
 }

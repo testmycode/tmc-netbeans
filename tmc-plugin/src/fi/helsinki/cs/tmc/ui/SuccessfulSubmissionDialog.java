@@ -1,12 +1,12 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 
 import java.awt.Component;
 
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.FeedbackQuestion;
-import fi.helsinki.cs.tmc.data.SubmissionResult;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanel;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanelFactory;
 

@@ -11,7 +11,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.Review;
 import fi.helsinki.cs.tmc.data.serialization.CourseInfoParser;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;

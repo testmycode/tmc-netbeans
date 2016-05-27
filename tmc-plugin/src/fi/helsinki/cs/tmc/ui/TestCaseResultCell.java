@@ -1,11 +1,12 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -45,20 +46,14 @@ public final class TestCaseResultCell {
     private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
 
     private final Exercise exercise;
-    private final TestCaseResult result;
+    private final TestResult result;
     private final SourceFileLookup sourceFileLookup;
     private JButton detailedMessageButton;
     private final GridBagConstraints gbc = new GridBagConstraints();
     private final JPanel detailView;
     private final ResultCell resultCell;
-    private final boolean valgrindFailed;
 
-    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
-
-        this(exercise, result, sourceFileLookup, false);
-    }
-
-    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup, boolean valgrindFailed) {
+    public TestCaseResultCell(final Exercise exercise, final TestResult result, final SourceFileLookup sourceFileLookup) {
 
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
@@ -68,14 +63,13 @@ public final class TestCaseResultCell {
         this.result = result;
         this.sourceFileLookup = sourceFileLookup;
         this.detailView = createDetailView();
-        this.valgrindFailed = valgrindFailed;
 
-        final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
+        final String title = (result.passed ? "PASS: " : "FAIL: ") + result.name;
 
         this.resultCell = new ResultCell(getResultColor(),
                                          getResultTextColor(),
                                          title,
-                                         result.getMessage(),
+                                         result.errorMessage,
                                          detailView);
     }
 
@@ -91,12 +85,12 @@ public final class TestCaseResultCell {
         view.setLayout(new GridBagLayout());
         view.setBackground(Color.WHITE);
 
-        if (result.getException() != null) {
+        if (result.backtrace != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(detailedMessageAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
             view.add(detailedMessageButton, gbc);
-        } else if (result.getDetailedMessage() != null) {
+        } else if (result.errorMessage != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(valgrindAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
@@ -212,7 +206,7 @@ public final class TestCaseResultCell {
 
             final DetailedMessageDisplay display = new DetailedMessageDisplay();
             display.setBackground(Color.WHITE);
-            display.setContent(result.getDetailedMessage());
+            display.setContent(result.errorMessage);
             display.finish();
 
             detailView.add(display, gbc);
@@ -231,33 +225,35 @@ public final class TestCaseResultCell {
             detailView.remove(detailedMessageButton);
 
             final ExceptionDisplay display = new ExceptionDisplay();
-            addException(display, result.getException(), false);
+// TODO 
+//            addException(display, result.backtrace, false);
             display.finish();
 
             detailView.add(display, gbc);
+            
 
             resultCell.revalidate();
             resultCell.repaint();
         }
 
-        private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
-            String mainLine;
-            if (ex.message != null) {
-                mainLine = ex.className + ": " + ex.message;
-            } else {
-                mainLine = ex.className;
-            }
-            if (isCause) {
-                mainLine = "Caused by: " + mainLine;
-            }
-            display.addBoldTextLine(mainLine);
-
-            addStackTraceLines(display, ex.stackTrace);
-
-            if (ex.cause != null) {
-                addException(display, ex.cause, true);
-            }
-        }
+//        private void addException(ExceptionDisplay display, ImmutableList<String> ex, boolean isCause) {
+//            String mainLine;
+//            if (ex.message != null) {
+//                mainLine = ex.className + ": " + ex.message;
+//            } else {
+//                mainLine = ex.className;
+//            }
+//            if (isCause) {
+//                mainLine = "Caused by: " + mainLine;
+//            }
+//            display.addBoldTextLine(mainLine);
+//
+//            addStackTraceLines(display, ex.stackTrace);
+//
+//            if (ex.cause != null) {
+//                addException(display, ex.cause, true);
+//            }
+//        }
 
         private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
             for (final StackTraceElement ste : stackTrace) {
@@ -299,9 +295,10 @@ public final class TestCaseResultCell {
     };
 
     private Color getResultColor() {
-        if (valgrindFailed) {
-            return VALGRIND_FAILED_COLOR;
-        } else if (result.isSuccessful()) {
+//        if (valgrindFailed) {
+//            return VALGRIND_FAILED_COLOR;
+//        } else
+        if (result.passed) {
             return PASS_COLOR;
         } else {
             return FAIL_COLOR;
@@ -309,7 +306,7 @@ public final class TestCaseResultCell {
     }
 
     private Color getResultTextColor() {
-        if (result.isSuccessful()) {
+        if (result.passed) {
             return PASS_TEXT_COLOR;
         } else {
             return FAIL_TEXT_COLOR;

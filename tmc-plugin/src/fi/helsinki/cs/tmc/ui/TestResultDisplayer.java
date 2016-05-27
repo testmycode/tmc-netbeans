@@ -1,20 +1,24 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.data.SubmissionResult;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
+import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.langs.domain.TestCase;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -41,9 +45,11 @@ public class TestResultDisplayer {
     }
 
     public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
+        // Palvelimelta siis
+        
         switch (result.getStatus()) {
             case OK:
-                displayTestCases(result.getTestCases(), false, resultCollector);
+                displayTestCases(magic(result), false, resultCollector);
                 displaySuccessfulSubmissionMsg(exercise, result);
                 break;
             case FAIL:
@@ -111,14 +117,15 @@ public class TestResultDisplayer {
             msg += "There are validation errors.\n";
         }
 
+        
         switch (result.getTestResultStatus()) {
-            case ALL:
+            case ALL_FAILED:
                 msg += "All tests failed on the server.\nSee below.";
                 break;
-            case SOME:
+            case SOME_FAILED:
                 msg += "Some tests failed on the server.\nSee below.";
                 break;
-            case NONE:
+            case NONE_FAILED:
                 if (result.validationsFailed()) {
                     msg += "See below.";
                 }
@@ -135,7 +142,7 @@ public class TestResultDisplayer {
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
-    public void showLocalRunResult(final List<TestCaseResult> results,
+    public void showLocalRunResult(final ImmutableList<TestResult> results,
                                    final boolean returnable,
                                    final Runnable submissionCallback,
                                    final ResultCollector resultCollector) {
@@ -162,26 +169,48 @@ public class TestResultDisplayer {
                 .replace("\n", "<br>");
     }
 
-    private void displayTestCases(final List<TestCaseResult> testCases, final boolean returnable, final ResultCollector resultCollector) {
+    private void displayTestCases(final ImmutableList<TestResult> testResults, final boolean returnable, final ResultCollector resultCollector) {
 
         resultCollector.setReturnable(returnable);
-        resultCollector.setTestCaseResults(testCases);
+        resultCollector.setTestCaseResults(testResults);
     }
 
     private void clearTestCaseView() {
         TestResultWindow.get().clear();
     }
 
-    private List<TestCaseResult> maybeAddValdrindToResults(SubmissionResult result) {
-        String valdrindOutput = result.getValgrindOutput();
-        List<TestCaseResult> resultList = result.getTestCases();
+    private ImmutableList<TestResult> maybeAddValdrindToResults(SubmissionResult result) {
+        String valdrindOutput = result.getValgrind();
+        
+        List<TestResult> resultList = null; // TODO mistä test resultsit
 
+        // TODO: valgrind
         if (StringUtils.isNotBlank(valdrindOutput)) {
-            TestCaseResult valgrindResult = new TestCaseResult("Valgrind validations", false , "Click show valgrind trace to view valgrind trace", valdrindOutput, true);
+            
+            TestResult valgrindResult = new TestResult("Valgrind validations", false , ImmutableList.<String>of(), "Click show valgrind trace to view valgrind trace", ImmutableList.copyOf(valdrindOutput.split("\n")));
             resultList.set(0, valgrindResult);
         }
 
-        return resultList;
+        return ImmutableList.copyOf(resultList);
     }
 
+    private ImmutableList<TestResult> magic(SubmissionResult result) {
+        ImmutableList.Builder builder = ImmutableList.builder();
+        for (TestCase testCase : result.getTestCases()) {
+            builder.add(new TestResult(testCase.className + "#" + testCase.methodName, 
+                    testCase.status == TestCase.Status.PASSED, 
+                    ImmutableList.copyOf(testCase.pointNames),
+                    testCase.message,
+                    toStringImmutableList(testCase.exception.stackTrace)));
+        }
+        return builder.build();
+    }
+
+    private ImmutableList<String> toStringImmutableList(StackTraceElement[] stackTrace) {
+        ImmutableList.Builder builder = ImmutableList.builder();
+        for (StackTraceElement stackTraceElement : stackTrace) {
+            builder.add(stackTraceElement.toString());
+        }
+        return builder.build();
+    }
 }

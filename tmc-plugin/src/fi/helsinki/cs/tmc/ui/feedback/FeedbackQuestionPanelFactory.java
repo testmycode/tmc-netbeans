@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui.feedback;
 
-import fi.helsinki.cs.tmc.data.FeedbackQuestion;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 
 public class FeedbackQuestionPanelFactory {
     public static FeedbackQuestionPanel getPanelForQuestion(FeedbackQuestion question) {

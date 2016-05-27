@@ -1,17 +1,16 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
-import fi.helsinki.cs.tmc.runners.TestRunHandler;
 
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
@@ -22,15 +21,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private CheckstyleRunHandler checkstyleRunHandler;
-    private TestRunHandler testRunHandler;
     private Project project;
 
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
-        this.checkstyleRunHandler = new CheckstyleRunHandler();
-        this.testRunHandler = new TestRunHandler();
 
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -76,9 +71,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     public void run() {
         Exercise exercise = exerciseForProject(project);
         if (exercise != null) {
-            ResultCollector resultCollector = new ResultCollector(exercise);
-            this.checkstyleRunHandler.performAction(resultCollector, project);
-            this.testRunHandler.performAction(resultCollector, project);
+            try {
+                ResultCollector resultCollector = new ResultCollector(exercise);
+                resultCollector.setLocalTestResults(TmcCore.get().runTests(ProgressObserver.NULL_OBSERVER, exercise).call());
+                resultCollector.setValidationResult(TmcCore.get().runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise).call());
+            } catch (Exception ex) {
+                Exceptions.printStackTrace(ex);
+            }
         }
     }
 }

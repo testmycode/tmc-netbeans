@@ -11,7 +11,6 @@ import fi.helsinki.cs.tmc.actions.SaveSettingsAction;
 import fi.helsinki.cs.tmc.actions.UpdateExercisesAction;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.runners.TestRunHandler;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -46,10 +45,6 @@ public class TmcEventBusEventSource extends TmcEventListener {
 
     public void receive(SpywareFacade.InvokedEvent event) {
         sendProjectActionEvent(event.message);
-    }
-
-    public void receive(TestRunHandler.InvokedEvent event) {
-        sendProjectActionEvent(event.projectInfo, "tmc.test");
     }
 
     public void receive(ExerciseSubmitter.InvokedEvent event) {

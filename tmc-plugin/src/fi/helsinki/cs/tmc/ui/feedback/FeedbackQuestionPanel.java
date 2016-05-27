@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.ui.feedback;
 
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import javax.swing.JPanel;
 
 public abstract class FeedbackQuestionPanel extends JPanel {
