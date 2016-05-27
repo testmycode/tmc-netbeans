@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.6</version>
+    <version>1.7</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -43,6 +43,16 @@
     </repositories>
 
     <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>core</artifactId>
+            <version>0.1.0-SNAPSHOT</version>
+        </dependency>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>tmc-langs-abstraction</artifactId>
+            <version>1.0.1-SNAPSHOT</version>
+        </dependency>
         <dependency>
             <groupId>org.apache.maven</groupId>
             <artifactId>apache-maven</artifactId>
@@ -333,6 +343,9 @@
                         <publicPackage>org.yaml.snakeyaml</publicPackage>
                         <publicPackage>org.apache.http.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.core.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.langs.abstraction.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.langs.util.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
