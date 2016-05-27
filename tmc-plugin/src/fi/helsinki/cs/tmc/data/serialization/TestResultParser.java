@@ -1,19 +1,24 @@
 package fi.helsinki.cs.tmc.data.serialization;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise.ValgrindStrategy;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.data.Exercise.ValgrindStrategy;
+
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.data.TestRunResult;
 import fi.helsinki.cs.tmc.data.serialization.cresultparser.CTestResultParser;
 import fi.helsinki.cs.tmc.testrunner.StackTraceSerializer;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 import fi.helsinki.cs.tmc.testrunner.TestCaseList;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+
 import static java.util.logging.Level.INFO;
+
 import java.util.logging.Logger;
 import org.apache.commons.io.FileUtils;
 

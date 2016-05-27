@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;

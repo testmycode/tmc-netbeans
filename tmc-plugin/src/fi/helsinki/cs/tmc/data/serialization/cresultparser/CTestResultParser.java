@@ -1,8 +1,9 @@
 package fi.helsinki.cs.tmc.data.serialization.cresultparser;
 
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.Exercise.ValgrindStrategy;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise.ValgrindStrategy;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
@@ -13,7 +14,9 @@ import java.io.Reader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+
 import static java.util.logging.Level.INFO;
+
 import java.util.logging.Logger;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;

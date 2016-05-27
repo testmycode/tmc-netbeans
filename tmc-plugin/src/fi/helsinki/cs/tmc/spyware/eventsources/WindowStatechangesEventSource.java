@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import com.google.common.base.CaseFormat;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Exercise;
+
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;

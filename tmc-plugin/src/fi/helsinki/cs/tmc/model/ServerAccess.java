@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
@@ -9,8 +11,6 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.FeedbackAnswer;
 import fi.helsinki.cs.tmc.data.Review;
 import fi.helsinki.cs.tmc.data.serialization.CourseInfoParser;
@@ -130,7 +130,7 @@ public class ServerAccess {
     }
 
     public CancellableCallable<Course> getFullCourseInfoTask(Course courseStub) {
-        String url = addApiCallQueryParameters(courseStub.getDetailsUrl());
+        String url = addApiCallQueryParameters(courseStub.getDetailsUrl().toString());
         final CancellableCallable<String> download = createHttpTasks().getForText(url);
         return new CancellableCallable<Course>() {
             @Override
@@ -172,21 +172,21 @@ public class ServerAccess {
     }
 
     private String getUnlockUrl(Course course) {
-        return addApiCallQueryParameters(course.getUnlockUrl());
+        return addApiCallQueryParameters(course.getUnlockUrl().toString());
     }
 
     public CancellableCallable<byte[]> getDownloadingExerciseZipTask(Exercise exercise) {
-        String zipUrl = exercise.getDownloadUrl();
+        String zipUrl = exercise.getDownloadUrl().toString();
         return createHttpTasks().getForBinary(zipUrl);
     }
 
     public CancellableCallable<byte[]> getDownloadingExerciseSolutionZipTask(Exercise exercise) {
-        String zipUrl = exercise.getSolutionDownloadUrl();
+        String zipUrl = exercise.getSolutionDownloadUrl().toString();
         return createHttpTasks().getForBinary(zipUrl);
     }
 
     public CancellableCallable<SubmissionResponse> getSubmittingExerciseTask(final Exercise exercise, final byte[] sourceZip, Map<String, String> extraParams) {
-        final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl());
+        final String submitUrl = addApiCallQueryParameters(exercise.getReturnUrl().toString());
 
         Map<String, String> params = new LinkedHashMap<String, String>();
         params.put("client_time", "" + (System.currentTimeMillis() / 1000L));
@@ -243,7 +243,7 @@ public class ServerAccess {
     }
 
     public CancellableCallable<List<Review>> getDownloadingReviewListTask(Course course) {
-        String url = addApiCallQueryParameters(course.getReviewsUrl());
+        String url = addApiCallQueryParameters(course.getReviewsUrl().toString());
         final CancellableCallable<String> download = createHttpTasks().getForText(url);
         return new CancellableCallable<List<Review>>() {
             @Override

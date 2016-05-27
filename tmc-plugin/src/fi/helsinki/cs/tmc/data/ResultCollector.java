@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;

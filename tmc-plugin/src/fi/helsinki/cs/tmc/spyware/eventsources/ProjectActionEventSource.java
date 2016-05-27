@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import com.google.gson.Gson;
-import fi.helsinki.cs.tmc.data.Exercise;
+
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+
 import java.nio.charset.Charset;
 import java.util.Collections;
 import java.util.logging.Level;

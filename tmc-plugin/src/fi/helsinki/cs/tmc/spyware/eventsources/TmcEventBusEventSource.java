@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
 import com.google.gson.Gson;
+
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.actions.DownloadCompletedExercises;
 import fi.helsinki.cs.tmc.actions.DownloadExercisesAction;
@@ -8,9 +9,9 @@ import fi.helsinki.cs.tmc.actions.DownloadSolutionAction;
 import fi.helsinki.cs.tmc.actions.PastebinAction;
 import fi.helsinki.cs.tmc.actions.SaveSettingsAction;
 import fi.helsinki.cs.tmc.actions.UpdateExercisesAction;
-import fi.helsinki.cs.tmc.data.Course;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.runners.TestRunHandler;
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -19,6 +20,7 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+
 import java.nio.charset.Charset;
 import java.util.Collections;
 

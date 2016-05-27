@@ -1,9 +1,11 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+
 import static com.google.common.base.Preconditions.checkArgument;
 
 import com.google.common.collect.Iterables;
-import fi.helsinki.cs.tmc.data.Course;
+
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -11,7 +13,9 @@ import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.Cooldown;
 import fi.helsinki.cs.tmc.utilities.SingletonTask;
 import fi.helsinki.cs.tmc.utilities.TmcRequestProcessor;
+
 import java.io.IOException;
+import java.net.URI;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -237,13 +241,13 @@ public class EventSendBuffer implements EventReceiver {
                 return null;
             }
 
-            List<String> urls = course.getSpywareUrls();
+            List<URI> urls = course.getSpywareUrls();
             if (urls == null || urls.isEmpty()) {
                 log.log(Level.INFO, "Not sending events because no URL provided by server");
                 return null;
             }
 
-            String url = urls.get(random.nextInt(urls.size()));
+            String url = urls.get(random.nextInt(urls.size())).toString();
 
             return url;
         }

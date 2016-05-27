@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import java.util.ArrayList;
 import java.util.List;
 import org.apache.commons.lang3.ObjectUtils;

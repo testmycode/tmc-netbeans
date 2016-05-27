@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.data.Course;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
@@ -114,7 +114,7 @@ public class PushEventListener {
             return;
         }
         
-        String cometUrl = course.getCometUrl();
+        String cometUrl = course.getCometUrl().toString();
         if (cometUrl == null) {
             return;
         }

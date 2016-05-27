@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.model;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
 import java.io.File;

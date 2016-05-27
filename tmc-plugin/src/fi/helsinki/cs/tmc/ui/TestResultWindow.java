@@ -1,8 +1,9 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import com.google.common.base.Function;
 
-import fi.helsinki.cs.tmc.data.Exercise;
 import fi.helsinki.cs.tmc.data.TestCaseResult;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 

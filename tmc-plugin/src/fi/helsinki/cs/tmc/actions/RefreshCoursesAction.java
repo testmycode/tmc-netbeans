@@ -1,8 +1,11 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.data.Course;
+
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
@@ -10,10 +13,10 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListenerList;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -53,7 +56,7 @@ public final class RefreshCoursesAction {
     }
 
     public void run() {
-        CancellableCallable<List<Course>> courseListTask = serverAccess.getDownloadingCourseListTask();
+        Callable<List<Course>> courseListTask = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER);
 
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
 
@@ -61,7 +64,7 @@ public final class RefreshCoursesAction {
             public void bgTaskReady(final List<Course> courses) {
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                 if (currentCourseStub != null) {
-                    CancellableCallable<Course> currentCourseTask = serverAccess.getFullCourseInfoTask(currentCourseStub);
+                    Callable<Course> currentCourseTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, currentCourseStub);
 
                     BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
                         @Override

@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import org.netbeans.api.java.classpath.GlobalPathRegistry;
 import org.openide.filesystems.FileObject;
 
