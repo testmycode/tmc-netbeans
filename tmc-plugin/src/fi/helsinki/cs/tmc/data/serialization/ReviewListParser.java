@@ -1,8 +1,9 @@
 package fi.helsinki.cs.tmc.data.serialization;
 
+import fi.helsinki.cs.tmc.core.domain.Review;
+
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import fi.helsinki.cs.tmc.data.Review;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;

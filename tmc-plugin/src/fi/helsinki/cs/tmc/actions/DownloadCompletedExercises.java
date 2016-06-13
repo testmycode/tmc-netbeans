@@ -27,13 +27,11 @@ import java.util.List;
 @Messages("CTL_DownloadCompletedExercises=Download old completed exercises")
 public final class DownloadCompletedExercises implements ActionListener {
 
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
     private TmcEventBus eventBus;
 
     public DownloadCompletedExercises() {
-        this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();

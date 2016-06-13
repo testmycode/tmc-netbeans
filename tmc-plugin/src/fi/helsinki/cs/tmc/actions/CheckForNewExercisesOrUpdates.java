@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
@@ -21,7 +23,7 @@ import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.Callable;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import org.apache.commons.lang3.StringUtils;
@@ -92,7 +94,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
         eventBus.post(new InvokedEvent(currentCourseBeforeUpdate));
 
-        BgTask.start("Checking for new exercises", serverAccess.getFullCourseInfoTask(currentCourseBeforeUpdate), new BgTaskListener<Course>() {
+        Callable<Course> getFullCourseInfoTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, courseDb.getCurrentCourse());
+        BgTask.start("Checking for new exercises", getFullCourseInfoTask, new BgTaskListener<Course>() {
             @Override
             public void bgTaskReady(Course receivedCourse) {
                 if (receivedCourse != null) {

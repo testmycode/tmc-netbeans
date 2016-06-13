@@ -12,7 +12,7 @@ import com.google.gson.JsonParser;
 import com.google.gson.reflect.TypeToken;
 
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.Review;
+import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.data.serialization.CourseInfoParser;
 import fi.helsinki.cs.tmc.data.serialization.CourseListParser;
 import fi.helsinki.cs.tmc.data.serialization.ReviewListParser;

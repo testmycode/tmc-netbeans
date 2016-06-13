@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.data.Review;
+import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.model.ServerAccess;
