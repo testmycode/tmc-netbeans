@@ -4,11 +4,11 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
@@ -26,23 +26,17 @@ import java.util.logging.Logger;
 public final class RefreshCoursesAction {
     private final static Logger log = Logger.getLogger(RefreshCoursesAction.class.getName());
 
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
     
     private BgTaskListenerList<List<Course>> listeners;
 
     public RefreshCoursesAction() {
-        this((TmcCoreSettingsImpl)TmcSettingsHolder.get());
-    }
-    
-    public RefreshCoursesAction(TmcCoreSettingsImpl settings) {
-        this.serverAccess = new ServerAccess(settings);
-        this.serverAccess.setSettings(settings);
         this.courseDb = CourseDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
 
         this.listeners = new BgTaskListenerList<List<Course>>();
+        log.warning("Refresh course list action created");
     }
 
     public RefreshCoursesAction addDefaultListener(boolean showDialogOnError, boolean updateCourseDb) {
@@ -56,12 +50,14 @@ public final class RefreshCoursesAction {
     }
 
     public void run() {
+        log.warning("Running list courses");
         Callable<List<Course>> courseListTask = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER);
-
+       
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
 
             @Override
             public void bgTaskReady(final List<Course> courses) {
+                log.warning("Got refreshed list of courses");
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                 if (currentCourseStub != null) {
                     Callable<Course> currentCourseTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, currentCourseStub);
@@ -69,6 +65,7 @@ public final class RefreshCoursesAction {
                     BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
                         @Override
                         public void bgTaskReady(Course currentCourse) {
+                            log.warning("GotCurrentCourse");
                             currentCourse.setExercisesLoaded(true);
 
                             ArrayList<Course> finalCourses = new ArrayList<Course>();
@@ -106,6 +103,7 @@ public final class RefreshCoursesAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
+                log.warning("Failed to download courseList");
                 log.log(Level.INFO, "Failed to download course list.", ex);
                 listeners.bgTaskFailed(ex);
             }

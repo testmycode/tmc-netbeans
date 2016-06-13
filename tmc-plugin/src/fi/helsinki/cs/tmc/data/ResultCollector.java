@@ -70,7 +70,7 @@ public final class ResultCollector {
     private boolean isSubmittable() {
 
         for (TestResult result : testCaseResults) {
-            if (!result.passed) {
+            if (!result.isSuccessful()) {
                 return false;
             }
         }

@@ -3,10 +3,8 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
-import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
-import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -64,12 +62,12 @@ public final class TestCaseResultCell {
         this.sourceFileLookup = sourceFileLookup;
         this.detailView = createDetailView();
 
-        final String title = (result.passed ? "PASS: " : "FAIL: ") + result.name;
+        final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
 
         this.resultCell = new ResultCell(getResultColor(),
                                          getResultTextColor(),
                                          title,
-                                         result.errorMessage,
+                                         result.getMessage(),
                                          detailView);
     }
 
@@ -85,12 +83,12 @@ public final class TestCaseResultCell {
         view.setLayout(new GridBagLayout());
         view.setBackground(Color.WHITE);
 
-        if (result.backtrace != null) {
+        if (result.getException() != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(detailedMessageAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
             view.add(detailedMessageButton, gbc);
-        } else if (result.errorMessage != null) {
+        } else if (result.getMessage() != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(valgrindAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
@@ -206,7 +204,7 @@ public final class TestCaseResultCell {
 
             final DetailedMessageDisplay display = new DetailedMessageDisplay();
             display.setBackground(Color.WHITE);
-            display.setContent(result.errorMessage);
+            display.setContent(result.getMessage());
             display.finish();
 
             detailView.add(display, gbc);
@@ -298,7 +296,7 @@ public final class TestCaseResultCell {
 //        if (valgrindFailed) {
 //            return VALGRIND_FAILED_COLOR;
 //        } else
-        if (result.passed) {
+        if (result.isSuccessful()) {
             return PASS_COLOR;
         } else {
             return FAIL_COLOR;
@@ -306,7 +304,7 @@ public final class TestCaseResultCell {
     }
 
     private Color getResultTextColor() {
-        if (result.passed) {
+        if (result.isSuccessful()) {
             return PASS_TEXT_COLOR;
         } else {
             return FAIL_TEXT_COLOR;

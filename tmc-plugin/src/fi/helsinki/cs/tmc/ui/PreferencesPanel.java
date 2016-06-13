@@ -9,6 +9,7 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 
+import com.google.common.base.Strings;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -52,7 +53,7 @@ import org.apache.commons.lang3.StringUtils;
         }
 
         public boolean isAllSet() {
-            return username != null && password != null && baseUrl != null;
+            return (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password) && !Strings.isNullOrEmpty(baseUrl));
         }
 
         @Override
@@ -275,19 +276,18 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
 
-    private TmcCoreSettingsImpl getTransientSettingsForRefresh() {
+    private void updateSettingsForRefresh() {
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
         settings.setProjectRootDir(getProjectDir());
-        return settings;
+        settings.save(); // TODO: is this wanted
     }
 
     private RefreshSettings getRefreshSettings() {
         return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
     }
-
 
     private void setUpErrorMsgLocaleSelection() {
 
@@ -423,7 +423,8 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {
-        final RefreshCoursesAction action = new RefreshCoursesAction(getTransientSettingsForRefresh());
+        updateSettingsForRefresh();
+        final RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(!failSilently, false);
         action.addListener(new BgTaskListener<List<Course>>() {
             @Override
@@ -457,10 +458,10 @@ import org.apache.commons.lang3.StringUtils;
 
     private void refreshCourseListNow(RefreshCoursesAction action) {
         setCourseListRefreshInProgress(true);
+        updateSettingsForRefresh();
         lastRefreshSettings = getRefreshSettings();
         action.run();
     }
-
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -706,7 +707,8 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        TmcCoreSettingsImpl settings = getTransientSettingsForRefresh();
+        updateSettingsForRefresh();
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first");
         }

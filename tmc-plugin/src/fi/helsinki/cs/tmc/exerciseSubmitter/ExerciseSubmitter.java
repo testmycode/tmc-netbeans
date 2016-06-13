@@ -1,13 +1,13 @@
 package fi.helsinki.cs.tmc.exerciseSubmitter;
 
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
-import fi.helsinki.cs.tmc.actions.ServerErrorHelper;
 import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.events.TmcEvent;

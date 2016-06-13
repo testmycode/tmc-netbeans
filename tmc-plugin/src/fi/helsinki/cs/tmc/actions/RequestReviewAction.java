@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory.SubmissionResponse;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
@@ -10,7 +12,6 @@ import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
@@ -129,13 +130,13 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
                     extraParams.put("message_for_reviewer", messageForReviewer);
                 }
 
-                final ServerAccess sa = new ServerAccess();
-                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
-                        .getSubmittingExerciseTask(exercise, zipData, extraParams);
+                
+                Callable<SubmissionResponse> submitTask = 
+                        new TmcServerCommunicationTaskFactory().getSubmittingExerciseTask(exercise, zipData, extraParams);
 
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
+                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<SubmissionResponse>() {
                     @Override
-                    public void bgTaskReady(ServerAccess.SubmissionResponse result) {
+                    public void bgTaskReady(SubmissionResponse result) {
                         sendLoggableEvent(exercise, result.submissionUrl);
 
                         dialogs.displayMessage("Code submitted for review.\n"

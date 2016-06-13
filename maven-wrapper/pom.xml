@@ -46,156 +46,12 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.1.0-SNAPSHOT</version>
+            <version>0.5.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tmc-langs-abstraction</artifactId>
-            <version>1.0.1-SNAPSHOT</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.maven</groupId>
-            <artifactId>apache-maven</artifactId>
-            <version>${maven.version}</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <artifactId>aether-api</artifactId>
-            <groupId>org.sonatype.aether</groupId>
-            <type>jar</type>
-            <version>1.13.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>aether-connector-wagon</artifactId>
-            <groupId>org.sonatype.aether</groupId>
-            <type>jar</type>
-            <version>1.13.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>aether-impl</artifactId>
-            <groupId>org.sonatype.aether</groupId>
-            <type>jar</type>
-            <version>1.13.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>aether-spi</artifactId>
-            <groupId>org.sonatype.aether</groupId>
-            <type>jar</type>
-            <version>1.13.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>aether-util</artifactId>
-            <groupId>org.sonatype.aether</groupId>
-            <type>jar</type>
-            <version>1.13.1</version>
-        </dependency>
-        <dependency>
-            <artifactId>commons-cli</artifactId>
-            <groupId>commons-cli</groupId>
-            <type>jar</type>
-            <version>1.2</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-aether-provider</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-artifact</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-compat</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-core</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-embedder</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-model</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-model-builder</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-plugin-api</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-repository-metadata</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-settings</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>maven-settings-builder</artifactId>
-            <groupId>org.apache.maven</groupId>
-            <type>jar</type>
-            <version>${maven.version}</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-cipher</artifactId>
-            <groupId>org.sonatype.plexus</groupId>
-            <type>jar</type>
-            <version>1.7</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-classworlds</artifactId>
-            <groupId>org.codehaus.plexus</groupId>
-            <type>jar</type>
-            <version>2.4</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-component-annotations</artifactId>
-            <groupId>org.codehaus.plexus</groupId>
-            <type>jar</type>
-            <version>1.5.5</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-interpolation</artifactId>
-            <groupId>org.codehaus.plexus</groupId>
-            <type>jar</type>
-            <version>1.14</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-sec-dispatcher</artifactId>
-            <groupId>org.sonatype.plexus</groupId>
-            <type>jar</type>
-            <version>1.3</version>
-        </dependency>
-        <dependency>
-            <artifactId>plexus-utils</artifactId>
-            <groupId>org.codehaus.plexus</groupId>
-            <type>jar</type>
-            <version>2.0.6</version>
+            <version>1.0.0</version>
         </dependency>
         <dependency>
             <artifactId>sisu-guava</artifactId>
@@ -223,49 +79,14 @@
             <version>2.3.0</version>
         </dependency>
         <dependency>
-            <artifactId>wagon-file</artifactId>
-            <groupId>org.apache.maven.wagon</groupId>
-            <type>jar</type>
-            <version>2.2</version>
-        </dependency>
-        <dependency>
-            <artifactId>wagon-http</artifactId>
-            <groupId>org.apache.maven.wagon</groupId>
-            <type>jar</type>
-            <version>2.2</version>
-            <classifier>shaded</classifier>
-        </dependency>
-        <dependency>
-            <artifactId>wagon-provider-api</artifactId>
-            <groupId>org.apache.maven.wagon</groupId>
-            <type>jar</type>
-            <version>2.2</version>
-        </dependency>
-        <dependency>
             <groupId>com.google.code.gson</groupId>
             <artifactId>gson</artifactId>
             <version>2.2.2</version>
         </dependency>
         <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpmime</artifactId>
-            <version>4.3.1</version>
-        </dependency>
-        <dependency>
             <groupId>org.yaml</groupId>
             <artifactId>snakeyaml</artifactId>
             <version>1.10</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpcore</artifactId>
-            <version>4.3.2</version>
-        </dependency>
-        <dependency>
-            <groupId>org.apache.httpcomponents</groupId>
-            <artifactId>httpclient</artifactId>
-            <type>jar</type>
-            <version>4.3.4</version>
         </dependency>
         <dependency>
             <groupId>org.apache.commons</groupId>
@@ -278,14 +99,10 @@
             <version>2.4</version>
         </dependency>
         <dependency>
-            <groupId>commons-codec</groupId>
-            <artifactId>commons-codec</artifactId>
-            <version>1.6</version>
-        </dependency>
-        <dependency>
             <groupId>org.mockito</groupId>
             <artifactId>mockito-all</artifactId>
             <version>1.9.0</version>
+            <scope>test</scope>
         </dependency>
         <dependency>
             <groupId>org.cometd.java</groupId>
@@ -296,6 +113,11 @@
             <groupId>org.cometd.java</groupId>
             <artifactId>cometd-java-websocket-javax-client</artifactId>
             <version>3.0.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.slf4j</groupId>
+            <artifactId>slf4j-jdk14</artifactId>
+            <version>1.7.21</version>
         </dependency>
         <!-- required by cometd -->
         <dependency>

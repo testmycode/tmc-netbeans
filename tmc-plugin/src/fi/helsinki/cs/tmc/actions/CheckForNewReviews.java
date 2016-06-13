@@ -1,10 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Review;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ReviewDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -46,7 +46,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         }
     }
     
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ReviewDb reviewDb;
     private ConvenientDialogDisplayer dialogs;
@@ -59,7 +58,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
     }
 
     CheckForNewReviews(boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
-        this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.reviewDb = ReviewDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -90,7 +88,8 @@ public class CheckForNewReviews implements ActionListener, Runnable {
             return;
         }
         
-        BgTask.start("Checking for code reviews", serverAccess.getDownloadingReviewListTask(course), new BgTaskListener<List<Review>>() {
+        // TODO via core
+        BgTask.start("Checking for code reviews", new TmcServerCommunicationTaskFactory().getDownloadingReviewListTask(course), new BgTaskListener<List<Review>>() {
             @Override
             public void bgTaskReady(List<Review> result) {
                 boolean newReviews = reviewDb.setReviews(result);

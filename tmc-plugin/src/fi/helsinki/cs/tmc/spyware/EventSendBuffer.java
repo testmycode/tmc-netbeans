@@ -1,5 +1,6 @@
 package fi.helsinki.cs.tmc.spyware;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 
 import static com.google.common.base.Preconditions.checkArgument;
@@ -7,7 +8,6 @@ import static com.google.common.base.Preconditions.checkArgument;
 import com.google.common.collect.Iterables;
 
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.Cooldown;
@@ -43,7 +43,6 @@ public class EventSendBuffer implements EventReceiver {
 
     private Random random = new Random();
     private SpywareSettings settings;
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private EventStore eventStore;
 
@@ -56,9 +55,8 @@ public class EventSendBuffer implements EventReceiver {
     private Cooldown autosendCooldown;
 
 
-    public EventSendBuffer(SpywareSettings settings, ServerAccess serverAccess, CourseDb courseDb, EventStore eventStore) {
+    public EventSendBuffer(SpywareSettings settings, CourseDb courseDb, EventStore eventStore) {
         this.settings = settings;
-        this.serverAccess = serverAccess;
         this.courseDb = courseDb;
         this.eventStore = eventStore;
         this.autosendCooldown = new Cooldown(DEFAULT_AUTOSEND_COOLDOWN);
@@ -253,7 +251,9 @@ public class EventSendBuffer implements EventReceiver {
         }
 
         private boolean tryToSend(final ArrayList<LoggableEvent> eventsToSend, final String url) {
-            CancellableCallable<Object> task = serverAccess.getSendEventLogJob(url, eventsToSend);
+            // TODO: from core
+//            TmcCore.get().sendSpywareEvents(ProgressObserver.NULL_OBSERVER, , events)
+/*            CancellableCallable<Object> task = serverAccess.getSendEventLogJob(url, eventsToSend);
             Future<Object> future = BgTask.start("Sending stats", task);
 
             try {
@@ -274,6 +274,8 @@ public class EventSendBuffer implements EventReceiver {
             // This will hopefully be very rare.
             savingTask.start();
             return true;
+*/
+            return false;
         }
 
         private void removeSentEventsFromQueue() {

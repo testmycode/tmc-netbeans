@@ -1,12 +1,13 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ExerciseUpdateOverwritingDecider;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
@@ -30,7 +31,6 @@ public class UpdateExercisesAction implements ActionListener {
     private List<Exercise> exercisesToUpdate;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private ServerAccess serverAccess;
     private ConvenientDialogDisplayer dialogDisplayer;
     private TmcEventBus eventBus;
 
@@ -38,7 +38,6 @@ public class UpdateExercisesAction implements ActionListener {
         this.exercisesToUpdate = exercisesToUpdate;
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
-        this.serverAccess = new ServerAccess();
         this.dialogDisplayer = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();
     }
@@ -78,7 +77,7 @@ public class UpdateExercisesAction implements ActionListener {
             final File projectDir = projectMediator.getProjectDirForExercise(exercise);
             eventBus.post(new InvokedEvent(exercise));
 
-            BgTask.start("Downloading " + exercise.getName(), serverAccess.getDownloadingExerciseZipTask(exercise), new BgTaskListener<byte[]>() {
+            BgTask.start("Downloading " + exercise.getName(), new TmcServerCommunicationTaskFactory().getDownloadingExerciseZipTask(exercise), new BgTaskListener<byte[]>() {
 
                 @Override
                 public void bgTaskReady(byte[] data) {

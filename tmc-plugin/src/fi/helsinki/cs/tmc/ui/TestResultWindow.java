@@ -155,7 +155,7 @@ public class TestResultWindow extends TopComponent {
     private int countSuccessfulTests(List<TestResult> results) {
         int count = 0;
         for (TestResult result : results) {
-            if (result.passed) {
+            if (result.isSuccessful()) {
                 count += 1;
             }
         }

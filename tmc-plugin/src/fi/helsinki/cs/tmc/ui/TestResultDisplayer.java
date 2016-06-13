@@ -1,25 +1,25 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult.TestResultStatus;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.langs.domain.TestCase;
+import fi.helsinki.cs.tmc.testrunner.TestCase;
 
 import com.google.common.collect.ImmutableList;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.util.ArrayList;
+import java.net.URI;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringEscapeUtils;
@@ -71,7 +71,7 @@ public class TestResultDisplayer {
             public void actionPerformed(ActionEvent e) {
                 List<FeedbackAnswer> answers = dialog.getFeedbackAnswers();
                 if (!answers.isEmpty()) {
-                    CancellableCallable<String> task = new ServerAccess().getFeedbackAnsweringJob(result.getFeedbackAnswerUrl(), answers);
+                    Callable<String> task = new TmcServerCommunicationTaskFactory().getFeedbackAnsweringJob(URI.create(result.getFeedbackAnswerUrl()), answers);
                     BgTask.start("Sending feedback", task, new BgTaskListener<String>() {
                         @Override
                         public void bgTaskReady(String result) {
@@ -182,7 +182,7 @@ public class TestResultDisplayer {
     private ImmutableList<TestResult> maybeAddValdrindToResults(SubmissionResult result) {
         String valdrindOutput = result.getValgrind();
         
-        List<TestResult> resultList = null; // TODO mistä test resultsit
+        List<TestResult> resultList = result.getTestCases();
 
         // TODO: valgrind
         if (StringUtils.isNotBlank(valdrindOutput)) {
@@ -196,20 +196,12 @@ public class TestResultDisplayer {
 
     private ImmutableList<TestResult> magic(SubmissionResult result) {
         ImmutableList.Builder builder = ImmutableList.builder();
-        for (TestCase testCase : result.getTestCases()) {
-            builder.add(new TestResult(testCase.className + "#" + testCase.methodName, 
-                    testCase.status == TestCase.Status.PASSED, 
-                    ImmutableList.copyOf(testCase.pointNames),
-                    testCase.message,
-                    toStringImmutableList(testCase.exception.stackTrace)));
-        }
-        return builder.build();
-    }
-
-    private ImmutableList<String> toStringImmutableList(StackTraceElement[] stackTrace) {
-        ImmutableList.Builder builder = ImmutableList.builder();
-        for (StackTraceElement stackTraceElement : stackTrace) {
-            builder.add(stackTraceElement.toString());
+        for (TestResult testCase : result.getTestCases()) {
+            builder.add(new TestResult(testCase.getName(), 
+                    testCase.isSuccessful(), 
+                    ImmutableList.copyOf(testCase.points),
+                    testCase.getMessage(),
+                    testCase.getException()));
         }
         return builder.build();
     }

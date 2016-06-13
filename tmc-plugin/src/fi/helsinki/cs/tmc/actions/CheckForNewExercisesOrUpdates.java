@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.events.TmcEvent;
@@ -11,7 +12,6 @@ import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
@@ -53,7 +53,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
-    private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
@@ -66,7 +65,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
-        this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;

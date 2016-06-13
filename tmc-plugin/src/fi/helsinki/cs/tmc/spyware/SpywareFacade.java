@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.spyware.eventsources.WindowStatechangesEventSource;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
@@ -96,7 +95,7 @@ public class SpywareFacade implements SpywareSettings {
     public SpywareFacade() {
         settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
 
-        sender = new EventSendBuffer(this, new ServerAccess(), CourseDb.getInstance(), new EventStore());
+        sender = new EventSendBuffer(this, CourseDb.getInstance(), new EventStore());
         sender.sendNow();
 
         String hostId = new HostInformationGenerator().updateHostInformation(sender);

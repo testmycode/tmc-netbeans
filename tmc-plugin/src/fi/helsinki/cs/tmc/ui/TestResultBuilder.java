@@ -18,7 +18,7 @@ public final class TestResultBuilder {
 
         for (TestResult result : testCaseResults) {
 
-            if (showAll || !result.passed) {
+            if (showAll || !result.isSuccessful()) {
 
                 resultCells.add(new TestCaseResultCell(exercise, result, sourceFileLookup).getCell());
 

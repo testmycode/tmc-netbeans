@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+
 import com.google.gson.Gson;
 
 import fi.helsinki.cs.tmc.core.domain.Review;
@@ -8,7 +10,6 @@ import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ReviewDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
@@ -21,6 +22,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.nio.charset.Charset;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.imageio.ImageIO;
@@ -44,13 +46,11 @@ public class ReviewEventListener extends TmcEventListener {
         }
     }
 
-    private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
 
     ReviewEventListener() {
-        this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
@@ -119,7 +119,7 @@ public class ReviewEventListener extends TmcEventListener {
     }
 
     private void markAsRead(Review review) {
-        CancellableCallable<Void> task = serverAccess.getMarkingReviewAsReadTask(review, true);
+        Callable<Void> task = new TmcServerCommunicationTaskFactory().getMarkingReviewAsReadTask(review, true);
         BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
             @Override
             public void bgTaskReady(Void result) {

@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -62,8 +63,8 @@ public class DownloadExercisesAction {
         BgTask.start("Downloading " + exercise.getName(), downloadExercisesTask, new BgTaskListener<List<Exercise>>() {
             @Override
             public void bgTaskReady(List<Exercise> result) {
-                try {
-                    
+//                try {
+                    logger.warning("res: " + result);
                     // There is only one exercise given as parameter.
                     TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(result.get(0));
 
@@ -72,19 +73,19 @@ public class DownloadExercisesAction {
                     }
 
                     // Need to invoke courseDb in swing thread to avoid races
-                    SwingUtilities.invokeAndWait(new Runnable() {
-                        @Override
-                        public void run() {
+//                    SwingUtilities.invokeAndWait(new Runnable() {
+//                        @Override
+//                        public void run() {
                             courseDb.exerciseDownloaded(exercise);
-                        }
-                    });
+//                        }
+//                    });
                     listener.bgTaskReady(proj);
 
-                } catch (InterruptedException ex) {
-                    Exceptions.printStackTrace(ex);
-                } catch (InvocationTargetException ex) {
-                    Exceptions.printStackTrace(ex);
-                }
+//                } catch (InterruptedException ex) {
+//                    Exceptions.printStackTrace(ex);
+//                } catch (InvocationTargetException ex) {
+//                    Exceptions.printStackTrace(ex);
+//                }
             }
 
             @Override
