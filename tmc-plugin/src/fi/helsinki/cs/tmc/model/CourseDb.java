@@ -9,6 +9,7 @@ import com.google.gson.GsonBuilder;
 
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.persistance.ConfigFileIo;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 
 import java.io.IOException;
@@ -40,16 +41,16 @@ public class CourseDb {
     }
 
     private TmcEventBus eventBus;
-    private ConfigFile configFile;
+    private ConfigFileIo configFile;
     private List<Course> availableCourses;
     private String currentCourseName;
     private Map<ExerciseKey, String> downloadedExerciseChecksums;
 
     private CourseDb() {
-        this(TmcEventBus.getDefault(), new ConfigFile("CourseDb.json"));
+        this(TmcEventBus.getDefault(), new ConfigFileIo("CourseDb.json"));
     }
     
-    public CourseDb(TmcEventBus eventBus, ConfigFile configFile) {
+    public CourseDb(TmcEventBus eventBus, ConfigFileIo configFile) {
         this.eventBus = eventBus;
         this.configFile = configFile;
         this.availableCourses = new ArrayList<Course>();

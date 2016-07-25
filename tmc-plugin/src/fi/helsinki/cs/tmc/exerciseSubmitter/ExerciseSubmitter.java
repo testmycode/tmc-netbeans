@@ -6,9 +6,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
-import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
@@ -20,11 +18,7 @@ import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 
-import java.util.HashMap;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -74,7 +68,6 @@ public class ExerciseSubmitter {
 
         projectMediator.saveAllFiles();
 
-        // Oh what a mess :/
         Callable<SubmissionResult> callable = TmcCore.get().submit(ProgressObserver.NULL_OBSERVER, exercise);
 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();

@@ -151,6 +151,7 @@
                         <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
+                        <publicPackage>name.fraser.neil.plaintext.*</publicPackage>
                         <publicPackage>org.cometd.*</publicPackage>
                         <publicPackage>org.eclipse.jetty.*</publicPackage>
                         <publicPackage>org.slf4j.*</publicPackage>
