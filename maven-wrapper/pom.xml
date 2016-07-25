@@ -46,7 +46,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.5.3-SNAPSHOT</version>
+            <version>0.6.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -144,6 +144,7 @@
                         <publicPackage>org.apache.http.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.core.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.spyware.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.abstraction.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.domain.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.util.*</publicPackage>
