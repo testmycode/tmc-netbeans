@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.events;
 
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.HashMap;

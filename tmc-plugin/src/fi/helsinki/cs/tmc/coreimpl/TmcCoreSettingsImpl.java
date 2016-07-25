@@ -2,7 +2,7 @@ package fi.helsinki.cs.tmc.coreimpl;
 
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.PersistableSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;

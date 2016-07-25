@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import com.google.gson.Gson;
 
 import fi.helsinki.cs.tmc.core.domain.Review;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -143,7 +144,7 @@ public class ReviewEventListener extends TmcEventListener {
             String json = new Gson().toJson(dataObject);
             byte[] jsonBytes = json.getBytes(Charset.forName("UTF-8"));
 
-            LoggableEvent event = new LoggableEvent(courseName, review.getExerciseName(), "review_opened", jsonBytes);
+            TmcEvent event = new LoggableEvent(courseName, review.getExerciseName(), "review_opened", jsonBytes);
             eventBus.post(event);
         }
     }

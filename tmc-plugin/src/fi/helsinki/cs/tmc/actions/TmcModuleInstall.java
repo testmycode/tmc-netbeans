@@ -9,7 +9,7 @@ import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
-import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 

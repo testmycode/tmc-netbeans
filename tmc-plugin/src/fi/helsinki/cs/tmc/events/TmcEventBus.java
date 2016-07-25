@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.events;
 
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+
 import java.lang.ref.WeakReference;
 import java.util.ArrayDeque;
 import java.util.ArrayList;

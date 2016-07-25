@@ -8,7 +8,7 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 
 import fi.helsinki.cs.tmc.data.CourseListUtils;
-import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 
 import java.io.IOException;

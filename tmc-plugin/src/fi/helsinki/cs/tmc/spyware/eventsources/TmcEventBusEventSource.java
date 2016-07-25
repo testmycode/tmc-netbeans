@@ -18,7 +18,7 @@ import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 
 import java.nio.charset.Charset;
 import java.util.Collections;

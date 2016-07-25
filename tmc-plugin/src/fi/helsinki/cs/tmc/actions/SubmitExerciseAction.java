@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;

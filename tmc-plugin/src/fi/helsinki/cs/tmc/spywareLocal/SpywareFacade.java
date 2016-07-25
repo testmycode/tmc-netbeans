@@ -1,11 +1,17 @@
-package fi.helsinki.cs.tmc.spyware;
+package fi.helsinki.cs.tmc.spywareLocal;
 
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.spyware.eventsources.WindowStatechangesEventSource;
-import fi.helsinki.cs.tmc.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.spyware.EventDeduplicater;
+import fi.helsinki.cs.tmc.spyware.EventReceiver;
+import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
+import fi.helsinki.cs.tmc.spyware.EventStore;
+import fi.helsinki.cs.tmc.spyware.HostInformationGenerator;
+import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 
 import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
 import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
@@ -95,7 +101,7 @@ public class SpywareFacade implements SpywareSettings {
     public SpywareFacade() {
         settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
 
-        sender = new EventSendBuffer(this, CourseDb.getInstance(), new EventStore());
+        sender = new EventSendBuffer(this, new EventStore());
         sender.sendNow();
 
         String hostId = new HostInformationGenerator().updateHostInformation(sender);
