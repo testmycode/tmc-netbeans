@@ -9,7 +9,7 @@ import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
-import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
@@ -191,7 +191,7 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
             RecursiveZipper zipper = new RecursiveZipper(projectDir, zippingDecider);
             try {
                 byte[] data = zipper.zipProjectSources();
-                TmcEvent event = new LoggableEvent(exercise, "code_snapshot", data, metadata);
+                LoggableEvent event = new LoggableEvent(exercise, "code_snapshot", data, metadata);
                 receiver.receiveEvent(event);
             } catch (IOException ex) {
                 // Warning might be also appropriate, but this often races with project closing
