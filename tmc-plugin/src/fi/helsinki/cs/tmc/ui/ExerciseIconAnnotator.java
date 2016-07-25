@@ -23,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.netbeans.api.project.Project;
 import org.netbeans.spi.project.ProjectIconAnnotator;
 import org.openide.util.ChangeSupport;
+import org.openide.util.Exceptions;
 import org.openide.util.ImageUtilities;
 import org.openide.util.lookup.ServiceProvider;
 
@@ -44,7 +45,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.iconCache = new HashMap<String, Image>();
-        
+
         eventBus.subscribeDependent(new TmcEventListener() {
             public void receive(CourseDb.ChangedEvent event) {
                 SwingUtilities.invokeLater(new Runnable() {
@@ -64,10 +65,10 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         if (exercise == null || !exercise.getCourseName().equals(courses.getCurrentCourseName())) {
             return origImg;
         }
-        
+
         //TODO: use ImageUtilities.createDisabledImage for expired exercises.
         //Had some very weird problems with that. Try again some day.
-        
+
         Image img = origImg;
         try {
             Image annotation = annotationIconForExericse(exercise);
@@ -77,13 +78,13 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to load exercise icon annotation", e);
         }
-        
+
         String tooltip = tooltipForExercise(exercise);
         img = ImageUtilities.assignToolTipToImage(img, tooltip);
-        
+
         return img;
     }
-    
+
     private Image annotationIconForExericse(Exercise exercise) throws IOException {
         String name = annotationIconNameForExercise(exercise);
         if (name != null) {
@@ -96,7 +97,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return null;
         }
     }
-    
+
     private String annotationIconNameForExercise(Exercise exercise) {
         if (exercise.hasDeadlinePassed()) {
             return null;
@@ -110,7 +111,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return "black-project-dot.png";
         }
     }
-    
+
     private String tooltipForExercise(Exercise exercise) {
         List<String> parts = new ArrayList<String>();
         if (exercise.isAttempted()) {
@@ -129,23 +130,23 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                     parts.add("code review not yet done");
                 }
             }
-            
+
         } else {
             parts.add("exercise not yet submitted");
         }
-        
+
         if (!exercise.isCompleted() && exercise.getDeadline() != null) {
             DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
             parts.add("deadline: " + df.format(exercise.getDeadline()));
         }
-        
+
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
     }
-    
+
     public void updateAllIcons() {
         changeSupport.fireChange();
     }
-    
+
     @Override
     public void addChangeListener(ChangeListener listener) {
         changeSupport.addChangeListener(listener);

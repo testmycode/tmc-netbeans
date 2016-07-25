@@ -10,11 +10,16 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 
 import com.google.common.base.Optional;
+import java.io.IOException;
 import java.net.ProxySelector;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileStateInvalidException;
+import org.openide.filesystems.FileUtil;
+import org.openide.util.Exceptions;
 import org.openide.util.Lookup;
 import org.openide.util.NbPreferences;
 
@@ -105,7 +110,18 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
     @Override
     public Path getConfigRoot() {
-        return Paths.get(NbPreferences.forModule(TmcCoreSettingsImpl.class).absolutePath());
+        FileObject root = FileUtil.getConfigRoot();
+        FileObject tmcRoot = root.getFileObject("tmc");
+
+        if (tmcRoot == null) {
+            try {
+                tmcRoot = root.createFolder("tmc");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+       
+        return FileUtil.toFile(tmcRoot).toPath();
     }
     
     public static class SavedEvent implements TmcEvent {}

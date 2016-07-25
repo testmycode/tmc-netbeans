@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
@@ -36,19 +37,22 @@ public class TmcModuleInstall extends ModuleInstall {
 
     @Override
     public void restored() {
+        TmcSettingsHolder.set(new TmcCoreSettingsImpl());
+        TmcLangsHolder.set(new TaskExecutorImpl());
+
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
             public void run() {
-                TmcLangsHolder.set(new TaskExecutorImpl());
-                TmcSettingsHolder.set(new TmcCoreSettingsImpl());
+
                 TmcCore.setInstance(new TmcCore());
-                
+
                 CheckForNewExercisesOrUpdates.startTimer();
                 CheckForNewReviews.startTimer();
                 ReviewEventListener.start();
                 PushEventListener.start();
+                TmcSettings settings = TmcSettingsHolder.get();
                 SpywareFacade.start();
-                
+
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
 
                 SpecificationVersion currentVersion = getCurrentModuleVersion();
@@ -90,7 +94,7 @@ public class TmcModuleInstall extends ModuleInstall {
                             log.warning("moduleInstall refresh failed " + ex);
                         }
                     }).run();
-*/                
+*/
                 }
             }
         });
