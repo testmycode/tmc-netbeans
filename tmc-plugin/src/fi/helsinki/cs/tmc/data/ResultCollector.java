@@ -49,7 +49,7 @@ public final class ResultCollector {
         setTestCaseResults(runResult.testResults);
     }
     
-    private void showResultsIfReady() {
+    private synchronized void showResultsIfReady() {
 
         boolean ready = testCaseResultsSet && validationResultsSet;
         if (ready) {

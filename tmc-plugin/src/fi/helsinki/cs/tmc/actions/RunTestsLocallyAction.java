@@ -4,9 +4,17 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
+import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
+import java.util.List;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
@@ -70,14 +78,42 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
         Exercise exercise = exerciseForProject(project);
+        final ResultCollector resultCollector = new ResultCollector(exercise);
+
         if (exercise != null) {
-            try {
-                ResultCollector resultCollector = new ResultCollector(exercise);
-                resultCollector.setLocalTestResults(TmcCore.get().runTests(ProgressObserver.NULL_OBSERVER, exercise).call());
-                resultCollector.setValidationResult(TmcCore.get().runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise).call());
-            } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
-            }
+            BgTask.start("Running tests for " + exercise.getName(), TmcCore.get().runTests(ProgressObserver.NULL_OBSERVER, exercise), new BgTaskListener<RunResult>() {
+                @Override
+                public void bgTaskReady(RunResult result) {
+                    resultCollector.setLocalTestResults(result);
+                }
+
+                @Override
+                public void bgTaskCancelled() {
+                    // NOP
+                }
+
+                @Override
+                public void bgTaskFailed(Throwable ex) {
+                    log.log(Level.WARNING, "Test run failed:", ex);
+                }
+            });
         }
+
+        BgTask.start("Running code style validations", TmcCore.get().runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise), new BgTaskListener<ValidationResult>() {
+            @Override
+            public void bgTaskReady(ValidationResult result) {
+                resultCollector.setValidationResult(result);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                // NOP
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                log.log(Level.WARNING, "Code style run failed:", ex);
+            }
+        });
     }
 }
