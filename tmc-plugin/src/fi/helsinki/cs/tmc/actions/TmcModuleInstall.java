@@ -74,7 +74,7 @@ public class TmcModuleInstall extends ModuleInstall {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     // Do full refresh.
-                   /* new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
+                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
                         @Override
                         public void bgTaskReady(List<Course> result) {
                             log.warning("moduleInstall refresh ready");
@@ -94,7 +94,6 @@ public class TmcModuleInstall extends ModuleInstall {
                             log.warning("moduleInstall refresh failed " + ex);
                         }
                     }).run();
-*/
                 }
             }
         });
