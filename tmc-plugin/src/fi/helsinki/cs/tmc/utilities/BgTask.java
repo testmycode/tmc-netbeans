@@ -128,14 +128,14 @@ public class BgTask<V> implements CancellableCallable<V> {
                 }
             });
             return null;
-        } catch (final Exception ex) {
+        } catch (final Throwable ex) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     listener.bgTaskFailed(ex);
                 }
             });
-            throw ExceptionUtils.toRuntimeException(ex);
+            throw new RuntimeException(ex);
         } finally {
             synchronized (cancelLock) {
                 executingThread = null;
