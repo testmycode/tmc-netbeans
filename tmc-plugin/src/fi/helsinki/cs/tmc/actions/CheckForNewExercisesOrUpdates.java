@@ -50,7 +50,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         timer.start();
     }
 
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    private static final TmcNotificationDisplayer.SingletonToken NOTIFIER_TOKEN = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
     private TmcNotificationDisplayer notifier;
@@ -158,7 +158,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         String prompt = "Click here to " + TmcStringUtils.joinCommaAnd(actions) + ".";
 
-        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, action);
+        notifier.notify(NOTIFIER_TOKEN, msg, getNotificationIcon(), prompt, action);
     }
 
     private Icon getNotificationIcon() {

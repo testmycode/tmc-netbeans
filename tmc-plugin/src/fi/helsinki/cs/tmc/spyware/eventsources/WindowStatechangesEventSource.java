@@ -171,13 +171,15 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                 return ((Mode) object).getName();
             } else if (object instanceof Accessible) {
                 try {
-                    Accessible acc = (Accessible) object;
-                    if (acc != null) {
-                        AccessibleContext context = acc.getAccessibleContext();
-                        if (context != null) {
-                            String str = context.getAccessibleName();
-                            if (str != null) {
-                                return str;
+                    if (object != null) {
+                        Accessible acc = (Accessible) object;
+                        if (acc != null) {
+                            AccessibleContext context = acc.getAccessibleContext();
+                            if (context != null) {
+                                String str = context.getAccessibleName();
+                                if (str != null) {
+                                    return str;
+                                }
                             }
                         }
                     }
@@ -188,6 +190,7 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
             }
             return object.toString();
         } catch (Exception e) {
+            log.log(Level.WARNING, "Error in window state change event source listener:", e);
             return "error";
         }
     }
