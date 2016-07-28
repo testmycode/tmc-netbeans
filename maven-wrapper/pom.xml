@@ -46,12 +46,17 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.6.0-SNAPSHOT</version>
+            <version>0.7.0-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>tmc-langs-abstraction</artifactId>
             <version>1.0.0</version>
+        </dependency>
+        <dependency>
+            <groupId>fi.helsinki.cs.tmc</groupId>
+            <artifactId>tmc-checkstyle-runner</artifactId>
+            <version>3.0.1</version>
         </dependency>
         <dependency>
             <artifactId>sisu-guava</artifactId>
@@ -151,6 +156,7 @@
                         <publicPackage>fi.helsinki.cs.tmc.stylerunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testrunner.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.testscanner.*</publicPackage>
+                        <publicPackage>com.puppycrawl.*</publicPackage>
                         <publicPackage>name.fraser.neil.plaintext.*</publicPackage>
                         <publicPackage>org.cometd.*</publicPackage>
                         <publicPackage>org.eclipse.jetty.*</publicPackage>

@@ -8,17 +8,13 @@ import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
-import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 import org.openide.windows.WindowManager;
 
@@ -81,14 +77,17 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
         final ResultCollector resultCollector = new ResultCollector(exercise);
 
         if (exercise != null) {
+            
             BgTask.start("Running tests for " + exercise.getName(), TmcCore.get().runTests(ProgressObserver.NULL_OBSERVER, exercise), new BgTaskListener<RunResult>() {
                 @Override
                 public void bgTaskReady(RunResult result) {
+                    log.log(Level.INFO, "Got test results: {0}", result);
                     resultCollector.setLocalTestResults(result);
                 }
 
                 @Override
                 public void bgTaskCancelled() {
+                    log.log(Level.INFO, "Run tests cancelled");
                     // NOP
                 }
 
@@ -102,12 +101,13 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
         BgTask.start("Running code style validations", TmcCore.get().runCheckStyle(ProgressObserver.NULL_OBSERVER, exercise), new BgTaskListener<ValidationResult>() {
             @Override
             public void bgTaskReady(ValidationResult result) {
+                log.log(Level.INFO, "Got code style results: {0}", result);
                 resultCollector.setValidationResult(result);
             }
 
             @Override
             public void bgTaskCancelled() {
-                // NOP
+                log.log(Level.INFO, "Run code style cancelled");
             }
 
             @Override

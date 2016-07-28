@@ -13,6 +13,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.AggregatingBgTaskListener;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 
 import com.google.common.collect.Lists;
 import java.lang.reflect.InvocationTargetException;
@@ -63,7 +64,7 @@ public class DownloadExercisesAction {
         BgTask.start("Downloading " + exercise.getName(), downloadExercisesTask, new BgTaskListener<List<Exercise>>() {
             @Override
             public void bgTaskReady(List<Exercise> result) {
-//                try {
+                try {
                     logger.warning("res: " + result);
                     // There is only one exercise given as parameter.
                     TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(result.get(0));
@@ -73,19 +74,18 @@ public class DownloadExercisesAction {
                     }
 
                     // Need to invoke courseDb in swing thread to avoid races
-//                    SwingUtilities.invokeAndWait(new Runnable() {
-//                        @Override
-//                        public void run() {
+                    // java.lang.Error: Cannot call invokeAndWait from the event dispatcher thread
+                    TmcSwingUtilities.ensureEdt(new Runnable() {
+                        @Override
+                        public void run() {
                             courseDb.exerciseDownloaded(exercise);
-//                        }
-//                    });
+                        }
+                    });
                     listener.bgTaskReady(proj);
 
-//                } catch (InterruptedException ex) {
-//                    Exceptions.printStackTrace(ex);
-//                } catch (InvocationTargetException ex) {
-//                    Exceptions.printStackTrace(ex);
-//                }
+                } catch (RuntimeException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
             }
 
             @Override

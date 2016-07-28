@@ -16,7 +16,6 @@ import fi.helsinki.cs.tmc.ui.CodeReviewDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
 import java.awt.Image;
 import java.awt.event.ActionEvent;
@@ -120,6 +119,7 @@ public class ReviewEventListener extends TmcEventListener {
     }
 
     private void markAsRead(Review review) {
+        // TODO: use core
         Callable<Void> task = new TmcServerCommunicationTaskFactory().getMarkingReviewAsReadTask(review, true);
         BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
             @Override

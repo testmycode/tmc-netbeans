@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory.SubmissionResponse;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
@@ -112,6 +111,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
         final String errorMsgLocale = settings.getErrorMsgLocale().toString();
 
+        // TODO: use core
         BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
             @Override
             public byte[] call() throws Exception {

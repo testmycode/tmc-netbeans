@@ -3,9 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
-import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -57,7 +55,6 @@ public final class RefreshCoursesAction {
 
             @Override
             public void bgTaskReady(final List<Course> courses) {
-                log.warning("Got refreshed list of courses");
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                 if (currentCourseStub != null) {
                     Callable<Course> currentCourseTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, currentCourseStub);
@@ -65,7 +62,6 @@ public final class RefreshCoursesAction {
                     BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
                         @Override
                         public void bgTaskReady(Course currentCourse) {
-                            log.warning("GotCurrentCourse");
                             currentCourse.setExercisesLoaded(true);
 
                             ArrayList<Course> finalCourses = new ArrayList<Course>();
@@ -103,8 +99,7 @@ public final class RefreshCoursesAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                log.warning("Failed to download courseList");
-                log.log(Level.INFO, "Failed to download course list.", ex);
+                log.log(Level.WARNING, "Failed to download course list.", ex);
                 listeners.bgTaskFailed(ex);
             }
         });
