@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import com.google.gson.Gson;
 
@@ -120,10 +121,11 @@ public class ReviewEventListener extends TmcEventListener {
 
     private void markAsRead(Review review) {
         // TODO: use core
-        Callable<Void> task = new TmcServerCommunicationTaskFactory().getMarkingReviewAsReadTask(review, true);
+        Callable<Void> task = TmcCore.get().markReviewAsRead(ProgressObserver.NULL_OBSERVER, review);
         BgTask.start("Marking review as read", task, new BgTaskListener<Void>() {
             @Override
             public void bgTaskReady(Void result) {
+                log.log(Level.INFO, "Marking review as read succeeded.");
             }
 
             @Override

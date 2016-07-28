@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory.SubmissionResponse;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
@@ -55,7 +57,7 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
     private TmcEventBus eventBus;
 
     public RequestReviewAction() {
-        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
+        this.settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -109,57 +111,24 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
 
-        final String errorMsgLocale = settings.getErrorMsgLocale().toString();
-
-        // TODO: use core
-        BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
+        Callable<TmcServerCommunicationTaskFactory.SubmissionResponse> requestReview = TmcCore.get().requestCodeReview(ProgressObserver.NULL_OBSERVER, exercise, messageForReviewer);
+        BgTask.start("Requesting code review " + exercise.getName(), requestReview, new BgTaskListener<TmcServerCommunicationTaskFactory.SubmissionResponse>() {
             @Override
-            public byte[] call() throws Exception {
-                RecursiveZipper zipper = new RecursiveZipper(projectInfo.getProjectDirAsFile(), projectInfo.getZippingDecider());
-                return zipper.zipProjectSources();
-            }
-        }, new BgTaskListener<byte[]>() {
-            @Override
-            public void bgTaskReady(byte[] zipData) {
-                Map<String, String> extraParams = new HashMap<String, String>();
-                extraParams.put("error_msg_locale", errorMsgLocale);
+            public void bgTaskReady(TmcServerCommunicationTaskFactory.SubmissionResponse result) {
+                sendLoggableEvent(exercise, result.submissionUrl);
 
-                extraParams.put("request_review", "1");
-                if (!messageForReviewer.isEmpty()) {
-                    extraParams.put("message_for_reviewer", messageForReviewer);
-                }
-
-                
-                Callable<SubmissionResponse> submitTask = 
-                        new TmcServerCommunicationTaskFactory().getSubmittingExerciseTask(exercise, zipData, extraParams);
-
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<SubmissionResponse>() {
-                    @Override
-                    public void bgTaskReady(SubmissionResponse result) {
-                        sendLoggableEvent(exercise, result.submissionUrl);
-
-                        dialogs.displayMessage("Code submitted for review.\n"
-                                + "You will be notified when an instructor has reviewed your code.");
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {
-                    }
-
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        dialogs.displayError("Failed to submit exercise for code review", ex);
-                    }
-                });
-            }
-
-            @Override
-            public void bgTaskCancelled() {
+                dialogs.displayMessage("Code submitted for review.\n"
+                        + "You will be notified when an instructor has reviewed your code.");
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to zip up exercise", ex);
+                dialogs.displayError("Failed to submit exercise for code review", ex);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                log.log(Level.INFO, "Request code review action was cancelled");
             }
         });
     }

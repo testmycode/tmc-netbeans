@@ -91,7 +91,7 @@ public class TmcModuleInstall extends ModuleInstall {
 
                         @Override
                         public void bgTaskFailed(Throwable ex) {
-                            log.warning("moduleInstall refresh failed " + ex);
+                            log.log(Level.WARNING, "moduleInstall refresh failed ", ex);
                         }
                     }).run();
                 }

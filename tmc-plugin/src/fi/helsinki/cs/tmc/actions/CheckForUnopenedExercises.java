@@ -21,7 +21,7 @@ public class CheckForUnopenedExercises implements ActionListener {
         return ((TmcCoreSettingsImpl)TmcSettingsHolder.get()).isCheckingForUnopenedAtStartup();
     }
     
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    private static final TmcNotificationDisplayer.SingletonToken NOTIFIER_TOKEN = TmcNotificationDisplayer.createSingletonToken();
     
     private ProjectMediator projects;
     private CourseDb courseDb;
@@ -68,7 +68,7 @@ public class CheckForUnopenedExercises implements ActionListener {
             msg = "There are " + count + " exercises that are downloaded but not opened.";
             prompt = "Click here to open them.";
         }
-        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
+        notifier.notify(NOTIFIER_TOKEN, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
     }
     
     private ActionListener openAction(final List<Exercise> exercises) {
