@@ -56,8 +56,8 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     /**
-     * Receives and logs sub window change events. Such as opening and closing a
-     * new file and changing between open files.
+     * Receives and logs sub window change events. Such as opening and closing a new file and
+     * changing between open files.
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -172,11 +172,13 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
             } else if (object instanceof Accessible) {
                 try {
                     Accessible acc = (Accessible) object;
-                    AccessibleContext context = acc.getAccessibleContext();
-                    if (context != null) {
-                        String str = context.getAccessibleName();
-                        if (str != null) {
-                            return str;
+                    if (acc != null) {
+                        AccessibleContext context = acc.getAccessibleContext();
+                        if (context != null) {
+                            String str = context.getAccessibleName();
+                            if (str != null) {
+                                return str;
+                            }
                         }
                     }
                 } catch (Exception e) {
@@ -195,8 +197,7 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     /**
-     * Returns {@link FileObject} representing the last active file for each
-     * event.
+     * Returns {@link FileObject} representing the last active file for each event.
      */
     private FileObject getChangedFile() {
         JTextComponent jtc = EditorRegistry.lastFocusedComponent();
