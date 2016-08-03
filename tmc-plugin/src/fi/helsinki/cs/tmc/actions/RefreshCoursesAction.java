@@ -22,11 +22,12 @@ import java.util.logging.Logger;
  * Refreshes the course list in the background.
  */
 public final class RefreshCoursesAction {
+
     private final static Logger log = Logger.getLogger(RefreshCoursesAction.class.getName());
 
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
-    
+
     private BgTaskListenerList<List<Course>> listeners;
 
     public RefreshCoursesAction() {
@@ -48,9 +49,9 @@ public final class RefreshCoursesAction {
     }
 
     public void run() {
-        log.warning("Running list courses");
+        log.log(Level.INFO, "Running list courses");
         Callable<List<Course>> courseListTask = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER);
-       
+
         BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
 
             @Override
@@ -86,7 +87,7 @@ public final class RefreshCoursesAction {
                             listeners.bgTaskFailed(ex);
                         }
                     });
-                    
+
                 } else {
                     listeners.bgTaskReady(courses);
                 }
@@ -99,13 +100,14 @@ public final class RefreshCoursesAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                log.log(Level.WARNING, "Failed to download course list.", ex);
+                log.log(Level.INFO, "Failed to download course list.", ex);
                 listeners.bgTaskFailed(ex);
             }
         });
     }
 
     private class DefaultListener implements BgTaskListener<List<Course>> {
+
         private final boolean showDialogOnError;
         private final boolean updateCourseDb;
 

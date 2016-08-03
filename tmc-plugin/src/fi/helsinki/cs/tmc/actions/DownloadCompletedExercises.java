@@ -1,14 +1,18 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
+import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import org.openide.awt.ActionID;
@@ -20,6 +24,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.Callable;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadCompletedExercises")
 @ActionRegistration(displayName = "#CTL_DownloadCompletedExercises")
@@ -46,17 +51,22 @@ public final class DownloadCompletedExercises implements ActionListener {
         }
 
         eventBus.post(new InvokedEvent(currentCourse));
-        RefreshCoursesAction action = new RefreshCoursesAction();
-        action.addDefaultListener(true, true);
-        action.addListener(new BgTaskListener<List<Course>>() {
+
+        Callable<Course> getFullCourseInfoTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, courseDb.getCurrentCourse());
+        BgTask.start("Checking for new exercises", getFullCourseInfoTask, new BgTaskListener<Course>() {
             @Override
-            public void bgTaskReady(List<Course> receivedCourseList) {
-                LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
-                if (!status.downloadableCompleted.isEmpty()) {
-                    List<Exercise> emptyList = Collections.emptyList();
-                    DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
-                } else {
-                    dialogs.displayMessage("No completed exercises to download.\nDid you only close them and not delete them?");
+            public void bgTaskReady(Course receivedCourse) {
+                if (receivedCourse != null) {
+                    courseDb.putDetailedCourse(receivedCourse);
+
+                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+
+                    if (!status.downloadableCompleted.isEmpty()) {
+                        List<Exercise> emptyList = Collections.emptyList();
+                        DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
+                    } else {
+                        dialogs.displayMessage("No completed exercises to download.\nDid you only close them and not delete them?");
+                    }
                 }
             }
 
@@ -69,7 +79,6 @@ public final class DownloadCompletedExercises implements ActionListener {
                 dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
             }
         });
-        action.run();
     }
 
     public static class InvokedEvent implements TmcEvent {

@@ -1,5 +1,7 @@
 package fi.helsinki.cs.tmc.utilities;
 
+import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
@@ -15,17 +17,17 @@ import org.openide.util.RequestProcessor;
  * also {@link Cancellable}.
  */
 public class BgTask<V> implements CancellableCallable<V> {
-    
+
     private RequestProcessor requestProcessor;
     private String label;
     private BgTaskListener<? super V> listener;
     private Callable<V> callable;
     private ProgressHandle progressHandle;
-    
+
     private final Object cancelLock = new Object();
     private boolean cancelled;
     private Thread executingThread;
-    
+
     public static <V> Future<V> start(String label, Callable<V> callable) {
         return new BgTask<V>(label, callable).start();
     }
@@ -43,7 +45,7 @@ public class BgTask<V> implements CancellableCallable<V> {
         Callable<Object> callable = runnableToCallable(runnable);
         return start(label, callable, listener);
     }
-    
+
     private static Callable<Object> runnableToCallable(final Runnable runnable) {
         if (runnable instanceof Cancellable) {
             return new CancellableCallable<Object>() {
@@ -72,7 +74,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     public BgTask(String label, Callable<V> callable) {
         this(label, callable, EmptyBgTaskListener.get());
     }
-    
+
     public BgTask(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
         this.requestProcessor = TmcRequestProcessor.instance;
         this.label = label;
@@ -80,7 +82,7 @@ public class BgTask<V> implements CancellableCallable<V> {
         this.callable = callable;
         this.progressHandle = null;
     }
-    
+
     public Future<V> start() {
         return requestProcessor.submit(this);
     }
@@ -104,11 +106,11 @@ public class BgTask<V> implements CancellableCallable<V> {
                 executingThread = Thread.currentThread();
             }
         }
-        
+
         if (progressHandle == null) {
             progressHandle = ProgressHandleFactory.createSystemHandle(label, this);
         }
-        
+
         progressHandle.start();
         try {
             final V result = callable.call();
@@ -125,6 +127,14 @@ public class BgTask<V> implements CancellableCallable<V> {
                 @Override
                 public void run() {
                     listener.bgTaskCancelled();
+                }
+            });
+            return null;
+        } catch (final Exception ex) {
+            :wingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    listener.bgTaskFailed(ex);
                 }
             });
             return null;

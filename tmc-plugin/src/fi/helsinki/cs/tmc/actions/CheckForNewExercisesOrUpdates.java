@@ -79,7 +79,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
-        
+
         if (backgroundCheck && !((TmcCoreSettingsImpl)TmcSettingsHolder.get()).isCheckingForUpdatesInTheBackground()) {
             return;
         }
