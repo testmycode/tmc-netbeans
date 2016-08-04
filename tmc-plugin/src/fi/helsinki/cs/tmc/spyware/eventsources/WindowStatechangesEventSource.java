@@ -89,7 +89,7 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
 
             receiver.receiveEvent(event);
         } catch (Exception e) {
-            log.log(Level.WARNING, "Error in window event listener: {0}", e);
+            log.log(Level.INFO, "Error in window event listener: {0}", e);
         }
     }
 
@@ -112,10 +112,10 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                             new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
                 }
             } else {
-                log.log(Level.WARNING, "Coursedb is null");
+                log.log(Level.INFO, "Coursedb is null");
             }
         } catch (Exception e) {
-            log.log(Level.WARNING, "Error in window event listener: {0}", e);
+            log.log(Level.INFO, "Error in window event listener: {0}", e);
         }
     }
 
@@ -187,13 +187,13 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                         }
                     }
                 } catch (Exception e) {
-                    log.log(Level.WARNING, "Windowstate exception error: {0}", e);
+                    log.log(Level.INFO, "Windowstate exception error: {0}", e);
                     return "accessible_exception";
                 }
             }
             return object.toString();
         } catch (Exception e) {
-            log.log(Level.WARNING, "Error in window state change event source listener:", e);
+            log.log(Level.INFO, "Error in window state change event source listener:", e);
             return "error";
         }
     }
