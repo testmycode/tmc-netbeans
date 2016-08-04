@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -13,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -50,6 +53,9 @@ public final class TestCaseResultCell {
     private final GridBagConstraints gbc = new GridBagConstraints();
     private final JPanel detailView;
     private final ResultCell resultCell;
+    
+    private static final Pattern JAVA_STACKTRACE_ELEMENT_PATTERN = Pattern.compile("([\\w.]+)(\\.\\w+|\\$([\\w\\.]+))\\((\\w+.java):(\\d+)\\)");
+
 
     public TestCaseResultCell(final Exercise exercise, final TestResult result, final SourceFileLookup sourceFileLookup) {
 
@@ -65,10 +71,10 @@ public final class TestCaseResultCell {
         final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
 
         this.resultCell = new ResultCell(getResultColor(),
-                                         getResultTextColor(),
-                                         title,
-                                         result.getMessage(),
-                                         detailView);
+                getResultTextColor(),
+                title,
+                result.getMessage(),
+                detailView);
     }
 
     public ResultCell getCell() {
@@ -218,57 +224,54 @@ public final class TestCaseResultCell {
     private Action detailedMessageAction = new AbstractAction("Show detailed message") {
 
         @Override
-        public void actionPerformed(final ActionEvent event) {
+        public void actionPerformed(ActionEvent event) {
 
             detailView.remove(detailedMessageButton);
 
-            final ExceptionDisplay display = new ExceptionDisplay();
-// TODO 
-//            addException(display, result.backtrace, false);
+            ExceptionDisplay display = new ExceptionDisplay();
+            addException(display, result.getException(), false);
             display.finish();
 
             detailView.add(display, gbc);
-            
 
             resultCell.revalidate();
             resultCell.repaint();
         }
 
-//        private void addException(ExceptionDisplay display, ImmutableList<String> ex, boolean isCause) {
-//            String mainLine;
-//            if (ex.message != null) {
-//                mainLine = ex.className + ": " + ex.message;
-//            } else {
-//                mainLine = ex.className;
-//            }
-//            if (isCause) {
-//                mainLine = "Caused by: " + mainLine;
-//            }
-//            display.addBoldTextLine(mainLine);
-//
-//            addStackTraceLines(display, ex.stackTrace);
-//
-//            if (ex.cause != null) {
-//                addException(display, ex.cause, true);
-//            }
-//        }
+        private void addException(ExceptionDisplay display, ImmutableList<String> ex, boolean isCause) {
+            if (ex.size() > 0) {
+                display.addBoldTextLine(ex.get(0));
+            }
 
-        private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
-            for (final StackTraceElement ste : stackTrace) {
-                final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, ste.getClassName());
+            addStackTraceLines(display, ex);
+        }
 
-                if (sourceFile != null && ste.getLineNumber() > 0) {
-                    display.addLink(ste.toString(), new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            openAtLine(sourceFile, ste.getLineNumber());
-                        }
-                    });
-                } else {
-                    display.addTextLine(ste.toString());
+        private void addStackTraceLines(ExceptionDisplay display, ImmutableList<String> stackTrace) {
+            for (final String ste : stackTrace) {
+                Matcher matcher = JAVA_STACKTRACE_ELEMENT_PATTERN.matcher(ste);
+                boolean added = false;
+                if (matcher.matches()) {
+                    String packageAndClass = matcher.group(1);
+                    final int row = Integer.parseInt(matcher.group(5));
+                    final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, packageAndClass);
+
+                    if (sourceFile != null && row > 0) {
+                        display.addLink(ste, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openAtLine(sourceFile, row);
+                            }
+                        });
+                        added = true;
+
+                    }
+                    if (!added) {
+                        display.addTextLine(ste);
+                    }
                 }
             }
         }
+        
 
         private void openAtLine(FileObject sourceFile, final int lineNum) {
             try {

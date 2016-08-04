@@ -160,6 +160,9 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
         }
         ProjectMediator pm = ProjectMediator.getInstance();
         TmcProjectInfo project = pm.tryGetProjectOwningFile(obj);
+        if (project == null) {
+            return null;
+        }
         return pm.tryGetExerciseForProject(project, courseDb);
     }
 

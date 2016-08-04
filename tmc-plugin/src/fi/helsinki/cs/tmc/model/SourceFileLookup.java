@@ -29,6 +29,7 @@ public class SourceFileLookup {
         for (FileObject sr : globalPathRegistry.getSourceRoots()) {
             TmcProjectInfo p = projectMediator.tryGetProjectOwningFile(sr);
             if (p != null && p.equals(correctProject)) {
+                
                 FileObject result = sr.getFileObject(path);
                 if (result != null) {
                     return result;

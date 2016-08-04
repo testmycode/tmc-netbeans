@@ -131,7 +131,7 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
         Exercise exercise = exerciseForProject(proj.getProject());
         Callable<Exercise> dlModelSolutionTask = TmcCore.get().downloadModelSolution(ProgressObserver.NULL_OBSERVER, exercise);
-        BgTask.start("Downloading modelsolution", dlModelSolutionTask,
+        BgTask.start("Downloading suggested solution", dlModelSolutionTask,
                 new BgTaskListener<Object>() {
                     @Override
                     public void bgTaskReady(Object result) {

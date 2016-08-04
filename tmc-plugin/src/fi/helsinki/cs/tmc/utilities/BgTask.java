@@ -131,7 +131,7 @@ public class BgTask<V> implements CancellableCallable<V> {
             });
             return null;
         } catch (final Exception ex) {
-            :wingUtilities.invokeLater(new Runnable() {
+            SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {
                     listener.bgTaskFailed(ex);
