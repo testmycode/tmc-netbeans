@@ -53,10 +53,9 @@ public final class TestCaseResultCell {
     private final GridBagConstraints gbc = new GridBagConstraints();
     private final JPanel detailView;
     private final ResultCell resultCell;
-    
+
     private static final Pattern JAVA_STACKTRACE_ELEMENT_PATTERN = Pattern.compile("([\\w.]+)(\\.\\w+|\\$([\\w\\.]+))\\((\\w+.java):(\\d+)\\)");
-
-
+    private static final Pattern FILE_PATH_PATTERN = Pattern.compile(".*(?:src|test|lib)[/\\\\]((?:[^/\\\\]\\S*[/\\\\]?)):(\\d+).*");// "((?:[^/\\\\]\\S*[/\\\\])\\S+[/\\\\]\\S+):(\\d+)");
     public TestCaseResultCell(final Exercise exercise, final TestResult result, final SourceFileLookup sourceFileLookup) {
 
         gbc.anchor = GridBagConstraints.NORTHWEST;
@@ -215,7 +214,6 @@ public final class TestCaseResultCell {
 //        }
 //
 //    };
-
     private Action detailedMessageAction = new AbstractAction("Show detailed message") {
 
         @Override
@@ -225,13 +223,13 @@ public final class TestCaseResultCell {
 
             ExceptionDisplay display = new ExceptionDisplay();
             ImmutableList<String> ex;
-            
+
             if (result.getException() != null && result.getException().size() > 0) {
                 ex = result.getException();
             } else {
                 ex = result.getDetailedMessage();
-            } 
-           
+            }
+
             addException(display, ex, false);
             display.finish();
 
@@ -244,6 +242,7 @@ public final class TestCaseResultCell {
         private void addException(ExceptionDisplay display, ImmutableList<String> ex, boolean isCause) {
             if (ex.size() > 0) {
                 display.addBoldTextLine(ex.get(0));
+                ex = ex.subList(1, ex.size()); // Remove first of ImmutableList
             }
 
             addStackTraceLines(display, ex);
@@ -251,7 +250,9 @@ public final class TestCaseResultCell {
 
         private void addStackTraceLines(ExceptionDisplay display, ImmutableList<String> stackTrace) {
             for (final String ste : stackTrace) {
+                
                 Matcher matcher = JAVA_STACKTRACE_ELEMENT_PATTERN.matcher(ste);
+                Matcher pathMatcher = FILE_PATH_PATTERN.matcher(ste);
                 boolean added = false;
                 if (matcher.matches()) {
                     String packageAndClass = matcher.group(1);
@@ -268,13 +269,31 @@ public final class TestCaseResultCell {
                         added = true;
 
                     }
-                    if (!added) {
-                        display.addTextLine(ste);
+                } else if (!added && pathMatcher.matches()) {
+                    String path = pathMatcher.group(1);
+                    final int row = Integer.parseInt(pathMatcher.group(2));
+                    if (path.endsWith(".java")) {
+                        path = path.substring(0, path.length() - 5);
                     }
+                    final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, path);
+                    System.out.println("Source: " + path + "File: " + sourceFile);
+                    if (sourceFile != null && row > 0) {
+                        display.addLink(ste, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openAtLine(sourceFile, row);
+                            }
+                        });
+                        added = true;
+
+                    }
+                    
+                }
+                if (!added) {
+                    display.addTextLine(ste);
                 }
             }
         }
-        
 
         private void openAtLine(FileObject sourceFile, final int lineNum) {
             try {

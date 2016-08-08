@@ -4,10 +4,16 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
+import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 
 /**
  * Waits for test and validation results and shows the result view only when
@@ -21,6 +27,7 @@ public final class ResultCollector {
 
     private boolean testCaseResultsSet = false;
     private boolean validationResultsSet = false;
+    private boolean dontWaitForValidations = false; // For e.g showing compilation errors.
 
     private boolean isReturnable;
     private Runnable submissionCallback;
@@ -46,12 +53,37 @@ public final class ResultCollector {
     }
 
     public void setLocalTestResults(RunResult runResult) {
-        setTestCaseResults(runResult.testResults);
+        
+        if (runResult.status == Status.COMPILE_FAILED) {
+
+            String STDOUT = "stdout";
+            String STDERR = "stderr";
+            List<String> log = new ArrayList<String>();
+            Splitter s = Splitter.on("\n");
+            Map<String,byte[]> logs = runResult.logs;
+
+            if (logs.containsKey(STDOUT)) {
+                String str1 = new String(logs.get(STDOUT), Charset.forName("utf-8"));
+                log.addAll(s.splitToList(str1));
+            }
+            if (logs.containsKey(STDERR)) {
+                log.addAll(s.splitToList(new String(logs.get(STDERR), Charset.forName("utf-8"))));
+            }
+            
+            log = tryToCleanLog(log);
+            
+            TestResult buildFailed = new TestResult("Compilation failed", false, ImmutableList.<String>of(), "Compilation failed", ImmutableList.copyOf(log));
+
+            setTestCaseResults(ImmutableList.of(buildFailed));
+            dontWaitForValidations = true;
+        } else {
+            setTestCaseResults(runResult.testResults);
+        }
     }
     
     private synchronized void showResultsIfReady() {
 
-        boolean ready = testCaseResultsSet && validationResultsSet;
+        boolean ready = dontWaitForValidations || (testCaseResultsSet && validationResultsSet);
         if (ready) {
             TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, isSubmittable());
         }
@@ -84,6 +116,15 @@ public final class ResultCollector {
         }
 
         return isReturnable;
+    }
+
+    private List<String> tryToCleanLog(List<String> log) {
+        for (int i = 0; i < log.size(); i++) {
+            if (log.get(i).contains("-do-compile:")) {
+                return log.subList(i, log.size());
+            }
+        }
+        return log;
     }
 
     
