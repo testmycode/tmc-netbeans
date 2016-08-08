@@ -76,6 +76,8 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
         Exercise exercise = exerciseForProject(project);
+        
+        projectMediator.saveAllFiles();
         final ResultCollector resultCollector = new ResultCollector(exercise);
 
         if (exercise != null) {

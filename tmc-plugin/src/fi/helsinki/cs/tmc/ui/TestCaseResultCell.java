@@ -89,14 +89,9 @@ public final class TestCaseResultCell {
         view.setLayout(new GridBagLayout());
         view.setBackground(Color.WHITE);
 
-        if (result.getException() != null) {
+        if (result.getException() != null || result.getMessage() != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(detailedMessageAction);
-            gbc.weighty = 1.0; // Leave it so for the detailed message
-            view.add(detailedMessageButton, gbc);
-        } else if (result.getMessage() != null) {
-            view.add(Box.createVerticalStrut(16), gbc);
-            this.detailedMessageButton = new JButton(valgrindAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
             view.add(detailedMessageButton, gbc);
         } else {
@@ -201,25 +196,25 @@ public final class TestCaseResultCell {
         }
     }
 
-    private Action valgrindAction = new AbstractAction("Show valgrind trace") {
-
-        @Override
-        public void actionPerformed(final ActionEvent event) {
-
-            detailView.remove(detailedMessageButton);
-
-            final DetailedMessageDisplay display = new DetailedMessageDisplay();
-            display.setBackground(Color.WHITE);
-            display.setContent(result.getMessage());
-            display.finish();
-
-            detailView.add(display, gbc);
-
-            resultCell.revalidate();
-            resultCell.repaint();
-        }
-
-    };
+//    private Action valgrindAction = new AbstractAction("Show valgrind trace") {
+//
+//        @Override
+//        public void actionPerformed(final ActionEvent event) {
+//
+//            detailView.remove(detailedMessageButton);
+//
+//            final DetailedMessageDisplay display = new DetailedMessageDisplay();
+//            display.setBackground(Color.WHITE);
+//            display.setContent(result.getMessage());
+//            display.finish();
+//
+//            detailView.add(display, gbc);
+//
+//            resultCell.revalidate();
+//            resultCell.repaint();
+//        }
+//
+//    };
 
     private Action detailedMessageAction = new AbstractAction("Show detailed message") {
 
@@ -229,7 +224,15 @@ public final class TestCaseResultCell {
             detailView.remove(detailedMessageButton);
 
             ExceptionDisplay display = new ExceptionDisplay();
-            addException(display, result.getException(), false);
+            ImmutableList<String> ex;
+            
+            if (result.getException() != null && result.getException().size() > 0) {
+                ex = result.getException();
+            } else {
+                ex = result.getDetailedMessage();
+            } 
+           
+            addException(display, ex, false);
             display.finish();
 
             detailView.add(display, gbc);
