@@ -4,8 +4,8 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventListener;
 
 import java.util.HashMap;
 import java.util.Map;

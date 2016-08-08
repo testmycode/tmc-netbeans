@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -50,17 +51,19 @@ public final class RefreshCoursesAction {
 
     public void run() {
         log.log(Level.INFO, "Running list courses");
-        Callable<List<Course>> courseListTask = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER);
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<List<Course>> courseListTask = TmcCore.get().listCourses(observer);
 
-        BgTask.start("Refreshing course list", courseListTask, new BgTaskListener<List<Course>>() {
+        BgTask.start("Refreshing course list", courseListTask, observer, new BgTaskListener<List<Course>>() {
 
             @Override
             public void bgTaskReady(final List<Course> courses) {
                 Course currentCourseStub = CourseListUtils.getCourseByName(courses, courseDb.getCurrentCourseName());
                 if (currentCourseStub != null) {
-                    Callable<Course> currentCourseTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, currentCourseStub);
+                    ProgressObserver observer = new BridgingProgressObserver();
+                    Callable<Course> currentCourseTask = TmcCore.get().getCourseDetails(observer, currentCourseStub);
 
-                    BgTask.start("Loading course", currentCourseTask, new BgTaskListener<Course>() {
+                    BgTask.start("Loading course", currentCourseTask, observer, new BgTaskListener<Course>() {
                         @Override
                         public void bgTaskReady(Course currentCourse) {
                             currentCourse.setExercisesLoaded(true);

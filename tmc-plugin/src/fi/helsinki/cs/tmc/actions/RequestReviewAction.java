@@ -2,15 +2,15 @@ package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory.SubmissionResponse;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
 import com.google.gson.Gson;
 
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -19,15 +19,12 @@ import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -111,8 +108,9 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
 
-        Callable<TmcServerCommunicationTaskFactory.SubmissionResponse> requestReview = TmcCore.get().requestCodeReview(ProgressObserver.NULL_OBSERVER, exercise, messageForReviewer);
-        BgTask.start("Requesting code review " + exercise.getName(), requestReview, new BgTaskListener<TmcServerCommunicationTaskFactory.SubmissionResponse>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<TmcServerCommunicationTaskFactory.SubmissionResponse> requestReview = TmcCore.get().requestCodeReview(observer, exercise, messageForReviewer);
+        BgTask.start("Requesting code review " + exercise.getName(), requestReview, observer, new BgTaskListener<TmcServerCommunicationTaskFactory.SubmissionResponse>() {
             @Override
             public void bgTaskReady(TmcServerCommunicationTaskFactory.SubmissionResponse result) {
                 sendLoggableEvent(exercise, result.submissionUrl);

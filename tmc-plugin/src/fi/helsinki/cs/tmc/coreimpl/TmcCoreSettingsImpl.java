@@ -3,7 +3,8 @@ package fi.helsinki.cs.tmc.coreimpl;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PersistableSettings;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
@@ -17,11 +18,9 @@ import java.nio.file.Paths;
 import java.util.Locale;
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.openide.filesystems.FileObject;
-import org.openide.filesystems.FileStateInvalidException;
 import org.openide.filesystems.FileUtil;
-import org.openide.util.Exceptions;
+import org.openide.modules.Modules;
 import org.openide.util.Lookup;
-import org.openide.util.NbPreferences;
 
 public class TmcCoreSettingsImpl implements TmcSettings {
 
@@ -36,7 +35,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     
-    private static final PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
+    private static PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
     
     private Tailoring tailoring = SelectedTailoring.get();
     private TmcEventBus eventBus = TmcEventBus.getDefault();
@@ -54,9 +53,8 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    // TODO: replace this with courseDbs
     public Optional<Course> getCurrentCourse() {
-        throw new UnsupportedOperationException("Not supported yet."); //To change body of generated methods, choose Tools | Templates.
+        return Optional.of(CourseDb.getInstance().getCurrentCourse());
     }
 
     @Override
@@ -70,19 +68,17 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    // TODO
     public String clientVersion() {
-        return "0.9.2";
+        return Modules.getDefault().ownerOf(TmcCoreSettingsImpl.class).getSpecificationVersion().toString();
+
     }
 
     @Override
-    // TODO what is this even
     public String getFormattedUserData() {
         return "";
     }
 
     @Override
-    // TODO
     public Path getTmcProjectDirectory() {
         return Paths.get(getProjectRootDir());
     }
@@ -100,12 +96,12 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
     @Override
     public void setCourse(Course course) {
-        // TODO use this instead of coursedb
+        CourseDb.getInstance().setCurrentCourseName(course.getName());
     }
 
     @Override
     public void setConfigRoot(Path path) {
-        // NOP
+        // NOP - can't change.
     }
 
     @Override
@@ -126,17 +122,17 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     
     public static class SavedEvent implements TmcEvent {}
     
-//                PersistableSettings.forModule(TmcSettings.class),
-//                SelectedTailoring.get(),
-//                TmcEventBus.getDefault()
+    public TmcCoreSettingsImpl() {
+        // NOP
+    }
     
-//    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
-//        this.settings = settings;
-//        this.tailoring = tailoring;
-//        this.eventBus = eventBus;
-//        
-//        this.unsavedPassword = settings.get(PREF_PASSWORD, "");
-//    }
+    /*package*/ TmcCoreSettingsImpl(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
+        this.settings = settings;
+        this.tailoring = tailoring;
+        this.eventBus = eventBus;
+        
+        this.unsavedPassword = settings.get(PREF_PASSWORD, "");
+    }
     
     public void save() {
         settings.saveAll();
@@ -169,7 +165,6 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
     
     @Override
-    // TODO: make char array not to leave it in memory (String pool)
     public String getPassword() {
         return unsavedPassword;
     }

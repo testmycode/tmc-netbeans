@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.utilities;
 
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -23,6 +25,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     private BgTaskListener<? super V> listener;
     private Callable<V> callable;
     private ProgressHandle progressHandle;
+    private ProgressObserver proressObserver;
 
     private final Object cancelLock = new Object();
     private boolean cancelled;
@@ -32,8 +35,12 @@ public class BgTask<V> implements CancellableCallable<V> {
         return new BgTask<V>(label, callable).start();
     }
 
-    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
-        return new BgTask<V>(label, callable, listener).start();
+    public static <V> Future<V> start(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener) {
+        return new BgTask<V>(label, callable, observer, listener).start();
+    }
+
+    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<V> listener) {
+        return new BgTask<V>(label, callable, ProgressObserver.NULL_OBSERVER, listener).start();
     }
 
     public static Future<Object> start(String label, Runnable runnable) {
@@ -43,7 +50,12 @@ public class BgTask<V> implements CancellableCallable<V> {
 
     public static Future<Object> start(String label, Runnable runnable, BgTaskListener<Object> listener) {
         Callable<Object> callable = runnableToCallable(runnable);
-        return start(label, callable, listener);
+        return start(label, callable, ProgressObserver.NULL_OBSERVER, listener);
+    }
+
+    public static Future<Object> start(String label, Runnable runnable, ProgressObserver observer, BgTaskListener<Object> listener) {
+        Callable<Object> callable = runnableToCallable(runnable);
+        return start(label, callable, observer, listener);
     }
 
     private static Callable<Object> runnableToCallable(final Runnable runnable) {
@@ -72,14 +84,15 @@ public class BgTask<V> implements CancellableCallable<V> {
     }
 
     public BgTask(String label, Callable<V> callable) {
-        this(label, callable, EmptyBgTaskListener.get());
+        this(label, callable, ProgressObserver.NULL_OBSERVER, EmptyBgTaskListener.get());
     }
 
-    public BgTask(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
+    public BgTask(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener) {
         this.requestProcessor = TmcRequestProcessor.instance;
         this.label = label;
         this.listener = listener;
         this.callable = callable;
+        this.proressObserver = observer;
         this.progressHandle = null;
     }
 
@@ -109,6 +122,11 @@ public class BgTask<V> implements CancellableCallable<V> {
 
         if (progressHandle == null) {
             progressHandle = ProgressHandleFactory.createSystemHandle(label, this);
+        }
+
+        if (proressObserver instanceof BridgingProgressObserver) {
+            BridgingProgressObserver bi =(BridgingProgressObserver) this.proressObserver;
+            bi.attach(progressHandle);
         }
 
         progressHandle.start();

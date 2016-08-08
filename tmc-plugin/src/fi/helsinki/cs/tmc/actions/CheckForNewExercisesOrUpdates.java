@@ -6,10 +6,10 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
@@ -92,8 +92,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
         eventBus.post(new InvokedEvent(currentCourseBeforeUpdate));
 
-        Callable<Course> getFullCourseInfoTask = TmcCore.get().getCourseDetails(ProgressObserver.NULL_OBSERVER, courseDb.getCurrentCourse());
-        BgTask.start("Checking for new exercises", getFullCourseInfoTask, new BgTaskListener<Course>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<Course> getFullCourseInfoTask = TmcCore.get().getCourseDetails(observer, courseDb.getCurrentCourse());
+        BgTask.start("Checking for new exercises", getFullCourseInfoTask, observer, new BgTaskListener<Course>() {
             @Override
             public void bgTaskReady(Course receivedCourse) {
                 if (receivedCourse != null) {

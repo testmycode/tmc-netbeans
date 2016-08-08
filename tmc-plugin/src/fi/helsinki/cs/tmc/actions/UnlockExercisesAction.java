@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 
 import java.awt.event.ActionListener;
 import java.util.concurrent.Callable;
@@ -31,6 +30,7 @@ public class UnlockExercisesAction {
             return;
         }
         
+        // TODO: use core
         Callable<Void> task = new TmcServerCommunicationTaskFactory().getUnlockingTask(course);
         BgTask.start("Unlocking exercises", task, new BgTaskListener<Void>() {
             @Override

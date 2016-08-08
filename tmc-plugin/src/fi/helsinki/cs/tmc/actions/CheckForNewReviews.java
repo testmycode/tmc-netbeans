@@ -1,10 +1,10 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.Review;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ReviewDb;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -91,9 +91,9 @@ public class CheckForNewReviews implements ActionListener, Runnable {
             return;
         }
         
-        // TODO via core
-        Callable<List<Review>> getReviewsTask = TmcCore.get().getUnreadReviews(ProgressObserver.NULL_OBSERVER, course);
-        BgTask.start("Checking for code reviews", getReviewsTask, new BgTaskListener<List<Review>>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<List<Review>> getReviewsTask = TmcCore.get().getUnreadReviews(observer, course);
+        BgTask.start("Checking for code reviews", getReviewsTask, observer, new BgTaskListener<List<Review>>() {
             @Override
             public void bgTaskReady(List<Review> result) {
                 boolean newReviews = reviewDb.setReviews(result);

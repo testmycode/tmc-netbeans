@@ -5,7 +5,8 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -130,8 +131,9 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
         Exercise exercise = exerciseForProject(proj.getProject());
-        Callable<Exercise> dlModelSolutionTask = TmcCore.get().downloadModelSolution(ProgressObserver.NULL_OBSERVER, exercise);
-        BgTask.start("Downloading suggested solution", dlModelSolutionTask,
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<Exercise> dlModelSolutionTask = TmcCore.get().downloadModelSolution(observer, exercise);
+        BgTask.start("Downloading suggested solution", dlModelSolutionTask, observer,
                 new BgTaskListener<Object>() {
                     @Override
                     public void bgTaskReady(Object result) {

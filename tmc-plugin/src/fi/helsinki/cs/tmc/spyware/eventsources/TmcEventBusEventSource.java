@@ -11,7 +11,7 @@ import fi.helsinki.cs.tmc.actions.SaveSettingsAction;
 import fi.helsinki.cs.tmc.actions.UpdateExercisesAction;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.core.events.TmcEventListener;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;

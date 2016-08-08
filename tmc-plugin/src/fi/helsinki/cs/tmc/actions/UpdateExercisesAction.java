@@ -5,7 +5,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -76,6 +76,7 @@ public class UpdateExercisesAction implements ActionListener {
         for (final Exercise exercise : exercisesToUpdate) {
             final File projectDir = projectMediator.getProjectDirForExercise(exercise);
             eventBus.post(new InvokedEvent(exercise));
+
 
             Callable<List<Exercise>> downloadAndExtractExerciseTask = TmcCore.get().downloadOrUpdateExercises(ProgressObserver.NULL_OBSERVER, ImmutableList.of(exercise));
             BgTask.start("Downloading " + exercise.getName(), downloadAndExtractExerciseTask, new BgTaskListener<List<Exercise>>() {

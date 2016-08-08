@@ -5,7 +5,8 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -57,14 +58,21 @@ public class DownloadExercisesAction {
     }
 
     private void startDownloading(final Exercise exercise, final BgTaskListener<TmcProjectInfo> listener) {
-        Callable<List<Exercise>> downloadExercisesTask = TmcCore.get().downloadOrUpdateExercises(ProgressObserver.NULL_OBSERVER, Lists.newArrayList(exercise));
 
-        BgTask.start("Downloading " + exercise.getName(), downloadExercisesTask, new BgTaskListener<List<Exercise>>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+
+        Callable<List<Exercise>> downloadExercisesTask = TmcCore.get().downloadOrUpdateExercises(observer, Lists.newArrayList(exercise));
+
+        BgTask.start("Downloading " + exercise.getName(), downloadExercisesTask, observer, new BgTaskListener<List<Exercise>>() {
             @Override
             public void bgTaskReady(List<Exercise> result) {
                 try {
                     logger.warning("res: " + result);
                     // There is only one exercise given as parameter.
+                    if (result.isEmpty()) {
+                        logger.log(Level.INFO, "Download task returned an empty list");
+                        return;
+                    }
                     TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(result.get(0));
 
                     if (proj == null) {
@@ -72,7 +80,6 @@ public class DownloadExercisesAction {
                     }
 
                     // Need to invoke courseDb in swing thread to avoid races
-                    // java.lang.Error: Cannot call invokeAndWait from the event dispatcher thread
                     TmcSwingUtilities.ensureEdt(new Runnable() {
                         @Override
                         public void run() {

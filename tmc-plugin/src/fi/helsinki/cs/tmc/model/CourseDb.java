@@ -10,7 +10,7 @@ import com.google.gson.GsonBuilder;
 import fi.helsinki.cs.tmc.data.CourseListUtils;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.persistance.ConfigFileIo;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 
 import java.io.IOException;
 import java.io.Reader;

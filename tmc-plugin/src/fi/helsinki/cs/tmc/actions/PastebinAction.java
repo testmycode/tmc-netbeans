@@ -6,7 +6,8 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -120,11 +121,12 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
 
+        ProgressObserver observer = new BridgingProgressObserver();
         Callable<URI> pasteTask = TmcCore.get()
-                .pasteWithComment(ProgressObserver.NULL_OBSERVER, exercise, messageForReviewer);
+                .pasteWithComment(observer, exercise, messageForReviewer);
 
         BgTask.start(
-                "Sending " + exercise.getName(), pasteTask, new BgTaskListener<URI>() {
+                "Sending " + exercise.getName(), pasteTask, observer, new BgTaskListener<URI>() {
             @Override
             public void bgTaskReady(URI result) {
                 new PastebinResponseDialog(result.toString())
