@@ -85,7 +85,8 @@ public final class ResultCollector {
 
         boolean ready = dontWaitForValidations || (testCaseResultsSet && validationResultsSet);
         if (ready) {
-            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, isSubmittable());
+            final boolean submittable = isSubmittable();
+            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, submittable);
         }
     }
 

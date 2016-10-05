@@ -5,11 +5,13 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
+import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
@@ -30,10 +32,14 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private Project project;
+    private TestResultDisplayer resultDisplayer;
+    private ExerciseSubmitter exerciseSubmitter;
 
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
+        this.resultDisplayer = TestResultDisplayer.getInstance();
+        this.exerciseSubmitter = new ExerciseSubmitter();
 
         putValue("noIconInMenu", Boolean.TRUE);
     }
@@ -77,7 +83,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     public void run() {
-        Exercise exercise = exerciseForProject(project);
+        final Exercise exercise = exerciseForProject(project);
         
         projectMediator.saveAllFiles();
         final ResultCollector resultCollector = new ResultCollector(exercise);
@@ -89,7 +95,14 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
                 @Override
                 public void bgTaskReady(RunResult result) {
                     log.log(Level.INFO, "Got test results: {0}", result);
-                    resultCollector.setLocalTestResults(result);
+
+                    boolean canSubmitExercise = exercise.isReturnable();
+                    resultDisplayer.showLocalRunResult(result, canSubmitExercise, new Runnable() {
+                        @Override
+                        public void run() {
+                            exerciseSubmitter.performAction(project);
+                        }
+                    }, resultCollector);
                 }
 
                 @Override

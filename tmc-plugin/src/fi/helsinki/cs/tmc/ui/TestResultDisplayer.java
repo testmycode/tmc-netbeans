@@ -14,6 +14,7 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.testrunner.TestCase;
 
 import com.google.common.collect.ImmutableList;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -142,14 +143,14 @@ public class TestResultDisplayer {
     /**
      * Shows local results and calls the callback if a submission should be started.
      */
-    public void showLocalRunResult(final ImmutableList<TestResult> results,
+    public void showLocalRunResult(final RunResult runResult,
                                    final boolean returnable,
                                    final Runnable submissionCallback,
                                    final ResultCollector resultCollector) {
 
         resultCollector.setSubmissionCallback(submissionCallback);
-
-        displayTestCases(results, returnable, resultCollector);
+        resultCollector.setReturnable(returnable);
+        resultCollector.setLocalTestResults(runResult);
     }
 
     private void displayError(String error) {
