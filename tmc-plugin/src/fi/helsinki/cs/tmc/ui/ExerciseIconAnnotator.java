@@ -9,9 +9,8 @@ import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 
 import java.awt.Image;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -134,9 +133,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             parts.add("exercise not yet submitted");
         }
 
-        if (!exercise.isCompleted() && exercise.getDeadline() != null) {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            parts.add("deadline: " + df.format(exercise.getDeadline()));
+        final Date deadlineDate = exercise.getDeadlineDate();
+        if (!exercise.isCompleted() && deadlineDate != null) {
+            parts.add("deadline: " + deadlineDate);
         }
 
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
