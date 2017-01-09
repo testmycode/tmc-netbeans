@@ -21,10 +21,13 @@ public class SaveSettingsAction extends AbstractAction {
     private CourseDb courseDb;
     private TmcEventBus eventBus;
     private TmcCore tmcCore;
+    private final FixUnoptimalSettings fixUnoptimalSettings;
+    
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.tmcCore = TmcCore.get();
+        this.fixUnoptimalSettings = new FixUnoptimalSettings();
     }
 
     @Override
@@ -49,8 +52,15 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
         settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
+        settings.setResolveDependencies(prefUi.getResolveProjectDependenciesEnabled());
 
         eventBus.post(new InvokedEvent());
+        
+        if (settings.getResolveDependencies()) {
+            fixUnoptimalSettings.run();
+        } else {
+            fixUnoptimalSettings.undo();
+        }
 
         if (prefUi.getSelectedCourseName() != null) {
             courseDb.setAvailableCourses(prefUi.getAvailableCourses());

@@ -173,17 +173,22 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
             } else if (object instanceof Mode) {
                 return ((Mode) object).getName();
             } else if (object instanceof Accessible) {
+                // Workaround a weird bug
+                if (object instanceof JTextComponent) {
+                    try {
+                        ((JTextComponent) object).getCaret();
+                    } catch (NullPointerException e) {
+                        log.log(Level.WARNING, "JTextcomponent's caret mysteriously missing: {}", e);
+                        return "null";
+                    }
+                }
                 try {
-                    if (object != null) {
-                        Accessible acc = (Accessible) object;
-                        if (acc != null) {
-                            AccessibleContext context = acc.getAccessibleContext();
-                            if (context != null) {
-                                String str = context.getAccessibleName();
-                                if (str != null) {
-                                    return str;
-                                }
-                            }
+                    Accessible acc = (Accessible) object;
+                    AccessibleContext context = acc.getAccessibleContext();
+                    if (context != null) {
+                        String str = context.getAccessibleName();
+                        if (str != null) {
+                            return str;
                         }
                     }
                 } catch (Exception e) {

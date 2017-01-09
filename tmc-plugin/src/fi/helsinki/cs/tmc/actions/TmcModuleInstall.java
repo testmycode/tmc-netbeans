@@ -65,6 +65,8 @@ public class TmcModuleInstall extends ModuleInstall {
                     }
                     prefs.put(PREF_MODULE_VERSION, currentVersion.toString());
                 }
+                
+                new EnsureMavenBinaryIsExecutable().run();
 
                 boolean isFirstRun = prefs.getBoolean(PREF_FIRST_RUN, true);
                 if (isFirstRun) {

@@ -34,6 +34,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_SPYWARE_ENABLED = "spywareEnabled";
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
+    private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
     
     private static PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
     
@@ -239,6 +240,14 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     
     public void setErrorMsgLocale(Locale locale) {
         settings.put(PREF_ERROR_MSG_LOCALE, locale.toString());
+    }
+    
+    public void setResolveDependencies(boolean value) {
+        settings.put(PREF_RESOLVE_DEPENDENCIES, value ? "1" : "0");
+    }
+    
+    public boolean getResolveDependencies() {
+        return settings.get(PREF_RESOLVE_DEPENDENCIES, "1").equals("1");
     }
     
     private Locale parseLocale(String s, Locale dflt) {

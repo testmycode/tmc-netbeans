@@ -65,6 +65,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
+        prefUI.setResolveProjectDependenciesEnabled(settings.getResolveDependencies());
 
         ActionListener listener = new ActionListener() {
             @Override
