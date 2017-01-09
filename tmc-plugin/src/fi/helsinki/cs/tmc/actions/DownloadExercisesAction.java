@@ -74,7 +74,7 @@ public class DownloadExercisesAction {
                         return;
                     }
                     TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(result.get(0));
-
+                    
                     if (proj == null) {
                         throw new RuntimeException("Failed to open project for exercise " + exercise.getName());
                     }

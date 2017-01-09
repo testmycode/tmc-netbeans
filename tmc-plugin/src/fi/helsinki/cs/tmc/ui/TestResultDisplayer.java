@@ -7,11 +7,9 @@ import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.testrunner.TestCase;
 
 import com.google.common.collect.ImmutableList;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;

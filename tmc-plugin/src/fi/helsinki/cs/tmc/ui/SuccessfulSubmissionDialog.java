@@ -151,7 +151,6 @@ public class SuccessfulSubmissionDialog extends JDialog {
                     feedbackQuestionPanels.add(panel);
                 } catch (IllegalArgumentException e) {
                     log.warning(e.getMessage());
-                    continue;
                 }
             }
             

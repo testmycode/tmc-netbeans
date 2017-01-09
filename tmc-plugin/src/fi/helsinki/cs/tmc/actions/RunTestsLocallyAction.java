@@ -10,7 +10,6 @@ import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.SourceFileLookup;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -18,14 +17,10 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-import java.util.prefs.BackingStoreException;
-import java.util.prefs.Preferences;
+
 import org.netbeans.api.project.Project;
-import org.openide.filesystems.FileObject;
 import org.openide.nodes.Node;
-import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
-import org.openide.util.NbPreferences;
 import org.openide.windows.WindowManager;
 
 @Messages("CTL_RunTestsLocallyExerciseAction=Run &tests locally")

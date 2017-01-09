@@ -269,7 +269,7 @@ public final class TestCaseResultCell {
                         added = true;
 
                     }
-                } else if (!added && pathMatcher.matches()) {
+                } else if (pathMatcher.matches()) {
                     String path = pathMatcher.group(1);
                     final int row = Integer.parseInt(pathMatcher.group(2));
                     if (path.endsWith(".java")) {

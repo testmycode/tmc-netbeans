@@ -58,7 +58,7 @@ public class ReviewEventListener extends TmcEventListener {
         this.eventBus = TmcEventBus.getDefault();
     }
 
-    public void receive(PushEventListener.ReviewAvailableEvent e) throws Throwable {
+    public void receive(PushEventListener.ReviewAvailableEvent e) {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
@@ -67,7 +67,7 @@ public class ReviewEventListener extends TmcEventListener {
         });
     }
 
-    public void receive(ReviewDb.NewUnreadReviewEvent e) throws Throwable {
+    public void receive(ReviewDb.NewUnreadReviewEvent e) {
         final Review review = e.review;
         SwingUtilities.invokeLater(new Runnable() {
             @Override

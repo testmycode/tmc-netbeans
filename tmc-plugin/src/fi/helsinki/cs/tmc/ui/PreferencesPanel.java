@@ -140,7 +140,7 @@ import org.apache.commons.lang3.StringUtils;
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
     }
-
+    
     @Override
     public void setAvailableCourses(List<Course> courses) {
         setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
@@ -274,10 +274,7 @@ import org.apache.commons.lang3.StringUtils;
             if (obj == null) {
                 return false;
             }
-            if (!(obj instanceof LocaleWrapper)) {
-                return false;
-            }
-            return this.locale.equals(((LocaleWrapper)obj).locale);
+            return obj instanceof LocaleWrapper && this.locale.equals(((LocaleWrapper) obj).locale);
         }
 
         @Override

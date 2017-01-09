@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 
 import java.util.concurrent.Callable;

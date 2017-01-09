@@ -130,11 +130,7 @@ public class CourseDb {
     
     public boolean isUnlockable(Exercise ex) {
         Course course = getCourseByName(ex.getCourseName());
-        if (course != null) {
-            return course.getUnlockables().contains(ex.getName());
-        } else {
-            return false;
-        }
+        return course != null && course.getUnlockables().contains(ex.getName());
     }
     
     /**

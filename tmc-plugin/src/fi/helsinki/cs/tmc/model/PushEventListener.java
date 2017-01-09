@@ -135,7 +135,7 @@ public class PushEventListener {
         client.handshake();
     }
     
-    private ClientTransport createWebSocketTransport(String cometUrl) throws Exception {
+    private ClientTransport createWebSocketTransport(String cometUrl) {
         Map<String, Object> transportOpts = new HashMap<String, Object>();
         WebSocketTransport.Factory factory = new WebSocketTransport.Factory();
         return factory.newClientTransport(cometUrl, transportOpts);

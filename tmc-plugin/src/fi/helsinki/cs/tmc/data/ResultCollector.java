@@ -112,11 +112,8 @@ public final class ResultCollector {
             return isReturnable;
         }
 
-        if (!validationResults.getValidationErrors().isEmpty()) {
-            return false;
-        }
+        return validationResults.getValidationErrors().isEmpty() && isReturnable;
 
-        return isReturnable;
     }
 
     private List<String> tryToCleanLog(List<String> log) {

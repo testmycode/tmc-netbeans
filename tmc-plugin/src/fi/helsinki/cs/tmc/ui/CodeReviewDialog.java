@@ -6,7 +6,6 @@ import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;

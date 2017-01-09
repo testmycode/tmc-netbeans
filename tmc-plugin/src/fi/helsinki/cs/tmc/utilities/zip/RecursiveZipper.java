@@ -13,14 +13,14 @@ public class RecursiveZipper {
     private File rootDir;
     private ZippingDecider zippingDecider;
     
-    public static interface ZippingDecider {
+    public interface ZippingDecider {
         /**
          * Tells whether the given file or directory should be zipped.
          * 
          * Zip paths are separated by slashes and don't have a starting slash.
          * Directory paths always end in a slash.
          */
-        public boolean shouldZip(String zipPath);
+        boolean shouldZip(String zipPath);
     }
     
     public static final ZippingDecider ZIP_ALL_THE_THINGS = new ZippingDecider() {
