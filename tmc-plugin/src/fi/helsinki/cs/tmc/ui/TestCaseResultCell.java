@@ -1,11 +1,11 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.model.SourceFileLookup;
-import fi.helsinki.cs.tmc.testrunner.CaughtException;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
+import com.google.common.collect.ImmutableList;
 import java.awt.Color;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -14,6 +14,8 @@ import java.awt.event.ActionListener;
 import java.util.HashMap;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.swing.AbstractAction;
 import javax.swing.Action;
@@ -45,20 +47,16 @@ public final class TestCaseResultCell {
     private static final Color PASS_TEXT_COLOR = PASS_COLOR.darker();
 
     private final Exercise exercise;
-    private final TestCaseResult result;
+    private final TestResult result;
     private final SourceFileLookup sourceFileLookup;
     private JButton detailedMessageButton;
     private final GridBagConstraints gbc = new GridBagConstraints();
     private final JPanel detailView;
     private final ResultCell resultCell;
-    private final boolean valgrindFailed;
 
-    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup) {
-
-        this(exercise, result, sourceFileLookup, false);
-    }
-
-    public TestCaseResultCell(final Exercise exercise, final TestCaseResult result, final SourceFileLookup sourceFileLookup, boolean valgrindFailed) {
+    private static final Pattern JAVA_STACKTRACE_ELEMENT_PATTERN = Pattern.compile("([\\w.]+)(\\.\\w+|\\$([\\w\\.]+))\\((\\w+.java):(\\d+)\\)");
+    private static final Pattern FILE_PATH_PATTERN = Pattern.compile(".*(?:src|test|lib)[/\\\\]((?:[^/\\\\]\\S*[/\\\\]?)):(\\d+).*");// "((?:[^/\\\\]\\S*[/\\\\])\\S+[/\\\\]\\S+):(\\d+)");
+    public TestCaseResultCell(final Exercise exercise, final TestResult result, final SourceFileLookup sourceFileLookup) {
 
         gbc.anchor = GridBagConstraints.NORTHWEST;
         gbc.gridx = 0;
@@ -68,15 +66,14 @@ public final class TestCaseResultCell {
         this.result = result;
         this.sourceFileLookup = sourceFileLookup;
         this.detailView = createDetailView();
-        this.valgrindFailed = valgrindFailed;
 
         final String title = (result.isSuccessful() ? "PASS: " : "FAIL: ") + result.getName();
 
         this.resultCell = new ResultCell(getResultColor(),
-                                         getResultTextColor(),
-                                         title,
-                                         result.getMessage(),
-                                         detailView);
+                getResultTextColor(),
+                title,
+                result.getMessage(),
+                detailView);
     }
 
     public ResultCell getCell() {
@@ -91,14 +88,9 @@ public final class TestCaseResultCell {
         view.setLayout(new GridBagLayout());
         view.setBackground(Color.WHITE);
 
-        if (result.getException() != null) {
+        if (result.getException() != null || result.getMessage() != null) {
             view.add(Box.createVerticalStrut(16), gbc);
             this.detailedMessageButton = new JButton(detailedMessageAction);
-            gbc.weighty = 1.0; // Leave it so for the detailed message
-            view.add(detailedMessageButton, gbc);
-        } else if (result.getDetailedMessage() != null) {
-            view.add(Box.createVerticalStrut(16), gbc);
-            this.detailedMessageButton = new JButton(valgrindAction);
             gbc.weighty = 1.0; // Leave it so for the detailed message
             view.add(detailedMessageButton, gbc);
         } else {
@@ -203,35 +195,42 @@ public final class TestCaseResultCell {
         }
     }
 
-    private Action valgrindAction = new AbstractAction("Show valgrind trace") {
-
-        @Override
-        public void actionPerformed(final ActionEvent event) {
-
-            detailView.remove(detailedMessageButton);
-
-            final DetailedMessageDisplay display = new DetailedMessageDisplay();
-            display.setBackground(Color.WHITE);
-            display.setContent(result.getDetailedMessage());
-            display.finish();
-
-            detailView.add(display, gbc);
-
-            resultCell.revalidate();
-            resultCell.repaint();
-        }
-
-    };
-
+//    private Action valgrindAction = new AbstractAction("Show valgrind trace") {
+//
+//        @Override
+//        public void actionPerformed(final ActionEvent event) {
+//
+//            detailView.remove(detailedMessageButton);
+//
+//            final DetailedMessageDisplay display = new DetailedMessageDisplay();
+//            display.setBackground(Color.WHITE);
+//            display.setContent(result.getMessage());
+//            display.finish();
+//
+//            detailView.add(display, gbc);
+//
+//            resultCell.revalidate();
+//            resultCell.repaint();
+//        }
+//
+//    };
     private Action detailedMessageAction = new AbstractAction("Show detailed message") {
 
         @Override
-        public void actionPerformed(final ActionEvent event) {
+        public void actionPerformed(ActionEvent event) {
 
             detailView.remove(detailedMessageButton);
 
-            final ExceptionDisplay display = new ExceptionDisplay();
-            addException(display, result.getException(), false);
+            ExceptionDisplay display = new ExceptionDisplay();
+            ImmutableList<String> ex;
+
+            if (result.getException() != null && result.getException().size() > 0) {
+                ex = result.getException();
+            } else {
+                ex = result.getDetailedMessage();
+            }
+
+            addException(display, ex, false);
             display.finish();
 
             detailView.add(display, gbc);
@@ -240,38 +239,58 @@ public final class TestCaseResultCell {
             resultCell.repaint();
         }
 
-        private void addException(ExceptionDisplay display, CaughtException ex, boolean isCause) {
-            String mainLine;
-            if (ex.message != null) {
-                mainLine = ex.className + ": " + ex.message;
-            } else {
-                mainLine = ex.className;
+        private void addException(ExceptionDisplay display, ImmutableList<String> ex, boolean isCause) {
+            if (ex.size() > 0) {
+                display.addBoldTextLine(ex.get(0));
+                ex = ex.subList(1, ex.size()); // Remove first of ImmutableList
             }
-            if (isCause) {
-                mainLine = "Caused by: " + mainLine;
-            }
-            display.addBoldTextLine(mainLine);
 
-            addStackTraceLines(display, ex.stackTrace);
-
-            if (ex.cause != null) {
-                addException(display, ex.cause, true);
-            }
+            addStackTraceLines(display, ex);
         }
 
-        private void addStackTraceLines(ExceptionDisplay display, StackTraceElement[] stackTrace) {
-            for (final StackTraceElement ste : stackTrace) {
-                final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, ste.getClassName());
+        private void addStackTraceLines(ExceptionDisplay display, ImmutableList<String> stackTrace) {
+            for (final String ste : stackTrace) {
+                
+                Matcher matcher = JAVA_STACKTRACE_ELEMENT_PATTERN.matcher(ste);
+                Matcher pathMatcher = FILE_PATH_PATTERN.matcher(ste);
+                boolean added = false;
+                if (matcher.matches()) {
+                    String packageAndClass = matcher.group(1);
+                    final int row = Integer.parseInt(matcher.group(5));
+                    final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, packageAndClass);
 
-                if (sourceFile != null && ste.getLineNumber() > 0) {
-                    display.addLink(ste.toString(), new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            openAtLine(sourceFile, ste.getLineNumber());
-                        }
-                    });
-                } else {
-                    display.addTextLine(ste.toString());
+                    if (sourceFile != null && row > 0) {
+                        display.addLink(ste, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openAtLine(sourceFile, row);
+                            }
+                        });
+                        added = true;
+
+                    }
+                } else if (pathMatcher.matches()) {
+                    String path = pathMatcher.group(1);
+                    final int row = Integer.parseInt(pathMatcher.group(2));
+                    if (path.endsWith(".java")) {
+                        path = path.substring(0, path.length() - 5);
+                    }
+                    final FileObject sourceFile = sourceFileLookup.findSourceFileFor(exercise, path);
+                    System.out.println("Source: " + path + "File: " + sourceFile);
+                    if (sourceFile != null && row > 0) {
+                        display.addLink(ste, new ActionListener() {
+                            @Override
+                            public void actionPerformed(ActionEvent e) {
+                                openAtLine(sourceFile, row);
+                            }
+                        });
+                        added = true;
+
+                    }
+                    
+                }
+                if (!added) {
+                    display.addTextLine(ste);
                 }
             }
         }
@@ -299,9 +318,10 @@ public final class TestCaseResultCell {
     };
 
     private Color getResultColor() {
-        if (valgrindFailed) {
-            return VALGRIND_FAILED_COLOR;
-        } else if (result.isSuccessful()) {
+//        if (valgrindFailed) {
+//            return VALGRIND_FAILED_COLOR;
+//        } else
+        if (result.isSuccessful()) {
             return PASS_COLOR;
         } else {
             return FAIL_COLOR;

@@ -23,8 +23,8 @@ import static org.netbeans.spi.project.ActionProvider.*;
  * of the actual action provider.
  */
 public class ProjectActionCaptor implements ActionProvider {
-    public static interface Listener {
-        public void actionInvoked(Project project, String command);
+    public interface Listener {
+        void actionInvoked(Project project, String command);
     }
     private static List<Listener> listeners = new ArrayList<Listener>();
 

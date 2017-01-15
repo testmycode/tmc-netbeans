@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+
 import java.awt.Component;
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.FeedbackQuestion;
-import fi.helsinki.cs.tmc.data.SubmissionResult;
+
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanel;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanelFactory;
+
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -25,6 +28,7 @@ import javax.swing.JPanel;
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.awt.HtmlBrowser;
+
 import static fi.helsinki.cs.tmc.ui.Boxer.*;
 
 public class SuccessfulSubmissionDialog extends JDialog {
@@ -147,7 +151,6 @@ public class SuccessfulSubmissionDialog extends JDialog {
                     feedbackQuestionPanels.add(panel);
                 } catch (IllegalArgumentException e) {
                     log.warning(e.getMessage());
-                    continue;
                 }
             }
             

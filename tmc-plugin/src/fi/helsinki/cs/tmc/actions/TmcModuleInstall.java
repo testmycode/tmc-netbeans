@@ -1,14 +1,19 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
-import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.spyware.SpywareFacade;
+import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
@@ -32,13 +37,20 @@ public class TmcModuleInstall extends ModuleInstall {
 
     @Override
     public void restored() {
+        TmcSettingsHolder.set(new TmcCoreSettingsImpl());
+        TmcLangsHolder.set(new TaskExecutorImpl());
+
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
             public void run() {
+
+                TmcCore.setInstance(new TmcCore());
+
                 CheckForNewExercisesOrUpdates.startTimer();
                 CheckForNewReviews.startTimer();
                 ReviewEventListener.start();
                 PushEventListener.start();
+                TmcSettings settings = TmcSettingsHolder.get();
                 SpywareFacade.start();
 
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
@@ -53,18 +65,21 @@ public class TmcModuleInstall extends ModuleInstall {
                     }
                     prefs.put(PREF_MODULE_VERSION, currentVersion.toString());
                 }
+                
+                new EnsureMavenBinaryIsExecutable().run();
 
                 boolean isFirstRun = prefs.getBoolean(PREF_FIRST_RUN, true);
                 if (isFirstRun) {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
-                } else if (new ServerAccess().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
+                } else if (new TmcServerCommunicationTaskFactory().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
                     LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     // Do full refresh.
                     new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
                         @Override
                         public void bgTaskReady(List<Course> result) {
+                            log.warning("moduleInstall refresh ready");
                             new CheckForNewExercisesOrUpdates(true, false).run();
                             if (CheckForUnopenedExercises.shouldRunOnStartup()) {
                                 new CheckForUnopenedExercises().run();
@@ -73,10 +88,12 @@ public class TmcModuleInstall extends ModuleInstall {
 
                         @Override
                         public void bgTaskCancelled() {
+                            log.warning("moduleInstall refresh cancelled");
                         }
 
                         @Override
                         public void bgTaskFailed(Throwable ex) {
+                            log.log(Level.WARNING, "moduleInstall refresh failed ", ex);
                         }
                     }).run();
                 }

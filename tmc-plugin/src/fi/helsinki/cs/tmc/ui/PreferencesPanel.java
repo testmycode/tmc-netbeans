@@ -1,11 +1,15 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.model.TmcSettings;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
+
+import com.google.common.base.Strings;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -49,7 +53,7 @@ import org.apache.commons.lang3.StringUtils;
         }
 
         public boolean isAllSet() {
-            return username != null && password != null && baseUrl != null;
+            return (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password) && !Strings.isNullOrEmpty(baseUrl));
         }
 
         @Override
@@ -136,7 +140,7 @@ import org.apache.commons.lang3.StringUtils;
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
     }
-
+    
     @Override
     public void setAvailableCourses(List<Course> courses) {
         setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
@@ -214,6 +218,16 @@ import org.apache.commons.lang3.StringUtils;
     public void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck) {
         checkForUnopenedExercisesCheckbox.setSelected(shouldCheck);
     }
+    
+    @Override
+    public boolean getResolveProjectDependenciesEnabled() {
+        return resolveDependencies.isSelected();
+    }
+    
+    @Override
+    public void setResolveProjectDependenciesEnabled(boolean value) {
+        resolveDependencies.setSelected(value);
+    }
 
     @Override
     public boolean getSpywareEnabled() {
@@ -260,10 +274,7 @@ import org.apache.commons.lang3.StringUtils;
             if (obj == null) {
                 return false;
             }
-            if (!(obj instanceof LocaleWrapper)) {
-                return false;
-            }
-            return this.locale.equals(((LocaleWrapper)obj).locale);
+            return obj instanceof LocaleWrapper && this.locale.equals(((LocaleWrapper) obj).locale);
         }
 
         @Override
@@ -272,19 +283,18 @@ import org.apache.commons.lang3.StringUtils;
         }
     }
 
-    private TmcSettings getTransientSettingsForRefresh() {
-        TmcSettings settings = TmcSettings.getTransient();
+    private void updateSettingsForRefresh() {
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         settings.setUsername(getUsername());
         settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
         settings.setProjectRootDir(getProjectDir());
-        return settings;
+        settings.save(); // TODO: is this wanted
     }
 
     private RefreshSettings getRefreshSettings() {
         return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
     }
-
 
     private void setUpErrorMsgLocaleSelection() {
 
@@ -303,7 +313,7 @@ import org.apache.commons.lang3.StringUtils;
                 if (event.getStateChange() == ItemEvent.SELECTED) {
 
                     // Language changed, notify user about restarting
-                    if (!TmcSettings.getDefault().getErrorMsgLocale().equals(getErrorMsgLocale())) {
+                    if (!((TmcCoreSettingsImpl)TmcSettingsHolder.get()).getErrorMsgLocale().equals(getErrorMsgLocale())) {
                         restartMessage.setText("Changing language requires restart");
                     } else {
                         restartMessage.setText("");
@@ -420,7 +430,8 @@ import org.apache.commons.lang3.StringUtils;
     }
 
     private void startRefreshingCourseList(boolean failSilently, boolean delay) {
-        final RefreshCoursesAction action = new RefreshCoursesAction(getTransientSettingsForRefresh());
+        updateSettingsForRefresh();
+        final RefreshCoursesAction action = new RefreshCoursesAction();
         action.addDefaultListener(!failSilently, false);
         action.addListener(new BgTaskListener<List<Course>>() {
             @Override
@@ -454,10 +465,10 @@ import org.apache.commons.lang3.StringUtils;
 
     private void refreshCourseListNow(RefreshCoursesAction action) {
         setCourseListRefreshInProgress(true);
+        updateSettingsForRefresh();
         lastRefreshSettings = getRefreshSettings();
         action.run();
     }
-
 
     /** This method is called from within the constructor to
      * initialize the form.
@@ -493,6 +504,7 @@ import org.apache.commons.lang3.StringUtils;
         errorMsgLocaleLabel = new javax.swing.JLabel();
         errorMsgLocaleComboBox = new javax.swing.JComboBox();
         restartMessage = new javax.swing.JLabel();
+        resolveDependencies = new javax.swing.JCheckBox();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -578,59 +590,75 @@ import org.apache.commons.lang3.StringUtils;
         restartMessage.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
         restartMessage.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.restartMessage.text")); // NOI18N
 
+        resolveDependencies.setSelected(true);
+        resolveDependencies.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.resolveDependencies.text")); // NOI18N
+        resolveDependencies.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.resolveDependencies.toolTipText")); // NOI18N
+        resolveDependencies.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                resolveDependenciesActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-            .addGroup(layout.createSequentialGroup()
-                .addContainerGap()
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                    .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
-                    .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                    .addComponent(jSeparator1)
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(usernameLabel)
-                            .addComponent(serverAddressLabel)
-                            .addComponent(coursesLabel)
-                            .addComponent(passwordLabel))
-                        .addGap(78, 78, 78)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(coursesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(refreshCoursesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(courseListReloadingLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                    .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                    .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(savePasswordCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                            .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(projectFolderLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(projectFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 381, javax.swing.GroupLayout.PREFERRED_SIZE)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(folderChooserBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
-                    .addComponent(jSeparator3)
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(errorMsgLocaleLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                        .addComponent(errorMsgLocaleComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(spywareEnabledCheckbox)
-                            .addComponent(checkForUnopenedExercisesCheckbox)
-                            .addComponent(checkForUpdatesInBackgroundCheckbox))
-                        .addGap(0, 0, Short.MAX_VALUE)))
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addComponent(restartMessage)
                 .addGap(22, 22, 22))
+            .addGroup(layout.createSequentialGroup()
+                .addContainerGap()
+                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(resolveDependencies)
+                        .addGap(0, 0, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                            .addComponent(jSeparator1)
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(usernameLabel)
+                                    .addComponent(serverAddressLabel)
+                                    .addComponent(coursesLabel)
+                                    .addComponent(passwordLabel))
+                                .addGap(78, 78, 78)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addComponent(coursesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(refreshCoursesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(courseListReloadingLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
+                                            .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                            .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                        .addComponent(savePasswordCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(projectFolderLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addComponent(projectFolderTextField, javax.swing.GroupLayout.PREFERRED_SIZE, 381, javax.swing.GroupLayout.PREFERRED_SIZE)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(folderChooserBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 93, javax.swing.GroupLayout.PREFERRED_SIZE))
+                            .addComponent(jSeparator3)
+                            .addGroup(layout.createSequentialGroup()
+                                .addComponent(errorMsgLocaleLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(errorMsgLocaleComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(checkForUnopenedExercisesCheckbox)
+                                    .addComponent(checkForUpdatesInBackgroundCheckbox))
+                                .addGap(0, 420, Short.MAX_VALUE)))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(spywareEnabledCheckbox)
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -670,6 +698,8 @@ import org.apache.commons.lang3.StringUtils;
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkForUnopenedExercisesCheckbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(resolveDependencies)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spywareEnabledCheckbox)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
@@ -679,7 +709,7 @@ import org.apache.commons.lang3.StringUtils;
                     .addComponent(errorMsgLocaleComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(restartMessage)
-                .addContainerGap(20, Short.MAX_VALUE))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
         bindingGroup.bind();
@@ -703,7 +733,8 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        TmcSettings settings = getTransientSettingsForRefresh();
+        updateSettingsForRefresh();
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
             dialogs.displayError("Please set the server address first");
         }
@@ -714,6 +745,10 @@ import org.apache.commons.lang3.StringUtils;
         // Pressing return in the server address field presses the refresh button
         refreshCoursesBtn.doClick();
     }//GEN-LAST:event_serverAddressTextFieldActionPerformed
+
+    private void resolveDependenciesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveDependenciesActionPerformed
+       
+    }//GEN-LAST:event_resolveDependenciesActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel adviceLabel;
@@ -733,6 +768,7 @@ import org.apache.commons.lang3.StringUtils;
     private javax.swing.JLabel projectFolderLabel;
     private javax.swing.JTextField projectFolderTextField;
     private javax.swing.JButton refreshCoursesBtn;
+    private javax.swing.JCheckBox resolveDependencies;
     private javax.swing.JLabel restartMessage;
     private javax.swing.JCheckBox savePasswordCheckBox;
     private javax.swing.JLabel serverAddressLabel;

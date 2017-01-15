@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.utilities;
 
-import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;

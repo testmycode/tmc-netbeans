@@ -5,44 +5,44 @@
 <project name="tmc-netbeans" basedir=".">
     <description>Builds the module suite tmc-netbeans.</description>
     <import file="nbproject/build-impl.xml"/>
-    
+
     <!-- Pull maven wrapper into the 'mavenmodules' cluster. Build it first if needed. -->
-    
+
     <target name="-check-mavenmodules">
         <uptodate property="mavenmodules.uptodate"
-                  srcfile="maven-wrapper/target/nbm/maven-wrapper-1.6.nbm"
+                  srcfile="maven-wrapper/target/nbm/maven-wrapper-1.9.nbm"
                   targetfile="mavenmodules"/>
     </target>
-    
+
     <condition property="mvn.exe" value="mvn.bat" else="mvn">
         <os family="windows"/>
     </condition>
-    
+
     <target name="-build-mavenmodules" depends="-check-mavenmodules" unless="mavenmodules.uptodate">
         <echo>Building the mavenmodules cluster.</echo>
         <echo>NOTE: you may need to restart NetBeans for the editor to notice.</echo>
-        
+
         <exec dir="maven-wrapper" executable="${mvn.exe}" failonerror="true">
             <arg value="package"/>
         </exec>
-        
+
         <delete dir="mavenmodules"/>
         <copy todir="mavenmodules">
             <fileset dir="maven-wrapper/target/nbm/netbeans/tmcbeans"/>
         </copy>
     </target>
-    
+
     <target name="-clean-mavenmodules">
         <delete dir="mavenmodules"/>
-        
+
         <exec dir="maven-wrapper" executable="${mvn.exe}" failonerror="true">
             <arg value="clean"/>
         </exec>
     </target>
-    
+
     <target name="build" depends="-build-mavenmodules,suite.build"/>
     <target name="clean" depends="suite.clean,-clean-mavenmodules"/>
-    
+
     <!-- Include maven-wrapper NBM in autoupdate site. -->
     <target name="nbms" depends="-init,branding,release,-hide-excluded-modules" description="Build NBMs and an Auto Update site descriptor for all modules in the suite.">
         <mkdir dir="${suite.build.dir}/updates"/>

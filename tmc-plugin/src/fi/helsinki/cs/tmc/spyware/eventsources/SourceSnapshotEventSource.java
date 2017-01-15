@@ -1,6 +1,6 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -8,10 +8,11 @@ import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.spyware.SpywareSettings;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
-import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
 import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
@@ -27,7 +28,7 @@ import org.openide.filesystems.FileUtil;
 
 public class SourceSnapshotEventSource implements FileChangeListener, Closeable {
     private enum ChangeType {
-        FILE_CREATE, FOLDER_CREATE, FILE_CHANGE, FILE_DELETE, FILE_RENAME;
+        FILE_CREATE, FOLDER_CREATE, FILE_CHANGE, FILE_DELETE, FILE_RENAME
     }
 
     private static final Logger log = Logger.getLogger(SourceSnapshotEventSource.class.getName());

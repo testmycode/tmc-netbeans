@@ -1,15 +1,30 @@
-package fi.helsinki.cs.tmc.model;
+package fi.helsinki.cs.tmc.coreimpl;
 
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.model.PersistableSettings;
+import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
-import java.util.Locale;
 
-/**
- * A transient saveable collection of all settings of the TMC plugin.
- */
-public class TmcSettings {
+import com.google.common.base.Optional;
+import java.io.IOException;
+import java.net.ProxySelector;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.util.Locale;
+import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
+import org.openide.filesystems.FileObject;
+import org.openide.filesystems.FileUtil;
+import org.openide.modules.Modules;
+import org.openide.util.Lookup;
+
+public class TmcCoreSettingsImpl implements TmcSettings {
+
+   
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
@@ -19,35 +34,100 @@ public class TmcSettings {
     private static final String PREF_SPYWARE_ENABLED = "spywareEnabled";
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
+    private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
     
-    private static final TmcSettings defaultInstance =
-            new TmcSettings(
-                    PersistableSettings.forModule(TmcSettings.class),
-                    SelectedTailoring.get(),
-                    TmcEventBus.getDefault()
-                    );
+    private static PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
     
-    private PersistableSettings settings;
-    private Tailoring tailoring;
-    private TmcEventBus eventBus;
+    private Tailoring tailoring = SelectedTailoring.get();
+    private TmcEventBus eventBus = TmcEventBus.getDefault();
     
-    private String unsavedPassword;
+    private String unsavedPassword = settings.get(PREF_PASSWORD, "");
+
+    @Override
+    public String getServerAddress() {
+        return settings.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
+    }
+
+    @Override
+    public boolean userDataExists() {
+        return true;
+    }
+
+    @Override
+    public Optional<Course> getCurrentCourse() {
+        return Optional.of(CourseDb.getInstance().getCurrentCourse());
+    }
+
+    @Override
+    public String apiVersion() {
+        return "7";
+    }
+
+    @Override
+    public String clientName() {
+        return "netbeans_plugin";
+    }
+
+    @Override
+    public String clientVersion() {
+        return Modules.getDefault().ownerOf(TmcCoreSettingsImpl.class).getSpecificationVersion().toString();
+
+    }
+
+    @Override
+    public String getFormattedUserData() {
+        return "";
+    }
+
+    @Override
+    public Path getTmcProjectDirectory() {
+        return Paths.get(getProjectRootDir());
+    }
+
+    @Override
+    public Locale getLocale() {
+        return getErrorMsgLocale();
+    }
+
+    @Override
+    public SystemDefaultRoutePlanner proxy() {
+        ProxySelector proxys = Lookup.getDefault().lookup((ProxySelector.class));
+        return new SystemDefaultRoutePlanner(proxys);
+    }
+
+    @Override
+    public void setCourse(Course course) {
+        CourseDb.getInstance().setCurrentCourseName(course.getName());
+    }
+
+    @Override
+    public void setConfigRoot(Path path) {
+        // NOP - can't change.
+    }
+
+    @Override
+    public Path getConfigRoot() {
+        FileObject root = FileUtil.getConfigRoot();
+        FileObject tmcRoot = root.getFileObject("tmc");
+
+        if (tmcRoot == null) {
+            try {
+                tmcRoot = root.createFolder("tmc");
+            } catch (IOException ex) {
+                throw new RuntimeException(ex);
+            }
+        }
+       
+        return FileUtil.toFile(tmcRoot).toPath();
+    }
     
     public static class SavedEvent implements TmcEvent {}
-
-    public static TmcSettings getDefault() {
-        return defaultInstance;
+    
+    public TmcCoreSettingsImpl() {
+        // NOP
     }
     
-    public static TmcSettings getTransient() {
-        return new TmcSettings(
-                PersistableSettings.forModule(TmcSettings.class),
-                SelectedTailoring.get(),
-                TmcEventBus.getDefault()
-                );
-    }
-    
-    /*package*/ TmcSettings(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
+    /*package*/ TmcCoreSettingsImpl(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
         this.settings = settings;
         this.tailoring = tailoring;
         this.eventBus = eventBus;
@@ -56,12 +136,8 @@ public class TmcSettings {
     }
     
     public void save() {
-        if (this != defaultInstance) {
-            throw new IllegalStateException("May only save the default instance of TmcSettings.");
-        }
         settings.saveAll();
-        eventBus.post(new SavedEvent());
-        
+        eventBus.post(new SavedEvent());        
     }
 
     public String getServerBaseUrl() {
@@ -80,6 +156,7 @@ public class TmcSettings {
         return s;
     }
     
+    @Override
     public String getUsername() {
         return settings.get(PREF_USERNAME, tailoring.getDefaultUsername());
     }
@@ -88,6 +165,7 @@ public class TmcSettings {
         settings.put(PREF_USERNAME, username);
     }
     
+    @Override
     public String getPassword() {
         return unsavedPassword;
     }
@@ -162,6 +240,14 @@ public class TmcSettings {
     
     public void setErrorMsgLocale(Locale locale) {
         settings.put(PREF_ERROR_MSG_LOCALE, locale.toString());
+    }
+    
+    public void setResolveDependencies(boolean value) {
+        settings.put(PREF_RESOLVE_DEPENDENCIES, value ? "1" : "0");
+    }
+    
+    public boolean getResolveDependencies() {
+        return settings.get(PREF_RESOLVE_DEPENDENCIES, "1").equals("1");
     }
     
     private Locale parseLocale(String s, Locale dflt) {

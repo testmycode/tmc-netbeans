@@ -1,7 +1,10 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
+
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -63,7 +66,7 @@ public class ProjectMediator {
     }
     
     public String getProjectRootDir() {
-        return TmcSettings.getDefault().getProjectRootDir();
+        return ((TmcCoreSettingsImpl)TmcSettingsHolder.get()).getProjectRootDir();
     }
     
     public static String getDefaultProjectRootDir() {

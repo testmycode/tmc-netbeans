@@ -1,16 +1,20 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Review;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.Review;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ReviewDb;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.List;
+import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
@@ -45,7 +49,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
         }
     }
     
-    private ServerAccess serverAccess;
     private CourseDb courseDb;
     private ReviewDb reviewDb;
     private ConvenientDialogDisplayer dialogs;
@@ -58,7 +61,6 @@ public class CheckForNewReviews implements ActionListener, Runnable {
     }
 
     CheckForNewReviews(boolean beQuiet, boolean resetNotifications, boolean notifyAboutNoNewReviews) {
-        this.serverAccess = new ServerAccess();
         this.courseDb = CourseDb.getInstance();
         this.reviewDb = ReviewDb.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -89,7 +91,9 @@ public class CheckForNewReviews implements ActionListener, Runnable {
             return;
         }
         
-        BgTask.start("Checking for code reviews", serverAccess.getDownloadingReviewListTask(course), new BgTaskListener<List<Review>>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<List<Review>> getReviewsTask = TmcCore.get().getUnreadReviews(observer, course);
+        BgTask.start("Checking for code reviews", getReviewsTask, observer, new BgTaskListener<List<Review>>() {
             @Override
             public void bgTaskReady(List<Review> result) {
                 boolean newReviews = reviewDb.setReviews(result);

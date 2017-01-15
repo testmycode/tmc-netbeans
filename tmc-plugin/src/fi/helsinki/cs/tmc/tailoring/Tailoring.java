@@ -9,15 +9,15 @@ import java.util.Locale;
  * @see <code>SelectedTailoring.properties.sample</code>
  */
 public interface Tailoring {
-    public String getDefaultServerUrl();
-    public String getDefaultUsername();
-    public String getUsernameFieldName();
-    public boolean isSpywareEnabledByDefault();
-    public boolean isDetailedSpywareEnabledByDefault();
+    String getDefaultServerUrl();
+    String getDefaultUsername();
+    String getUsernameFieldName();
+    boolean isSpywareEnabledByDefault();
+    boolean isDetailedSpywareEnabledByDefault();
     
-    public Locale[] getAvailableErrorMsgLocales();
-    public Locale getDefaultErrorMsgLocale();
+    Locale[] getAvailableErrorMsgLocales();
+    Locale getDefaultErrorMsgLocale();
     
-    public String getUpdateCenterTitle();
-    public String getUpdateCenterUrl();
+    String getUpdateCenterTitle();
+    String getUpdateCenterUrl();
 }

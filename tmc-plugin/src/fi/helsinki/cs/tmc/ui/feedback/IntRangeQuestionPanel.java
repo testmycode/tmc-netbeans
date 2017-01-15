@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.ui.feedback;
 
-import fi.helsinki.cs.tmc.data.FeedbackAnswer;
-import fi.helsinki.cs.tmc.data.FeedbackQuestion;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
+import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import java.awt.Font;
 import java.util.Hashtable;
 import javax.swing.JLabel;

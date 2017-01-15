@@ -1,9 +1,12 @@
 package fi.helsinki.cs.tmc.model;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventListener;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
@@ -43,20 +46,20 @@ public class PushEventListener {
         }
     }
     
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseDb courseDb;
     private TmcEventBus eventBus;
     private BayeuxClient client;
     private boolean shouldReconnect;
 
     PushEventListener() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.shouldReconnect = false;
         
         this.eventBus.subscribeDependent(new TmcEventListener() {
-            public void receive(TmcSettings.SavedEvent e) {
+            public void receive(TmcCoreSettingsImpl.SavedEvent e) {
                 reconnectSoon();
             }
             
@@ -111,7 +114,7 @@ public class PushEventListener {
             return;
         }
         
-        String cometUrl = course.getCometUrl();
+        String cometUrl = course.getCometUrl().toString();
         if (cometUrl == null) {
             return;
         }
@@ -132,7 +135,7 @@ public class PushEventListener {
         client.handshake();
     }
     
-    private ClientTransport createWebSocketTransport(String cometUrl) throws Exception {
+    private ClientTransport createWebSocketTransport(String cometUrl) {
         Map<String, Object> transportOpts = new HashMap<String, Object>();
         WebSocketTransport.Factory factory = new WebSocketTransport.Factory();
         return factory.newClientTransport(cometUrl, transportOpts);

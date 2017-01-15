@@ -1,8 +1,11 @@
 package fi.helsinki.cs.tmc.data;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+
 import java.util.List;
 
 public class CourseListUtils {
+    
     /**
      * Returns the course with the given name or null if not found.
      */

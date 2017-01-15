@@ -1,5 +1,8 @@
 package fi.helsinki.cs.tmc.utilities;
 
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
@@ -15,23 +18,28 @@ import org.openide.util.RequestProcessor;
  * also {@link Cancellable}.
  */
 public class BgTask<V> implements CancellableCallable<V> {
-    
+
     private RequestProcessor requestProcessor;
     private String label;
     private BgTaskListener<? super V> listener;
     private Callable<V> callable;
     private ProgressHandle progressHandle;
-    
+    private ProgressObserver proressObserver;
+
     private final Object cancelLock = new Object();
     private boolean cancelled;
     private Thread executingThread;
-    
+
     public static <V> Future<V> start(String label, Callable<V> callable) {
         return new BgTask<V>(label, callable).start();
     }
 
-    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
-        return new BgTask<V>(label, callable, listener).start();
+    public static <V> Future<V> start(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener) {
+        return new BgTask<V>(label, callable, observer, listener).start();
+    }
+
+    public static <V> Future<V> start(String label, Callable<V> callable, BgTaskListener<V> listener) {
+        return new BgTask<V>(label, callable, ProgressObserver.NULL_OBSERVER, listener).start();
     }
 
     public static Future<Object> start(String label, Runnable runnable) {
@@ -41,9 +49,14 @@ public class BgTask<V> implements CancellableCallable<V> {
 
     public static Future<Object> start(String label, Runnable runnable, BgTaskListener<Object> listener) {
         Callable<Object> callable = runnableToCallable(runnable);
-        return start(label, callable, listener);
+        return start(label, callable, ProgressObserver.NULL_OBSERVER, listener);
     }
-    
+
+    public static Future<Object> start(String label, Runnable runnable, ProgressObserver observer, BgTaskListener<Object> listener) {
+        Callable<Object> callable = runnableToCallable(runnable);
+        return start(label, callable, observer, listener);
+    }
+
     private static Callable<Object> runnableToCallable(final Runnable runnable) {
         if (runnable instanceof Cancellable) {
             return new CancellableCallable<Object>() {
@@ -70,17 +83,18 @@ public class BgTask<V> implements CancellableCallable<V> {
     }
 
     public BgTask(String label, Callable<V> callable) {
-        this(label, callable, EmptyBgTaskListener.get());
+        this(label, callable, ProgressObserver.NULL_OBSERVER, EmptyBgTaskListener.get());
     }
-    
-    public BgTask(String label, Callable<V> callable, BgTaskListener<? super V> listener) {
+
+    public BgTask(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener) {
         this.requestProcessor = TmcRequestProcessor.instance;
         this.label = label;
         this.listener = listener;
         this.callable = callable;
+        this.proressObserver = observer;
         this.progressHandle = null;
     }
-    
+
     public Future<V> start() {
         return requestProcessor.submit(this);
     }
@@ -104,11 +118,16 @@ public class BgTask<V> implements CancellableCallable<V> {
                 executingThread = Thread.currentThread();
             }
         }
-        
+
         if (progressHandle == null) {
             progressHandle = ProgressHandleFactory.createSystemHandle(label, this);
         }
-        
+
+        if (proressObserver instanceof BridgingProgressObserver) {
+            BridgingProgressObserver bi =(BridgingProgressObserver) this.proressObserver;
+            bi.attach(progressHandle);
+        }
+
         progressHandle.start();
         try {
             final V result = callable.call();
@@ -135,7 +154,15 @@ public class BgTask<V> implements CancellableCallable<V> {
                     listener.bgTaskFailed(ex);
                 }
             });
-            throw ExceptionUtils.toRuntimeException(ex);
+            return null;
+        } catch (final Throwable ex) {
+            SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    listener.bgTaskFailed(ex);
+                }
+            });
+            throw new RuntimeException(ex);
         } finally {
             synchronized (cancelLock) {
                 executingThread = null;

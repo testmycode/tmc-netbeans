@@ -1,14 +1,17 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.CourseListUtils;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.model.ObsoleteClientException;
-import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
@@ -16,10 +19,11 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.Inflector;
 import fi.helsinki.cs.tmc.utilities.TmcStringUtils;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.List;
+import java.util.concurrent.Callable;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
 import org.apache.commons.lang3.StringUtils;
@@ -46,10 +50,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         timer.start();
     }
 
-    private static final TmcNotificationDisplayer.SingletonToken notifierToken = TmcNotificationDisplayer.createSingletonToken();
+    private static final TmcNotificationDisplayer.SingletonToken NOTIFIER_TOKEN = TmcNotificationDisplayer.createSingletonToken();
 
     private CourseDb courseDb;
-    private ServerAccess serverAccess;
     private TmcNotificationDisplayer notifier;
     private ConvenientDialogDisplayer dialogs;
     private boolean beQuiet;
@@ -62,7 +65,6 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
     public CheckForNewExercisesOrUpdates(boolean beQuiet, boolean backgroundCheck) {
         this.courseDb = CourseDb.getInstance();
-        this.serverAccess = new ServerAccess();
         this.notifier = TmcNotificationDisplayer.getDefault();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.beQuiet = beQuiet;
@@ -78,7 +80,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
 
-        if (backgroundCheck && !TmcSettings.getDefault().isCheckingForUpdatesInTheBackground()) {
+        if (backgroundCheck && !((TmcCoreSettingsImpl)TmcSettingsHolder.get()).isCheckingForUpdatesInTheBackground()) {
             return;
         }
 
@@ -90,7 +92,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         }
         eventBus.post(new InvokedEvent(currentCourseBeforeUpdate));
 
-        BgTask.start("Checking for new exercises", serverAccess.getFullCourseInfoTask(currentCourseBeforeUpdate), new BgTaskListener<Course>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<Course> getFullCourseInfoTask = TmcCore.get().getCourseDetails(observer, courseDb.getCurrentCourse());
+        BgTask.start("Checking for new exercises", getFullCourseInfoTask, observer, new BgTaskListener<Course>() {
             @Override
             public void bgTaskReady(Course receivedCourse) {
                 if (receivedCourse != null) {
@@ -155,7 +159,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         String prompt = "Click here to " + TmcStringUtils.joinCommaAnd(actions) + ".";
 
-        notifier.notify(notifierToken, msg, getNotificationIcon(), prompt, action);
+        notifier.notify(NOTIFIER_TOKEN, msg, getNotificationIcon(), prompt, action);
     }
 
     private Icon getNotificationIcon() {

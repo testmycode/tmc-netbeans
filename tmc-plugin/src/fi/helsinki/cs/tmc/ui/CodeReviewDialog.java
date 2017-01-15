@@ -1,11 +1,11 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Review;
+import fi.helsinki.cs.tmc.core.domain.Review;
+
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
 import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.apache.commons.lang3.StringUtils;
@@ -59,7 +59,7 @@ public class CodeReviewDialog extends javax.swing.JDialog {
     
     private void openInBrowser() {
         try {
-            HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(review.getUrl()));
+            HtmlBrowser.URLDisplayer.getDefault().showURLExternal(review.getUrl().toURL());
         } catch (MalformedURLException ex) {
             log.log(Level.WARNING, "Malformed URL: " + ex.getMessage(), ex);
         }

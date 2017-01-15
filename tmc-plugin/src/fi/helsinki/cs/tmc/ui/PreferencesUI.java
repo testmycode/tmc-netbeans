@@ -1,6 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Course;
+
+import fi.helsinki.cs.tmc.core.domain.Course;
+
 import java.util.List;
 import java.util.Locale;
 
@@ -18,13 +20,17 @@ public interface PreferencesUI {
     
     boolean getShouldSavePassword();
 
-    public List<Course> getAvailableCourses();
+    List<Course> getAvailableCourses();
     
     boolean getCheckForUpdatesInTheBackground();
     
     boolean getCheckForUnopenedExercisesAtStartup();
     
     boolean getSpywareEnabled();
+    
+    boolean getResolveProjectDependenciesEnabled();
+    
+    void setResolveProjectDependenciesEnabled(boolean value);
     
     Locale getErrorMsgLocale();
 

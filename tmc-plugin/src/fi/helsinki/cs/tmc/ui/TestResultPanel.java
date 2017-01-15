@@ -1,8 +1,8 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.data.TestCaseResult;
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
@@ -20,7 +20,7 @@ public final class TestResultPanel extends JPanel {
 
     private boolean allTestsVisible = false;
     private Exercise exercise = null;
-    private final List<TestCaseResult> storedTestCaseResults = new ArrayList<TestCaseResult>();
+    private final List<TestResult> storedTestCaseResults = new ArrayList<TestResult>();
     private ValidationResult storedValidationResult;
 
     public TestResultPanel() {
@@ -28,7 +28,7 @@ public final class TestResultPanel extends JPanel {
         this.setLayout(new GridBagLayout());
     }
 
-    public void setResults(final Exercise exercise, final List<TestCaseResult> results, final ValidationResult validationResult) {
+    public void setResults(final Exercise exercise, final List<TestResult> results, final ValidationResult validationResult) {
 
         this.clear();
 

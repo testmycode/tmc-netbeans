@@ -1,14 +1,23 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.data.ResultCollector;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.runners.CheckstyleRunHandler;
-import fi.helsinki.cs.tmc.runners.TestRunHandler;
+import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
+import java.util.concurrent.Callable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
 import org.openide.util.NbBundle.Messages;
@@ -21,27 +30,27 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
-    private CheckstyleRunHandler checkstyleRunHandler;
-    private TestRunHandler testRunHandler;
     private Project project;
+    private TestResultDisplayer resultDisplayer;
+    private ExerciseSubmitter exerciseSubmitter;
 
     public RunTestsLocallyAction() {
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
-        this.checkstyleRunHandler = new CheckstyleRunHandler();
-        this.testRunHandler = new TestRunHandler();
+        this.resultDisplayer = TestResultDisplayer.getInstance();
+        this.exerciseSubmitter = new ExerciseSubmitter();
 
         putValue("noIconInMenu", Boolean.TRUE);
     }
 
     @Override
     protected void performAction(final Node[] nodes) {
+            if (nodes.length == 1) {
+                this.project = projectsFromNodes(nodes).get(0);
+                
+                WindowManager.getDefault().invokeWhenUIReady(this);
+            }
 
-        if (nodes.length == 1) {
-            this.project = projectsFromNodes(nodes).get(0);
-
-            WindowManager.getDefault().invokeWhenUIReady(this);
-        }
     }
 
     @Override
@@ -73,11 +82,59 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     public void run() {
-        Exercise exercise = exerciseForProject(project);
+        final Exercise exercise = exerciseForProject(project);
+        
+        projectMediator.saveAllFiles();
+        final ResultCollector resultCollector = new ResultCollector(exercise);
+
         if (exercise != null) {
-            ResultCollector resultCollector = new ResultCollector(exercise);
-            this.checkstyleRunHandler.performAction(resultCollector, project);
-            this.testRunHandler.performAction(resultCollector, project);
+            ProgressObserver observer = new BridgingProgressObserver();
+            Callable<RunResult> runTestsTask = TmcCore.get().runTests(observer, exercise);
+            BgTask.start("Running tests for " + exercise.getName(), runTestsTask, observer, new BgTaskListener<RunResult>() {
+                @Override
+                public void bgTaskReady(RunResult result) {
+                    log.log(Level.INFO, "Got test results: {0}", result);
+
+                    boolean canSubmitExercise = exercise.isReturnable();
+                    resultDisplayer.showLocalRunResult(result, canSubmitExercise, new Runnable() {
+                        @Override
+                        public void run() {
+                            exerciseSubmitter.performAction(project);
+                        }
+                    }, resultCollector);
+                }
+
+                @Override
+                public void bgTaskCancelled() {
+                    log.log(Level.INFO, "Run tests cancelled");
+                    // NOP
+                }
+
+                @Override
+                public void bgTaskFailed(Throwable ex) {
+                    log.log(Level.WARNING, "Test run failed:", ex);
+                }
+            });
         }
+
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<ValidationResult> runCodeStyleValidationsTask = TmcCore.get().runCheckStyle(observer, exercise);
+        BgTask.start("Running code style validations", runCodeStyleValidationsTask, observer, new BgTaskListener<ValidationResult>() {
+            @Override
+            public void bgTaskReady(ValidationResult result) {
+                log.log(Level.INFO, "Got code style results: {0}", result);
+                resultCollector.setValidationResult(result);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                log.log(Level.INFO, "Run code style cancelled");
+            }
+
+            @Override
+            public void bgTaskFailed(Throwable ex) {
+                log.log(Level.WARNING, "Code style run failed:", ex);
+            }
+        });
     }
 }

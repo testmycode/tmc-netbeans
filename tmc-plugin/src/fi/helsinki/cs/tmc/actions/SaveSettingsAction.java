@@ -1,14 +1,17 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+
 import java.awt.event.ActionEvent;
 import java.util.List;
 import javax.swing.AbstractAction;
@@ -17,9 +20,14 @@ public class SaveSettingsAction extends AbstractAction {
 
     private CourseDb courseDb;
     private TmcEventBus eventBus;
+    private TmcCore tmcCore;
+    private final FixUnoptimalSettings fixUnoptimalSettings;
+    
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
+        this.tmcCore = TmcCore.get();
+        this.fixUnoptimalSettings = new FixUnoptimalSettings();
     }
 
     @Override
@@ -33,7 +41,8 @@ public class SaveSettingsAction extends AbstractAction {
 
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
-        TmcSettings settings = TmcSettings.getDefault();
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
+        
         settings.setUsername(prefUi.getUsername());
         settings.setPassword(prefUi.getPassword());
         settings.setSavingPassword(prefUi.getShouldSavePassword());
@@ -43,8 +52,15 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
         settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
+        settings.setResolveDependencies(prefUi.getResolveProjectDependenciesEnabled());
 
         eventBus.post(new InvokedEvent());
+        
+        if (settings.getResolveDependencies()) {
+            fixUnoptimalSettings.run();
+        } else {
+            fixUnoptimalSettings.undo();
+        }
 
         if (prefUi.getSelectedCourseName() != null) {
             courseDb.setAvailableCourses(prefUi.getAvailableCourses());

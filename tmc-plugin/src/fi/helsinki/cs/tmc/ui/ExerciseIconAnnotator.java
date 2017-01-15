@@ -1,16 +1,16 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
-import fi.helsinki.cs.tmc.events.TmcEventListener;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+
 import java.awt.Image;
 import java.io.IOException;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.logging.Level;
@@ -43,7 +43,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         this.courses = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.iconCache = new HashMap<String, Image>();
-        
+
         eventBus.subscribeDependent(new TmcEventListener() {
             public void receive(CourseDb.ChangedEvent event) {
                 SwingUtilities.invokeLater(new Runnable() {
@@ -63,10 +63,10 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         if (exercise == null || !exercise.getCourseName().equals(courses.getCurrentCourseName())) {
             return origImg;
         }
-        
+
         //TODO: use ImageUtilities.createDisabledImage for expired exercises.
         //Had some very weird problems with that. Try again some day.
-        
+
         Image img = origImg;
         try {
             Image annotation = annotationIconForExericse(exercise);
@@ -76,13 +76,13 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         } catch (IOException e) {
             log.log(Level.WARNING, "Failed to load exercise icon annotation", e);
         }
-        
+
         String tooltip = tooltipForExercise(exercise);
         img = ImageUtilities.assignToolTipToImage(img, tooltip);
-        
+
         return img;
     }
-    
+
     private Image annotationIconForExericse(Exercise exercise) throws IOException {
         String name = annotationIconNameForExercise(exercise);
         if (name != null) {
@@ -95,7 +95,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return null;
         }
     }
-    
+
     private String annotationIconNameForExercise(Exercise exercise) {
         if (exercise.hasDeadlinePassed()) {
             return null;
@@ -109,7 +109,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return "black-project-dot.png";
         }
     }
-    
+
     private String tooltipForExercise(Exercise exercise) {
         List<String> parts = new ArrayList<String>();
         if (exercise.isAttempted()) {
@@ -128,23 +128,23 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                     parts.add("code review not yet done");
                 }
             }
-            
+
         } else {
             parts.add("exercise not yet submitted");
         }
-        
-        if (!exercise.isCompleted() && exercise.getDeadline() != null) {
-            DateFormat df = new SimpleDateFormat("dd.MM.yyyy HH:mm");
-            parts.add("deadline: " + df.format(exercise.getDeadline()));
+
+        final Date deadlineDate = exercise.getDeadlineDate();
+        if (!exercise.isCompleted() && deadlineDate != null) {
+            parts.add("deadline: " + deadlineDate);
         }
-        
+
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
     }
-    
+
     public void updateAllIcons() {
         changeSupport.fireChange();
     }
-    
+
     @Override
     public void addChangeListener(ChangeListener listener) {
         changeSupport.addChangeListener(listener);

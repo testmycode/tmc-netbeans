@@ -1,14 +1,16 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
+import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+
 import com.google.common.base.CaseFormat;
-import fi.helsinki.cs.tmc.data.Course;
-import fi.helsinki.cs.tmc.data.Exercise;
+
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 
 import org.netbeans.api.editor.EditorRegistry;
@@ -54,8 +56,8 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     /**
-     * Receives and logs sub window change events. Such as opening and closing a
-     * new file and changing between open files.
+     * Receives and logs sub window change events. Such as opening and closing a new file and
+     * changing between open files.
      */
     @Override
     public void propertyChange(PropertyChangeEvent evt) {
@@ -87,7 +89,7 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
 
             receiver.receiveEvent(event);
         } catch (Exception e) {
-            log.log(Level.WARNING, "Error in window event listener: {0}", e);
+            log.log(Level.INFO, "Error in window event listener: {0}", e);
         }
     }
 
@@ -110,10 +112,10 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                             new LoggableEvent(action, data.getBytes(Charset.forName("UTF-8"))));
                 }
             } else {
-                log.log(Level.WARNING, "Coursedb is null");
+                log.log(Level.INFO, "Coursedb is null");
             }
         } catch (Exception e) {
-            log.log(Level.WARNING, "Error in window event listener: {0}", e);
+            log.log(Level.INFO, "Error in window event listener: {0}", e);
         }
     }
 
@@ -158,6 +160,9 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
         }
         ProjectMediator pm = ProjectMediator.getInstance();
         TmcProjectInfo project = pm.tryGetProjectOwningFile(obj);
+        if (project == null) {
+            return null;
+        }
         return pm.tryGetExerciseForProject(project, courseDb);
     }
 
@@ -168,6 +173,15 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
             } else if (object instanceof Mode) {
                 return ((Mode) object).getName();
             } else if (object instanceof Accessible) {
+                // Workaround a weird bug
+                if (object instanceof JTextComponent) {
+                    try {
+                        ((JTextComponent) object).getCaret();
+                    } catch (NullPointerException e) {
+                        log.log(Level.WARNING, "JTextcomponent's caret mysteriously missing: {}", e);
+                        return "null";
+                    }
+                }
                 try {
                     Accessible acc = (Accessible) object;
                     AccessibleContext context = acc.getAccessibleContext();
@@ -178,12 +192,13 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
                         }
                     }
                 } catch (Exception e) {
-                    log.log(Level.WARNING, "Windowstate exception error: {0}", e);
+                    log.log(Level.INFO, "Windowstate exception error: {0}", e);
                     return "accessible_exception";
                 }
             }
             return object.toString();
         } catch (Exception e) {
+            log.log(Level.INFO, "Error in window state change event source listener:", e);
             return "error";
         }
     }
@@ -193,8 +208,7 @@ public final class WindowStatechangesEventSource implements PropertyChangeListen
     }
 
     /**
-     * Returns {@link FileObject} representing the last active file for each
-     * event.
+     * Returns {@link FileObject} representing the last active file for each event.
      */
     private FileObject getChangedFile() {
         JTextComponent jtc = EditorRegistry.lastFocusedComponent();

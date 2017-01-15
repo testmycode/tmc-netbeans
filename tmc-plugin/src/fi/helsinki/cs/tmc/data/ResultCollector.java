@@ -1,10 +1,20 @@
 package fi.helsinki.cs.tmc.data;
 
-import fi.helsinki.cs.tmc.stylerunner.validation.Strategy;
-import fi.helsinki.cs.tmc.stylerunner.validation.ValidationResult;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
+import fi.helsinki.cs.tmc.langs.abstraction.ValidationResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
+import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
+import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
+import com.google.common.base.Splitter;
+import com.google.common.collect.ImmutableList;
+import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Waits for test and validation results and shows the result view only when
@@ -13,11 +23,12 @@ import java.util.List;
 public final class ResultCollector {
 
     private final Exercise exercise;
-    private List<TestCaseResult> testCaseResults;
+    private ImmutableList<TestResult> testCaseResults;
     private ValidationResult validationResults;
 
     private boolean testCaseResultsSet = false;
     private boolean validationResultsSet = false;
+    private boolean dontWaitForValidations = false; // For e.g showing compilation errors.
 
     private boolean isReturnable;
     private Runnable submissionCallback;
@@ -34,7 +45,7 @@ public final class ResultCollector {
         showResultsIfReady();
     }
 
-    public void setTestCaseResults(final List<TestCaseResult> results) {
+    public void setTestCaseResults(final ImmutableList<TestResult> results) {
 
         this.testCaseResults = results;
         this.testCaseResultsSet = true;
@@ -42,11 +53,41 @@ public final class ResultCollector {
         showResultsIfReady();
     }
 
-    private void showResultsIfReady() {
+    public void setLocalTestResults(RunResult runResult) {
+        
+        if (runResult.status == Status.COMPILE_FAILED) {
 
-        boolean ready = testCaseResultsSet && validationResultsSet;
+            String STDOUT = "stdout";
+            String STDERR = "stderr";
+            List<String> log = new ArrayList<String>();
+            Map<String,byte[]> logs = runResult.logs;
+
+            if (logs.containsKey(STDOUT)) {
+                final String str1 = new String(logs.get(STDOUT), Charset.forName("utf-8"));
+                log.addAll(Arrays.asList(str1.split("\\r?\\n")));
+            }
+            if (logs.containsKey(STDERR)) {
+                final String str2 = new String(logs.get(STDERR), Charset.forName("utf-8"));
+                log.addAll(Arrays.asList(str2.split("\\r?\\n")));
+            }
+            
+            log = tryToCleanLog(log);
+            
+            TestResult buildFailed = new TestResult("Compilation failed", false, ImmutableList.<String>of(), "Compilation failed", ImmutableList.copyOf(log));
+
+            setTestCaseResults(ImmutableList.of(buildFailed));
+            dontWaitForValidations = true;
+        } else {
+            setTestCaseResults(runResult.testResults);
+        }
+    }
+    
+    private synchronized void showResultsIfReady() {
+
+        boolean ready = dontWaitForValidations || (testCaseResultsSet && validationResultsSet);
         if (ready) {
-            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, isSubmittable());
+            final boolean submittable = isSubmittable();
+            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, submittable);
         }
     }
 
@@ -62,8 +103,7 @@ public final class ResultCollector {
 
     private boolean isSubmittable() {
 
-        for (TestCaseResult result : testCaseResults) {
-
+        for (TestResult result : testCaseResults) {
             if (!result.isSuccessful()) {
                 return false;
             }
@@ -73,10 +113,18 @@ public final class ResultCollector {
             return isReturnable;
         }
 
-        if (!validationResults.getValidationErrors().isEmpty()) {
-            return false;
-        }
+        return validationResults.getValidationErrors().isEmpty() && isReturnable;
 
-        return isReturnable;
     }
+
+    private List<String> tryToCleanLog(List<String> log) {
+        for (int i = 0; i < log.size(); i++) {
+            if (log.get(i).contains("-do-compile:")) {
+                return log.subList(i, log.size());
+            }
+        }
+        return log;
+    }
+
+    
 }

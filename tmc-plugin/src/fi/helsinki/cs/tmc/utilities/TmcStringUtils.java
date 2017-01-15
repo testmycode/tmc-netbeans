@@ -2,7 +2,6 @@ package fi.helsinki.cs.tmc.utilities;
 
 import java.util.Iterator;
 import java.util.List;
-import org.apache.commons.lang3.StringUtils;
 
 public class TmcStringUtils {
     /**

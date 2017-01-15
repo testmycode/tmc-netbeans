@@ -1,13 +1,14 @@
 package fi.helsinki.cs.tmc.spyware.eventsources;
 
-import fi.helsinki.cs.tmc.data.Exercise;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.spyware.EventReceiver;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.utilities.JsonMaker;
+import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
+
 import java.awt.HeadlessException;
 import java.awt.datatransfer.DataFlavor;
 import java.beans.PropertyChangeEvent;
@@ -25,8 +26,8 @@ import javax.swing.event.DocumentListener;
 import javax.swing.text.BadLocationException;
 import javax.swing.text.Document;
 import javax.swing.text.JTextComponent;
-import name.fraser.neil.plaintext.diff_match_patch;
-import name.fraser.neil.plaintext.diff_match_patch.Patch;
+import name.fraser.neil.plaintext.DiffMatchPatch;
+import name.fraser.neil.plaintext.DiffMatchPatch.Patch;
 import org.netbeans.api.editor.EditorRegistry;
 import org.netbeans.modules.editor.NbEditorUtilities;
 import org.openide.filesystems.FileObject;
@@ -40,7 +41,7 @@ import org.openide.util.datatransfer.ExClipboard;
 public class TextInsertEventSource implements Closeable {
     
     private static final Logger log = Logger.getLogger(TextInsertEventSource.class.getName());
-    private static final diff_match_patch PATCH_GENERATOR = new diff_match_patch();
+    private static final DiffMatchPatch PATCH_GENERATOR = new DiffMatchPatch();
     private EventReceiver receiver;
     private JTextComponent currentComponent;
     private Map<Document, String> documentCache;

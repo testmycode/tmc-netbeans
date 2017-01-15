@@ -1,28 +1,30 @@
 package fi.helsinki.cs.tmc.actions;
 
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+
 import com.google.gson.Gson;
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.spyware.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewRequestDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -45,14 +47,14 @@ import org.openide.util.NbBundle;
 public class RequestReviewAction extends AbstractExerciseSensitiveAction {
 
     private static final Logger log = Logger.getLogger(RequestReviewAction.class.getName());
-    private TmcSettings settings;
+    private TmcCoreSettingsImpl settings;
     private CourseDb courseDb;
     private ProjectMediator projectMediator;
     private ConvenientDialogDisplayer dialogs;
     private TmcEventBus eventBus;
 
     public RequestReviewAction() {
-        this.settings = TmcSettings.getDefault();
+        this.settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
@@ -106,56 +108,25 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             final String messageForReviewer) {
         projectMediator.saveAllFiles();
 
-        final String errorMsgLocale = settings.getErrorMsgLocale().toString();
-
-        BgTask.start("Zipping up " + exercise.getName(), new Callable<byte[]>() {
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<TmcServerCommunicationTaskFactory.SubmissionResponse> requestReview = TmcCore.get().requestCodeReview(observer, exercise, messageForReviewer);
+        BgTask.start("Requesting code review " + exercise.getName(), requestReview, observer, new BgTaskListener<TmcServerCommunicationTaskFactory.SubmissionResponse>() {
             @Override
-            public byte[] call() throws Exception {
-                RecursiveZipper zipper = new RecursiveZipper(projectInfo.getProjectDirAsFile(), projectInfo.getZippingDecider());
-                return zipper.zipProjectSources();
-            }
-        }, new BgTaskListener<byte[]>() {
-            @Override
-            public void bgTaskReady(byte[] zipData) {
-                Map<String, String> extraParams = new HashMap<String, String>();
-                extraParams.put("error_msg_locale", errorMsgLocale);
+            public void bgTaskReady(TmcServerCommunicationTaskFactory.SubmissionResponse result) {
+                sendLoggableEvent(exercise, result.submissionUrl);
 
-                extraParams.put("request_review", "1");
-                if (!messageForReviewer.isEmpty()) {
-                    extraParams.put("message_for_reviewer", messageForReviewer);
-                }
-
-                final ServerAccess sa = new ServerAccess();
-                CancellableCallable<ServerAccess.SubmissionResponse> submitTask = sa
-                        .getSubmittingExerciseTask(exercise, zipData, extraParams);
-
-                BgTask.start("Sending " + exercise.getName(), submitTask, new BgTaskListener<ServerAccess.SubmissionResponse>() {
-                    @Override
-                    public void bgTaskReady(ServerAccess.SubmissionResponse result) {
-                        sendLoggableEvent(exercise, result.submissionUrl);
-
-                        dialogs.displayMessage("Code submitted for review.\n"
-                                + "You will be notified when an instructor has reviewed your code.");
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {
-                    }
-
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        dialogs.displayError("Failed to submit exercise for code review", ex);
-                    }
-                });
-            }
-
-            @Override
-            public void bgTaskCancelled() {
+                dialogs.displayMessage("Code submitted for review.\n"
+                        + "You will be notified when an instructor has reviewed your code.");
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to zip up exercise", ex);
+                dialogs.displayError("Failed to submit exercise for code review", ex);
+            }
+
+            @Override
+            public void bgTaskCancelled() {
+                log.log(Level.INFO, "Request code review action was cancelled");
             }
         });
     }

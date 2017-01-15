@@ -1,19 +1,18 @@
 package fi.helsinki.cs.tmc.actions;
 
-import fi.helsinki.cs.tmc.data.Exercise;
-import fi.helsinki.cs.tmc.events.TmcEvent;
-import fi.helsinki.cs.tmc.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.model.ServerAccess;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.model.TmcSettings;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
-import fi.helsinki.cs.tmc.utilities.CancellableCallable;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper;
-import fi.helsinki.cs.tmc.utilities.zip.NbProjectUnzipper.OverwritingDecider;
 
 import com.google.common.base.Function;
 
@@ -131,45 +130,10 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
     }
 
     private void downloadSolution(final Exercise ex, final TmcProjectInfo proj) {
-        ServerAccess serverAccess = new ServerAccess(TmcSettings.getDefault());
-        CancellableCallable<byte[]> downloadTask =
-                serverAccess.getDownloadingExerciseSolutionZipTask(ex);
-        BgTask.start(
-                "Downloading solution for " + ex.getName(),
-                downloadTask,
-                new BgTaskListener<byte[]>() {
-                    @Override
-                    public void bgTaskReady(byte[] result) {
-                        unzipSolution(ex, proj, result);
-                    }
-
-                    @Override
-                    public void bgTaskCancelled() {}
-
-                    @Override
-                    public void bgTaskFailed(Throwable ex) {
-                        logger.log(Level.INFO, "Failed to download solution.", ex);
-                        dialogs.displayError(
-                                "Failed to download solution.\n"
-                                        + ServerErrorHelper.getServerExceptionMsg(ex));
-                    }
-                });
-    }
-
-    private void unzipSolution(final Exercise ex, final TmcProjectInfo proj, final byte[] data) {
-        Callable<Object> task =
-                new Callable<Object>() {
-                    @Override
-                    public Object call() throws Exception {
-                        NbProjectUnzipper unzipper = new NbProjectUnzipper(solutionOverwriting);
-                        unzipper.unzipProject(data, proj.getProjectDirAsFile());
-                        return null;
-                    }
-                };
-
-        BgTask.start(
-                "Extracting solution",
-                task,
+        Exercise exercise = exerciseForProject(proj.getProject());
+        ProgressObserver observer = new BridgingProgressObserver();
+        Callable<Exercise> dlModelSolutionTask = TmcCore.get().downloadModelSolution(observer, exercise);
+        BgTask.start("Downloading suggested solution", dlModelSolutionTask, observer,
                 new BgTaskListener<Object>() {
                     @Override
                     public void bgTaskReady(Object result) {
@@ -189,18 +153,6 @@ public class DownloadSolutionAction extends AbstractExerciseSensitiveAction {
                 });
     }
 
-    private OverwritingDecider solutionOverwriting =
-            new OverwritingDecider() {
-                @Override
-                public boolean mayOverwrite(String relPath) {
-                    return true;
-                }
-
-                @Override
-                public boolean mayDelete(String relPath) {
-                    return false;
-                }
-            };
 
     private class ActionMenuItem extends JMenuItem implements DynamicMenuContent {
 
