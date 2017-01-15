@@ -12,6 +12,7 @@ import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -59,15 +60,15 @@ public final class ResultCollector {
             String STDOUT = "stdout";
             String STDERR = "stderr";
             List<String> log = new ArrayList<String>();
-            Splitter s = Splitter.on("\n");
             Map<String,byte[]> logs = runResult.logs;
 
             if (logs.containsKey(STDOUT)) {
-                String str1 = new String(logs.get(STDOUT), Charset.forName("utf-8"));
-                log.addAll(s.splitToList(str1));
+                final String str1 = new String(logs.get(STDOUT), Charset.forName("utf-8"));
+                log.addAll(Arrays.asList(str1.split("\\r?\\n")));
             }
             if (logs.containsKey(STDERR)) {
-                log.addAll(s.splitToList(new String(logs.get(STDERR), Charset.forName("utf-8"))));
+                final String str2 = new String(logs.get(STDERR), Charset.forName("utf-8"));
+                log.addAll(Arrays.asList(str2.split("\\r?\\n")));
             }
             
             log = tryToCleanLog(log);
