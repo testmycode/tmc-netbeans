@@ -134,6 +134,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
             @Override
             public void bgTaskFailed(Throwable ex) {
                 log.log(Level.WARNING, "Code style run failed:", ex);
+                resultCollector.setValidationResult(null);
             }
         });
     }
