@@ -54,8 +54,8 @@ public final class ResultCollector {
     }
 
     public void setLocalTestResults(RunResult runResult) {
-        
-        if (runResult.status == Status.COMPILE_FAILED) {
+
+        if (runResult.status == Status.COMPILE_FAILED || runResult.status == Status.TESTRUN_INTERRUPTED) {
 
             String STDOUT = "stdout";
             String STDERR = "stderr";
@@ -70,10 +70,17 @@ public final class ResultCollector {
                 final String str2 = new String(logs.get(STDERR), Charset.forName("utf-8"));
                 log.addAll(Arrays.asList(str2.split("\\r?\\n")));
             }
-            
+
             log = tryToCleanLog(log);
-            
-            TestResult buildFailed = new TestResult("Compilation failed", false, ImmutableList.<String>of(), "Compilation failed", ImmutableList.copyOf(log));
+
+            String errorType;
+            if (runResult.status == Status.COMPILE_FAILED) {
+                errorType = "Compilation failed";
+            } else {
+                errorType = "Testrun interrupted";
+            }
+
+            TestResult buildFailed = new TestResult(errorType, false, ImmutableList.<String>of(), errorType, ImmutableList.copyOf(log));
 
             setTestCaseResults(ImmutableList.of(buildFailed));
             dontWaitForValidations = true;
