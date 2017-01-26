@@ -1,7 +1,7 @@
 package fi.helsinki.cs.tmc.functionaltests.utils;
 
-import fi.helsinki.cs.tmc.model.ServerAccess;
-import fi.helsinki.cs.tmc.testing.AdHocHttpServer;
+//import fi.helsinki.cs.tmc.model.ServerAccess;
+//import fi.helsinki.cs.tmc.testing.AdHocHttpServer;
 import java.io.UnsupportedEncodingException;
 import org.apache.http.entity.StringEntity;
 import java.io.IOException;
@@ -22,9 +22,9 @@ import org.apache.http.protocol.HttpContext;
 import org.apache.http.protocol.HttpRequestHandler;
 import static org.junit.Assert.*;
 
-public class FakeTmcServer extends AdHocHttpServer {
+public class FakeTmcServer /*extends AdHocHttpServer*/ {
 
-    private int expectedApiVersion = ServerAccess.API_VERSION;
+//    private int expectedApiVersion = ServerAccess.API_VERSION;
     private String expectedUsername;
     private String expectedPassword;
     private String coursesJson = "{}";
@@ -33,7 +33,7 @@ public class FakeTmcServer extends AdHocHttpServer {
     private HashMap<String, byte[]> zipFiles = new HashMap<String, byte[]>();
 
     public FakeTmcServer() {
-        setHandler(new Handler());
+//        setHandler(new Handler());
     }
     
     public synchronized FakeTmcServer expectUser(String username, String password) {
@@ -76,11 +76,11 @@ public class FakeTmcServer extends AdHocHttpServer {
                 Map<String, String> params = parseQueryParameters(uri);
 
                 String path = uri.getPath();
-                debug("Path: " + path);
+//                debug("Path: " + path);
 
                 if (path.startsWith("/courses.json")) {
                     authenticate(params);
-                    debug("Responding with course list: " + coursesJson);
+//                    debug("Responding with course list: " + coursesJson);
                     respondWithJson(resp, coursesJson);
                 } else if (courseRegex.matcher(path).matches()) {
                     Matcher m = courseRegex.matcher(path);
@@ -92,17 +92,17 @@ System.out.println(id);
                     String response = courseDetails.get(id);
                     if (response != null) {
                         authenticate(params);
-                        debug("Responding with course details: " + response);
+//                        debug("Responding with course details: " + response);
                         respondWithJson(resp, response);
                     } else {
-                        debug("Unknown course path: " + path);
+//                        debug("Unknown course path: " + path);
                         resp.setStatusCode(404);
                         resp.setEntity(new StringEntity("Not Found"));
                     }
                 } else if (zipFiles.containsKey(path)) {
                     respondWithBinary(resp, zipFiles.get(path), "application/zip");
                 } else {
-                    debug("Unknown path: " + path);
+//                    debug("Unknown path: " + path);
                     resp.setStatusCode(404);
                     resp.setEntity(new StringEntity("Not Found"));
                 }
@@ -119,7 +119,7 @@ System.out.println(id);
         }
 
         private void authenticate(Map<String, String> params) {
-            assertEquals("" + expectedApiVersion, params.get("api_version"));
+//            assertEquals("" + expectedApiVersion, params.get("api_version"));
             if (expectedUsername != null) {
                 assertEquals(expectedUsername, params.get("api_username"));
             }

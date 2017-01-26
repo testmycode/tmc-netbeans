@@ -32,7 +32,7 @@ public abstract class TmcFunctionalTestCase extends JellyTestCase {
     @Override
     protected void tearDown() throws Exception {
         this.clearWorkDir();
-        serverFixture.tearDown();
+//        serverFixture.tearDown();
         super.tearDown();
     }
     

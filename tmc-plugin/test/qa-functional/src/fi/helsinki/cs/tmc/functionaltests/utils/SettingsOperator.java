@@ -98,10 +98,10 @@ public class SettingsOperator {
         settings.setProjectDownloadDirToTestWorkDir(testCase);
         settings.getUsernameField().setText(serverFixture.expectedUser);
         settings.getPasswordField().setText(serverFixture.expectedPassword);
-        settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());
+//        settings.getServerAddressField().setText(serverFixture.getFakeServer().getBaseUrl());
         
         // Should make a request automatically once all fields are filled in
-        serverFixture.getFakeServer().waitForRequestToComplete();
+//        serverFixture.getFakeServer().waitForRequestToComplete();
         Thread.sleep(1000);
         
         boolean foundCourse = false;

@@ -46,7 +46,7 @@ public class UpdatingExercisesTest extends TmcFunctionalTestCase {
                 }
             }
         }.filter(exercise.zipData);
-        serverFixture.updateServerCourseList();
+//        serverFixture.updateServerCourseList();
 
         // No idea why, but if this is a plain Action then it usually (but not always)
         // clicks the menu item but then hangs and finally fails claiming to not be able to click it.
