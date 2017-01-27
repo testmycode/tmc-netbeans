@@ -149,6 +149,8 @@ public class TestResultWindow extends TopComponent {
                     return null;
                 }
             });
+        } else if (exercise.hasDeadlinePassed()) {
+            dialogDisplayer.displayMessage("All tests passed, but exercise's deadline has expired.");
         }
     }
 

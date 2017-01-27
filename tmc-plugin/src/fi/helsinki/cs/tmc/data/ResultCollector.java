@@ -109,6 +109,9 @@ public final class ResultCollector {
     }
 
     private boolean isSubmittable() {
+        if (exercise.hasDeadlinePassed()) {
+            return false;
+        }
 
         for (TestResult result : testCaseResults) {
             if (!result.isSuccessful()) {
