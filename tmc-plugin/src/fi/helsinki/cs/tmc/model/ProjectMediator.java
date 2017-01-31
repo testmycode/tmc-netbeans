@@ -7,6 +7,8 @@ import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -114,21 +116,21 @@ public class ProjectMediator {
      * <p>
      * The exercise must have a course name set.
      */
-    public File getProjectDirForExercise(Exercise ex) {
-        String path = 
-                getProjectRootDir() + File.separator +
-                ex.getCourseName() + File.separator +
-                ex.getName().replaceAll("/", "-");
-        return new File(path);
+    public Path getProjectDirForExercise(Exercise ex) {
+        Path path = Paths.get(
+                getProjectRootDir(),
+                ex.getCourseName(),
+                ex.getName().replaceAll("/", "-"));
+        return tryGetRealPath(path);
     }
     
     /**
      * Returns the exercise associated with the given project, or null if none.
      */
     public Exercise tryGetExerciseForProject(TmcProjectInfo project, CourseDb courseDb) {
-        File projectDir = FileUtil.toFile(project.getProjectDir());
+        Path projectDir = FileUtil.toFile(project.getProjectDir()).toPath();
         for (Exercise ex : courseDb.getCurrentCourseExercises()) {
-            if (getProjectDirForExercise(ex).equals(projectDir)) {
+            if (getProjectDirForExercise(ex).equals(tryGetRealPath(projectDir))) {
                 return ex;
             }
         }
@@ -164,7 +166,7 @@ public class ProjectMediator {
     public TmcProjectInfo tryGetProjectForExercise(Exercise exercise) {
         projectManager.clearNonProjectCache(); // Just to be sure.
         
-        File path = getProjectDirForExercise(exercise);
+        File path = getProjectDirForExercise(exercise).toFile();
         FileObject fo = FileUtil.toFileObject(path);
         if (fo != null) {
             try {
@@ -257,6 +259,14 @@ public class ProjectMediator {
         }
         for (FileSystem fs : filesystems) { // Probably just one
             fs.refresh(true);
+        }
+    }
+
+    private Path tryGetRealPath(Path path) {
+        try {
+            return path.toRealPath();
+        } catch (IOException ex) {
+            return path;
         }
     }
 }
