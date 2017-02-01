@@ -74,7 +74,7 @@ public class UpdateExercisesAction implements ActionListener {
         });
 
         for (final Exercise exercise : exercisesToUpdate) {
-            final File projectDir = projectMediator.getProjectDirForExercise(exercise);
+            final File projectDir = projectMediator.getProjectDirForExercise(exercise).toFile();
             eventBus.post(new InvokedEvent(exercise));
 
 
