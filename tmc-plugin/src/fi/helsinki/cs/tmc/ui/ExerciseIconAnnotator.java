@@ -100,10 +100,10 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     }
 
     private String annotationIconNameForExercise(Exercise exercise) {
-        if (exercise.hasDeadlinePassed()) {
-            return "expired-project-dot.png";
-        } else if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
+        if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
             return "green-project-dot.png";
+        } else if (exercise.hasDeadlinePassed()) {
+            return "expired-project-dot.png";
         } else if (exercise.isAttempted() && exercise.isCompleted()) {
             return "yellow-project-dot.png";
         } else if (exercise.isAttempted()) {
