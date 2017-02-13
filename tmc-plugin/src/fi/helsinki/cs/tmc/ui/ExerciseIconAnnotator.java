@@ -68,9 +68,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         //Had some very weird problems with that. Try again some day.
 
         Image img = origImg;
-        if (exercise.hasDeadlinePassed()) {
-            img = ImageUtilities.createDisabledImage(origImg);
-        }
+        // if (exercise.hasDeadlinePassed()) {
+        //      img = ImageUtilities.createDisabledImage(origImg);
+        // }
         try {
             Image annotation = annotationIconForExericse(exercise);
             if (annotation != null) {
@@ -139,6 +139,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
         final Date deadlineDate = exercise.getDeadlineDate();
         if (!exercise.isCompleted() && deadlineDate != null) {
             parts.add("deadline: " + deadlineDate);
+            if (exercise.hasDeadlinePassed()) {
+                parts.add("expired");
+            }
         }
 
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
