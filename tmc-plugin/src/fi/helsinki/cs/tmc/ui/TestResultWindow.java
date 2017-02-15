@@ -136,21 +136,22 @@ public class TestResultWindow extends TopComponent {
         }
 
         if (submittable) {
+            if (exercise.hasDeadlinePassed()) {
+                dialogDisplayer.displayMessage("All tests passed, but exercise's deadline has expired.");
+            } else {
+                dialogDisplayer.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
 
-            dialogDisplayer.askYesNo("All tests passed. Submit to server?", "Submit?", new Function<Boolean, Void>() {
+                    @Override
+                    public Void apply(final Boolean yes) {
 
-                @Override
-                public Void apply(final Boolean yes) {
+                        if (yes) {
+                            submissionCallback.run();
+                        }
 
-                    if (yes) {
-                        submissionCallback.run();
+                        return null;
                     }
-
-                    return null;
-                }
-            });
-        } else if (exercise.hasDeadlinePassed()) {
-            dialogDisplayer.displayMessage("All tests passed, but exercise's deadline has expired.");
+                });
+            }
         }
     }
 
