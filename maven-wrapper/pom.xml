@@ -56,7 +56,7 @@
         <dependency>
             <groupId>fi.helsinki.cs.tmc</groupId>
             <artifactId>tmc-checkstyle-runner</artifactId>
-            <version>3.0.1</version>
+            <version>3.0.3-SNAPSHOT</version>
         </dependency>
         <dependency>
             <artifactId>sisu-guice</artifactId>
