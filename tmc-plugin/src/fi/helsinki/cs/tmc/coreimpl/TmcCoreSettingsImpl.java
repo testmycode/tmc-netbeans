@@ -36,6 +36,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
     private static final String PREF_SEND_DIAGNOSTICS = "sendDiagnostics";
+    private static final String PREF_OAUTH_TOKEN = "oauthToken";
     
     private static PersistableSettings settings = PersistableSettings.forModule(TmcCoreSettingsImpl.class);
     
@@ -187,8 +188,8 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
     
     @Override
-    public String getPassword() {
-        return unsavedPassword;
+    public Optional<String> getPassword() {
+        return Optional.fromNullable(unsavedPassword);
     }
     
     public void setPassword(String password) {
@@ -278,6 +279,21 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     @Override
     public boolean getSendDiagnostics() {
         return settings.get(PREF_SEND_DIAGNOSTICS, "1").equals("1");
+    }
+    
+    @Override
+    public Optional<String> getToken() {
+        return Optional.fromNullable(settings.get(PREF_OAUTH_TOKEN, null));
+    }
+    
+    @Override
+    public void setToken(String token) {
+        settings.put(PREF_OAUTH_TOKEN, token);
+    }
+    
+    @Override
+    public String getOauthSecret() {
+        return ;
     }
     
     private Locale parseLocale(String s, Locale dflt) {
