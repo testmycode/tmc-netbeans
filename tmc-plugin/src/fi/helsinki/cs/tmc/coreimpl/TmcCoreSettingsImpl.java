@@ -35,6 +35,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_DETAILED_SPYWARE_ENABLED = "detailedSpywareEnabled";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
+    private static final String PREF_SEND_DIAGNOSTICS = "sendDiagnostics";
     
     private static PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
     
@@ -119,6 +120,16 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         }
        
         return FileUtil.toFile(tmcRoot).toPath();
+    }
+
+    @Override
+    public String hostProgramName() {
+        return "netbeans";
+    }
+
+    @Override
+    public String hostProgramVersion() {
+        return System.getProperty("netbeans.buildnumber");
     }
     
     public static class SavedEvent implements TmcEvent {}
@@ -248,6 +259,14 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     
     public boolean getResolveDependencies() {
         return settings.get(PREF_RESOLVE_DEPENDENCIES, "1").equals("1");
+    }
+
+    public void setSendDiagnostics(boolean value) {
+        settings.put(PREF_SEND_DIAGNOSTICS, value ? "1" : "0");
+    }
+    
+    public boolean getSendDiagnostics() {
+        return settings.get(PREF_SEND_DIAGNOSTICS, "1").equals("1");
     }
     
     private Locale parseLocale(String s, Locale dflt) {

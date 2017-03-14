@@ -254,6 +254,16 @@ import org.apache.commons.lang3.StringUtils;
         errorMsgLocaleComboBox.setSelectedItem(new LocaleWrapper(locale));
     }
 
+    @Override
+    public boolean getSendDiagnosticsEnabled() {
+        return sendDiagnostics.isSelected();
+    }
+
+    @Override
+    public void setSendDiagnosticsEnabled(boolean value) {
+        sendDiagnostics.setSelected(value);
+    }
+
     private static class LocaleWrapper {
         private Locale locale;
         public LocaleWrapper(Locale locale) {
@@ -505,6 +515,7 @@ import org.apache.commons.lang3.StringUtils;
         errorMsgLocaleComboBox = new javax.swing.JComboBox();
         restartMessage = new javax.swing.JLabel();
         resolveDependencies = new javax.swing.JCheckBox();
+        sendDiagnostics = new javax.swing.JCheckBox();
 
         usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
 
@@ -599,6 +610,15 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
 
+        sendDiagnostics.setSelected(true);
+        sendDiagnostics.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.sendDiagnostics.text")); // NOI18N
+        sendDiagnostics.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.sendDiagnostics.toolTipText")); // NOI18N
+        sendDiagnostics.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                sendDiagnosticsActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -658,7 +678,10 @@ import org.apache.commons.lang3.StringUtils;
                         .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(spywareEnabledCheckbox)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))))
+                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                    .addGroup(layout.createSequentialGroup()
+                        .addComponent(sendDiagnostics)
+                        .addGap(0, 0, Short.MAX_VALUE))))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -699,6 +722,8 @@ import org.apache.commons.lang3.StringUtils;
                 .addComponent(checkForUnopenedExercisesCheckbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(resolveDependencies)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                .addComponent(sendDiagnostics)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(spywareEnabledCheckbox)
                 .addGap(18, 18, 18)
@@ -750,6 +775,10 @@ import org.apache.commons.lang3.StringUtils;
        
     }//GEN-LAST:event_resolveDependenciesActionPerformed
 
+    private void sendDiagnosticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendDiagnosticsActionPerformed
+
+    }//GEN-LAST:event_sendDiagnosticsActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JLabel adviceLabel;
     private javax.swing.JCheckBox checkForUnopenedExercisesCheckbox;
@@ -771,6 +800,7 @@ import org.apache.commons.lang3.StringUtils;
     private javax.swing.JCheckBox resolveDependencies;
     private javax.swing.JLabel restartMessage;
     private javax.swing.JCheckBox savePasswordCheckBox;
+    private javax.swing.JCheckBox sendDiagnostics;
     private javax.swing.JLabel serverAddressLabel;
     private javax.swing.JTextField serverAddressTextField;
     private javax.swing.JCheckBox spywareEnabledCheckbox;

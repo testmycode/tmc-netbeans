@@ -32,6 +32,10 @@ public interface PreferencesUI {
     
     void setResolveProjectDependenciesEnabled(boolean value);
     
+    boolean getSendDiagnosticsEnabled();
+
+    void setSendDiagnosticsEnabled(boolean value);
+
     Locale getErrorMsgLocale();
 
     void setAvailableCourses(List<Course> courses);

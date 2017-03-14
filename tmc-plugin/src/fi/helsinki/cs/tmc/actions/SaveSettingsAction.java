@@ -22,12 +22,14 @@ public class SaveSettingsAction extends AbstractAction {
     private TmcEventBus eventBus;
     private TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
+    private SendDiagnostics sendDiagnostics;
     
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
         this.tmcCore = TmcCore.get();
         this.fixUnoptimalSettings = new FixUnoptimalSettings();
+        this.sendDiagnostics = new SendDiagnostics();
     }
 
     @Override
@@ -53,6 +55,7 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
         settings.setResolveDependencies(prefUi.getResolveProjectDependenciesEnabled());
+        settings.setSendDiagnostics(prefUi.getSendDiagnosticsEnabled());
 
         eventBus.post(new InvokedEvent());
         
@@ -60,6 +63,10 @@ public class SaveSettingsAction extends AbstractAction {
             fixUnoptimalSettings.run();
         } else {
             fixUnoptimalSettings.undo();
+        }
+
+        if (settings.getSendDiagnostics()) {
+            sendDiagnostics.run();
         }
 
         if (prefUi.getSelectedCourseName() != null) {

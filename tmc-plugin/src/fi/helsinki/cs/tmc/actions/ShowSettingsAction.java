@@ -66,6 +66,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
         prefUI.setResolveProjectDependenciesEnabled(settings.getResolveDependencies());
+        prefUI.setSendDiagnosticsEnabled(settings.getSendDiagnostics());
 
         ActionListener listener = new ActionListener() {
             @Override
