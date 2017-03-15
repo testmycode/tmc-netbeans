@@ -776,7 +776,8 @@ import org.apache.commons.lang3.StringUtils;
     }//GEN-LAST:event_resolveDependenciesActionPerformed
 
     private void sendDiagnosticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendDiagnosticsActionPerformed
-
+        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
+        settings.setSendDiagnostics(getSendDiagnosticsEnabled());
     }//GEN-LAST:event_sendDiagnosticsActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables

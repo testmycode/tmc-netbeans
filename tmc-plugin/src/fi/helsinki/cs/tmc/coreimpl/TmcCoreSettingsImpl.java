@@ -265,6 +265,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         settings.put(PREF_SEND_DIAGNOSTICS, value ? "1" : "0");
     }
     
+    @Override
     public boolean getSendDiagnostics() {
         return settings.get(PREF_SEND_DIAGNOSTICS, "1").equals("1");
     }
