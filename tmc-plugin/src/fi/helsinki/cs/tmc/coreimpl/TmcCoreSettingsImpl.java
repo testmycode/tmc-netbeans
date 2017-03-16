@@ -124,12 +124,22 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
     @Override
     public String hostProgramName() {
+        final String productString = System.getProperty("netbeans.productversion").trim();
+        final String computedName = productString.substring(0, productString.lastIndexOf(" ")).trim();
+        if (!computedName.isEmpty()) {
+            return computedName;
+        }
         return "netbeans";
     }
 
     @Override
     public String hostProgramVersion() {
-        return System.getProperty("netbeans.buildnumber");
+        final String productString = System.getProperty("netbeans.productversion").trim();
+        final String computedVersion = productString.substring(productString.lastIndexOf(" "), productString.length()).trim();
+        if (!computedVersion.isEmpty()) {
+            return computedVersion;
+        }
+        return "unknown";
     }
     
     public static class SavedEvent implements TmcEvent {}
