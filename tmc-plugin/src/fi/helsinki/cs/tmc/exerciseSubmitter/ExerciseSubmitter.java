@@ -1,7 +1,6 @@
 package fi.helsinki.cs.tmc.exerciseSubmitter;
 
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
-import fi.helsinki.cs.tmc.actions.SubmitExerciseAction;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -27,7 +26,7 @@ import org.netbeans.api.project.Project;
 
 public class ExerciseSubmitter {
 
-    private static final Logger log = Logger.getLogger(SubmitExerciseAction.class.getName());
+    private static final Logger log = Logger.getLogger(ExerciseSubmitter.class.getName());
 
     public static class InvokedEvent implements TmcEvent {
 

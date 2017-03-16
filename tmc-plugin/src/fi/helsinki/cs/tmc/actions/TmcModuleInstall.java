@@ -97,6 +97,9 @@ public class TmcModuleInstall extends ModuleInstall {
                         }
                     }).run();
                 }
+                if (!isFirstRun && settings.getSendDiagnostics()) {
+                    new SendDiagnostics().run();
+                }
             }
         });
     }
