@@ -10,7 +10,7 @@
 
     <target name="-check-mavenmodules">
         <uptodate property="mavenmodules.uptodate"
-                  srcfile="maven-wrapper/target/nbm/maven-wrapper-1.13.nbm"
+                  srcfile="maven-wrapper/target/nbm/maven-wrapper-1.14.nbm"
                   targetfile="mavenmodules"/>
     </target>
 

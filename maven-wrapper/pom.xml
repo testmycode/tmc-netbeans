@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.13</version>
+    <version>1.14</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.9.11-SNAPSHOT</version>
+            <version>0.9.12-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
