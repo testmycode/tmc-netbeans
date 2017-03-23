@@ -43,6 +43,7 @@ public class TmcModuleInstall extends ModuleInstall {
         WindowManager.getDefault().invokeWhenUIReady(new Runnable() {
             @Override
             public void run() {
+                CheckForOutdatedNetbeans.run();
 
                 TmcCore.setInstance(new TmcCore());
 
