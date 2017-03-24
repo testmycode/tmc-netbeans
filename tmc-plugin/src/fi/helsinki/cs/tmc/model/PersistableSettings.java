@@ -83,6 +83,10 @@ public class PersistableSettings {
         transients.clear();
     }
     
+    public Preferences getPreferences() {
+        return prefs;
+    }
+
     private void flushPrefsOrThrow() {
         try {
             prefs.flush();

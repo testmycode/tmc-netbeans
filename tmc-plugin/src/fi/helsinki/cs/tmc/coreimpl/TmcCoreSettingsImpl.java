@@ -37,7 +37,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
     private static final String PREF_SEND_DIAGNOSTICS = "sendDiagnostics";
     
-    private static PersistableSettings settings = PersistableSettings.forModule(TmcSettings.class);
+    private static PersistableSettings settings = PersistableSettings.forModule(TmcCoreSettingsImpl.class);
     
     private Tailoring tailoring = SelectedTailoring.get();
     private TmcEventBus eventBus = TmcEventBus.getDefault();
