@@ -3,9 +3,12 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
+import com.google.common.base.Optional;
+
+import org.openide.windows.WindowManager;
+
 import java.awt.event.ActionListener;
 import javax.swing.SwingUtilities;
-import org.openide.windows.WindowManager;
 
 public class LoginDialog extends javax.swing.JDialog {
 
@@ -14,10 +17,10 @@ public class LoginDialog extends javax.swing.JDialog {
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
-
+    
     private TmcCoreSettingsImpl settings;
     private ActionListener onLogin;
-
+    
     /** Creates new form LoginForm */
     public LoginDialog(ActionListener onLogin) {
         super(WindowManager.getDefault().getMainWindow(), true);
@@ -27,8 +30,6 @@ public class LoginDialog extends javax.swing.JDialog {
 
         this.settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         this.usernameField.setText(settings.getUsername());
-        this.passwordField.setText(settings.getPassword());
-        this.savePasswordCheckbox.setSelected(settings.isSavingPassword());
 
         if (!usernameField.getText().isEmpty()) {
             SwingUtilities.invokeLater(new Runnable() {
@@ -153,8 +154,7 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         settings.setUsername(usernameField.getText());
-        settings.setPassword(new String(passwordField.getPassword()));
-        settings.setSavingPassword(savePasswordCheckbox.isSelected());
+        settings.setPassword(Optional.of(new String(passwordField.getPassword())));
         settings.save();
 
         onLogin.actionPerformed(evt);

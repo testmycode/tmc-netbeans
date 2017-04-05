@@ -54,8 +54,6 @@ public final class ShowSettingsAction extends AbstractAction {
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         prefUI.setUsername(settings.getUsername());
-        prefUI.setPassword(settings.getPassword());
-        prefUI.setShouldSavePassword(settings.isSavingPassword());
         prefUI.setServerBaseUrl(settings.getServerBaseUrl());
         prefUI.setProjectDir(settings.getProjectRootDir());
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());

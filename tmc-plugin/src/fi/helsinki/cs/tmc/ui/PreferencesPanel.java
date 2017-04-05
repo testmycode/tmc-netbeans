@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
@@ -296,8 +297,8 @@ import org.apache.commons.lang3.StringUtils;
     private void updateSettingsForRefresh() {
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
         settings.setUsername(getUsername());
-        settings.setPassword(getPassword());
         settings.setServerBaseUrl(getServerBaseUrl());
+        TmcServerAddressNormalizer.normalize();
         settings.setProjectRootDir(getProjectDir());
         settings.save(); // TODO: is this wanted
     }

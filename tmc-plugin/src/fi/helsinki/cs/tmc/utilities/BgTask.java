@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 
 import java.util.concurrent.Callable;
@@ -124,14 +125,25 @@ public class BgTask<V> implements CancellableCallable<V> {
         }
 
         if (proressObserver instanceof BridgingProgressObserver) {
-            BridgingProgressObserver bi =(BridgingProgressObserver) this.proressObserver;
+            BridgingProgressObserver bi = (BridgingProgressObserver) this.proressObserver;
             bi.attach(progressHandle);
         }
 
         progressHandle.start();
         try {
-            final V result = callable.call();
+            V resultTemp = null;
+            boolean successful = true;
+            do {
+                try {
+                    resultTemp = callable.call();
+                } catch (NotLoggedInException ex) {
+                    successful = false;
+                    new LoginManager().login();
+                    //TODO: add a message if username or password incorrect
+                }
+            } while (!successful);
 
+            final V result = resultTemp;
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

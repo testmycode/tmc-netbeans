@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -46,9 +47,8 @@ public class SaveSettingsAction extends AbstractAction {
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         
         settings.setUsername(prefUi.getUsername());
-        settings.setPassword(prefUi.getPassword());
-        settings.setSavingPassword(prefUi.getShouldSavePassword());
         settings.setServerBaseUrl(prefUi.getServerBaseUrl());
+        TmcServerAddressNormalizer.normalize();
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
