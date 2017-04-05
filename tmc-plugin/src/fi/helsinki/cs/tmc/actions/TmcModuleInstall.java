@@ -77,8 +77,6 @@ public class TmcModuleInstall extends ModuleInstall {
                 if (isFirstRun) {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
-                } else if (new TmcServerCommunicationTaskFactory().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
-                    LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     // Do full refresh.
                     new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
