@@ -12,6 +12,7 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 
 import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.nio.file.Path;
@@ -64,7 +65,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
     @Override
     public Optional<Course> getCurrentCourse() {
-        return Optional.of(CourseDb.getInstance().getCurrentCourse());
+        return Optional.fromNullable(CourseDb.getInstance().getCurrentCourse());
     }
 
     @Override
@@ -155,15 +156,16 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         settings.put(PREF_OAUTH_APPLICATION_ID, credentials.getOauthApplicationId());
         settings.put(PREF_OAUTH_SECRET, credentials.getOauthSecret());
     }
-
-    @Override
-    public void setOrganization(String organization) {
-        settings.put(PREF_ORGANIZATION, organization);
-    }
-
+    
     @Override
     public String getOrganization() {
         return settings.get(PREF_ORGANIZATION, null);
+    }
+    
+    @Override
+    public void setOrganization(String organization) {
+        settings.put(PREF_ORGANIZATION, organization);
+
     }
 
     public static class SavedEvent implements TmcEvent {}
@@ -298,8 +300,12 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public void setToken(String token) {
-        settings.put(PREF_OAUTH_TOKEN, token);
+    public void setToken(Optional<String> token) {
+        if (token.isPresent()) {
+            settings.put(PREF_OAUTH_TOKEN, token.get());
+        } else {
+            settings.remove(PREF_OAUTH_TOKEN);
+        }
     }
 
     private Locale parseLocale(String s, Locale dflt) {

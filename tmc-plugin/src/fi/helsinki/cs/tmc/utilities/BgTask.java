@@ -1,12 +1,15 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Cancellable;
@@ -132,13 +135,22 @@ public class BgTask<V> implements CancellableCallable<V> {
         progressHandle.start();
         try {
             V resultTemp = null;
-            boolean successful = true;
+            boolean successful;
             do {
                 try {
+                    successful = true;
                     resultTemp = callable.call();
-                } catch (NotLoggedInException ex) {
+                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException ex) {
                     successful = false;
-                    new LoginManager().login();
+                    boolean authenticationSuccessful;
+                    do {
+                        try {
+                            authenticationSuccessful = true;
+                            new LoginManager().login();
+                        } catch (AuthenticationFailedException loginException) {
+                            authenticationSuccessful = false;
+                        }
+                    } while (!authenticationSuccessful);
                     //TODO: add a message if username or password incorrect
                 }
             } while (!successful);
