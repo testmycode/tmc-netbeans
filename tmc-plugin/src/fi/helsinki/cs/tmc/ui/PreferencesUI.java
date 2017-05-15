@@ -9,22 +9,14 @@ import java.util.Locale;
 public interface PreferencesUI {
 
     String getProjectDir();
-
-    String getSelectedCourseName();
-
-    String getServerBaseUrl();
-
-    String getUsername();
     
-    String getPassword();
-    
-    boolean getShouldSavePassword();
-
     List<Course> getAvailableCourses();
-    
+            
     boolean getCheckForUpdatesInTheBackground();
     
     boolean getCheckForUnopenedExercisesAtStartup();
+    
+    String getSelectedCourseName();
     
     boolean getSpywareEnabled();
     
@@ -37,23 +29,9 @@ public interface PreferencesUI {
     void setSendDiagnosticsEnabled(boolean value);
 
     Locale getErrorMsgLocale();
-
-    void setAvailableCourses(List<Course> courses);
     
     void setProjectDir(String projectDir);
-
-    void setSelectedCourseName(String courseName);
-
-    void setServerBaseUrl(String baseUrl);
-
-    void setUsername(String username);
-    
-    void setUsernameFieldName(String usernameFieldName);
-    
-    void setPassword(String password);
-    
-    void setShouldSavePassword(boolean shouldSavePassword);
-    
+                
     void setCheckForUpdatesInTheBackground(boolean shouldCheck);
     
     void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck);

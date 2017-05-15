@@ -46,8 +46,6 @@ public class SaveSettingsAction extends AbstractAction {
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         
-        settings.setUsername(prefUi.getUsername());
-        settings.setServerBaseUrl(prefUi.getServerBaseUrl());
         TmcServerAddressNormalizer.normalize();
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());

@@ -141,6 +141,7 @@
                         <publicPackage>org.yaml.snakeyaml</publicPackage>
                         <publicPackage>org.apache.http.*</publicPackage>
                         <publicPackage>org.apache.commons.*</publicPackage>
+                        <publicPackage>org.apache.oltu.oauth2.common.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.core.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.spyware.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.abstraction.*</publicPackage>
