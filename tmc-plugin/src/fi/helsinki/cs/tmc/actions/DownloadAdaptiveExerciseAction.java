@@ -51,9 +51,14 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
         logger.log(Level.WARNING, "hey you pålk,gpodfk,pogdkf,g");
         ProgressObserver observer = new BridgingProgressObserver();
         Callable<Exercise> ex = TmcCore.get().downloadAdaptiveExercise(observer);
-        BgTask.start("hjhgjgj", ex, observer, new BgTaskListener<Exercise>() {
+        BgTask.start("Downloading new adaptive exercise...", ex, observer, new BgTaskListener<Exercise>() {
             @Override
             public void bgTaskReady(Exercise ex) {
+                if (ex == null) {
+                    dialogs.displayMessage("Ei adaptiivisia tehtäviä saatavilla :)");
+                    return;
+                }
+                dialogs.displayMessage("Ladattiin uusi adaptiivinen tehtävä :)");
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 projectMediator.openProject(proj);
             }
@@ -64,7 +69,7 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                logger.log(Level.SEVERE, "murks<ijmdoisafs");
+                logger.log(Level.SEVERE, "Something went wrong.");
             }
         });
     }
