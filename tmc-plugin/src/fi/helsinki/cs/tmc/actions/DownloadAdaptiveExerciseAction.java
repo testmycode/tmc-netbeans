@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -31,11 +26,11 @@ import org.openide.util.NbBundle.Messages;
 @Messages("CTL_DownloadAdaptiveExerciseAction=DownloadAdaptiveExerciseAction")
 public final class DownloadAdaptiveExerciseAction implements ActionListener {
 
-    private static final Logger logger = Logger.getLogger(DownloadSolutionAction.class.getName());
+    private static final Logger logger = Logger.getLogger(DownloadAdaptiveExerciseAction.class.getName());
     
-    private ProjectMediator projectMediator;
-    private ConvenientDialogDisplayer dialogs;
-    private TmcEventBus eventBus;
+    private final ProjectMediator projectMediator;
+    private final ConvenientDialogDisplayer dialogs;
+    private final TmcEventBus eventBus;
     
     public DownloadAdaptiveExerciseAction() {
         this.projectMediator = ProjectMediator.getInstance();
@@ -45,7 +40,6 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO implement action body
         logger.log(Level.WARNING, "Init adaptive exercise downloading");
         ProgressObserver observer = new BridgingProgressObserver();
         Callable<Exercise> ex = TmcCore.get().downloadAdaptiveExercise(observer);
@@ -53,21 +47,22 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
             @Override
             public void bgTaskReady(Exercise ex) {
                 if (ex == null) {
-                    dialogs.displayMessage("Ei adaptiivisia tehtäviä saatavilla :)");
+                    dialogs.displayMessage("No adaptive excer :)");
                     return;
                 }
-                dialogs.displayMessage("Ladattiin uusi adaptiivinen tehtävä :)");
+                dialogs.displayMessage("Adaptive exercise downloaded :)");
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 projectMediator.openProject(proj);
             }
 
             @Override
             public void bgTaskCancelled() {
+                logger.log(Level.WARNING, "adaptive exercise download cancelled");
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                logger.log(Level.SEVERE, "Something went wrong.");
+                logger.log(Level.SEVERE, "Something went wrong: {0}", ex.toString());
             }
         });
     }
