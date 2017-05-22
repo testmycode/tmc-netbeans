@@ -5,7 +5,6 @@
  */
 package fi.helsinki.cs.tmc.actions;
 
-import com.google.common.base.Function;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -25,7 +24,6 @@ import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionRegistration;
 import org.openide.util.NbBundle.Messages;
-import org.netbeans.api.project.ui.OpenProjects;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadAdaptiveExerciseAction")
 @ActionRegistration(displayName = "#CTL_DownloadAdaptiveExerciseAction")
@@ -48,7 +46,7 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         // TODO implement action body
-        logger.log(Level.WARNING, "hey you pålk,gpodfk,pogdkf,g");
+        logger.log(Level.WARNING, "Init adaptive exercise downloading");
         ProgressObserver observer = new BridgingProgressObserver();
         Callable<Exercise> ex = TmcCore.get().downloadAdaptiveExercise(observer);
         BgTask.start("Downloading new adaptive exercise...", ex, observer, new BgTaskListener<Exercise>() {
