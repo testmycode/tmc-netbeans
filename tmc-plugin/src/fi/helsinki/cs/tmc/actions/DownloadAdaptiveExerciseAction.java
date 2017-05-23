@@ -1,8 +1,3 @@
-/*
- * To change this license header, choose License Headers in Project Properties.
- * To change this template file, choose Tools | Templates
- * and open the template in the editor.
- */
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
@@ -45,8 +40,8 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
     
     @Override
     public void actionPerformed(ActionEvent e) {
-        // TODO implement action body
-        logger.log(Level.WARNING, "Init adaptive exercise downloading.");
+
+        logger.log(Level.WARNING, "Init adaptive exercise downloading");
         ProgressObserver observer = new BridgingProgressObserver();
         Callable<Exercise> ex = TmcCore.get().downloadAdaptiveExercise(observer);
         BgTask.start("Downloading new adaptive exercise...", ex, observer, new BgTaskListener<Exercise>() {
