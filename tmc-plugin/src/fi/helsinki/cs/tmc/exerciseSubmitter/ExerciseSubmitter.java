@@ -60,6 +60,9 @@ public class ExerciseSubmitter {
     }
 
     private void submitProject(final TmcProjectInfo project) {
+        if(project.isAdaptive()) {
+            submitAdaptiveProject(project);
+        }
         final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseDb);
         if (exercise == null || !exercise.isReturnable()) {
             return;
@@ -108,5 +111,9 @@ public class ExerciseSubmitter {
             }
 
         });
+    }
+    
+    private void submitAdaptiveProject(final TmcProjectInfo project) {
+        // submit
     }
 }

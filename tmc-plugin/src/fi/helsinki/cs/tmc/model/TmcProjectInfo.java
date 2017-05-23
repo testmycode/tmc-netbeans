@@ -47,6 +47,10 @@ public class TmcProjectInfo {
     public TmcProjectFile getTmcProjectFile() {
         return TmcProjectFile.forProject(FileUtil.toFile(getProjectDir()));
     }
+    
+    public boolean isAdaptive() {
+        return false;
+    }
 
     //TODO: a more robust/elegant/extensible project type recognition system
     public TmcProjectType getProjectType() {
