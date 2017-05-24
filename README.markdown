@@ -1,3 +1,6 @@
+Legacy-ohjelmointiprojekti: TMC
+This a fork for issue 111
+
 # Test My Code NetBeans plugin #
 
 [![Build Status](https://travis-ci.org/testmycode/tmc-netbeans.svg?branch=master)](https://travis-ci.org/testmycode/tmc-netbeans)
