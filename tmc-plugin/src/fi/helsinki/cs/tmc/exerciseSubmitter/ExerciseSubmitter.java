@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.Theme;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.data.ResultCollector;
@@ -12,17 +13,19 @@ import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.ui.AdaptiveExerciseAfterGroupDialog;
+import fi.helsinki.cs.tmc.ui.AdaptiveExerciseResultDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
+import org.netbeans.api.project.Project;
+
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.netbeans.api.project.Project;
 
 public class ExerciseSubmitter {
 
@@ -60,9 +63,6 @@ public class ExerciseSubmitter {
     }
 
     private void submitProject(final TmcProjectInfo project) {
-        if (project.isAdaptive()) {
-            submitAdaptiveProject(project);
-        }
         final Exercise exercise = projectMediator.tryGetExerciseForProject(project, courseDb);
         if (exercise == null || !exercise.isReturnable()) {
             return;
@@ -70,29 +70,46 @@ public class ExerciseSubmitter {
 
         projectMediator.saveAllFiles();
 
-        Callable<SubmissionResult> callable = TmcCore.get().submit(ProgressObserver.NULL_OBSERVER, exercise);
+        Callable<SubmissionResult> callable;
+        if (exercise.isAdaptive()) {
+            callable = TmcCore.get().submitAdaptiveExercise(ProgressObserver.NULL_OBSERVER, exercise);
+        } else {
+            callable = TmcCore.get().submit(ProgressObserver.NULL_OBSERVER, exercise);
+        }
 
         final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
 
         BgTask.start("Waiting for results from server.", callable, new BgTaskListener<SubmissionResult>() {
             @Override
             public void bgTaskReady(SubmissionResult result) {
-
-                final ResultCollector resultCollector = new ResultCollector(exercise);
-                resultCollector.setValidationResult(result.getValidationResult());
-                resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
-
+                if (exercise.isAdaptive()) {
+                    new AdaptiveExerciseResultDialog(exercise, result);
+                } else {
+                    final ResultCollector resultCollector = new ResultCollector(exercise);
+                    resultCollector.setValidationResult(result.getValidationResult());
+                    resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+                }
                 // We change exercise state as a first approximation,
                 // then refresh from the server and potentially notify the user
                 // as we might have unlocked new exercises.
                 exercise.setAttempted(true);
 
                 if (result.getStatus() == SubmissionResult.Status.OK) {
-                    exercise.setCompleted(true);
+                    if (exercise.isCompleted()) {
+                        exercise.setAllReviewPointsGiven(true);
+                    } else {
+                        exercise.setCompleted(true);
+                    }
                 }
 
                 courseDb.save();
 
+                if (isAllExercisesInThemeCompleted(courseDb.themeForExercise(exercise))) {
+                    log.log(Level.INFO, "All exercises in this theme are done. "
+                        + "Continuing to adaptive exercises.");
+                    new AdaptiveExerciseAfterGroupDialog();
+                }
+                
                 new CheckForNewExercisesOrUpdates(true, false).run();
                 dialog.close();
             }
@@ -104,16 +121,21 @@ public class ExerciseSubmitter {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                        log.log(Level.INFO, "Error waiting for results from server.", ex);
-                        String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                        dialogDisplayer.displayError("Error trying to get test results.", ex);
-                        dialog.close();
+                log.log(Level.INFO, "Error waiting for results from server.", ex);
+                String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                dialogDisplayer.displayError("Error trying to get test results.", ex);
+                dialog.close();
             }
 
         });
     }
-    
-    private void submitAdaptiveProject(final TmcProjectInfo project) {
-        // submit
+
+    private boolean isAllExercisesInThemeCompleted(Theme theme) {
+        for (Exercise ex : courseDb.getCurrentCoursesExercisesByTheme(theme)) {
+            if (!ex.isCompleted() && ex.isAvailable()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

@@ -7,6 +7,13 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 
+import org.apache.commons.lang3.StringUtils;
+import org.netbeans.api.project.Project;
+import org.netbeans.spi.project.ProjectIconAnnotator;
+import org.openide.util.ChangeSupport;
+import org.openide.util.ImageUtilities;
+import org.openide.util.lookup.ServiceProvider;
+
 import java.awt.Image;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -18,12 +25,6 @@ import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeListener;
-import org.apache.commons.lang3.StringUtils;
-import org.netbeans.api.project.Project;
-import org.netbeans.spi.project.ProjectIconAnnotator;
-import org.openide.util.ChangeSupport;
-import org.openide.util.ImageUtilities;
-import org.openide.util.lookup.ServiceProvider;
 
 @ServiceProvider(service = ProjectIconAnnotator.class)
 public class ExerciseIconAnnotator implements ProjectIconAnnotator {
@@ -87,7 +88,12 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     }
 
     private Image annotationIconForExericse(Exercise exercise) throws IOException {
-        String name = annotationIconNameForExercise(exercise);
+        String name;
+        if (exercise.isAdaptive()) {
+            name = annotationIconNameForAdaptiveExercise(exercise);
+        } else {
+            name = annotationIconNameForExercise(exercise);
+        }
         if (name != null) {
             if (!iconCache.containsKey(name)) {
                 Image img = ImageIO.read(getClass().getClassLoader().getResource("fi/helsinki/cs/tmc/ui/" + name));
@@ -112,6 +118,20 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return "black-project-dot.png";
         }
     }
+    
+    private String annotationIconNameForAdaptiveExercise(Exercise exercise) {
+        if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
+            return "green-project-heart.png";
+        } else if (exercise.hasDeadlinePassed()) {
+            return "expired-project-heart.png";
+        } else if (exercise.isAttempted() && exercise.isCompleted()) {
+            return "yellow-project-heart.png";
+        } else if (exercise.isAttempted()) {
+            return "red-project-heart.png";
+        } else {
+            return "black-project-heart.png";
+        }
+    }
 
     private String tooltipForExercise(Exercise exercise) {
         List<String> parts = new ArrayList<String>();
@@ -131,7 +151,6 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                     parts.add("code review not yet done");
                 }
             }
-
         } else {
             parts.add("exercise not yet submitted");
         }

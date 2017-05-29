@@ -10,7 +10,7 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithThemeDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import java.awt.event.ActionEvent;
@@ -78,7 +78,7 @@ public class SaveSettingsAction extends AbstractAction {
                 public void bgTaskReady(List<Course> result) {
                     LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                     if (status.thereIsSomethingToDownload(false)) {
-                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                        DownloadOrUpdateExercisesWithThemeDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable, courseDb.getCurrentCourseThemes());
                     }
                 }
 
