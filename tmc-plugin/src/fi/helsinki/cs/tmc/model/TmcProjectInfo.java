@@ -1,8 +1,10 @@
 package fi.helsinki.cs.tmc.model;
 
 import fi.helsinki.cs.tmc.utilities.zip.RecursiveZipper;
+
 import java.io.File;
 import java.util.regex.Pattern;
+
 import org.netbeans.api.project.Project;
 import org.netbeans.api.project.ProjectUtils;
 import org.netbeans.api.project.ui.OpenProjects;
@@ -46,6 +48,10 @@ public class TmcProjectInfo {
 
     public TmcProjectFile getTmcProjectFile() {
         return TmcProjectFile.forProject(FileUtil.toFile(getProjectDir()));
+    }
+    
+    public boolean isAdaptive() {
+        return false;
     }
 
     //TODO: a more robust/elegant/extensible project type recognition system
