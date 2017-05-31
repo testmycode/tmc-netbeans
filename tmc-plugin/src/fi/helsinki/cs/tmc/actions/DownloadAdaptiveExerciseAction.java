@@ -11,16 +11,16 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
+import org.openide.awt.ActionID;
+import org.openide.awt.ActionReference;
+import org.openide.awt.ActionRegistration;
+import org.openide.util.NbBundle.Messages;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import org.openide.awt.ActionID;
-import org.openide.awt.ActionReference;
-import org.openide.awt.ActionRegistration;
-import org.openide.util.NbBundle.Messages;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadAdaptiveExerciseAction")
 @ActionRegistration(displayName = "#CTL_DownloadAdaptiveExerciseAction")
@@ -29,20 +29,19 @@ import org.openide.util.NbBundle.Messages;
 public final class DownloadAdaptiveExerciseAction implements ActionListener {
 
     private static final Logger logger = Logger.getLogger(DownloadAdaptiveExerciseAction.class.getName());
-    
+
     private final ProjectMediator projectMediator;
     private final ConvenientDialogDisplayer dialogs;
     private final TmcEventBus eventBus;
-    
+
     public DownloadAdaptiveExerciseAction() {
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();
     }
-    
+
     @Override
     public void actionPerformed(ActionEvent e) {
-
         logger.log(Level.INFO, "Init adaptive exercise downloading");
         ProgressObserver observer = new BridgingProgressObserver();
         Callable<Exercise> ex = TmcCore.get().downloadAdaptiveExercise(observer);
@@ -50,10 +49,10 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
             @Override
             public void bgTaskReady(Exercise ex) {
                 if (ex == null) {
-                    dialogs.displayMessage("No adaptive exercises available.");
+                    dialogs.displayMessage("No adaptive excercises :)");
                     return;
                 }
-                dialogs.displayMessage("A new adaptive exercise downloaded.");
+                dialogs.displayMessage("Adaptive exercise downloaded");
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 projectMediator.openProject(proj);
             }

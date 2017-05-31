@@ -10,13 +10,13 @@ import javax.swing.ImageIcon;
 import javax.swing.text.DefaultCaret;
 
 public class OrganizationCard extends javax.swing.JPanel {
-    
+
     public OrganizationCard(Organization organization) {
         initComponents();
-        
+
         DefaultCaret caret = (DefaultCaret)this.organizationInformation.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
-        
+
         this.organizationName.setText(organization.getName());
         String information = organization.getInformation();
         if (information.length() > 75) {
@@ -27,11 +27,15 @@ public class OrganizationCard extends javax.swing.JPanel {
         ImageIcon image = new ImageIcon(logoUrl(organization.getLogoPath()));
         this.logo.setIcon(image);
     }
-    
+
     public String getOrganizationName() {
         return this.organizationName.getText();
     }
-    
+
+    public String getOrganizationSlug() {
+        return this.organizationSlug.getText();
+    }
+
     private URL logoUrl(String path) {
         final String address = TmcSettingsHolder.get().getServerAddress();
         String url;
@@ -46,7 +50,7 @@ public class OrganizationCard extends javax.swing.JPanel {
             return null;
         }
     }
-    
+
     public void setColors(Color foreground, Color background) {
         this.setBackground(background);
         this.organizationName.setForeground(foreground);
