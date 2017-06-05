@@ -1,24 +1,18 @@
 package fi.helsinki.cs.tmc.ui;
 
-import com.google.common.base.Optional;
-import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tasks.LoginTask;
 import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import fi.helsinki.cs.tmc.utilities.LoginManager;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
+import com.google.common.base.Optional;
+
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -31,9 +25,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import org.openide.util.Exceptions;
 
 /**
  * The settings panel.
@@ -52,7 +43,7 @@ import org.openide.util.Exceptions;
         setUpErrorMsgLocaleSelection();
         updateFields();
     }
-    
+
     private void updateFields() {
         final String username = TmcSettingsHolder.get().getUsername();
         final JLabel login = this.loginLabel;
@@ -64,7 +55,7 @@ import org.openide.util.Exceptions;
             login.setText("Not logged in!");
             logout.setEnabled(false);
         }
-        
+
         String org = TmcSettingsHolder.get().getOrganization();
         final JLabel selectedOrg = this.selectedOrganizationLabel;
         if (org != null) {
@@ -72,7 +63,7 @@ import org.openide.util.Exceptions;
         } else {
             selectedOrg.setText("No organization selected");
         }
-        
+
         Optional<Course> course = TmcSettingsHolder.get().getCurrentCourse();
         final JLabel selectedCourse = this.selectedCourseLabel;
         if (course.isPresent()) {
@@ -81,7 +72,7 @@ import org.openide.util.Exceptions;
             selectedCourse.setText("No course selected");
         }
     }
-    
+
     @Override
     public List<Course> getAvailableCourses() {
         try {
@@ -106,7 +97,7 @@ import org.openide.util.Exceptions;
         TmcSettingsHolder.get().setCourse(course);
         this.selectedCourseLabel.setText(course.getName());
     }
-    
+
     @Override
     public String getSelectedCourseName() {
         return this.selectedCourseLabel.getText();
@@ -131,12 +122,12 @@ import org.openide.util.Exceptions;
     public void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck) {
         checkForUnopenedExercisesCheckbox.setSelected(shouldCheck);
     }
-    
+
     @Override
     public boolean getResolveProjectDependenciesEnabled() {
         return resolveDependencies.isSelected();
     }
-    
+
     @Override
     public void setResolveProjectDependenciesEnabled(boolean value) {
         resolveDependencies.setSelected(value);
@@ -176,12 +167,12 @@ import org.openide.util.Exceptions;
     public void setSendDiagnosticsEnabled(boolean value) {
         sendDiagnostics.setSelected(value);
     }
-    
+
     public void setOrganization(OrganizationCard organization) {
-        TmcSettingsHolder.get().setOrganization(organization.getOrganizationName());
+        TmcSettingsHolder.get().setOrganization(organization.getOrganizationSlug());
         this.selectedOrganizationLabel.setText(organization.getOrganizationName());
     }
-    
+
     private static class LocaleWrapper {
         private Locale locale;
         public LocaleWrapper(Locale locale) {
@@ -493,7 +484,7 @@ import org.openide.util.Exceptions;
     }//GEN-LAST:event_changeCourseButtonActionPerformed
 
     private void resolveDependenciesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveDependenciesActionPerformed
-       
+
     }//GEN-LAST:event_resolveDependenciesActionPerformed
 
     private void sendDiagnosticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendDiagnosticsActionPerformed
@@ -513,11 +504,11 @@ import org.openide.util.Exceptions;
         LoginManager manager = new LoginManager();
         manager.logout();
         updateFields();
-        
+
         JDialog window = (JDialog) SwingUtilities.getWindowAncestor(this);
         window.setVisible(false);
         window.dispose();
-        
+
         BgTask.start("Logged out. Asking to log in.", new LoginTask());
     }//GEN-LAST:event_logoutButtonActionPerformed
 
