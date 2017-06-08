@@ -8,7 +8,6 @@ import fi.helsinki.cs.tmc.langs.domain.RunResult.Status;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
 import fi.helsinki.cs.tmc.ui.TestResultWindow;
 
-import com.google.common.base.Splitter;
 import com.google.common.collect.ImmutableList;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -88,7 +87,7 @@ public final class ResultCollector {
             setTestCaseResults(runResult.testResults);
         }
     }
-    
+
     private synchronized void showResultsIfReady() {
 
         boolean ready = dontWaitForValidations || (testCaseResultsSet && validationResultsSet);
@@ -136,5 +135,5 @@ public final class ResultCollector {
         return log;
     }
 
-    
+
 }

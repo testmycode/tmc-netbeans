@@ -1,20 +1,18 @@
 package fi.helsinki.cs.tmc.exerciseSubmitter;
 
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
-import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.domain.Theme;
-import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
-import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
+import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.AdaptiveExerciseAfterGroupDialog;
-import fi.helsinki.cs.tmc.ui.AdaptiveExerciseResultDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;
@@ -82,13 +80,10 @@ public class ExerciseSubmitter {
         BgTask.start("Waiting for results from server.", callable, new BgTaskListener<SubmissionResult>() {
             @Override
             public void bgTaskReady(SubmissionResult result) {
-                if (exercise.isAdaptive()) {
-                    new AdaptiveExerciseResultDialog(exercise, result);
-                } else {
-                    final ResultCollector resultCollector = new ResultCollector(exercise);
-                    resultCollector.setValidationResult(result.getValidationResult());
-                    resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
-                }
+                final ResultCollector resultCollector = new ResultCollector(exercise);
+                resultCollector.setValidationResult(result.getValidationResult());
+                resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+
                 // We change exercise state as a first approximation,
                 // then refresh from the server and potentially notify the user
                 // as we might have unlocked new exercises.
@@ -104,12 +99,12 @@ public class ExerciseSubmitter {
 
                 courseDb.save();
 
-                if (isAllExercisesInThemeCompleted(courseDb.themeForExercise(exercise))) {
-                    log.log(Level.INFO, "All exercises in this theme are done. "
+                if (!exercise.isAdaptive() && isAllNormalExercisesInWeekCompleted(exercise.getWeek())) {
+                    log.log(Level.INFO, "All exercises in this week are done. "
                         + "Continuing to adaptive exercises.");
-                    new AdaptiveExerciseAfterGroupDialog();
+                    AdaptiveExerciseAfterGroupDialog.display();
                 }
-                
+
                 new CheckForNewExercisesOrUpdates(true, false).run();
                 dialog.close();
             }
@@ -126,13 +121,12 @@ public class ExerciseSubmitter {
                 dialogDisplayer.displayError("Error trying to get test results.", ex);
                 dialog.close();
             }
-
         });
     }
 
-    private boolean isAllExercisesInThemeCompleted(Theme theme) {
-        for (Exercise ex : courseDb.getCurrentCoursesExercisesByTheme(theme)) {
-            if (!ex.isCompleted() && ex.isAvailable()) {
+    private boolean isAllNormalExercisesInWeekCompleted(int week) {
+        for (Exercise ex : courseDb.getExercisesByWeek(week)) {
+            if (!ex.isCompleted() && !ex.isAdaptive()) {
                 return false;
             }
         }

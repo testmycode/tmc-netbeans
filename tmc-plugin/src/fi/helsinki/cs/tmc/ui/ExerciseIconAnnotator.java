@@ -118,7 +118,7 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             return "black-project-dot.png";
         }
     }
-    
+
     private String annotationIconNameForAdaptiveExercise(Exercise exercise) {
         if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
             return "green-project-heart.png";
@@ -162,7 +162,9 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
                 parts.add("expired");
             }
         }
-
+        if (exercise.isAdaptive()) {
+            parts.add("adaptive");
+        }
         return StringUtils.capitalize(StringUtils.join(parts, " - "));
     }
 

@@ -1,18 +1,20 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
-
-import java.awt.Component;
-
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
+import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanel;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanelFactory;
 
-import java.awt.Font;
+import org.apache.commons.lang3.StringEscapeUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.openide.awt.HtmlBrowser;
+
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.Font;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,29 +27,25 @@ import javax.swing.JButton;
 import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import org.apache.commons.lang3.StringEscapeUtils;
-import org.apache.commons.lang3.StringUtils;
-import org.openide.awt.HtmlBrowser;
 
 import static fi.helsinki.cs.tmc.ui.Boxer.*;
 
 public class SuccessfulSubmissionDialog extends JDialog {
-    
+
     private static final Logger log = Logger.getLogger(SuccessfulSubmissionDialog.class.getName());
-    
+
     private JButton okButton;
-    
     private List<FeedbackQuestionPanel> feedbackQuestionPanels;
 
     public SuccessfulSubmissionDialog(Exercise exercise, SubmissionResult result) {
         this.setTitle(exercise.getName() + " passed");
-        
+
         JPanel contentPane = new JPanel();
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
-        
-        addYayLabel();
+
+        addPassedLabel();
         addVSpace(6);
         if (exercise.requiresReview() && !result.getMissingReviewPoints().isEmpty()) {
             addRequiresReviewLabels();
@@ -59,15 +57,17 @@ public class SuccessfulSubmissionDialog extends JDialog {
         addVSpace(20);
         addFeedbackQuestions(result); //TODO: maybe put in box
         addVSpace(10);
+        addProgressPanel(exercise);
+        addVSpace(10);
         addOkButton();
-        
+
         pack();
     }
-    
+
     public void addOkListener(ActionListener okListener) {
         this.okButton.addActionListener(okListener);
     }
-    
+
     public List<FeedbackAnswer> getFeedbackAnswers() {
         List<FeedbackAnswer> answers = new ArrayList<FeedbackAnswer>();
         for (FeedbackQuestionPanel panel : feedbackQuestionPanels) {
@@ -78,42 +78,42 @@ public class SuccessfulSubmissionDialog extends JDialog {
         }
         return answers;
     }
-    
+
     private void addVSpace(int height) {
         add(Box.createVerticalStrut(height));
     }
-    
+
     private Box leftAligned(Component component) {
         return hbox(component, hglue());
     }
-    
-    private void addYayLabel() {
-        JLabel yayLabel = new JLabel("All tests passed on the server.");
-        
-        Font font = yayLabel.getFont();
+
+    private void addPassedLabel() {
+        JLabel passedLabel = new JLabel("All tests passed on the server.");
+
+        Font font = passedLabel.getFont();
         font = font.deriveFont(Font.BOLD, font.getSize2D() * 1.2f);
-        yayLabel.setFont(font);
-        
-        yayLabel.setForeground(new java.awt.Color(0, 153, 51));
-        yayLabel.setIcon(ConvenientDialogDisplayer.getDefault().getSmileyIcon());
-        
-        getContentPane().add(leftAligned(yayLabel));
+        passedLabel.setFont(font);
+
+        passedLabel.setForeground(new java.awt.Color(0, 153, 51));
+        passedLabel.setIcon(ConvenientDialogDisplayer.getDefault().getSmileyIcon());
+
+        getContentPane().add(leftAligned(passedLabel));
     }
-    
+
     private void addRequiresReviewLabels() {
         JLabel lbl1 = new JLabel("This exercise requires a code review.");
         JLabel lbl2 = new JLabel("It will have a yellow marker until it's accepted by an instructor.");
         getContentPane().add(leftAligned(lbl1));
         getContentPane().add(leftAligned(lbl2));
     }
-    
+
     private void addPointsLabel(SubmissionResult result) {
         JLabel pointsLabel = new JLabel(getPointsMsg(result));
         pointsLabel.setFont(pointsLabel.getFont().deriveFont(Font.BOLD));
-        
+
         getContentPane().add(leftAligned(pointsLabel));
     }
-    
+
     private String getPointsMsg(SubmissionResult result) {
         if (!result.getPoints().isEmpty()) {
             String msg = "Points permanently awarded: " + StringUtils.join(result.getPoints(), ", ") + ".";
@@ -136,14 +136,14 @@ public class SuccessfulSubmissionDialog extends JDialog {
                     }
                 }
             });
-            
+
             getContentPane().add(leftAligned(solutionButton));
         }
     }
 
     private void addFeedbackQuestions(SubmissionResult result) {
         this.feedbackQuestionPanels = new ArrayList<FeedbackQuestionPanel>();
-        
+
         if (!result.getFeedbackQuestions().isEmpty() && result.getFeedbackAnswerUrl() != null) {
             for (FeedbackQuestion question : result.getFeedbackQuestions()) {
                 try {
@@ -153,12 +153,12 @@ public class SuccessfulSubmissionDialog extends JDialog {
                     log.warning(e.getMessage());
                 }
             }
-            
+
             if (!feedbackQuestionPanels.isEmpty()) { // Some failsafety
                 JLabel feedbackLabel = new JLabel("Feedback (leave empty to not send)");
                 feedbackLabel.setFont(feedbackLabel.getFont().deriveFont(Font.BOLD));
                 getContentPane().add(leftAligned(feedbackLabel));
-                
+
                 for (FeedbackQuestionPanel panel : feedbackQuestionPanels) {
                     getContentPane().add(leftAligned(panel));
                 }
@@ -167,7 +167,7 @@ public class SuccessfulSubmissionDialog extends JDialog {
             }
         }
     }
-    
+
     private void addOkButton() {
         okButton = new JButton("OK");
         okButton.addActionListener(new ActionListener() {
@@ -179,5 +179,9 @@ public class SuccessfulSubmissionDialog extends JDialog {
         });
         getContentPane().add(hbox(hglue(), okButton));
     }
-    
+
+    private void addProgressPanel(Exercise exercise) {
+        JPanel progressPanel = new ProgressPanel(exercise);
+        getContentPane().add(progressPanel);
+    }
 }

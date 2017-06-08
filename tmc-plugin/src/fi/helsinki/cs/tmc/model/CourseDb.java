@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.model;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ExerciseKey;
-import fi.helsinki.cs.tmc.core.domain.Theme;
+import fi.helsinki.cs.tmc.core.domain.Skill;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.persistance.ConfigFileIo;
@@ -11,6 +11,8 @@ import fi.helsinki.cs.tmc.data.CourseListUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import org.netbeans.api.project.Project;
+import org.netbeans.api.project.ui.OpenProjects;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -19,9 +21,9 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.Map;
 
 /**
  * Stores the list of available courses, the current course and its exercise list.
@@ -85,25 +87,53 @@ public class CourseDb {
         save();
     }
 
-    public List<Theme> getCurrentCourseThemes() {
-        return getCurrentCourse().getThemes();
+    public int getCurrentCourseWeekCount() {
+        return getCurrentCourse().getWeekCount();
     }
 
-    public Theme themeForExercise(Exercise exercise) {
-        List<Theme> currentCourseThemes = getCurrentCourseThemes();
-        if (currentCourseThemes == null) {
-            return new Theme("no theme");
-        }
-        for (Theme theme : currentCourseThemes) {
-            if (theme.shouldContain(exercise)) {
-                return theme;
+    public List<Exercise> getExercisesByWeek(int week) {
+        return getCurrentCourse().getExercisesByWeek(week);
+    }
+
+    public int getPresumedCurrentWeek() {
+        Project project = OpenProjects.getDefault().getOpenProjects()[0];
+        ProjectMediator projectMediator = ProjectMediator.getInstance();
+        Exercise exercise = projectMediator
+            .tryGetExerciseForProject(projectMediator.wrapProject(project),
+                CourseDb.getInstance());
+        return exercise.getWeek();
+    }
+
+    public int getCurrentWeek() {
+        for (int i = getCurrentCourseWeekCount(); i > 0; i--) {
+            for (Exercise ex : getExercisesByWeek(i)) {
+                if (ex.isAttempted()) {
+                    return i;
+                }
             }
         }
-        return new Theme("no theme");
+        return 1; //default
     }
 
-    public List<Exercise> getCurrentCoursesExercisesByTheme(Theme theme) {
-        return getCurrentCourse().getExercisesByTheme(theme);
+    public int getAdaptiveWeek() {
+        int week = -1;
+        for (int i = 1; i <= getCurrentCourseWeekCount(); i++) {
+            boolean wholeWeekDone = true;
+            for (Exercise ex : getExercisesByWeek(i)) {
+                if (!ex.isCompleted() && !ex.isAdaptive()) {
+                    wholeWeekDone = false;
+                    break;
+                }
+            }
+            if (wholeWeekDone) {
+                week = i;
+            }
+        }
+        return week;
+    }
+
+    public List<Skill> getSkillsByWeek(int week) {
+        return getCurrentCourse().getSkillsByWeek(week);
     }
 
     public void putDetailedCourse(Course course) {
