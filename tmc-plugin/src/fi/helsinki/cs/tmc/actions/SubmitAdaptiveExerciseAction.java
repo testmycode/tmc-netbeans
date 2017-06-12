@@ -1,6 +1,7 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
@@ -19,6 +20,7 @@ import java.awt.event.ActionListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -56,14 +58,17 @@ public final class SubmitAdaptiveExerciseAction implements ActionListener {
 
         ProgressObserver observer = new BridgingProgressObserver();
         TmcProjectInfo adaptiveProject = projectMediator.wrapProject(this.context);
+        final Exercise exercise = projectMediator.tryGetExerciseForProject(adaptiveProject, courseDb);
 
-        final String exerciseName = adaptiveProject.getProjectName();
-        Callable<SubmissionResult> callable = TmcCore.get().submitAdaptiveExercise(observer, exerciseName);
+        Callable<SubmissionResult> callable = TmcCore.get().submitAdaptiveExercise(observer, exercise);
 
-            BgTask.start("Waiting for results from skillifier", callable, new BgTaskListener<SubmissionResult>() {
+        BgTask.start("Waiting for results from skillifier", callable, new BgTaskListener<SubmissionResult>() {
             @Override
             public void bgTaskReady(SubmissionResult result) {
-                new AdaptiveExerciseResultDialog(exerciseName, result);
+                exercise.setAttempted(true);
+                exercise.setCompleted(true);
+                courseDb.save();
+                new AdaptiveExerciseResultDialog(exercise, result);
             }
 
             @Override
@@ -76,7 +81,6 @@ public final class SubmitAdaptiveExerciseAction implements ActionListener {
                 logger.log(Level.SEVERE, "Submitting adaptive exercise failed!");
                 dialogDisplayer.displayError("Error trying to get test results.", ex);
             }
-
         });
     }
 }

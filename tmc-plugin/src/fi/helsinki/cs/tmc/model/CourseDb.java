@@ -3,14 +3,14 @@ package fi.helsinki.cs.tmc.model;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ExerciseKey;
+import fi.helsinki.cs.tmc.core.domain.Theme;
+import fi.helsinki.cs.tmc.core.events.TmcEvent;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.persistance.ConfigFileIo;
+import fi.helsinki.cs.tmc.data.CourseListUtils;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-
-import fi.helsinki.cs.tmc.data.CourseListUtils;
-import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.core.persistance.ConfigFileIo;
-import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 
 import java.io.IOException;
 import java.io.Reader;
@@ -29,10 +29,10 @@ import java.util.logging.Logger;
 public class CourseDb {
 
     public static class ChangedEvent implements TmcEvent {}
-    
+
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;
-    
+
     public static synchronized CourseDb getInstance() {
         if (defaultInstance == null) {
             defaultInstance = new CourseDb();
@@ -49,7 +49,7 @@ public class CourseDb {
     private CourseDb() {
         this(TmcEventBus.getDefault(), new ConfigFileIo("CourseDb.json"));
     }
-    
+
     public CourseDb(TmcEventBus eventBus, ConfigFileIo configFile) {
         this.eventBus = eventBus;
         this.configFile = configFile;
@@ -62,7 +62,7 @@ public class CourseDb {
             logger.log(Level.WARNING, "Failed to load course database", e);
         }
     }
-    
+
     public List<Course> getAvailableCourses() {
         return Collections.unmodifiableList(availableCourses);
     }
@@ -83,6 +83,27 @@ public class CourseDb {
     public void setCurrentCourseName(String currentCourseName) {
         this.currentCourseName = currentCourseName;
         save();
+    }
+
+    public List<Theme> getCurrentCourseThemes() {
+        return getCurrentCourse().getThemes();
+    }
+
+    public Theme themeForExercise(Exercise exercise) {
+        List<Theme> currentCourseThemes = getCurrentCourseThemes();
+        if (currentCourseThemes == null) {
+            return new Theme("no theme");
+        }
+        for (Theme theme : currentCourseThemes) {
+            if (theme.shouldContain(exercise)) {
+                return theme;
+            }
+        }
+        return new Theme("no theme");
+    }
+
+    public List<Exercise> getCurrentCoursesExercisesByTheme(Theme theme) {
+        return getCurrentCourse().getExercisesByTheme(theme);
     }
 
     public void putDetailedCourse(Course course) {
@@ -106,7 +127,7 @@ public class CourseDb {
 
     /**
      * Returns the exercises from currently selected course.
-     * 
+     *
      * <p>
      * If no course is currently selected then returns the empty collection.
      */
@@ -118,7 +139,7 @@ public class CourseDb {
             return Collections.emptyList();
         }
     }
-    
+
     public Course getCourseByName(String name) {
         for (Course course : availableCourses) {
             if (course.getName().equals(name)) {
@@ -127,12 +148,12 @@ public class CourseDb {
         }
         return null;
     }
-    
+
     public boolean isUnlockable(Exercise ex) {
         Course course = getCourseByName(ex.getCourseName());
         return course != null && course.getUnlockables().contains(ex.getName());
     }
-    
+
     /**
      * Returns all exercises from the current course that can be unlocked (and must be unlocked together).
      */
@@ -158,10 +179,10 @@ public class CourseDb {
     public String getDownloadedExerciseChecksum(ExerciseKey ex) {
         return downloadedExerciseChecksums.get(ex);
     }
-    
+
     /**
      * Informs the course database that the exercise is considered downloaded.
-     * 
+     *
      * <p>
      * Sets the downloaded checksum of the exercise to be the one reported by the server.
      */
@@ -169,9 +190,9 @@ public class CourseDb {
         downloadedExerciseChecksums.put(ex.getKey(), ex.getChecksum());
         save();
     }
-    
+
     //TODO: arrange for downloadedExerciseChecksums.put(..., null) when a project is deleted!
-    
+
     public void save() {
         try {
             saveToFile();
@@ -180,13 +201,13 @@ public class CourseDb {
         }
         eventBus.post(new ChangedEvent());
     }
-    
+
     private static class StoredStuff {
         public List<Course> availableCourses;
         public String currentCourseName;
         public Map<ExerciseKey, String> downloadedExerciseChecksums;
     }
-    
+
     private void saveToFile() throws IOException {
         StoredStuff stuff = new StoredStuff();
         stuff.availableCourses = this.availableCourses;
@@ -204,7 +225,7 @@ public class CourseDb {
         if (!configFile.exists()) {
             return;
         }
-        
+
         Reader reader = configFile.getReader();
         StoredStuff stuff;
         try {
@@ -217,16 +238,16 @@ public class CourseDb {
                 this.availableCourses.clear();
                 this.availableCourses.addAll(stuff.availableCourses);
             }
-            
+
             this.currentCourseName = stuff.currentCourseName;
-            
+
             if (stuff.downloadedExerciseChecksums != null) {
                 this.downloadedExerciseChecksums.clear();
                 this.downloadedExerciseChecksums.putAll(stuff.downloadedExerciseChecksums);
             }
         }
     }
-    
+
     private Gson getGson() {
         return new GsonBuilder()
                 .serializeNulls()

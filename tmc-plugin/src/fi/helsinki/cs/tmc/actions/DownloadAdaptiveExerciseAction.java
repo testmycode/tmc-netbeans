@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
@@ -30,11 +31,13 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
 
     private static final Logger logger = Logger.getLogger(DownloadAdaptiveExerciseAction.class.getName());
 
+    private CourseDb courseDb;
     private final ProjectMediator projectMediator;
     private final ConvenientDialogDisplayer dialogs;
     private final TmcEventBus eventBus;
 
     public DownloadAdaptiveExerciseAction() {
+        this.courseDb = CourseDb.getInstance();
         this.projectMediator = ProjectMediator.getInstance();
         this.dialogs = ConvenientDialogDisplayer.getDefault();
         this.eventBus = TmcEventBus.getDefault();
@@ -55,6 +58,15 @@ public final class DownloadAdaptiveExerciseAction implements ActionListener {
                 dialogs.displayMessage("Adaptive exercise downloaded");
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
                 projectMediator.openProject(proj);
+
+                // ugly fix because adaptive exercises cannot be found 
+                // on server yet... it add's exercise temporarily on current courses
+                // list of exercises
+                if (courseDb.getCurrentCourseExercises().contains(ex)) {
+                    courseDb.getCurrentCourseExercises().remove(ex);
+                }
+                courseDb.getCurrentCourseExercises().add(ex);
+                courseDb.exerciseDownloaded(ex);
             }
 
             @Override

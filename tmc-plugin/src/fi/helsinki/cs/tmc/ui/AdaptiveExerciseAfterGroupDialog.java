@@ -1,11 +1,7 @@
 package fi.helsinki.cs.tmc.ui;
 
-import static fi.helsinki.cs.tmc.ui.Boxer.hbox;
-import static fi.helsinki.cs.tmc.ui.Boxer.hglue;
-
 import fi.helsinki.cs.tmc.actions.DownloadAdaptiveExerciseAction;
-import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import static fi.helsinki.cs.tmc.ui.Boxer.*;
 
 import org.openide.awt.HtmlBrowser;
 
@@ -26,32 +22,26 @@ import javax.swing.JDialog;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
-public class AdaptiveExerciseResultDialog extends JDialog {
+public class AdaptiveExerciseAfterGroupDialog extends JDialog {
 
-    private static final Logger log = Logger.getLogger(AdaptiveExerciseResultDialog.class.getName());
+    private static final Logger log = Logger.getLogger(AdaptiveExerciseAfterGroupDialog.class.getName());
 
     private JButton okButton;
-    private JButton hateButton;
     private JCheckBox downloadNextExerciseButton;
-    private JLabel feelingsLabel;
-    
-    public AdaptiveExerciseResultDialog(Exercise exercise, SubmissionResult result) {
+
+    public AdaptiveExerciseAfterGroupDialog() {
         this.setTitle("Adaptive exercise");
 
         JPanel contentPane = new JPanel();
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
-        
-        addHeadlineLabel(exercise.getName());
+
+        addHeadlineLabel();
         addVSpace(20);
-        addSkillLabel();
-        addVSpace(10);
         addDownloadBox();
         addVSpace(20);
-        addInfoButton(result);
-        addHateButton();
-        addFeelingsLabel();
+        addInfoButton();
         addVSpace(20);
         addOkButton();
 
@@ -73,20 +63,14 @@ public class AdaptiveExerciseResultDialog extends JDialog {
 
     private void addDownloadBox() {
         downloadNextExerciseButton =
-                    new JCheckBox("Check and download next adaptive exercise");
+                    new JCheckBox("Check and download adaptive exercise");
         downloadNextExerciseButton.setSelected(true);
         getContentPane().add(leftAligned(downloadNextExerciseButton));
     }
 
-    private void addSkillLabel() {
-        JLabel skillText = new JLabel();
-        skillText.setText("New skill granted!");
-        getContentPane().add(leftAligned(skillText));
-    }
+    private void addHeadlineLabel() {
+        JLabel headline = new JLabel("Tehtäväryhmä suoritettu!");
 
-    private void addHeadlineLabel(String exerciseName) {
-        JLabel headline = new JLabel(exerciseName);
-        headline.setIcon(ConvenientDialogDisplayer.getDefault().getSmileyIcon());
         Font font = headline.getFont();
         font = font.deriveFont(Font.BOLD, font.getSize2D() * 1.2f);
         headline.setFont(font);
@@ -110,24 +94,7 @@ public class AdaptiveExerciseResultDialog extends JDialog {
         getContentPane().add(leftAligned(okButton));
     }
 
-    private void addHateButton() {
-        hateButton = new JButton("I hate this");
-        hateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                feelingsLabel.setVisible(true);
-            }
-        });
-        getContentPane().add(leftAligned(hateButton));
-    }
-
-    private void addFeelingsLabel() {
-        feelingsLabel = new JLabel("Report your feelings to your instructor by email, please.");
-        feelingsLabel.setVisible(false);
-        getContentPane().add(leftAligned(feelingsLabel));
-    }
-
-    private void addInfoButton(SubmissionResult result) {
+    private void addInfoButton() {
         final String infoUrl = "https://mooc.fi/adaptinfo";
         JButton infoButton = new JButton(new AbstractAction("More info about adaptive exercises") {
             @Override
