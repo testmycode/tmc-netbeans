@@ -1,10 +1,11 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.actions.DownloadAdaptiveExerciseAction;
 import fi.helsinki.cs.tmc.actions.DownloadExercisesAction;
 import fi.helsinki.cs.tmc.actions.UnlockExercisesAction;
 import fi.helsinki.cs.tmc.actions.UpdateExercisesAction;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.Theme;
+import fi.helsinki.cs.tmc.model.CourseDb;
 
 import org.openide.windows.WindowManager;
 
@@ -18,10 +19,10 @@ import java.util.List;
 import javax.swing.JCheckBox;
 import javax.swing.JDialog;
 
-public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
+public class DownloadOrUpdateExercisesWithWeekDialog extends JDialog {
 
-    public static void display(List<Exercise> unlockable, List<Exercise> downloadable, List<Exercise> updateable, List<Theme> themes) {
-        DownloadOrUpdateExercisesWithThemeDialog dialog = new DownloadOrUpdateExercisesWithThemeDialog(unlockable, downloadable, updateable, themes);
+    public static void display(List<Exercise> unlockable, List<Exercise> downloadable, List<Exercise> updateable) {
+        DownloadOrUpdateExercisesWithWeekDialog dialog = new DownloadOrUpdateExercisesWithWeekDialog(unlockable, downloadable, updateable);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
     }
@@ -32,8 +33,9 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
     private HashMap<JCheckBox, Exercise> checkBoxToExercise;
 
     private boolean selectAllButtonIsDeselecting;
+    private CourseDb courseDb;
 
-    private DownloadOrUpdateExercisesWithThemeDialog(List<Exercise> unlockable, List<Exercise> downloadable, List<Exercise> updateable, List<Theme> themes) {
+    private DownloadOrUpdateExercisesWithWeekDialog(List<Exercise> unlockable, List<Exercise> downloadable, List<Exercise> updateable) {
         super(WindowManager.getDefault().getMainWindow(), true);
         initComponents();
 
@@ -55,8 +57,17 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
             setTitle("Download exercises");
             downloadButton.setText("Download");
         }
+        courseDb = CourseDb.getInstance();
+        if (courseDb.getAdaptiveWeek() == -1) {
+            remove(downloadAdaptiveExButton);
+        }
 
-        int downloadTableSize = downloadable.size();
+        int downloadTableSize = 0;
+        for (Exercise ex : downloadable) {
+            if (!ex.isAdaptive()) {
+                downloadTableSize++;
+            }
+        }
         Object[][] downloadRows = new Object[downloadTableSize][2];
 
         int updateTableSize = updateable.size();
@@ -69,13 +80,16 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
             if (exercise.isCompleted()) {
                 text += " (completed)";
             }
-            JCheckBox cb = new JCheckBox(text, true);
-            Theme theme = themeForExercise(exercise, themes);
-            checkBoxToExercise.put(cb, exercise);
-            downloadRows[i][0] = cb;
-            downloadRows[i][1] = theme.getName();
+
+            if (!exercise.isAdaptive()) {
+                JCheckBox cb = new JCheckBox(text, true);
+                int week = exercise.getWeek();
+                checkBoxToExercise.put(cb, exercise);
+                downloadRows[i][0] = cb;
+                downloadRows[i][1] = "week" + week;
+            }
         }
-        ((ExerciseThemeTable)downloadTableComponent).setRows(downloadRows);
+        ((ExerciseWeekTable)downloadTableComponent).setRows(downloadRows);
 
         unlockableCheckboxes = new ArrayList<JCheckBox>();
         for (int i = 0; i < unlockable.size(); i++) {
@@ -87,10 +101,10 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
                 desc = "unlockable";
             }
             JCheckBox cb = new JCheckBox(exercise.getName() + " (" + desc + ")", true);
-            Theme theme = themeForExercise(exercise, themes);
+            int week = exercise.getWeek();
             unlockableCheckboxes.add(cb);
             checkBoxToExercise.put(cb, exercise);
-            ((ExerciseThemeTable)downloadTableComponent).setRow(cb, theme.getName());
+            ((ExerciseWeekTable)downloadTableComponent).setRow(cb, "week" + week);
         }
 
         for (int i = 0; i < updateTableSize; i++) {
@@ -100,29 +114,17 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
                 text += " (completed)";
             }
             JCheckBox cb = new JCheckBox(text, true);
-            Theme theme = themeForExercise(exercise, themes);
+            int week = exercise.getWeek();
             checkBoxToExercise.put(cb, exercise);
             updateRows[i][0] = cb;
-            updateRows[i][1] = theme.getName();
+            updateRows[i][1] = "week" + week;
         }
-        ((ExerciseThemeTable)updateTableComponent).setRows(updateRows);
-        ((ExerciseThemeTable)downloadTableComponent).addItemListener(updateSelectAllButtonStateListener);
-        ((ExerciseThemeTable)updateTableComponent).addItemListener(updateSelectAllButtonStateListener);
-        
+        ((ExerciseWeekTable)updateTableComponent).setRows(updateRows);
+        ((ExerciseWeekTable)downloadTableComponent).addItemListener(updateSelectAllButtonStateListener);
+        ((ExerciseWeekTable)updateTableComponent).addItemListener(updateSelectAllButtonStateListener);
+
         updateSelectAllButtonState();
         pack();
-    }
-
-        private Theme themeForExercise(Exercise exercise, List<Theme> themes) {
-        if (themes == null) {
-            return new Theme("no theme");
-        }
-        for (Theme theme : themes) {
-            if (theme.shouldContain(exercise)) {
-                return theme;
-            }
-        }
-        return new Theme("no theme");
     }
 
     private ItemListener updateSelectAllButtonStateListener = new ItemListener() {
@@ -133,11 +135,11 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
     };
 
     private boolean isUnlockable(int index) {
-        return unlockableCheckboxes.contains(((ExerciseThemeTable)downloadTableComponent).getElement(index));
+        return unlockableCheckboxes.contains(((ExerciseWeekTable)downloadTableComponent).getElement(index));
     }
 
     private void updateSelectAllButtonState() {
-        if (((ExerciseThemeTable)downloadTableComponent).isAnySelected() || ((ExerciseThemeTable)updateTableComponent).isAnySelected()) {
+        if (((ExerciseWeekTable)downloadTableComponent).isAnySelected() || ((ExerciseWeekTable)updateTableComponent).isAnySelected()) {
             selectAllButtonIsDeselecting = true;
             selectAllButton.setText("Unselect all");
         } else {
@@ -167,32 +169,33 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
         selectAllButton = new javax.swing.JButton();
         unlockCheckbox = new javax.swing.JCheckBox();
         downloadTable = new javax.swing.JScrollPane();
-        downloadTableComponent = new ExerciseThemeTable();
+        downloadTableComponent = new fi.helsinki.cs.tmc.ui.ExerciseWeekTable();
         jScrollPane1 = new javax.swing.JScrollPane();
-        updateTableComponent = new ExerciseThemeTable();
+        updateTableComponent = new fi.helsinki.cs.tmc.ui.ExerciseWeekTable();
+        downloadAdaptiveExButton = new javax.swing.JButton();
 
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
-        setTitle(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.title")); // NOI18N
+        setTitle(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.title")); // NOI18N
 
-        downloadableLabel.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.downloadableLabel.text")); // NOI18N
+        downloadableLabel.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.downloadableLabel.text")); // NOI18N
 
-        updateableLabel.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.updateableLabel.text")); // NOI18N
+        updateableLabel.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.updateableLabel.text")); // NOI18N
 
-        downloadButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.downloadButton.text")); // NOI18N
+        downloadButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.downloadButton.text")); // NOI18N
         downloadButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 downloadButtonActionPerformed(evt);
             }
         });
 
-        closeButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.closeButton.text")); // NOI18N
+        closeButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.closeButton.text")); // NOI18N
         closeButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 closeButtonActionPerformed(evt);
             }
         });
 
-        selectAllButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.selectAllButton.text")); // NOI18N
+        selectAllButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.selectAllButton.text")); // NOI18N
         selectAllButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
                 selectAllButtonActionPerformed(evt);
@@ -200,7 +203,7 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
         });
 
         unlockCheckbox.setSelected(true);
-        unlockCheckbox.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithThemeDialog.class, "DownloadOrUpdateExercisesWithThemeDialog.unlockCheckbox.text")); // NOI18N
+        unlockCheckbox.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.unlockCheckbox.text")); // NOI18N
         unlockCheckbox.addItemListener(new java.awt.event.ItemListener() {
             public void itemStateChanged(java.awt.event.ItemEvent evt) {
                 unlockCheckboxItemStateChanged(evt);
@@ -234,6 +237,13 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
         ));
         jScrollPane1.setViewportView(updateTableComponent);
 
+        downloadAdaptiveExButton.setText(org.openide.util.NbBundle.getMessage(DownloadOrUpdateExercisesWithWeekDialog.class, "DownloadOrUpdateExercisesWithWeekDialog.downloadAdaptiveExButton.text")); // NOI18N
+        downloadAdaptiveExButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                downloadAdaptiveExButtonActionPerformed(evt);
+            }
+        });
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(getContentPane());
         getContentPane().setLayout(layout);
         layout.setHorizontalGroup(
@@ -243,20 +253,22 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(jScrollPane1)
                     .addComponent(downloadTable)
-                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                        .addGap(0, 0, Short.MAX_VALUE)
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(selectAllButton, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                .addComponent(downloadButton)
-                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                .addComponent(closeButton))))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(unlockCheckbox)
                             .addComponent(downloadableLabel)
                             .addComponent(updateableLabel))
-                        .addGap(0, 294, Short.MAX_VALUE)))
+                        .addGap(0, 294, Short.MAX_VALUE))
+                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                        .addGap(0, 0, Short.MAX_VALUE)
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(selectAllButton, javax.swing.GroupLayout.Alignment.TRAILING)
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addComponent(downloadAdaptiveExButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(downloadButton)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(closeButton)))))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
@@ -267,17 +279,18 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(unlockCheckbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(downloadTable, javax.swing.GroupLayout.PREFERRED_SIZE, 179, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(downloadTable, javax.swing.GroupLayout.PREFERRED_SIZE, 272, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(updateableLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(jScrollPane1, javax.swing.GroupLayout.DEFAULT_SIZE, 139, Short.MAX_VALUE)
+                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 8, Short.MAX_VALUE)
+                .addComponent(jScrollPane1, javax.swing.GroupLayout.PREFERRED_SIZE, 156, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(selectAllButton)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(closeButton)
-                    .addComponent(downloadButton))
+                    .addComponent(downloadButton)
+                    .addComponent(downloadAdaptiveExButton))
                 .addContainerGap())
         );
 
@@ -286,14 +299,14 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
 
     private void downloadButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadButtonActionPerformed
         final List<Exercise> toDownload = new ArrayList<Exercise>();
-        for (JCheckBox cb : (ExerciseThemeTable)downloadTableComponent) {
+        for (JCheckBox cb : (ExerciseWeekTable)downloadTableComponent) {
             if (cb.isSelected()) {
                 toDownload.add(checkBoxToExercise.get(cb));
             }
         }
 
         final List<Exercise> toUpdate = new ArrayList<Exercise>();
-        for (JCheckBox cb : (ExerciseThemeTable)updateTableComponent) {
+        for (JCheckBox cb : (ExerciseWeekTable)updateTableComponent) {
             if (cb.isSelected()) {
                 toUpdate.add(checkBoxToExercise.get(cb));
             }
@@ -323,15 +336,15 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
 
     private void selectAllButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_selectAllButtonActionPerformed
         boolean select = !selectAllButtonIsDeselecting;
-        for (int i = 0; i < ((ExerciseThemeTable)downloadTableComponent).getRowCount(); ++i) {
+        for (int i = 0; i < ((ExerciseWeekTable)downloadTableComponent).getRowCount(); ++i) {
             if (select && isUnlockable(i) && !unlockCheckbox.isSelected()) {
                 // Don't check grayed out unlockables
                 continue;
             }
-            ((ExerciseThemeTable)downloadTableComponent).setSelected(i, select);
+            ((ExerciseWeekTable)downloadTableComponent).setSelected(i, select);
         }
-        for (int i = 0; i < ((ExerciseThemeTable)updateTableComponent).getRowCount(); ++i) {
-            ((ExerciseThemeTable)updateTableComponent).setSelected(i, select);
+        for (int i = 0; i < ((ExerciseWeekTable)updateTableComponent).getRowCount(); ++i) {
+            ((ExerciseWeekTable)updateTableComponent).setSelected(i, select);
         }
         updateSelectAllButtonState();
     }//GEN-LAST:event_selectAllButtonActionPerformed
@@ -345,8 +358,14 @@ public class DownloadOrUpdateExercisesWithThemeDialog extends JDialog {
         updateSelectAllButtonState();
     }//GEN-LAST:event_unlockCheckboxItemStateChanged
 
+    private void downloadAdaptiveExButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_downloadAdaptiveExButtonActionPerformed
+        DownloadAdaptiveExerciseAction action = new DownloadAdaptiveExerciseAction();
+        action.downloadAdaptiveExercise();
+    }//GEN-LAST:event_downloadAdaptiveExButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton closeButton;
+    private javax.swing.JButton downloadAdaptiveExButton;
     private javax.swing.JButton downloadButton;
     private javax.swing.JScrollPane downloadTable;
     private javax.swing.JTable downloadTableComponent;

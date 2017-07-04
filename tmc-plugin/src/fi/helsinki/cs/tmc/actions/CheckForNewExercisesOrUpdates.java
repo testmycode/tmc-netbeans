@@ -3,7 +3,6 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.domain.Theme;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
@@ -14,7 +13,7 @@ import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithThemeDialog;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithWeekDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -32,7 +31,6 @@ import org.openide.util.NbBundle.Messages;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.Callable;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
@@ -104,19 +102,17 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                     courseDb.putDetailedCourse(receivedCourse);
 
                     final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                    
-                    final List<Theme> themes = courseDb.getCurrentCourseThemes();
-                    
+
                     if (status.thereIsSomethingToDownload(false)) {
                         if (beQuiet) {
                             displayNotification(status, new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesWithThemeDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable, themes);
+                                    DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                                 }
                             });
                         } else {
-                            DownloadOrUpdateExercisesWithThemeDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable, themes);
+                            DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                         }
                     } else if (!beQuiet) {
                         dialogs.displayMessage("No new exercises or updates to download.");

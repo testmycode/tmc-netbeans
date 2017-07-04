@@ -10,7 +10,7 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithThemeDialog;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithWeekDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import java.awt.event.ActionEvent;
@@ -24,7 +24,7 @@ public class SaveSettingsAction extends AbstractAction {
     private TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
     private SendDiagnostics sendDiagnostics;
-    
+
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
@@ -45,7 +45,7 @@ public class SaveSettingsAction extends AbstractAction {
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        
+
         TmcServerAddressNormalizer.normalize();
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
@@ -56,7 +56,7 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setSendDiagnostics(prefUi.getSendDiagnosticsEnabled());
 
         eventBus.post(new InvokedEvent());
-        
+
         if (settings.getResolveDependencies()) {
             fixUnoptimalSettings.run();
         } else {
@@ -78,7 +78,7 @@ public class SaveSettingsAction extends AbstractAction {
                 public void bgTaskReady(List<Course> result) {
                     LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                     if (status.thereIsSomethingToDownload(false)) {
-                        DownloadOrUpdateExercisesWithThemeDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable, courseDb.getCurrentCourseThemes());
+                        DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                     }
                 }
 

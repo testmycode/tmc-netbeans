@@ -29,13 +29,23 @@ public class AdaptiveExerciseAfterGroupDialog extends JDialog {
     private JButton okButton;
     private JCheckBox downloadNextExerciseButton;
 
+    public static void display() {
+        AdaptiveExerciseAfterGroupDialog dialog = new AdaptiveExerciseAfterGroupDialog();
+        dialog.setTitle("Adaptive exercise");
+        dialog.pack();
+        dialog.setSize(400, 300);
+        dialog.setModalityType(Dialog.ModalityType.MODELESS);
+        dialog.setLocationRelativeTo(null);
+        dialog.setAlwaysOnTop(true);
+        dialog.setVisible(true);
+    }
+
     public AdaptiveExerciseAfterGroupDialog() {
-        this.setTitle("Adaptive exercise");
 
         JPanel contentPane = new JPanel();
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
-        setContentPane(contentPane);
+        this.setContentPane(contentPane);
 
         addHeadlineLabel();
         addVSpace(20);
@@ -44,13 +54,6 @@ public class AdaptiveExerciseAfterGroupDialog extends JDialog {
         addInfoButton();
         addVSpace(20);
         addOkButton();
-
-        pack();
-        setSize(400, 300);
-        setModalityType(Dialog.ModalityType.MODELESS);
-        setLocationRelativeTo(null);
-        setAlwaysOnTop(true);
-        setVisible(true);
     }
 
     private void addVSpace(int height) {
@@ -69,7 +72,7 @@ public class AdaptiveExerciseAfterGroupDialog extends JDialog {
     }
 
     private void addHeadlineLabel() {
-        JLabel headline = new JLabel("Tehtäväryhmä suoritettu!");
+        JLabel headline = new JLabel("Exercise group completed!");
 
         Font font = headline.getFont();
         font = font.deriveFont(Font.BOLD, font.getSize2D() * 1.2f);
@@ -85,7 +88,8 @@ public class AdaptiveExerciseAfterGroupDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if (downloadNextExerciseButton.isSelected()) {
-                    new DownloadAdaptiveExerciseAction().actionPerformed(null);
+                    DownloadAdaptiveExerciseAction action = new DownloadAdaptiveExerciseAction();
+                    action.downloadAdaptiveExercise();
                 }
                 setVisible(false);
                 dispose();

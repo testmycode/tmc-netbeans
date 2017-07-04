@@ -1,0 +1,21 @@
+<html>
+    <head>
+        <title>Timeline</title>
+        <meta charset="UTF-8">
+    </head>
+    <body>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/svg.js/2.6.2/svg.js"></script>        
+        <div data-bind="template: templateName"></div>
+
+        <!-- UI of the main window -->
+        <script type="text/html" id="window">
+        </script>
+
+        <!-- timeline -->
+        <header><h1><div data-bind="text: getCurrentWeekName"></div></h1></header>
+        <section>
+            <div id="svgCanvas"></div>
+        </section>
+        <footer><a href="https://mooc.tmc.fi/adapt">Information about timeline, skills and adaptive exercises</a></footer>
+    </body>
+</html>
