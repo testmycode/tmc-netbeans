@@ -44,12 +44,11 @@ public final class DownloadAdaptiveExerciseAction {
                 }
                 logger.log(Level.INFO, "Adaptive exercise downloaded");
                 TmcProjectInfo proj = projectMediator.tryGetProjectForExercise(ex);
-                projectMediator.openProject(proj);
 
                 if (proj == null) {
                     throw new RuntimeException("Failed to open project for exercise " + ex.getName());
                 }
-
+                projectMediator.openProject(proj);
                 // Need to invoke courseDb in swing thread to avoid races
                 TmcSwingUtilities.ensureEdt(new Runnable() {
                     @Override

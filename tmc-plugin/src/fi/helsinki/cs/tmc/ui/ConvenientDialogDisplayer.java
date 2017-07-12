@@ -86,6 +86,10 @@ public class ConvenientDialogDisplayer {
         return new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/smile.gif"));
     }
     
+    public ImageIcon getInfoIcon() {
+        return new ImageIcon(getClass().getResource("/fi/helsinki/cs/tmc/ui/adaptive-info-32.png"));
+    }
+    
     public void askYesNo(String question, String title, final Function<Boolean, Void> listener) {
         DialogDescriptor desc = new DialogDescriptor(question, title);
         desc.setModal(false); // Modal would be better but NB or Swing is buggy and sometimes makes non-modal dialogs get in the way

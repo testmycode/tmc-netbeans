@@ -1,9 +1,11 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.actions.DownloadAdaptiveExerciseAction;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanel;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanelFactory;
 
@@ -29,13 +31,19 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import static fi.helsinki.cs.tmc.ui.Boxer.*;
+import java.awt.Color;
+import javax.swing.JCheckBox;
 
 public class SuccessfulSubmissionDialog extends JDialog {
 
     private static final Logger log = Logger.getLogger(SuccessfulSubmissionDialog.class.getName());
 
+    private CourseDb courseDb;
     private JButton okButton;
+    private JCheckBox downloadNextExerciseButton;
     private List<FeedbackQuestionPanel> feedbackQuestionPanels;
+
+    
 
     public SuccessfulSubmissionDialog(Exercise exercise, SubmissionResult result) {
         this.setTitle(exercise.getName() + " passed");
@@ -44,7 +52,8 @@ public class SuccessfulSubmissionDialog extends JDialog {
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
         setContentPane(contentPane);
-
+        downloadNextExerciseButton = new JCheckBox("Check and download adaptive exercise");
+        
         addPassedLabel();
         addVSpace(6);
         if (exercise.requiresReview() && !result.getMissingReviewPoints().isEmpty()) {
@@ -59,6 +68,14 @@ public class SuccessfulSubmissionDialog extends JDialog {
         addVSpace(10);
         addProgressPanel(exercise);
         addVSpace(10);
+        if (isAllNormalExercisesInWeekCompleted(exercise.getWeek())) {
+            addAdaptiveLabel();
+            addVSpace(10);
+        
+            addVSpace(10);
+            addDownloadBox();
+            addVSpace(10);
+        }
         addOkButton();
 
         pack();
@@ -167,21 +184,48 @@ public class SuccessfulSubmissionDialog extends JDialog {
             }
         }
     }
+    
+    private void addAdaptiveLabel() {
+        JLabel adaptiveLabel = new JLabel("A new adaptive exercise is available.");
+        adaptiveLabel.setFont(adaptiveLabel.getFont().deriveFont(Font.BOLD));
+        //adaptiveLabel.setForeground(ProgressBar.ADAPTIVE);
+        adaptiveLabel.setIcon(ConvenientDialogDisplayer.getDefault().getInfoIcon());
+        getContentPane().add(leftAligned(adaptiveLabel));
+    }
+    
+    private void addDownloadBox() {
+        downloadNextExerciseButton.setSelected(true);
+        getContentPane().add(leftAligned(downloadNextExerciseButton));
+    }
 
     private void addOkButton() {
         okButton = new JButton("OK");
         okButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
+                if (downloadNextExerciseButton.isSelected()) {
+                    DownloadAdaptiveExerciseAction action = new DownloadAdaptiveExerciseAction();
+                    action.downloadAdaptiveExercise();
+                }
                 setVisible(false);
                 dispose();
             }
         });
-        getContentPane().add(hbox(hglue(), okButton));
+        okButton.setAlignmentX(RIGHT_ALIGNMENT);
+        getContentPane().add(okButton);//hbox(hglue(), okButton));
     }
 
     private void addProgressPanel(Exercise exercise) {
         JPanel progressPanel = new ProgressPanel(exercise);
         getContentPane().add(progressPanel);
+    }
+    
+    private boolean isAllNormalExercisesInWeekCompleted(int week) {
+        for (Exercise ex : courseDb.getInstance().getExercisesByWeek(week)) {
+            if (!ex.isCompleted() && !ex.isAdaptive()) {
+                return false;
+            }
+        }
+        return true;
     }
 }

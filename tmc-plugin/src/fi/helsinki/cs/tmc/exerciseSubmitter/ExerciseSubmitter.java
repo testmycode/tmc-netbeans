@@ -38,11 +38,11 @@ public class ExerciseSubmitter {
         }
     }
 
-    private CourseDb courseDb;
-    private ProjectMediator projectMediator;
-    private TestResultDisplayer resultDisplayer;
-    private ConvenientDialogDisplayer dialogDisplayer;
-    private TmcEventBus eventBus;
+    final private CourseDb courseDb;
+    final private ProjectMediator projectMediator;
+    final private TestResultDisplayer resultDisplayer;
+    final private ConvenientDialogDisplayer dialogDisplayer;
+    final private TmcEventBus eventBus;
 
     public ExerciseSubmitter() {
         this.courseDb = CourseDb.getInstance();
@@ -100,9 +100,9 @@ public class ExerciseSubmitter {
                 courseDb.save();
 
                 if (!exercise.isAdaptive() && isAllNormalExercisesInWeekCompleted(exercise.getWeek())) {
-                    log.log(Level.INFO, "All exercises in this week are done. "
+                    log.log(Level.INFO, "All standard exercises in this week are done. "
                         + "Continuing to adaptive exercises.");
-                    AdaptiveExerciseAfterGroupDialog.display();
+                    //AdaptiveExerciseAfterGroupDialog.display();
                 }
 
                 new CheckForNewExercisesOrUpdates(true, false).run();
