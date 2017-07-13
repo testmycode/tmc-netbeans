@@ -55,9 +55,9 @@ public class CourseDb {
     public CourseDb(TmcEventBus eventBus, ConfigFileIo configFile) {
         this.eventBus = eventBus;
         this.configFile = configFile;
-        this.availableCourses = new ArrayList<Course>();
+        this.availableCourses = new ArrayList<>();
         this.currentCourseName = null;
-        this.downloadedExerciseChecksums = new HashMap<ExerciseKey, String>();
+        this.downloadedExerciseChecksums = new HashMap<>();
         try {
             loadFromFile();
         } catch (Exception e) {
@@ -93,6 +93,17 @@ public class CourseDb {
 
     public List<Exercise> getExercisesByWeek(int week) {
         return getCurrentCourse().getExercisesByWeek(week);
+    }
+    
+    public List<Exercise> getStandardExercisesByWeek(int week) {
+        List<Exercise> standardExercises = new ArrayList<>();
+        for (Exercise ex : this.getExercisesByWeek(week)) {
+            if (!ex.isAdaptive()) {
+                standardExercises.add(ex);
+            }
+        }
+        
+        return standardExercises;
     }
 
     public int getPresumedCurrentWeek() {

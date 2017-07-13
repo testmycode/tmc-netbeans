@@ -47,7 +47,8 @@ public class SuccessfulSubmissionDialog extends JDialog {
 
     public SuccessfulSubmissionDialog(Exercise exercise, SubmissionResult result) {
         this.setTitle(exercise.getName() + " passed");
-
+        
+        this.courseDb = CourseDb.getInstance();
         JPanel contentPane = new JPanel();
         contentPane.setBorder(BorderFactory.createEmptyBorder(8, 8, 8, 8));
         contentPane.setLayout(new BoxLayout(contentPane, BoxLayout.Y_AXIS));
@@ -221,7 +222,7 @@ public class SuccessfulSubmissionDialog extends JDialog {
     }
     
     private boolean isAllNormalExercisesInWeekCompleted(int week) {
-        for (Exercise ex : courseDb.getInstance().getExercisesByWeek(week)) {
+        for (Exercise ex : courseDb.getExercisesByWeek(week)) {
             if (!ex.isCompleted() && !ex.isAdaptive()) {
                 return false;
             }

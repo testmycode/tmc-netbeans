@@ -15,6 +15,7 @@ public class ProgressBar extends JProgressBar {
     private final CourseDb courseDb;
     private final int exerciseCount;
     private int skillCount;
+    private List<Skill> skills;
     
     public static final Color UNFINISHED = new Color(0xb7c4b7);
     public static final Color FINISHED = new Color(0, 153, 51);
@@ -29,14 +30,15 @@ public class ProgressBar extends JProgressBar {
         super();
         courseDb = CourseDb.getInstance();
         int week = exercise.getWeek();
-        List<Exercise> exercises = courseDb.getExercisesByWeek(week);
+        List<Exercise> exercises = courseDb.getStandardExercisesByWeek(week);
         this.exerciseCount = exercises.size();
-
+        this.skills = courseDb.getSkillsByWeek(week);
+        skillCount = skills.size();
         this.setStringPainted(true);
         this.setPreferredSize(new Dimension(WIDTH, HEIGHT));
-
+        
         this.setMinimum(0);
-        this.setMaximum(exerciseCount);
+        this.setMaximum(exerciseCount+skillCount);
         this.setValue(getCompletedExercises(exercises, exercise) + getCompletedSkills(week));
         this.setAlignmentX(CENTER_ALIGNMENT);
         this.setAlignmentY(CENTER_ALIGNMENT);
@@ -54,11 +56,9 @@ public class ProgressBar extends JProgressBar {
     }
 
     private int getCompletedSkills(int week) {
-        List<Skill> skills = courseDb.getSkillsByWeek(week);
-        skillCount = skills.size();
         int masteredSkills = 0;
 
-        for (Skill skill : skills) {
+        for (Skill skill : this.skills) {
             if (skill.isMastered()) {
                 masteredSkills++;
             }
@@ -72,19 +72,19 @@ public class ProgressBar extends JProgressBar {
         int y = getY();
         int progressWidth = convertValueToWidth(getModel().getValue());
         int skillWidth = convertValueToWidth(skillCount);
-        int todoWidth = WIDTH - progressWidth - skillWidth;
-
-        // Progress is displayed with green color.
-        g.setColor(FINISHED);
-        g.fillRect(x, y, progressWidth, HEIGHT);
-
+        final int standardExerciseWidth = WIDTH - skillWidth;
+        
         // Exercises are displayed with yellow color.
         g.setColor(UNFINISHED);
-        g.fillRect(x + progressWidth, y, todoWidth, HEIGHT);
+        g.fillRect(x, y, standardExerciseWidth, HEIGHT);
 
         // Skills are displayed with orange color.
         g.setColor(ADAPTIVE);
-        g.fillRect(x + progressWidth + todoWidth, y, skillWidth, HEIGHT);
+        g.fillRect(x + standardExerciseWidth, y, skillWidth, HEIGHT);
+        
+        // Progress is displayed with green color.
+        g.setColor(FINISHED);
+        g.fillRect(x, y, progressWidth, HEIGHT);
     }
 
     private int convertValueToWidth(int value) {
