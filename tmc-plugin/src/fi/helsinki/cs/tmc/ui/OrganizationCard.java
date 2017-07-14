@@ -10,7 +10,7 @@ import javax.swing.ImageIcon;
 import javax.swing.text.DefaultCaret;
 
 public class OrganizationCard extends javax.swing.JPanel {
-
+    
     public OrganizationCard(Organization organization) {
         initComponents();
 
@@ -24,7 +24,11 @@ public class OrganizationCard extends javax.swing.JPanel {
         }
         this.organizationInformation.setText(information);
         this.organizationSlug.setText("/" + organization.getSlug());
-        ImageIcon image = new ImageIcon(logoUrl(organization.getLogoPath()));
+        ImageIcon image = new ImageIcon(getClass().getResource("placeholderLogo.png"));
+        if (!organization.getLogoPath().contains("missing")) {
+            image = new ImageIcon(logoUrl(organization.getLogoPath()));
+        }
+        image.setImage(image.getImage().getScaledInstance(49, 49, java.awt.Image.SCALE_SMOOTH));
         this.logo.setIcon(image);
     }
 
