@@ -11,6 +11,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -29,6 +31,7 @@ public class OrganizationListWindow extends JPanel {
 
     private static JFrame frame;
     private final JList<OrganizationCard> organizations;
+    private final JButton button;
 
     public OrganizationListWindow(List<Organization> organizations) {
         OrganizationCard[] organizationCards = new OrganizationCard[organizations.size()];
@@ -37,9 +40,10 @@ public class OrganizationListWindow extends JPanel {
         }
         this.organizations = new JList<>(organizationCards);
         this.organizations.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        
         setLayout(new BorderLayout());
-        JButton button = new JButton("Select");
-        button.addActionListener(new SelectOrganizationListener(this));
+        this.button = new JButton("Select");
+        this.button.addActionListener(new SelectOrganizationListener(this));
 
         this.organizations.setCellRenderer(new OrganizationCellRenderer());
         this.organizations.setVisibleRowCount(4);
@@ -51,9 +55,18 @@ public class OrganizationListWindow extends JPanel {
         this.organizations.setBackground(new Color(242, 241, 240));
 
         this.organizations.setSelectedIndex(setDefaultSelectedIndex());
-
+        
+        this.organizations.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getClickCount() >= 2) {
+                    button.doClick();
+                }
+            }
+        });
+        
         add(pane, BorderLayout.NORTH);
-        add(button, BorderLayout.SOUTH);
+        add(this.button, BorderLayout.SOUTH);
     }
 
     public static void display() throws Exception {
