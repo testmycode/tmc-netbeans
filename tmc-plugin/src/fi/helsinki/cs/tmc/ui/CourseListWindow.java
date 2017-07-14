@@ -12,6 +12,8 @@ import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.MouseAdapter;
+import java.awt.event.MouseEvent;
 import java.util.List;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -30,6 +32,7 @@ public class CourseListWindow extends JPanel {
     private static JFrame frame;
     private final JList<CourseCard> courses;
     private PreferencesPanel prefPanel;
+    private final JButton button;
 
     public CourseListWindow(List<Course> courses, PreferencesPanel prefPanel) {
         this.prefPanel = prefPanel;       
@@ -40,8 +43,8 @@ public class CourseListWindow extends JPanel {
         this.courses = new JList<>(courseCards);
         this.courses.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setLayout(new BorderLayout());
-        JButton button = new JButton("Select");
-        button.addActionListener(new SelectCourseListener(this));
+        this.button = new JButton("Select");
+        this.button.addActionListener(new SelectCourseListener(this));
 
         this.courses.setCellRenderer(new CourseCellRenderer());
         this.courses.setVisibleRowCount(4);
@@ -53,9 +56,16 @@ public class CourseListWindow extends JPanel {
         this.courses.setBackground(new Color(242, 241, 240));
         
         this.courses.setSelectedIndex(setDefaultSelectedIndex());
-
+        this.courses.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent event) {
+                if (event.getClickCount() >= 2) {
+                    button.doClick();
+                }
+            }
+        });
         add(pane, BorderLayout.NORTH);
-        add(button, BorderLayout.SOUTH);
+        add(this.button, BorderLayout.SOUTH);
     }
 
     public static void display(PreferencesPanel prefPanel) throws Exception {
