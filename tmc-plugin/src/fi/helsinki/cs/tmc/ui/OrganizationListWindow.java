@@ -13,7 +13,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.List;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -30,7 +33,7 @@ public class OrganizationListWindow extends JPanel {
 
     private static JFrame frame;
     private final JList<OrganizationCard> organizations;
-    private final JButton button;
+    private static JButton button;
 
     public OrganizationListWindow(List<Organization> organizations) {
         OrganizationCard[] organizationCards = new OrganizationCard[organizations.size()];
@@ -39,10 +42,9 @@ public class OrganizationListWindow extends JPanel {
         }
         this.organizations = new JList<>(organizationCards);
         this.organizations.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.button = new JButton("Select");
-        this.button.addActionListener(new SelectOrganizationListener(this));
+        button.addActionListener(new SelectOrganizationListener(this));
 
         this.organizations.setCellRenderer(new OrganizationCellRenderer());
         this.organizations.setVisibleRowCount(4);
@@ -64,8 +66,8 @@ public class OrganizationListWindow extends JPanel {
             }
         });
         
-        add(pane, BorderLayout.NORTH);
-        add(this.button, BorderLayout.SOUTH);
+        add(pane);
+        add(button);
     }
 
     public static void display() throws Exception {
@@ -74,10 +76,32 @@ public class OrganizationListWindow extends JPanel {
         }
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Organization> organizations = TmcCore.get().getOrganizations(ProgressObserver.NULL_OBSERVER).call();
-        frame.setContentPane(new OrganizationListWindow(organizations));
+        final OrganizationListWindow organizationListWindow = new OrganizationListWindow(organizations);
+        frame.setContentPane(organizationListWindow);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setVisible(true);
+        button.setMinimumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
+        button.setMaximumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
+        organizationListWindow.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                button.setMinimumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
+                button.setMaximumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
     }
     
     public static boolean isWindowVisible() {

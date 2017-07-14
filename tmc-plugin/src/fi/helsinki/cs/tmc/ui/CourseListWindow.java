@@ -14,7 +14,10 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.awt.event.ComponentEvent;
+import java.awt.event.ComponentListener;
 import java.util.List;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -32,7 +35,7 @@ public class CourseListWindow extends JPanel {
     private static JFrame frame;
     private final JList<CourseCard> courses;
     private PreferencesPanel prefPanel;
-    private final JButton button;
+    private static JButton button;
 
     public CourseListWindow(List<Course> courses, PreferencesPanel prefPanel) {
         this.prefPanel = prefPanel;       
@@ -42,9 +45,9 @@ public class CourseListWindow extends JPanel {
         }
         this.courses = new JList<>(courseCards);
         this.courses.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-        setLayout(new BorderLayout());
+        setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.button = new JButton("Select");
-        this.button.addActionListener(new SelectCourseListener(this));
+        button.addActionListener(new SelectCourseListener(this));
 
         this.courses.setCellRenderer(new CourseCellRenderer());
         this.courses.setVisibleRowCount(4);
@@ -64,8 +67,8 @@ public class CourseListWindow extends JPanel {
                 }
             }
         });
-        add(pane, BorderLayout.NORTH);
-        add(this.button, BorderLayout.SOUTH);
+        add(pane);
+        add(button);
     }
 
     public static void display(PreferencesPanel prefPanel) throws Exception {
@@ -75,12 +78,34 @@ public class CourseListWindow extends JPanel {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Course> courses = prefPanel.getAvailableCourses();
         CourseDb.getInstance().setAvailableCourses(courses);
-        frame.setContentPane(new CourseListWindow(courses, prefPanel));
+        final CourseListWindow courseListWindow = new CourseListWindow(courses, prefPanel);
+        frame.setContentPane(courseListWindow);
         if (hasCourses(courses, prefPanel)) {
             frame.pack();
             frame.setLocationRelativeTo(null);
             frame.setVisible(true);
         }
+        button.setMinimumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
+        button.setMaximumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
+        courseListWindow.addComponentListener(new ComponentListener() {
+            @Override
+            public void componentResized(ComponentEvent event) {
+                button.setMinimumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
+                button.setMaximumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
+            }
+
+            @Override
+            public void componentMoved(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentShown(ComponentEvent e) {
+            }
+
+            @Override
+            public void componentHidden(ComponentEvent e) {
+            }
+        });
     }
     
     public static boolean isWindowVisible() {
