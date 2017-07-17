@@ -6,7 +6,6 @@ import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.model.CourseDb;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -17,6 +16,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.List;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -73,7 +73,7 @@ public class CourseListWindow extends JPanel {
 
     public static void display(PreferencesPanel prefPanel) throws Exception {
         if (frame == null) {
-            frame = new JFrame("Courses");
+            frame = new JFrame("Select a course");
         }
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Course> courses = prefPanel.getAvailableCourses();

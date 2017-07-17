@@ -5,7 +5,6 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -16,6 +15,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.util.List;
+
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFrame;
@@ -72,7 +72,7 @@ public class OrganizationListWindow extends JPanel {
 
     public static void display() throws Exception {
         if (frame == null) {
-            frame = new JFrame("Organizations");
+            frame = new JFrame("Select an organization");
         }
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Organization> organizations = TmcCore.get().getOrganizations(ProgressObserver.NULL_OBSERVER).call();
