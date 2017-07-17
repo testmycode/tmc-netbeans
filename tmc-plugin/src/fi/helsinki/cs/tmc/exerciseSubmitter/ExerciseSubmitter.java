@@ -12,7 +12,6 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.ui.AdaptiveExerciseAfterGroupDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.SubmissionResultWaitingDialog;
 import fi.helsinki.cs.tmc.ui.TestResultDisplayer;

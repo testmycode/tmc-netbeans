@@ -46,7 +46,11 @@ public class SuccessfulSubmissionDialog extends JDialog {
     
 
     public SuccessfulSubmissionDialog(Exercise exercise, SubmissionResult result) {
-        this.setTitle(exercise.getName() + " passed");
+        String name = exercise.getName();
+        if (name.endsWith(".zip")) {
+            name = name.substring(0, name.length()-4);
+        }
+        this.setTitle(name + " passed");
         
         this.courseDb = CourseDb.getInstance();
         JPanel contentPane = new JPanel();
