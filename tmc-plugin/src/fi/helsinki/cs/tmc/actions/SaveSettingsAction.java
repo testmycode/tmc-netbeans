@@ -10,7 +10,7 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithWeekDialog;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import java.awt.event.ActionEvent;
@@ -19,11 +19,11 @@ import javax.swing.AbstractAction;
 
 public class SaveSettingsAction extends AbstractAction {
 
-    private CourseDb courseDb;
-    private TmcEventBus eventBus;
-    private TmcCore tmcCore;
+    private final CourseDb courseDb;
+    private final TmcEventBus eventBus;
+    private final TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
-    private SendDiagnostics sendDiagnostics;
+    private final SendDiagnostics sendDiagnostics;
 
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
@@ -78,7 +78,7 @@ public class SaveSettingsAction extends AbstractAction {
                 public void bgTaskReady(List<Course> result) {
                     LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                     if (status.thereIsSomethingToDownload(false)) {
-                        DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                     }
                 }
 

@@ -24,12 +24,12 @@ public class LocalExerciseStatus {
     }
 
     private LocalExerciseStatus(CourseDb courseDb, ProjectMediator projectMediator, List<Exercise> allExercises) {
-        open = new ArrayList<Exercise>();
-        closed = new ArrayList<Exercise>();
-        downloadableUncompleted = new ArrayList<Exercise>();
-        downloadableCompleted = new ArrayList<Exercise>();
-        updateable = new ArrayList<Exercise>();
-        unlockable = new ArrayList<Exercise>();
+        open = new ArrayList<>();
+        closed = new ArrayList<>();
+        downloadableUncompleted = new ArrayList<>();
+        downloadableCompleted = new ArrayList<>();
+        updateable = new ArrayList<>();
+        unlockable = new ArrayList<>();
 
         for (Exercise ex : allExercises) {
             if (!ex.hasDeadlinePassed()) {

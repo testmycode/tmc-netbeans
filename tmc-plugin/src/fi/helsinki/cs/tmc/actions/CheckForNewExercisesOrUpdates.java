@@ -13,7 +13,7 @@ import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesWithWeekDialog;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -108,11 +108,11 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                             displayNotification(status, new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                                 }
                             });
                         } else {
-                            DownloadOrUpdateExercisesWithWeekDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
                         }
                     } else if (!beQuiet) {
                         dialogs.displayMessage("No new exercises or updates to download.");
