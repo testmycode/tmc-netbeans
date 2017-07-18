@@ -9,6 +9,7 @@ import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.CourseListWindow;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.ui.OrganizationListWindow;
@@ -51,6 +52,7 @@ public class LoginManager {
                             log.log(Level.WARNING, "Authentication failed!", ex);
                             if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
+//                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
                             }
                         }
                         setReady(true);
@@ -63,7 +65,7 @@ public class LoginManager {
         }
         
         if (authenticationException != null) {
-//            throw authenticationException;
+            throw authenticationException;
         }
         showOrganizations();
     }

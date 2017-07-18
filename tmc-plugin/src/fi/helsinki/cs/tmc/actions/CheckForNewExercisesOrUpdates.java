@@ -86,7 +86,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         if (currentCourseBeforeUpdate == null) {
             if (!beQuiet) {
-                dialogs.displayMessage("Please select a course in TMC -> Settings.");
+                dialogs.displayMessage("Please make sure you're logged in and have selected a course in TMC -> Settings.");
             }
             return;
         }
