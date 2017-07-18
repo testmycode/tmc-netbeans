@@ -19,12 +19,12 @@ import javax.swing.AbstractAction;
 
 public class SaveSettingsAction extends AbstractAction {
 
-    private CourseDb courseDb;
-    private TmcEventBus eventBus;
-    private TmcCore tmcCore;
+    private final CourseDb courseDb;
+    private final TmcEventBus eventBus;
+    private final TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
-    private SendDiagnostics sendDiagnostics;
-    
+    private final SendDiagnostics sendDiagnostics;
+
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
