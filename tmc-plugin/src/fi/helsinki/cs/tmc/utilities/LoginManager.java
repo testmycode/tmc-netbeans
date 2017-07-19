@@ -52,7 +52,7 @@ public class LoginManager {
                             log.log(Level.WARNING, "Authentication failed!", ex);
                             if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
-//                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
+                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
                             }
                         }
                         setReady(true);
