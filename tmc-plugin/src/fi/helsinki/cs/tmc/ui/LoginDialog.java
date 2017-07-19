@@ -35,7 +35,7 @@ public class LoginDialog extends javax.swing.JDialog {
      * Creates new form LoginForm
      */
     public LoginDialog(ActionListener onLogin) {
-        super(WindowManager.getDefault().getMainWindow(), true);
+        super(WindowManager.getDefault().getMainWindow(), false);
         initComponents();
 
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
