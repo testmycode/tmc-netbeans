@@ -12,7 +12,6 @@ import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane;
 import javax.swing.SwingUtilities;
-import org.openide.util.Exceptions;
 
 public class LoginDialog extends javax.swing.JDialog {
 
@@ -60,6 +59,17 @@ public class LoginDialog extends javax.swing.JDialog {
 
         this.onLogin = onLogin;
         this.visible = true;
+
+        /* Add a windowlistener to the dialog to track when the dialog is closed
+        * from the x-button
+        */
+        this.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosing(WindowEvent e) {
+                visible = false;
+                super.windowClosing(e);
+            }
+        });
     }
 
     public static boolean isWindowVisible() {
