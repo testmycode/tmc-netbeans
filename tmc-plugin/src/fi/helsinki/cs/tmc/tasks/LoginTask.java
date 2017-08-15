@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.utilities.LoginManager;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
-import org.openide.util.Exceptions;
 
 public class LoginTask implements Callable<Void> {
     private static final Logger log = Logger.getLogger(LoginTask.class.getName());

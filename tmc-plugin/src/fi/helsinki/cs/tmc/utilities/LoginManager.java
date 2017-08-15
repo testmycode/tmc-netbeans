@@ -49,7 +49,6 @@ public class LoginManager {
                         try {
                             TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
                         } catch (Exception ex) {
-                            log.log(Level.WARNING, "Authentication failed!", ex);
                             if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
                                 ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
