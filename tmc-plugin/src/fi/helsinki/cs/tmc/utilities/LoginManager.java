@@ -16,6 +16,9 @@ import fi.helsinki.cs.tmc.ui.OrganizationListWindow;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.io.FileNotFoundException;
+import java.io.IOException;
+import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -26,8 +29,9 @@ public class LoginManager {
     private boolean ready;
     private Logger log = Logger.getLogger(LoginManager.class.getName());
     private AuthenticationFailedException authenticationException;
+    private IOException connectionException;
 
-    public synchronized void login() throws InterruptedException, AuthenticationFailedException {
+    public synchronized void login() throws InterruptedException, AuthenticationFailedException, IOException {
         if (LoginDialog.isWindowVisible() || OrganizationListWindow.isWindowVisible() || CourseListWindow.isWindowVisible()) {
             return;
         }
@@ -49,6 +53,14 @@ public class LoginManager {
                         try {
                             TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
                         } catch (Exception ex) {
+                            if (ex instanceof IOException) {
+                                connectionException = (IOException)ex;
+                                if (ex instanceof UnknownHostException) {
+                                    ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
+                                } else if (ex instanceof FileNotFoundException) {
+                                    ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect.");
+                                } 
+                            }
                             if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
                                 ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
@@ -66,7 +78,10 @@ public class LoginManager {
         if (authenticationException != null) {
             throw authenticationException;
         }
-        showOrganizations();
+        if (connectionException != null) {
+            throw connectionException;
+        }
+        showOrganizations(); 
     }
     
     public void setReady(boolean value) {

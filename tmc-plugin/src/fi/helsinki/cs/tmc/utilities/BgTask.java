@@ -4,6 +4,7 @@ import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import java.io.IOException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
@@ -140,14 +141,14 @@ public class BgTask<V> implements CancellableCallable<V> {
                 try {
                     successful = true;
                     resultTemp = callable.call();
-                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException ex) {
+                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException | IOException ex) {
                     successful = false;
                     boolean authenticationSuccessful;
                     do {
                         try {
                             authenticationSuccessful = true;
                             new LoginManager().login();
-                        } catch (AuthenticationFailedException loginException) {
+                        } catch (AuthenticationFailedException | IOException | InterruptedException exception) {
                             authenticationSuccessful = false;
                         }
                     } while (!authenticationSuccessful);
