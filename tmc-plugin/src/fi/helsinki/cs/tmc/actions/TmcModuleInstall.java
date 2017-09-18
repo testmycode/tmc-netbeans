@@ -52,7 +52,10 @@ public class TmcModuleInstall extends ModuleInstall {
                 CheckForNewExercisesOrUpdates.startTimer();
                 CheckForNewReviews.startTimer();
                 ReviewEventListener.start();
-                PushEventListener.start();
+                // Push events are disabled for now since this spams threads and
+                // its functionality is rarely used since code reviews trigger
+                // an email notification.
+                // PushEventListener.start();
                 TmcSettings settings = TmcSettingsHolder.get();
                 SpywareFacade.start();
 
