@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
+import fi.helsinki.cs.tmc.ui.OpenClosedExercisesDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 
 import java.awt.event.ActionEvent;
@@ -42,23 +43,27 @@ public class CheckForUnopenedExercises implements ActionListener {
         projects.callWhenProjectsCompletelyOpened(new Runnable() {
             @Override
             public void run() {
-                List<Exercise> unopenedExercises = new ArrayList<Exercise>();
-                for (Exercise ex : courseDb.getCurrentCourseExercises()) {
-                    TmcProjectInfo project = projects.tryGetProjectForExercise(ex);
-                    if (project != null && !projects.isProjectOpen(project)) {
-                        unopenedExercises.add(ex);
-                    }
-                }
-
-                if (!unopenedExercises.isEmpty()) {
+                List<Exercise> unopenedExercises = unopenedExercises();
+                if (countUncompleted(unopenedExercises) > 0) {
                     showNotification(unopenedExercises);
                 }
             }
         });
     }
+    
+    private List<Exercise> unopenedExercises() {
+        List<Exercise> unopenedExercises = new ArrayList<>();
+        for (Exercise ex : courseDb.getCurrentCourseExercises()) {
+            TmcProjectInfo project = projects.tryGetProjectForExercise(ex);
+            if (project != null && !projects.isProjectOpen(project)) {
+                unopenedExercises.add(ex);
+            }
+        }
+        return unopenedExercises;
+    }
 
     private void showNotification(List<Exercise> unopenedExercises) {
-        int count = unopenedExercises.size();
+        int count = countUncompleted(unopenedExercises);
         String msg;
         String prompt;
         if (count == 1) {
@@ -68,19 +73,24 @@ public class CheckForUnopenedExercises implements ActionListener {
             msg = "There are " + count + " exercises that are downloaded but not opened.";
             prompt = "Click here to open them.";
         }
-        notifier.notify(NOTIFIER_TOKEN, msg, getNotificationIcon(), prompt, openAction(unopenedExercises), NotificationDisplayer.Priority.LOW);
+        notifier.notify(NOTIFIER_TOKEN, msg, getNotificationIcon(), prompt, openAction(), NotificationDisplayer.Priority.LOW);
     }
     
-    private ActionListener openAction(final List<Exercise> exercises) {
+    private int countUncompleted(List<Exercise> unopenedExercises) {
+        int count = 0;
+        for (Exercise ex : unopenedExercises) {
+            if (!ex.isCompleted() && !ex.hasDeadlinePassed()) {
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    private ActionListener openAction() {
         return new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                for (Exercise ex : exercises) {
-                    TmcProjectInfo project = projects.tryGetProjectForExercise(ex);
-                    if (project != null && !projects.isProjectOpen(project)) {
-                        projects.openProject(project);
-                    }
-                }
+                OpenClosedExercisesDialog.display(unopenedExercises());
             }
         };
     }

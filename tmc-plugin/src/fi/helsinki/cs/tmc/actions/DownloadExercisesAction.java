@@ -109,6 +109,7 @@ public class DownloadExercisesAction {
         @Override
         public void bgTaskReady(Collection<TmcProjectInfo> projects) {
             projectMediator.openProjects(projects);
+            new CheckProjectCount().checkAndNotifyIfOver();
         }
 
         @Override
