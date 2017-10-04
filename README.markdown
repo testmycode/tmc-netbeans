@@ -18,7 +18,9 @@ For a little more convenience while testing, you might want to set `tmc-plugin/s
 
 ## Credits ##
 
-Current maintainers of the project are
+The project is maintained by the [Agile Education research group](https://www.cs.helsinki.fi/en/rage/).
+
+The project used to be maintained by:
 - Martin Pärtel ([mpartel](https://github.com/mpartel))
 - Jarmo Isotalo ([jamox](https://github.com/jamox))
 
@@ -31,7 +33,7 @@ The project started as a Software Engineering Lab project at the [University of 
 
 Another team wrote the [server](https://github.com/testmycode/tmc-server).
 
-The course instructor and current maintainer of the project is Martin Pärtel ([mpartel](https://github.com/mpartel)). Other closely involved instructors were
+The course instructor was Martin Pärtel ([mpartel](https://github.com/mpartel)). Other closely involved instructors were
 
 - Matti Luukkainen ([mluukkai](https://github.com/mluukkai))
 - Antti Laaksonen
