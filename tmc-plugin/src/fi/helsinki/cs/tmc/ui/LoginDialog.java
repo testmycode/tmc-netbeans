@@ -41,7 +41,10 @@ public class LoginDialog extends javax.swing.JDialog {
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
 
         this.settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        this.usernameField.setText(settings.getUsername());
+        final Optional<String> username = settings.getUsername();
+        if (username.isPresent()) {
+            this.usernameField.setText(username.get());
+        }
 
         if (!usernameField.getText().isEmpty()) {
             SwingUtilities.invokeLater(new Runnable() {

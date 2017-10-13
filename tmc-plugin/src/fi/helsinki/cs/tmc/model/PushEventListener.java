@@ -7,6 +7,8 @@ import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.events.TmcEventListener;
 
+import com.google.common.base.Optional;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.TimerTask;
@@ -213,7 +215,12 @@ public class PushEventListener {
     }
     
     private synchronized void subscribeToReviews() {
-        String username = settings.getUsername();
+        final Optional<String> usernamePresent = settings.getUsername();
+        if (!usernamePresent.isPresent()) {
+            log.log(Level.WARNING, "Tried to subscribe to reviews while not logged in.");
+            return;
+        }
+        String username = usernamePresent.get();
         String channel = "/broadcast/user/" + username + "/review-available";
         client.getChannel(channel).subscribe(reviewAvailableListener);
     }

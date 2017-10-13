@@ -11,8 +11,12 @@ import javax.swing.text.DefaultCaret;
 
 public class OrganizationCard extends javax.swing.JPanel {
     
+    private final Organization organization;
+    
     public OrganizationCard(Organization organization) {
         initComponents();
+        
+        this.organization = organization;
         
         DefaultCaret caret = (DefaultCaret)this.organizationInformation.getCaret();
         caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
@@ -32,8 +36,8 @@ public class OrganizationCard extends javax.swing.JPanel {
         this.logo.setIcon(image);
     }
     
-    public String getOrganizationName() {
-        return this.organizationName.getText();
+    public Organization getOrganization() {
+        return this.organization;
     }
     
     private URL logoUrl(String path) {

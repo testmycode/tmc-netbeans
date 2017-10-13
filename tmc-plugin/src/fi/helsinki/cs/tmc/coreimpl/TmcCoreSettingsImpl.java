@@ -3,6 +3,7 @@ package fi.helsinki.cs.tmc.coreimpl;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -12,7 +13,9 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 
 import com.google.common.base.Optional;
-import fi.helsinki.cs.tmc.core.domain.Organization;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.nio.file.Path;
@@ -147,25 +150,44 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public OauthCredentials getOauthCredentials() {
-        return new OauthCredentials(settings.get(PREF_OAUTH_APPLICATION_ID, null), settings.get(PREF_OAUTH_SECRET, null));
+    public Optional<OauthCredentials> getOauthCredentials() {
+        OauthCredentials creds = new OauthCredentials(settings.get(PREF_OAUTH_APPLICATION_ID, null), settings.get(PREF_OAUTH_SECRET, null));
+        if (creds.getOauthApplicationId() == null || creds.getOauthSecret() == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(creds);
+        }
     }
 
     @Override
-    public void setOauthCredentials(OauthCredentials credentials) {
-        settings.put(PREF_OAUTH_APPLICATION_ID, credentials.getOauthApplicationId());
-        settings.put(PREF_OAUTH_SECRET, credentials.getOauthSecret());
+    public void setOauthCredentials(Optional<OauthCredentials> credentials) {
+        if (!credentials.isPresent()) {
+            settings.put(PREF_OAUTH_APPLICATION_ID, null);
+            settings.put(PREF_OAUTH_SECRET, null);
+        } else {
+            settings.put(PREF_OAUTH_APPLICATION_ID, credentials.get().getOauthApplicationId());
+            settings.put(PREF_OAUTH_SECRET, credentials.get().getOauthSecret());
+        }
     }
     
     @Override
-    public String getOrganization() {
-        return settings.get(PREF_ORGANIZATION, null);
+    public Optional<Organization> getOrganization() {
+        final String organizationJson = settings.get(PREF_ORGANIZATION, "");
+        if (organizationJson.isEmpty()) {
+            return Optional.absent();
+        } else {
+            Organization org = new Gson().fromJson(organizationJson, new TypeToken<Organization>(){}.getType());
+            return Optional.of(org);
+        }
     }
     
     @Override
-    public void setOrganization(String organization) {
-        settings.put(PREF_ORGANIZATION, organization);
-
+    public void setOrganization(Optional<Organization> organization) {
+        if (organization.isPresent()) {
+            settings.put(PREF_ORGANIZATION, new Gson().toJson(organization.get()));
+        } else {
+            settings.put(PREF_ORGANIZATION, "");
+        }
     }
 
     public static class SavedEvent implements TmcEvent {}
@@ -202,8 +224,8 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public String getUsername() {
-        return settings.get(PREF_USERNAME, tailoring.getDefaultUsername());
+    public Optional<String> getUsername() {
+        return Optional.of(settings.get(PREF_USERNAME, tailoring.getDefaultUsername()));
     }
 
     public void setUsername(String username) {

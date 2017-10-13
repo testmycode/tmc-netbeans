@@ -3,9 +3,11 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 import fi.helsinki.cs.tmc.tasks.LoginTask;
@@ -79,7 +81,9 @@ public class TmcModuleInstall extends ModuleInstall {
                     prefs.putBoolean(PREF_FIRST_RUN, false);
                 } else {
                     // Do full refresh.
-                    if (LoginManager.loggedIn() && settings.getOrganization() != null && settings.getCurrentCourse().isPresent()) {
+                    if (!LoginManager.loggedIn()) {
+                        BgTask.start("Asking user to log in", new LoginTask());
+                    } else if (LoginManager.loggedIn() && settings.getOrganization().isPresent() && settings.getCurrentCourse().isPresent()) {
                         new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
                             @Override
                             public void bgTaskReady(List<Course> result) {

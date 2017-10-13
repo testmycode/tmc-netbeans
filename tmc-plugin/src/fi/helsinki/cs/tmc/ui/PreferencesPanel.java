@@ -1,24 +1,18 @@
 package fi.helsinki.cs.tmc.ui;
 
 import com.google.common.base.Optional;
-import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tasks.LoginTask;
 import fi.helsinki.cs.tmc.utilities.BgTask;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import fi.helsinki.cs.tmc.utilities.LoginManager;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
@@ -31,9 +25,6 @@ import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import org.openide.util.Exceptions;
 
 /**
  * The settings panel.
@@ -54,7 +45,11 @@ import org.openide.util.Exceptions;
     }
     
     private void updateFields() {
-        final String username = TmcSettingsHolder.get().getUsername();
+        final Optional<String> usernamePresent = TmcSettingsHolder.get().getUsername();
+        String username = "";
+        if (usernamePresent.isPresent()) {
+            username = usernamePresent.get();
+        }
         final JLabel login = this.loginLabel;
         final JButton logout = this.logoutButton;
         if (!username.isEmpty()) {
@@ -65,10 +60,10 @@ import org.openide.util.Exceptions;
             logout.setEnabled(false);
         }
         
-        String org = TmcSettingsHolder.get().getOrganization();
+        Optional<Organization> org = TmcSettingsHolder.get().getOrganization();
         final JLabel selectedOrg = this.selectedOrganizationLabel;
-        if (org != null) {
-            selectedOrg.setText(org);
+        if (org.isPresent()) {
+            selectedOrg.setText(org.get().getName());
         } else {
             selectedOrg.setText("No organization selected");
         }
@@ -178,8 +173,8 @@ import org.openide.util.Exceptions;
     }
     
     public void setOrganization(OrganizationCard organization) {
-        TmcSettingsHolder.get().setOrganization(organization.getOrganizationName());
-        this.selectedOrganizationLabel.setText(organization.getOrganizationName());
+        TmcSettingsHolder.get().setOrganization(Optional.of(organization.getOrganization()));
+        this.selectedOrganizationLabel.setText(organization.getOrganization().getName());
     }
     
     private static class LocaleWrapper {

@@ -4,10 +4,13 @@ import com.google.common.base.Optional;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.CourseListWindow;
@@ -30,6 +33,11 @@ public class LoginManager {
     private Logger log = Logger.getLogger(LoginManager.class.getName());
     private AuthenticationFailedException authenticationException;
     private IOException connectionException;
+    private final TmcEventBus bus;
+
+    public LoginManager() {
+        this.bus = TmcEventBus.getDefault();
+    }
 
     public synchronized void login() throws InterruptedException, AuthenticationFailedException, IOException {
         if (LoginDialog.isWindowVisible() || OrganizationListWindow.isWindowVisible() || CourseListWindow.isWindowVisible()) {
@@ -67,6 +75,7 @@ public class LoginManager {
                             }
                         }
                         setReady(true);
+                        bus.post(new LoginStateChangedEvent());
                     }
                 }, closeHandler);
             }
@@ -89,7 +98,7 @@ public class LoginManager {
     }
     
     private void showOrganizations() {
-        if (TmcSettingsHolder.get().getOrganization() == null && loggedIn()) {
+        if (!TmcSettingsHolder.get().getOrganization().isPresent() && loggedIn()) {
             try {
                 OrganizationListWindow.display();
             } catch (Exception ex) {
@@ -102,12 +111,13 @@ public class LoginManager {
         log.log(Level.INFO, "Logging out the user.");
         final TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
         settings.setToken(Optional.<String>absent());
-        settings.setOauthCredentials(new OauthCredentials(null, null));
+        settings.setOauthCredentials(Optional.<OauthCredentials>absent());
         settings.setUsername("");
         settings.setPassword(Optional.<String>absent());
-        settings.setOrganization(null);
+        settings.setOrganization(Optional.<Organization>absent());
         CourseDb.getInstance().setCurrentCourseName(null);
         settings.save();
+        bus.post(new LoginStateChangedEvent());
     }
     
     public static boolean loggedIn() {

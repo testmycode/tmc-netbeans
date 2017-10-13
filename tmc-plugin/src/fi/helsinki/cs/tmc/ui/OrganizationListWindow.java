@@ -5,6 +5,8 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 
+import com.google.common.base.Optional;
+
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
@@ -112,10 +114,13 @@ public class OrganizationListWindow extends JPanel {
     }
 
     private int setDefaultSelectedIndex() {
-        String selectedOrganizationName = TmcSettingsHolder.get().getOrganization();
+        Optional<Organization> selectedOrganization = TmcSettingsHolder.get().getOrganization();
+        if (!selectedOrganization.isPresent()) {
+            return 0;
+        }
         final ListModel<OrganizationCard> list = organizations.getModel();
         for (int i = 0; i < list.getSize(); i++) {
-            if (list.getElementAt(i).getOrganizationName().equals(selectedOrganizationName)) {
+            if (list.getElementAt(i).getOrganization().getName().equals(selectedOrganization.get().getName())) {
                 return i;
             }
         }
