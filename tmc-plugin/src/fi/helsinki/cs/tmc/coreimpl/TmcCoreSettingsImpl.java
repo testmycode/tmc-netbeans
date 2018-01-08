@@ -83,11 +83,6 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public String getFormattedUserData() {
-        return "";
-    }
-
-    @Override
     public Path getTmcProjectDirectory() {
         return Paths.get(getProjectRootDir());
     }
@@ -104,13 +99,12 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public void setCourse(Course course) {
-        CourseDb.getInstance().setCurrentCourseName(course.getName());
-    }
-
-    @Override
-    public void setConfigRoot(Path path) {
-        // NOP - can't change.
+    public void setCourse(Optional<Course> course) {
+        String selected = null;
+        if (course.isPresent()) {
+            selected = course.get().getName();
+        }
+        CourseDb.getInstance().setCurrentCourseName(selected);
     }
 
     @Override

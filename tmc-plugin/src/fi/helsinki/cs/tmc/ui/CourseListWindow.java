@@ -9,6 +9,7 @@ import fi.helsinki.cs.tmc.model.CourseDb;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -33,12 +34,16 @@ import javax.swing.border.EmptyBorder;
 public class CourseListWindow extends JPanel {
 
     private static JFrame frame;
+    private final JLabel title;
     private final JList<CourseCard> courses;
     private PreferencesPanel prefPanel;
     private static JButton button;
 
     public CourseListWindow(List<Course> courses, PreferencesPanel prefPanel) {
-        this.prefPanel = prefPanel;       
+        this.prefPanel = prefPanel;
+        this.title = new JLabel("Select a course:");
+        Font titleFont = this.title.getFont();
+        this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
         CourseCard[] courseCards = new CourseCard[courses.size()];
         for (int i = 0; i < courses.size(); i++) {
             courseCards[i] = new CourseCard(courses.get(i));
@@ -67,13 +72,21 @@ public class CourseListWindow extends JPanel {
                 }
             }
         });
+        
+        add(title);
         add(pane);
         add(button);
     }
 
-    public static void display(PreferencesPanel prefPanel) throws Exception {
+    public static void display() throws Exception {
+        PreferencesPanel prefPanel;
+                if (PreferencesUIFactory.getInstance().getCurrentUI() == null) {
+                    prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().createCurrentPreferencesUI();
+                } else {
+                    prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().getCurrentUI();
+                }
         if (frame == null) {
-            frame = new JFrame("Select a course");
+            frame = new JFrame("Courses");
         }
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Course> courses = prefPanel.getAvailableCourses();

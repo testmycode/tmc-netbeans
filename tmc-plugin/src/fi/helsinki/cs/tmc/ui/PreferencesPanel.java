@@ -98,7 +98,7 @@ import javax.swing.SwingUtilities;
     }
 
     public void setSelectedCourse(Course course) {
-        TmcSettingsHolder.get().setCourse(course);
+        TmcSettingsHolder.get().setCourse(Optional.of(course));
         this.selectedCourseLabel.setText(course.getName());
     }
     
@@ -481,7 +481,7 @@ import javax.swing.SwingUtilities;
 
     private void changeCourseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeCourseButtonActionPerformed
         try {
-            CourseListWindow.display(this);
+            CourseListWindow.display();
         } catch (Exception ex) {
         }
         updateSettingsForRefresh();

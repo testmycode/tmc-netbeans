@@ -45,8 +45,9 @@ public class SaveSettingsAction extends AbstractAction {
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        
-        TmcServerAddressNormalizer.normalize();
+        TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+        normalizer.normalize();
+        normalizer.selectOrganizationAndCourse();
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());

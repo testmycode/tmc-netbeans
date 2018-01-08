@@ -10,6 +10,7 @@ import com.google.common.base.Optional;
 import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -34,10 +35,14 @@ import org.openide.util.Exceptions;
 public class OrganizationListWindow extends JPanel {
 
     private static JFrame frame;
+    private final JLabel title;
     private final JList<OrganizationCard> organizations;
     private static JButton button;
 
     public OrganizationListWindow(List<Organization> organizations) {
+        this.title = new JLabel("Select an organization:");
+        Font titleFont = this.title.getFont();
+        this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
         OrganizationCard[] organizationCards = new OrganizationCard[organizations.size()];
         for (int i = 0; i < organizations.size(); i++) {
             organizationCards[i] = new OrganizationCard(organizations.get(i));
@@ -67,14 +72,15 @@ public class OrganizationListWindow extends JPanel {
                 }
             }
         });
-        
+
+        add(title);
         add(pane);
         add(button);
     }
 
     public static void display() throws Exception {
         if (frame == null) {
-            frame = new JFrame("Select an organization");
+            frame = new JFrame("Organizations");
         }
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         List<Organization> organizations = TmcCore.get().getOrganizations(ProgressObserver.NULL_OBSERVER).call();
@@ -146,7 +152,7 @@ public class OrganizationListWindow extends JPanel {
                     panel = (PreferencesPanel) PreferencesUIFactory.getInstance().getCurrentUI();
                 }
                 panel.setOrganization(organization);
-                CourseListWindow.display(panel);
+                CourseListWindow.display();
             } catch (Exception ex) {
                 Exceptions.printStackTrace(ex);
             }

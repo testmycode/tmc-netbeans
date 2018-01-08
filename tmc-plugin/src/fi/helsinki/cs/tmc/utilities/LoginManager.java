@@ -1,14 +1,17 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.actions.ShowSettingsAction;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -55,29 +58,36 @@ public class LoginManager {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                LoginDialog.display(new ActionListener() {
-                    @Override
-                    public void actionPerformed(ActionEvent e) {
-                        try {
-                            TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
-                        } catch (Exception ex) {
-                            if (ex instanceof IOException) {
-                                connectionException = (IOException)ex;
-                                if (ex instanceof UnknownHostException) {
-                                    ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
-                                } else if (ex instanceof FileNotFoundException) {
-                                    ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect.");
-                                } 
+                if (loggedIn()) {
+                    showOrganizationsOrCourses();
+                } else {
+                    LoginDialog.display(new ActionListener() {
+                        @Override
+                        public void actionPerformed(ActionEvent e) {
+                            try {
+                                TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+                                normalizer.normalize();
+                                TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
+                                normalizer.selectOrganizationAndCourse();
+                            } catch (Exception ex) {
+                                if (ex instanceof IOException) {
+                                    connectionException = (IOException) ex;
+                                    if (ex instanceof UnknownHostException) {
+                                        ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
+                                    } else if (ex instanceof FileNotFoundException) {
+                                        ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect.");
+                                    }
+                                }
+                                if (ex instanceof AuthenticationFailedException) {
+                                    authenticationException = (AuthenticationFailedException) ex;
+                                    ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
+                                }
                             }
-                            if (ex instanceof AuthenticationFailedException) {
-                                authenticationException = (AuthenticationFailedException) ex;
-                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
-                            }
+                            setReady(true);
+                            bus.post(new LoginStateChangedEvent());
                         }
-                        setReady(true);
-                        bus.post(new LoginStateChangedEvent());
-                    }
-                }, closeHandler);
+                    }, closeHandler);
+                }
             }
         });
         while (!ready) {
@@ -90,20 +100,31 @@ public class LoginManager {
         if (connectionException != null) {
             throw connectionException;
         }
-        showOrganizations(); 
+        if (loggedIn()) {
+            showOrganizationsOrCourses();
+        }
     }
     
     public void setReady(boolean value) {
         this.ready = value;
     }
     
-    private void showOrganizations() {
-        if (!TmcSettingsHolder.get().getOrganization().isPresent() && loggedIn()) {
+    private void showOrganizationsOrCourses() {
+        TmcSettings settings = TmcSettingsHolder.get();
+        if (!settings.getOrganization().isPresent()) {
             try {
                 OrganizationListWindow.display();
             } catch (Exception ex) {
                 log.log(Level.WARNING, "Unable to show organizations", ex);
             }
+        } else if (!settings.getCurrentCourse().isPresent()) {
+            try {
+                CourseListWindow.display();
+            } catch (Exception ex) {
+                log.log(Level.WARNING, "Unable to show courses", ex);
+            }
+        } else {
+            new ShowSettingsAction().run();
         }
     }
     
