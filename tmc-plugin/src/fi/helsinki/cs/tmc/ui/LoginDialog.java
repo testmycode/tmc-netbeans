@@ -5,6 +5,7 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 
 import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.utilities.LoginListener;
 
 import org.openide.windows.WindowManager;
 
@@ -16,7 +17,7 @@ import javax.swing.SwingUtilities;
 
 public class LoginDialog extends javax.swing.JDialog {
 
-    public static void display(ActionListener onOk, final Runnable onClosed) {
+    public static void display(LoginListener onOk, final Runnable onClosed) {
         LoginDialog dialog = new LoginDialog(onOk);
         dialog.setLocationRelativeTo(null);
         dialog.setVisible(true);
@@ -29,13 +30,13 @@ public class LoginDialog extends javax.swing.JDialog {
     }
 
     private TmcCoreSettingsImpl settings;
-    private ActionListener onLogin;
+    private LoginListener onLogin;
     private static boolean visible;
 
     /**
      * Creates new form LoginForm
      */
-    public LoginDialog(ActionListener onLogin) {
+    public LoginDialog(LoginListener onLogin) {
         super(WindowManager.getDefault().getMainWindow(), false);
         initComponents();
 
@@ -222,9 +223,8 @@ public class LoginDialog extends javax.swing.JDialog {
 
     private void loginButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_loginButtonActionPerformed
         settings.setUsername(usernameField.getText());
-        settings.setPassword(Optional.of(new String(passwordField.getPassword())));
         settings.save();
-
+        onLogin.setPassword(new String(passwordField.getPassword()));
         onLogin.actionPerformed(evt);
 
         this.setVisible(false);

@@ -152,7 +152,6 @@ public class BgTask<V> implements CancellableCallable<V> {
                             authenticationSuccessful = false;
                         }
                     } while (!authenticationSuccessful);
-                    //TODO: add a message if username or password incorrect
                 }
             } while (!successful);
 

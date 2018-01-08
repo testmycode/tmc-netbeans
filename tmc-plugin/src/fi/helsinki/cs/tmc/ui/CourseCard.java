@@ -22,15 +22,13 @@ public class CourseCard extends javax.swing.JPanel {
         
         this.titleLabel.setText(course.getTitle());
         String information = course.getDescription();
-//        if (information.length() > 100) {
-//            information = information.substring(0, 99) + "...";
-//        }
-        this.informationLabel.setText(information);
-        this.informationLabel.setRows(2);
-        final String text = this.informationLabel.getText();
-        if (text.length() > 3) {
-            this.informationLabel.replaceRange("...", text.length() - 3, text.length());
+        if (information == null || information.isEmpty()) {
+            information = "A mysterious course without description.";
         }
+        if (information.length() > 198) {
+            information = information.substring(0, 197) + "...";
+        }
+        this.informationLabel.setText(information);
         this.nameLabel.setText("/" + course.getName());
     }
     

@@ -61,32 +61,39 @@ public class LoginManager {
                 if (loggedIn()) {
                     showOrganizationsOrCourses();
                 } else {
-                    LoginDialog.display(new ActionListener() {
-                        @Override
-                        public void actionPerformed(ActionEvent e) {
-                            try {
-                                TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
-                                normalizer.normalize();
-                                TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, TmcSettingsHolder.get().getPassword().get()).call();
-                                normalizer.selectOrganizationAndCourse();
-                            } catch (Exception ex) {
-                                if (ex instanceof IOException) {
-                                    connectionException = (IOException) ex;
-                                    if (ex instanceof UnknownHostException) {
-                                        ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
-                                    } else if (ex instanceof FileNotFoundException) {
-                                        ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect.");
+                    LoginDialog.display(new LoginListener(password -> {
+                        try {
+                            TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+                            normalizer.normalize();
+                            TmcCore.get().authenticate(ProgressObserver.NULL_OBSERVER, password).call();
+                            normalizer.selectOrganizationAndCourse();
+                        } catch (Exception ex) {
+                            log.log(Level.WARNING, "Error while logging in! " + ex.toString());
+                            if (ex instanceof IOException) {
+                                connectionException = (IOException) ex;
+                                if (ex instanceof UnknownHostException) {
+                                    ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
+                                } else if (ex instanceof FileNotFoundException) {
+                                    if (TmcSettingsHolder.get().getServerAddress().contains("tmc.mooc.fi/mooc")) {
+                                        ConvenientDialogDisplayer.getDefault().displayError("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                                                "All the courses have been migrated to our main server https://tmc.mooc.fi.\n" +
+                                                "If you'd like to do the migrated courses, you'll need to update your server address to\n" +
+                                                "https://tmc.mooc.fi/org/mooc and create a new account there.\n\n" +
+                                                "For more information, check the course materials on mooc.fi.");
+                                    } else {
+                                        ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect or the server is not supported.");
                                     }
                                 }
-                                if (ex instanceof AuthenticationFailedException) {
-                                    authenticationException = (AuthenticationFailedException) ex;
-                                    ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
-                                }
+                            } else if (ex instanceof AuthenticationFailedException) {
+                                authenticationException = (AuthenticationFailedException) ex;
+                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
+                            } else {
+                                ConvenientDialogDisplayer.getDefault().displayError("Logging in failed! Try again.");
                             }
-                            setReady(true);
-                            bus.post(new LoginStateChangedEvent());
                         }
-                    }, closeHandler);
+                        setReady(true);
+                        bus.post(new LoginStateChangedEvent());
+                    }), closeHandler);
                 }
             }
         });

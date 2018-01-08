@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -44,6 +45,18 @@ public class OrganizationListWindow extends JPanel {
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
         OrganizationCard[] organizationCards = new OrganizationCard[organizations.size()];
+        Collections.sort(organizations, (a, b) -> {
+            if (a.isPinned() && b.isPinned()) {
+                return a.getName().compareTo(b.getName());
+            }
+            if (a.isPinned()) {
+                return -1;
+            }
+            if (b.isPinned()) {
+                return 1;
+            }
+            return a.getName().compareTo(b.getName());
+        });
         for (int i = 0; i < organizations.size(); i++) {
             organizationCards[i] = new OrganizationCard(organizations.get(i));
         }
@@ -57,7 +70,7 @@ public class OrganizationListWindow extends JPanel {
         this.organizations.setVisibleRowCount(4);
         JScrollPane pane = new JScrollPane(this.organizations);
         Dimension d = pane.getPreferredSize();
-        d.width = 400;
+        d.width = 800;
         pane.setPreferredSize(d);
         pane.setBorder(new EmptyBorder(5, 0, 5, 0));
         this.organizations.setBackground(new Color(242, 241, 240));

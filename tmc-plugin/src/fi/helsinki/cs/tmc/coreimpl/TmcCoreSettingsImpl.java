@@ -234,7 +234,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     @Override
     public void setPassword(Optional<String> password) {
         if (password.isPresent()) {
-            settings.put(PREF_PASSWORD, password.get());
+            throw new IllegalArgumentException("Setting passwords is no longer supported!");
         } else {
             settings.remove(PREF_PASSWORD);
         }
