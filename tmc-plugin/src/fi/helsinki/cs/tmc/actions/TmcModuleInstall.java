@@ -75,6 +75,10 @@ public class TmcModuleInstall extends ModuleInstall {
                 
                 new EnsureMavenBinaryIsExecutable().run();
 
+                if (settings.getPassword().isPresent()) {
+                    MigrateSettings.tryToMigratePasswordToOAuthToken();
+                }
+
                 boolean isFirstRun = prefs.getBoolean(PREF_FIRST_RUN, true);
                 if (isFirstRun) {
                     doFirstRun();
