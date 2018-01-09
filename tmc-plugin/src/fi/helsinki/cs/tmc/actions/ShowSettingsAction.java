@@ -5,17 +5,23 @@ import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
+import fi.helsinki.cs.tmc.tasks.LoginTask;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
 import fi.helsinki.cs.tmc.ui.PreferencesUIFactory;
+import fi.helsinki.cs.tmc.utilities.BgTask;
+import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.LoginManager;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
 import org.openide.DialogDescriptor;
 import org.openide.awt.ActionRegistration;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
 import org.openide.awt.ActionID;
+import org.openide.util.Exceptions;
 import org.openide.util.NbBundle.Messages;
 
 @ActionID(category = "TMC",
@@ -31,6 +37,7 @@ public final class ShowSettingsAction extends AbstractAction {
     private SaveSettingsAction saveAction;
     private CourseDb courseDb;
     private Tailoring tailoring;
+    private Logger log = Logger.getLogger(ShowSettingsAction.class.getName());
 
     public ShowSettingsAction() {
         this.prefUiFactory = PreferencesUIFactory.getInstance();
@@ -41,7 +48,11 @@ public final class ShowSettingsAction extends AbstractAction {
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        run();
+        if (!LoginManager.loggedIn()) {
+            BgTask.start("Login window.", new LoginTask());
+        } else {
+            run();
+        }
     }
 
     public void run() {
@@ -49,20 +60,13 @@ public final class ShowSettingsAction extends AbstractAction {
             prefUiFactory.activateVisiblePreferencesUi();
             return;
         }
-
+        
         final PreferencesUI prefUI = prefUiFactory.createCurrentPreferencesUI();
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        prefUI.setUsername(settings.getUsername());
-        prefUI.setPassword(settings.getPassword());
-        prefUI.setShouldSavePassword(settings.isSavingPassword());
-        prefUI.setServerBaseUrl(settings.getServerBaseUrl());
         prefUI.setProjectDir(settings.getProjectRootDir());
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
         prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
-        prefUI.setAvailableCourses(courseDb.getAvailableCourses());
-        prefUI.setSelectedCourseName(courseDb.getCurrentCourseName());
-        prefUI.setUsernameFieldName(tailoring.getUsernameFieldName());
         prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
         prefUI.setResolveProjectDependenciesEnabled(settings.getResolveDependencies());

@@ -1,17 +1,19 @@
 package fi.helsinki.cs.tmc.actions;
 
 import fi.helsinki.cs.tmc.core.TmcCore;
-import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
-import fi.helsinki.cs.tmc.ui.LoginDialog;
+import fi.helsinki.cs.tmc.tasks.LoginTask;
+import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.utilities.LoginManager;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -77,31 +79,33 @@ public class TmcModuleInstall extends ModuleInstall {
                 if (isFirstRun) {
                     doFirstRun();
                     prefs.putBoolean(PREF_FIRST_RUN, false);
-                } else if (new TmcServerCommunicationTaskFactory().needsOnlyPassword() && CourseDb.getInstance().getCurrentCourse() != null) {
-                    LoginDialog.display(new CheckForNewExercisesOrUpdates(false, false));
                 } else {
                     // Do full refresh.
-                    new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
-                        @Override
-                        public void bgTaskReady(List<Course> result) {
-                            log.warning("moduleInstall refresh ready");
-                            new CheckForNewExercisesOrUpdates(true, false).run();
-                            if (CheckForUnopenedExercises.shouldRunOnStartup()) {
-                                new CheckForUnopenedExercises().run();
+                    if (!LoginManager.loggedIn()) {
+                        BgTask.start("Asking user to log in", new LoginTask());
+                    } else if (LoginManager.loggedIn() && settings.getOrganization().isPresent() && settings.getCurrentCourse().isPresent()) {
+                        new RefreshCoursesAction().addDefaultListener(false, true).addListener(new BgTaskListener<List<Course>>() {
+                            @Override
+                            public void bgTaskReady(List<Course> result) {
+                                log.warning("moduleInstall refresh ready");
+                                new CheckForNewExercisesOrUpdates(true, false).run();
+                                if (CheckForUnopenedExercises.shouldRunOnStartup()) {
+                                    new CheckForUnopenedExercises().run();
+                                }
+                                new CheckProjectCount().checkAndNotifyIfOver();
                             }
-                            new CheckProjectCount().checkAndNotifyIfOver();
-                        }
 
-                        @Override
-                        public void bgTaskCancelled() {
-                            log.warning("moduleInstall refresh cancelled");
-                        }
+                            @Override
+                            public void bgTaskCancelled() {
+                                log.warning("moduleInstall refresh cancelled");
+                            }
 
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                            log.log(Level.WARNING, "moduleInstall refresh failed ", ex);
-                        }
-                    }).run();
+                            @Override
+                            public void bgTaskFailed(Throwable ex) {
+                                log.log(Level.WARNING, "moduleInstall refresh failed ", ex);
+                            }
+                        }).run();
+                    }
                 }
                 if (!isFirstRun && settings.getSendDiagnostics()) {
                     new SendDiagnostics().run();
@@ -125,7 +129,7 @@ public class TmcModuleInstall extends ModuleInstall {
     }
 
     private void doFirstRun() {
-        new ShowSettingsAction().run();
+        BgTask.start("First run", new LoginTask());
     }
 
     private void doUpdateFromPreviousVersion(SpecificationVersion prevVersion) {

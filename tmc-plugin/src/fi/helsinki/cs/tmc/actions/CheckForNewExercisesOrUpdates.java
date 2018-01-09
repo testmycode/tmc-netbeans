@@ -12,8 +12,8 @@ import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
-import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
+import fi.helsinki.cs.tmc.ui.DownloadOrUpdateExercisesDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -86,7 +86,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
         if (currentCourseBeforeUpdate == null) {
             if (!beQuiet) {
-                dialogs.displayMessage("Please select a course in TMC -> Settings.");
+                dialogs.displayMessage("Please make sure you're logged in and have selected a course in TMC -> Settings.");
             }
             return;
         }

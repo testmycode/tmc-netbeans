@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.LocalExerciseStatus;
 import fi.helsinki.cs.tmc.ui.PreferencesUI;
@@ -18,12 +19,12 @@ import javax.swing.AbstractAction;
 
 public class SaveSettingsAction extends AbstractAction {
 
-    private CourseDb courseDb;
-    private TmcEventBus eventBus;
-    private TmcCore tmcCore;
+    private final CourseDb courseDb;
+    private final TmcEventBus eventBus;
+    private final TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
-    private SendDiagnostics sendDiagnostics;
-    
+    private final SendDiagnostics sendDiagnostics;
+
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
         this.eventBus = TmcEventBus.getDefault();
@@ -44,11 +45,9 @@ public class SaveSettingsAction extends AbstractAction {
         PreferencesUI prefUi = (PreferencesUI) e.getSource();
 
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        
-        settings.setUsername(prefUi.getUsername());
-        settings.setPassword(prefUi.getPassword());
-        settings.setSavingPassword(prefUi.getShouldSavePassword());
-        settings.setServerBaseUrl(prefUi.getServerBaseUrl());
+        TmcServerAddressNormalizer normalizer = new TmcServerAddressNormalizer();
+        normalizer.normalize();
+        normalizer.selectOrganizationAndCourse();
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());

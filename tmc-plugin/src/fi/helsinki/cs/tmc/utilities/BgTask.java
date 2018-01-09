@@ -1,11 +1,16 @@
 package fi.helsinki.cs.tmc.utilities;
 
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
+import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import java.io.IOException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
 import javax.swing.SwingUtilities;
+import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
+import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.netbeans.api.progress.ProgressHandle;
 import org.netbeans.api.progress.ProgressHandleFactory;
 import org.openide.util.Cancellable;
@@ -124,14 +129,33 @@ public class BgTask<V> implements CancellableCallable<V> {
         }
 
         if (proressObserver instanceof BridgingProgressObserver) {
-            BridgingProgressObserver bi =(BridgingProgressObserver) this.proressObserver;
+            BridgingProgressObserver bi = (BridgingProgressObserver) this.proressObserver;
             bi.attach(progressHandle);
         }
 
         progressHandle.start();
         try {
-            final V result = callable.call();
+            V resultTemp = null;
+            boolean successful;
+            do {
+                try {
+                    successful = true;
+                    resultTemp = callable.call();
+                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException | IOException ex) {
+                    successful = false;
+                    boolean authenticationSuccessful;
+                    do {
+                        try {
+                            authenticationSuccessful = true;
+                            new LoginManager().login();
+                        } catch (AuthenticationFailedException | IOException | InterruptedException exception) {
+                            authenticationSuccessful = false;
+                        }
+                    } while (!authenticationSuccessful);
+                }
+            } while (!successful);
 
+            final V result = resultTemp;
             SwingUtilities.invokeLater(new Runnable() {
                 @Override
                 public void run() {

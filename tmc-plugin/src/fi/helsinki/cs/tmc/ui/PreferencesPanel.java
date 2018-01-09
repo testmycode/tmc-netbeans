@@ -1,30 +1,30 @@
 package fi.helsinki.cs.tmc.ui;
 
-import fi.helsinki.cs.tmc.actions.RefreshCoursesAction;
+import com.google.common.base.Optional;
+import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.Organization;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-
 import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
-import fi.helsinki.cs.tmc.utilities.BgTaskListener;
+import fi.helsinki.cs.tmc.tasks.LoginTask;
+import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
+import fi.helsinki.cs.tmc.utilities.LoginManager;
 
-import com.google.common.base.Strings;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
+import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
-import javax.swing.event.DocumentEvent;
-import javax.swing.event.DocumentListener;
-import org.apache.commons.lang3.ObjectUtils;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * The settings panel.
@@ -34,101 +34,57 @@ import org.apache.commons.lang3.StringUtils;
  */
 /*package*/ class PreferencesPanel extends JPanel implements PreferencesUI {
 
-    private String usernameFieldName = "username";
-
     private ConvenientDialogDisplayer dialogs = ConvenientDialogDisplayer.getDefault();
 
     private DelayedRunner refreshRunner = new DelayedRunner();
-    private RefreshSettings lastRefreshSettings = null;
-
-    private static class RefreshSettings {
-        private final String username;
-        private final String password;
-        private final String baseUrl;
-
-        public RefreshSettings(String username, String password, String baseUrl) {
-            this.username = username;
-            this.password = password;
-            this.baseUrl = baseUrl;
-        }
-
-        public boolean isAllSet() {
-            return (!Strings.isNullOrEmpty(username) && !Strings.isNullOrEmpty(password) && !Strings.isNullOrEmpty(baseUrl));
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (obj instanceof RefreshSettings) {
-                RefreshSettings that = (RefreshSettings)obj;
-                return
-                        ObjectUtils.equals(this.username, that.username) &&
-                        ObjectUtils.equals(this.password, that.password) &&
-                        ObjectUtils.equals(this.baseUrl, that.baseUrl);
-            } else {
-                return false;
-            }
-        }
-
-        @Override
-        public int hashCode() {
-            return 0;
-        }
-    }
 
     /*package*/ PreferencesPanel() {
         initComponents();
         setUpErrorMsgLocaleSelection();
-        makeLoadingLabelNicer();
-
-        setUpFieldChangeListeners();
-        setUsernameFieldName(usernameFieldName);
+        updateFields();
     }
-
-    @Override
-    public String getUsername() {
-        return usernameTextField.getText().trim();
+    
+    private void updateFields() {
+        final Optional<String> usernamePresent = TmcSettingsHolder.get().getUsername();
+        String username = "";
+        if (usernamePresent.isPresent()) {
+            username = usernamePresent.get();
+        }
+        final JLabel login = this.loginLabel;
+        final JButton logout = this.logoutButton;
+        if (!username.isEmpty()) {
+            login.setText("Logged in as " + username);
+            logout.setEnabled(true);
+        } else {
+            login.setText("Not logged in!");
+            logout.setEnabled(false);
+        }
+        
+        Optional<Organization> org = TmcSettingsHolder.get().getOrganization();
+        final JLabel selectedOrg = this.selectedOrganizationLabel;
+        if (org.isPresent()) {
+            selectedOrg.setText(org.get().getName());
+        } else {
+            selectedOrg.setText("No organization selected");
+        }
+        
+        Optional<Course> course = TmcSettingsHolder.get().getCurrentCourse();
+        final JLabel selectedCourse = this.selectedCourseLabel;
+        if (course.isPresent()) {
+            selectedCourse.setText(course.get().getName());
+        } else {
+            selectedCourse.setText("No course selected");
+        }
     }
-
+    
     @Override
-    public void setUsername(String username) {
-        usernameTextField.setText(username);
-    }
-
-    @Override
-    public final void setUsernameFieldName(String usernameFieldName) {
-        this.usernameFieldName = usernameFieldName;
-        this.usernameLabel.setText(StringUtils.capitalize(usernameFieldName));
-        fieldChanged();
-    }
-
-    @Override
-    public String getPassword() {
-        return new String(passwordField.getPassword());
-    }
-
-    @Override
-    public void setPassword(String password) {
-        passwordField.setText(password);
-    }
-
-    @Override
-    public boolean getShouldSavePassword() {
-        return savePasswordCheckBox.isSelected();
-    }
-
-    @Override
-    public void setShouldSavePassword(boolean shouldSavePassword) {
-        savePasswordCheckBox.setSelected(shouldSavePassword);
-    }
-
-    @Override
-    public String getServerBaseUrl() {
-        return serverAddressTextField.getText().trim();
-    }
-
-    @Override
-    public void setServerBaseUrl(String baseUrl) {
-        serverAddressTextField.setText(baseUrl);
+    public List<Course> getAvailableCourses() {
+        try {
+            List<Course> courses = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER).call();
+            return courses;
+        } catch (Exception ex) {
+        }
+        return new ArrayList<>();
     }
 
     @Override
@@ -140,63 +96,15 @@ import org.apache.commons.lang3.StringUtils;
     public void setProjectDir(String projectDir) {
         projectFolderTextField.setText(projectDir);
     }
+
+    public void setSelectedCourse(Course course) {
+        TmcSettingsHolder.get().setCourse(Optional.of(course));
+        this.selectedCourseLabel.setText(course.getName());
+    }
     
     @Override
-    public void setAvailableCourses(List<Course> courses) {
-        setCourseListRefreshInProgress(true); // To avoid changes triggering a new reload
-
-        String previousSelectedCourseName = getSelectedCourseName();
-
-        coursesComboBox.removeAllItems();
-        int newSelectedIndex = -1;
-        for (int i = 0; i < courses.size(); ++i) {
-            Course course = courses.get(i);
-            coursesComboBox.addItem(courses.get(i));
-
-            if (course.getName().equals(previousSelectedCourseName)) {
-                newSelectedIndex = i;
-            }
-        }
-
-        coursesComboBox.setSelectedIndex(newSelectedIndex);
-
-        // Process any change events before enabling course selection
-        // to avoid triggering another refresh.
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                setCourseListRefreshInProgress(false);
-            }
-        });
-    }
-
-    @Override
-    public List<Course> getAvailableCourses() {
-        List<Course> result = new ArrayList<Course>(coursesComboBox.getItemCount());
-        for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
-            result.add((Course)coursesComboBox.getItemAt(i));
-        }
-        return result;
-    }
-
-    @Override
-    public void setSelectedCourseName(String courseName) {
-        for (int i = 0; i < coursesComboBox.getItemCount(); ++i) {
-            if (((Course)coursesComboBox.getItemAt(i)).getName().equals(courseName)) {
-                coursesComboBox.setSelectedIndex(i);
-                break;
-            }
-        }
-    }
-
-    @Override
     public String getSelectedCourseName() {
-        Object item = coursesComboBox.getSelectedItem();
-        if (item instanceof Course) {
-            return ((Course)item).getName();
-        } else { // because the combobox isn't populated yet
-            return null;
-        }
+        return this.selectedCourseLabel.getText();
     }
 
     @Override
@@ -263,7 +171,12 @@ import org.apache.commons.lang3.StringUtils;
     public void setSendDiagnosticsEnabled(boolean value) {
         sendDiagnostics.setSelected(value);
     }
-
+    
+    public void setOrganization(OrganizationCard organization) {
+        TmcSettingsHolder.get().setOrganization(Optional.of(organization.getOrganization()));
+        this.selectedOrganizationLabel.setText(organization.getOrganization().getName());
+    }
+    
     private static class LocaleWrapper {
         private Locale locale;
         public LocaleWrapper(Locale locale) {
@@ -295,15 +208,8 @@ import org.apache.commons.lang3.StringUtils;
 
     private void updateSettingsForRefresh() {
         TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
-        settings.setUsername(getUsername());
-        settings.setPassword(getPassword());
-        settings.setServerBaseUrl(getServerBaseUrl());
         settings.setProjectRootDir(getProjectDir());
         settings.save(); // TODO: is this wanted
-    }
-
-    private RefreshSettings getRefreshSettings() {
-        return new RefreshSettings(getUsername(), getPassword(), getServerBaseUrl());
     }
 
     private void setUpErrorMsgLocaleSelection() {
@@ -333,153 +239,6 @@ import org.apache.commons.lang3.StringUtils;
         });
     }
 
-    private void makeLoadingLabelNicer() {
-        try {
-            courseListReloadingLabel.setIcon(new javax.swing.ImageIcon(this.getClass().getResource("loading-spinner.gif")));
-        } catch (Exception e) {
-            return;
-        }
-        courseListReloadingLabel.setText("");
-    }
-
-    private void setCourseListRefreshInProgress(boolean inProgress) {
-        refreshCoursesBtn.setEnabled(!inProgress);
-        coursesComboBox.setEnabled(!inProgress);
-        courseListReloadingLabel.setVisible(inProgress);
-    }
-
-    private void setUpFieldChangeListeners() {
-        DocumentListener docListener = new DocumentListener() {
-            @Override
-            public void insertUpdate(DocumentEvent e) {
-                fieldChanged();
-            }
-            @Override
-            public void removeUpdate(DocumentEvent e) {
-                fieldChanged();
-            }
-            @Override
-            public void changedUpdate(DocumentEvent e) {
-                fieldChanged();
-            }
-        };
-        usernameTextField.getDocument().addDocumentListener(docListener);
-        passwordField.getDocument().addDocumentListener(docListener);
-        serverAddressTextField.getDocument().addDocumentListener(docListener);
-        projectFolderTextField.getDocument().addDocumentListener(docListener);
-
-        coursesComboBox.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                fieldChanged();
-            }
-        });
-    }
-
-    private void fieldChanged() {
-        updateAdvice();
-
-        if (canProbablyRefreshCourseList() && !alreadyRefreshingCourseList() && settingsChangedSinceLastRefresh()) {
-            startRefreshingCourseList(true, true);
-        }
-    }
-
-    private void updateAdvice() {
-        ArrayList<String> advices = new ArrayList<String>();
-        if (usernameTextField.getText().isEmpty()) {
-            advices.add("fill in " + StringUtils.uncapitalize(usernameFieldName));
-        }
-        if (passwordField.getPassword().length == 0) {
-            advices.add("fill in password");
-        }
-        if (serverAddressTextField.getText().isEmpty()) {
-            advices.add("fill in server address");
-        }
-        if (projectFolderTextField.getText().isEmpty()) {
-            advices.add("select folder for projects");
-        }
-        if (coursesComboBox.getSelectedIndex() == -1) {
-            advices.add("select course");
-        }
-
-        if (!advices.isEmpty()) {
-            String advice = "Please " + joinWithCommasAndAnd(advices) + ".";
-            adviceLabel.setText(advice);
-        } else {
-            adviceLabel.setText("");
-        }
-    }
-
-    private String joinWithCommasAndAnd(List<String> strings) {
-        if (strings.isEmpty()) {
-            return "";
-        } else if (strings.size() == 1) {
-            return strings.get(0);
-        } else {
-            String s = "";
-            for (int i = 0; i < strings.size() - 2; ++i) {
-                s += strings.get(i) + ", ";
-            }
-            s += strings.get(strings.size() - 2);
-            s += " and ";
-            s += strings.get(strings.size() - 1);
-            return s;
-        }
-    }
-
-    private boolean canProbablyRefreshCourseList() {
-        return getRefreshSettings().isAllSet();
-    }
-
-    private boolean alreadyRefreshingCourseList() {
-        return courseListReloadingLabel.isVisible();
-    }
-
-    private boolean settingsChangedSinceLastRefresh() {
-        return (lastRefreshSettings == null || !lastRefreshSettings.equals(getRefreshSettings()));
-    }
-
-    private void startRefreshingCourseList(boolean failSilently, boolean delay) {
-        updateSettingsForRefresh();
-        final RefreshCoursesAction action = new RefreshCoursesAction();
-        action.addDefaultListener(!failSilently, false);
-        action.addListener(new BgTaskListener<List<Course>>() {
-            @Override
-            public void bgTaskReady(List<Course> result) {
-                setCourseListRefreshInProgress(false);
-                setAvailableCourses(result);
-            }
-
-            @Override
-            public void bgTaskCancelled() {
-                setCourseListRefreshInProgress(false);
-            }
-
-            @Override
-            public void bgTaskFailed(Throwable ex) {
-                setCourseListRefreshInProgress(false);
-            }
-        });
-
-        if (delay) {
-            refreshRunner.setTask(new Runnable() {
-                @Override
-                public void run() {
-                    refreshCourseListNow(action);
-                }
-            });
-        } else {
-            refreshCourseListNow(action);
-        }
-    }
-
-    private void refreshCourseListNow(RefreshCoursesAction action) {
-        setCourseListRefreshInProgress(true);
-        updateSettingsForRefresh();
-        lastRefreshSettings = getRefreshSettings();
-        action.run();
-    }
-
     /** This method is called from within the constructor to
      * initialize the form.
      * WARNING: Do NOT modify this code. The content of this method is
@@ -488,23 +247,12 @@ import org.apache.commons.lang3.StringUtils;
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">//GEN-BEGIN:initComponents
     private void initComponents() {
-        bindingGroup = new org.jdesktop.beansbinding.BindingGroup();
 
-        usernameLabel = new javax.swing.JLabel();
-        usernameTextField = new javax.swing.JTextField();
-        serverAddressLabel = new javax.swing.JLabel();
-        serverAddressTextField = new javax.swing.JTextField();
         projectFolderLabel = new javax.swing.JLabel();
         projectFolderTextField = new javax.swing.JTextField();
         folderChooserBtn = new javax.swing.JButton();
-        refreshCoursesBtn = new javax.swing.JButton();
+        changeCourseButton = new javax.swing.JButton();
         coursesLabel = new javax.swing.JLabel();
-        coursesComboBox = new javax.swing.JComboBox();
-        adviceLabel = new javax.swing.JLabel();
-        passwordLabel = new javax.swing.JLabel();
-        passwordField = new javax.swing.JPasswordField();
-        savePasswordCheckBox = new javax.swing.JCheckBox();
-        courseListReloadingLabel = new javax.swing.JLabel();
         jSeparator1 = new javax.swing.JSeparator();
         checkForUpdatesInBackgroundCheckbox = new javax.swing.JCheckBox();
         checkForUnopenedExercisesCheckbox = new javax.swing.JCheckBox();
@@ -516,27 +264,13 @@ import org.apache.commons.lang3.StringUtils;
         restartMessage = new javax.swing.JLabel();
         resolveDependencies = new javax.swing.JCheckBox();
         sendDiagnostics = new javax.swing.JCheckBox();
-
-        usernameLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameLabel.text")); // NOI18N
-
-        org.jdesktop.beansbinding.Binding binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, usernameTextField, org.jdesktop.beansbinding.ObjectProperty.create(), usernameLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
-        bindingGroup.addBinding(binding);
-
-        usernameTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.usernameTextField.text")); // NOI18N
-        usernameTextField.setPreferredSize(new java.awt.Dimension(150, 27));
-
-        serverAddressLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressLabel.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, serverAddressTextField, org.jdesktop.beansbinding.ObjectProperty.create(), serverAddressLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
-        bindingGroup.addBinding(binding);
-
-        serverAddressTextField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.serverAddressTextField.text")); // NOI18N
-        serverAddressTextField.setPreferredSize(new java.awt.Dimension(250, 27));
-        serverAddressTextField.addActionListener(new java.awt.event.ActionListener() {
-            public void actionPerformed(java.awt.event.ActionEvent evt) {
-                serverAddressTextFieldActionPerformed(evt);
-            }
-        });
+        organizationLabel = new javax.swing.JLabel();
+        changeOrganizationButton = new javax.swing.JButton();
+        selectedCourseLabel = new javax.swing.JLabel();
+        loginLabel = new javax.swing.JLabel();
+        logoutButton = new javax.swing.JButton();
+        jSeparator4 = new javax.swing.JSeparator();
+        selectedOrganizationLabel = new javax.swing.JLabel();
 
         projectFolderLabel.setLabelFor(projectFolderTextField);
         projectFolderLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.projectFolderLabel.text")); // NOI18N
@@ -553,35 +287,14 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
 
-        refreshCoursesBtn.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.refreshCoursesBtn.text")); // NOI18N
-        refreshCoursesBtn.addActionListener(new java.awt.event.ActionListener() {
+        changeCourseButton.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.changeCourseButton.text")); // NOI18N
+        changeCourseButton.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                refreshCoursesBtnActionPerformed(evt);
+                changeCourseButtonActionPerformed(evt);
             }
         });
 
         coursesLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.coursesLabel.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, coursesComboBox, org.jdesktop.beansbinding.ObjectProperty.create(), coursesLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
-        bindingGroup.addBinding(binding);
-
-        coursesComboBox.setModel(new javax.swing.DefaultComboBoxModel(new String[] { "Item 1", "Item 2", "Item 3", "Item 4" }));
-
-        adviceLabel.setForeground(new java.awt.Color(255, 102, 0));
-        adviceLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.adviceLabel.text")); // NOI18N
-
-        passwordLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.passwordLabel.text")); // NOI18N
-
-        binding = org.jdesktop.beansbinding.Bindings.createAutoBinding(org.jdesktop.beansbinding.AutoBinding.UpdateStrategy.READ_WRITE, passwordField, org.jdesktop.beansbinding.ObjectProperty.create(), passwordLabel, org.jdesktop.beansbinding.BeanProperty.create("labelFor"));
-        bindingGroup.addBinding(binding);
-
-        passwordField.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.passwordField.text")); // NOI18N
-        passwordField.setPreferredSize(new java.awt.Dimension(109, 27));
-
-        savePasswordCheckBox.setSelected(true);
-        savePasswordCheckBox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.savePasswordCheckBox.text")); // NOI18N
-
-        courseListReloadingLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.courseListReloadingLabel.text")); // NOI18N
 
         checkForUpdatesInBackgroundCheckbox.setSelected(true);
         checkForUpdatesInBackgroundCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUpdatesInBackgroundCheckbox.text")); // NOI18N
@@ -619,6 +332,28 @@ import org.apache.commons.lang3.StringUtils;
             }
         });
 
+        organizationLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.organizationLabel.text")); // NOI18N
+
+        changeOrganizationButton.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.changeOrganizationButton.text")); // NOI18N
+        changeOrganizationButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                changeOrganizationButtonActionPerformed(evt);
+            }
+        });
+
+        selectedCourseLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.selectedCourseLabel.text")); // NOI18N
+
+        loginLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.loginLabel.text")); // NOI18N
+
+        logoutButton.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.logoutButton.text")); // NOI18N
+        logoutButton.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                logoutButtonActionPerformed(evt);
+            }
+        });
+
+        selectedOrganizationLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.selectedOrganizationLabel.text")); // NOI18N
+
         javax.swing.GroupLayout layout = new javax.swing.GroupLayout(this);
         this.setLayout(layout);
         layout.setHorizontalGroup(
@@ -631,34 +366,14 @@ import org.apache.commons.lang3.StringUtils;
                 .addContainerGap()
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
-                        .addComponent(resolveDependencies)
-                        .addGap(0, 0, Short.MAX_VALUE))
+                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                            .addComponent(resolveDependencies)
+                            .addComponent(sendDiagnostics))
+                        .addGap(0, 299, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
-                            .addComponent(adviceLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addComponent(jSeparator1)
-                            .addGroup(layout.createSequentialGroup()
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addComponent(usernameLabel)
-                                    .addComponent(serverAddressLabel)
-                                    .addComponent(coursesLabel)
-                                    .addComponent(passwordLabel))
-                                .addGap(78, 78, 78)
-                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addComponent(coursesComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(refreshCoursesBtn, javax.swing.GroupLayout.PREFERRED_SIZE, 115, javax.swing.GroupLayout.PREFERRED_SIZE)
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(courseListReloadingLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 72, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
-                                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.TRAILING)
-                                            .addComponent(usernameTextField, javax.swing.GroupLayout.Alignment.LEADING, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                                            .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                                        .addComponent(savePasswordCheckBox, javax.swing.GroupLayout.PREFERRED_SIZE, 133, javax.swing.GroupLayout.PREFERRED_SIZE))
-                                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)))
+                            .addComponent(jSeparator2, javax.swing.GroupLayout.Alignment.TRAILING)
                             .addGroup(layout.createSequentialGroup()
                                 .addComponent(projectFolderLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
@@ -670,45 +385,54 @@ import org.apache.commons.lang3.StringUtils;
                                 .addComponent(errorMsgLocaleLabel)
                                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                                 .addComponent(errorMsgLocaleComboBox, 0, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(coursesLabel)
+                                    .addComponent(organizationLabel))
+                                .addGap(18, 18, 18)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
+                                    .addComponent(selectedOrganizationLabel)
+                                    .addComponent(selectedCourseLabel, javax.swing.GroupLayout.PREFERRED_SIZE, 353, javax.swing.GroupLayout.PREFERRED_SIZE))
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
+                                    .addComponent(changeOrganizationButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
+                                    .addComponent(changeCourseButton, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                                .addGap(160, 160, 160))
+                            .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
+                                .addGap(0, 0, Short.MAX_VALUE)
+                                .addComponent(loginLabel)
+                                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
+                                .addComponent(logoutButton))
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(checkForUnopenedExercisesCheckbox)
-                                    .addComponent(checkForUpdatesInBackgroundCheckbox))
-                                .addGap(0, 420, Short.MAX_VALUE)))
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(spywareEnabledCheckbox)
-                        .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
-                    .addGroup(layout.createSequentialGroup()
-                        .addComponent(sendDiagnostics)
-                        .addGap(0, 0, Short.MAX_VALUE))))
+                                    .addComponent(checkForUpdatesInBackgroundCheckbox)
+                                    .addComponent(spywareEnabledCheckbox))
+                                .addGap(0, 0, Short.MAX_VALUE))
+                            .addComponent(jSeparator4))
+                        .addContainerGap())))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
             .addGroup(javax.swing.GroupLayout.Alignment.TRAILING, layout.createSequentialGroup()
                 .addContainerGap()
-                .addComponent(adviceLabel)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(usernameLabel)
-                    .addComponent(usernameTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
+                    .addComponent(loginLabel)
+                    .addComponent(logoutButton))
+                .addGap(3, 3, 3)
+                .addComponent(jSeparator4, javax.swing.GroupLayout.PREFERRED_SIZE, 16, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(passwordLabel)
-                    .addComponent(passwordField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
-                    .addComponent(savePasswordCheckBox))
+                    .addComponent(organizationLabel)
+                    .addComponent(changeOrganizationButton)
+                    .addComponent(selectedOrganizationLabel))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(serverAddressLabel)
-                    .addComponent(serverAddressTextField, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                    .addComponent(coursesComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addComponent(coursesLabel)
-                    .addComponent(refreshCoursesBtn)
-                    .addComponent(courseListReloadingLabel))
+                    .addComponent(changeCourseButton)
+                    .addComponent(selectedCourseLabel))
                 .addGap(18, 18, 18)
-                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
+                .addComponent(jSeparator1, javax.swing.GroupLayout.PREFERRED_SIZE, 6, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
                     .addComponent(folderChooserBtn)
@@ -734,10 +458,8 @@ import org.apache.commons.lang3.StringUtils;
                     .addComponent(errorMsgLocaleComboBox, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE))
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(restartMessage)
-                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
+                .addContainerGap())
         );
-
-        bindingGroup.bind();
     }// </editor-fold>//GEN-END:initComponents
 
     /**
@@ -757,19 +479,13 @@ import org.apache.commons.lang3.StringUtils;
         projectFolderTextField.setText(projectDefaultFolder.getAbsolutePath());
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
-    private void refreshCoursesBtnActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_refreshCoursesBtnActionPerformed
-        updateSettingsForRefresh();
-        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        if (settings.getServerBaseUrl() == null || settings.getServerBaseUrl().trim().isEmpty()) {
-            dialogs.displayError("Please set the server address first");
+    private void changeCourseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeCourseButtonActionPerformed
+        try {
+            CourseListWindow.display();
+        } catch (Exception ex) {
         }
-        startRefreshingCourseList(false, false);
-    }//GEN-LAST:event_refreshCoursesBtnActionPerformed
-
-    private void serverAddressTextFieldActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_serverAddressTextFieldActionPerformed
-        // Pressing return in the server address field presses the refresh button
-        refreshCoursesBtn.doClick();
-    }//GEN-LAST:event_serverAddressTextFieldActionPerformed
+        updateSettingsForRefresh();
+    }//GEN-LAST:event_changeCourseButtonActionPerformed
 
     private void resolveDependenciesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveDependenciesActionPerformed
        
@@ -780,12 +496,31 @@ import org.apache.commons.lang3.StringUtils;
         settings.setSendDiagnostics(getSendDiagnosticsEnabled());
     }//GEN-LAST:event_sendDiagnosticsActionPerformed
 
+    private void changeOrganizationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeOrganizationButtonActionPerformed
+        try {
+            OrganizationListWindow.display();
+        } catch (Exception ex) {
+        }
+        updateSettingsForRefresh();
+    }//GEN-LAST:event_changeOrganizationButtonActionPerformed
+
+    private void logoutButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_logoutButtonActionPerformed
+        LoginManager manager = new LoginManager();
+        manager.logout();
+        updateFields();
+        
+        JDialog window = (JDialog) SwingUtilities.getWindowAncestor(this);
+        window.setVisible(false);
+        window.dispose();
+        
+        BgTask.start("Logged out. Asking to log in.", new LoginTask());
+    }//GEN-LAST:event_logoutButtonActionPerformed
+
     // Variables declaration - do not modify//GEN-BEGIN:variables
-    private javax.swing.JLabel adviceLabel;
+    private javax.swing.JButton changeCourseButton;
+    private javax.swing.JButton changeOrganizationButton;
     private javax.swing.JCheckBox checkForUnopenedExercisesCheckbox;
     private javax.swing.JCheckBox checkForUpdatesInBackgroundCheckbox;
-    private javax.swing.JLabel courseListReloadingLabel;
-    private javax.swing.JComboBox coursesComboBox;
     private javax.swing.JLabel coursesLabel;
     private javax.swing.JComboBox errorMsgLocaleComboBox;
     private javax.swing.JLabel errorMsgLocaleLabel;
@@ -793,21 +528,18 @@ import org.apache.commons.lang3.StringUtils;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
     private javax.swing.JSeparator jSeparator3;
-    private javax.swing.JPasswordField passwordField;
-    private javax.swing.JLabel passwordLabel;
+    private javax.swing.JSeparator jSeparator4;
+    private javax.swing.JLabel loginLabel;
+    private javax.swing.JButton logoutButton;
+    private javax.swing.JLabel organizationLabel;
     private javax.swing.JLabel projectFolderLabel;
     private javax.swing.JTextField projectFolderTextField;
-    private javax.swing.JButton refreshCoursesBtn;
     private javax.swing.JCheckBox resolveDependencies;
     private javax.swing.JLabel restartMessage;
-    private javax.swing.JCheckBox savePasswordCheckBox;
+    private javax.swing.JLabel selectedCourseLabel;
+    private javax.swing.JLabel selectedOrganizationLabel;
     private javax.swing.JCheckBox sendDiagnostics;
-    private javax.swing.JLabel serverAddressLabel;
-    private javax.swing.JTextField serverAddressTextField;
     private javax.swing.JCheckBox spywareEnabledCheckbox;
-    private javax.swing.JLabel usernameLabel;
-    private javax.swing.JTextField usernameTextField;
-    private org.jdesktop.beansbinding.BindingGroup bindingGroup;
     // End of variables declaration//GEN-END:variables
 
 }

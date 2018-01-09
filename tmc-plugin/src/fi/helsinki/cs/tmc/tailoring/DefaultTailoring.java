@@ -5,7 +5,7 @@ import java.util.Locale;
 public class DefaultTailoring implements Tailoring {
     @Override
     public String getDefaultServerUrl() {
-        return "";
+        return "https://tmc.mooc.fi";
     }
     
     @Override

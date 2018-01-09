@@ -33,7 +33,7 @@ public class CourseDb {
     public static final Logger logger = Logger.getLogger(CourseDb.class.getName());
     private static CourseDb defaultInstance;
     
-    public static CourseDb getInstance() {
+    public static synchronized CourseDb getInstance() {
         if (defaultInstance == null) {
             defaultInstance = new CourseDb();
         }

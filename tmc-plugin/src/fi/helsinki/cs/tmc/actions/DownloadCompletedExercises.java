@@ -32,9 +32,9 @@ import java.util.concurrent.Callable;
 @Messages("CTL_DownloadCompletedExercises=Download old completed exercises")
 public final class DownloadCompletedExercises implements ActionListener {
 
-    private CourseDb courseDb;
-    private ConvenientDialogDisplayer dialogs;
-    private TmcEventBus eventBus;
+    private final CourseDb courseDb;
+    private final ConvenientDialogDisplayer dialogs;
+    private final TmcEventBus eventBus;
 
     public DownloadCompletedExercises() {
         this.courseDb = CourseDb.getInstance();

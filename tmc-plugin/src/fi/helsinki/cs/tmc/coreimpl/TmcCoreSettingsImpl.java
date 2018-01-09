@@ -2,6 +2,8 @@ package fi.helsinki.cs.tmc.coreimpl;
 
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
+import fi.helsinki.cs.tmc.core.domain.OauthCredentials;
+import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -11,6 +13,9 @@ import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.tailoring.Tailoring;
 
 import com.google.common.base.Optional;
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
+
 import java.io.IOException;
 import java.net.ProxySelector;
 import java.nio.file.Path;
@@ -24,7 +29,7 @@ import org.openide.util.Lookup;
 
 public class TmcCoreSettingsImpl implements TmcSettings {
 
-   
+
     private static final String PREF_BASE_URL = "baseUrl";
     private static final String PREF_USERNAME = "username";
     private static final String PREF_PASSWORD = "password";
@@ -36,17 +41,24 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
     private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
     private static final String PREF_SEND_DIAGNOSTICS = "sendDiagnostics";
-    
+    private static final String PREF_OAUTH_TOKEN = "oauthToken";
+    private static final String PREF_OAUTH_APPLICATION_ID = "oauthApplicationId";
+    private static final String PREF_OAUTH_SECRET = "oauthSecret";
+    private static final String PREF_ORGANIZATION = "organization";
+
     private static PersistableSettings settings = PersistableSettings.forModule(TmcCoreSettingsImpl.class);
     
     private Tailoring tailoring = SelectedTailoring.get();
     private TmcEventBus eventBus = TmcEventBus.getDefault();
-    
-    private String unsavedPassword = settings.get(PREF_PASSWORD, "");
 
     @Override
     public String getServerAddress() {
         return settings.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
+    }
+
+    @Override
+    public void setServerAddress(String address) {
+        settings.put(PREF_BASE_URL, address);
     }
 
     @Override
@@ -56,12 +68,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
     @Override
     public Optional<Course> getCurrentCourse() {
-        return Optional.of(CourseDb.getInstance().getCurrentCourse());
-    }
-
-    @Override
-    public String apiVersion() {
-        return "7";
+        return Optional.fromNullable(CourseDb.getInstance().getCurrentCourse());
     }
 
     @Override
@@ -73,11 +80,6 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     public String clientVersion() {
         return Modules.getDefault().ownerOf(TmcCoreSettingsImpl.class).getSpecificationVersion().toString();
 
-    }
-
-    @Override
-    public String getFormattedUserData() {
-        return "";
     }
 
     @Override
@@ -97,13 +99,12 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     }
 
     @Override
-    public void setCourse(Course course) {
-        CourseDb.getInstance().setCurrentCourseName(course.getName());
-    }
-
-    @Override
-    public void setConfigRoot(Path path) {
-        // NOP - can't change.
+    public void setCourse(Optional<Course> course) {
+        String selected = null;
+        if (course.isPresent()) {
+            selected = course.get().getName();
+        }
+        CourseDb.getInstance().setCurrentCourseName(selected);
     }
 
     @Override
@@ -118,7 +119,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
                 throw new RuntimeException(ex);
             }
         }
-       
+
         return FileUtil.toFile(tmcRoot).toPath();
     }
 
@@ -141,75 +142,104 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         }
         return "unknown";
     }
+
+    @Override
+    public Optional<OauthCredentials> getOauthCredentials() {
+        OauthCredentials creds = new OauthCredentials(settings.get(PREF_OAUTH_APPLICATION_ID, null), settings.get(PREF_OAUTH_SECRET, null));
+        if (creds.getOauthApplicationId() == null || creds.getOauthSecret() == null) {
+            return Optional.absent();
+        } else {
+            return Optional.of(creds);
+        }
+    }
+
+    @Override
+    public void setOauthCredentials(Optional<OauthCredentials> credentials) {
+        if (!credentials.isPresent()) {
+            settings.put(PREF_OAUTH_APPLICATION_ID, null);
+            settings.put(PREF_OAUTH_SECRET, null);
+        } else {
+            settings.put(PREF_OAUTH_APPLICATION_ID, credentials.get().getOauthApplicationId());
+            settings.put(PREF_OAUTH_SECRET, credentials.get().getOauthSecret());
+        }
+    }
     
+    @Override
+    public Optional<Organization> getOrganization() {
+        final String organizationJson = settings.get(PREF_ORGANIZATION, "");
+        if (organizationJson.isEmpty()) {
+            return Optional.absent();
+        } else {
+            Organization org = new Gson().fromJson(organizationJson, new TypeToken<Organization>(){}.getType());
+            return Optional.of(org);
+        }
+    }
+    
+    @Override
+    public void setOrganization(Optional<Organization> organization) {
+        if (organization.isPresent()) {
+            settings.put(PREF_ORGANIZATION, new Gson().toJson(organization.get()));
+        } else {
+            settings.put(PREF_ORGANIZATION, "");
+        }
+    }
+
     public static class SavedEvent implements TmcEvent {}
-    
+
     public TmcCoreSettingsImpl() {
         // NOP
     }
-    
+
     /*package*/ TmcCoreSettingsImpl(PersistableSettings settings, Tailoring tailoring, TmcEventBus eventBus) {
         this.settings = settings;
         this.tailoring = tailoring;
         this.eventBus = eventBus;
-        
-        this.unsavedPassword = settings.get(PREF_PASSWORD, "");
     }
-    
+
     public void save() {
         settings.saveAll();
-        eventBus.post(new SavedEvent());        
+        eventBus.post(new SavedEvent());
     }
 
     public String getServerBaseUrl() {
         return settings.get(PREF_BASE_URL, tailoring.getDefaultServerUrl());
     }
-    
+
     public void setServerBaseUrl(String baseUrl) {
         baseUrl = stripTrailingSlashes(baseUrl);
         settings.put(PREF_BASE_URL, baseUrl);
     }
-    
+
     private String stripTrailingSlashes(String s) {
         while (s.endsWith("/")) {
             s = s.substring(0, s.length() - 1);
         }
         return s;
     }
-    
+
     @Override
-    public String getUsername() {
-        return settings.get(PREF_USERNAME, tailoring.getDefaultUsername());
+    public Optional<String> getUsername() {
+        return Optional.of(settings.get(PREF_USERNAME, tailoring.getDefaultUsername()));
     }
 
     public void setUsername(String username) {
         settings.put(PREF_USERNAME, username);
     }
-    
+
     @Override
-    public String getPassword() {
-        return unsavedPassword;
+    public Optional<String> getPassword() {
+        return Optional.fromNullable(settings.get(PREF_PASSWORD, null));
     }
-    
-    public void setPassword(String password) {
-        unsavedPassword = password;
-        if (isSavingPassword()) {
-            settings.put(PREF_PASSWORD, password);
-        }
-    }
-    
-    public void setSavingPassword(boolean shouldSave) {
-        if (shouldSave) {
-            settings.put(PREF_PASSWORD, unsavedPassword);
+
+    @Override
+    public void setPassword(Optional<String> password) {
+        if (password.isPresent()) {
+            throw new IllegalArgumentException("Setting passwords is no longer supported!");
         } else {
             settings.remove(PREF_PASSWORD);
         }
     }
-    
-    public boolean isSavingPassword() {
-        return settings.get(PREF_PASSWORD, null) != null;
-    }
-    
+
     public String getProjectRootDir() {
         String path = settings.get(PREF_PROJECT_ROOT_DIR, null);
         if (path != null) {
@@ -219,23 +249,23 @@ public class TmcCoreSettingsImpl implements TmcSettings {
             return ProjectMediator.getDefaultProjectRootDir();
         }
     }
-    
+
     public void setProjectRootDir(String value) {
         settings.put(PREF_PROJECT_ROOT_DIR, value);
     }
-    
+
     public boolean isCheckingForUpdatesInTheBackground() {
         return settings.get(PREF_CHECK_FOR_UPDATES_IN_BACKGROUND, "1").equals("1");
     }
-    
+
     public void setCheckingForUpdatesInTheBackground(boolean value) {
         settings.put(PREF_CHECK_FOR_UPDATES_IN_BACKGROUND, value ? "1" : "0");
     }
-    
+
     public boolean isCheckingForUnopenedAtStartup() {
         return settings.get(PREF_CHECK_FOR_UNOPENED_AT_STARTUP, "1").equals("1");
     }
-    
+
     public void setCheckingForUnopenedAtStartup(boolean value) {
         settings.put(PREF_CHECK_FOR_UNOPENED_AT_STARTUP, value ? "1" : "0");
     }
@@ -248,25 +278,25 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     public void setIsSpywareEnabled(boolean value) {
         settings.put(PREF_SPYWARE_ENABLED, value ? "1" : "0");
     }
-    
+
     public boolean isDetailedSpywareEnabled() {
         String defaultValue = tailoring.isDetailedSpywareEnabledByDefault() ? "1" : "0";
         return settings.get(PREF_DETAILED_SPYWARE_ENABLED, defaultValue).equals("1");
     }
-    
+
     public Locale getErrorMsgLocale() {
         Locale dflt = tailoring.getDefaultErrorMsgLocale();
         return parseLocale(settings.get(PREF_ERROR_MSG_LOCALE, ""), dflt);
     }
-    
+
     public void setErrorMsgLocale(Locale locale) {
         settings.put(PREF_ERROR_MSG_LOCALE, locale.toString());
     }
-    
+
     public void setResolveDependencies(boolean value) {
         settings.put(PREF_RESOLVE_DEPENDENCIES, value ? "1" : "0");
     }
-    
+
     public boolean getResolveDependencies() {
         return settings.get(PREF_RESOLVE_DEPENDENCIES, "1").equals("1");
     }
@@ -274,12 +304,26 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     public void setSendDiagnostics(boolean value) {
         settings.put(PREF_SEND_DIAGNOSTICS, value ? "1" : "0");
     }
-    
+
     @Override
     public boolean getSendDiagnostics() {
         return settings.get(PREF_SEND_DIAGNOSTICS, "1").equals("1");
     }
-    
+
+    @Override
+    public Optional<String> getToken() {
+        return Optional.fromNullable(settings.get(PREF_OAUTH_TOKEN, null));
+    }
+
+    @Override
+    public void setToken(Optional<String> token) {
+        if (token.isPresent()) {
+            settings.put(PREF_OAUTH_TOKEN, token.get());
+        } else {
+            settings.remove(PREF_OAUTH_TOKEN);
+        }
+    }
+
     private Locale parseLocale(String s, Locale dflt) {
         if (s.isEmpty()) {
             return dflt;
@@ -296,5 +340,4 @@ public class TmcCoreSettingsImpl implements TmcSettings {
                 return dflt;
         }
     }
-    
 }
