@@ -15,15 +15,15 @@ import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.model.CourseDb;
+import fi.helsinki.cs.tmc.tailoring.SelectedTailoring;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.ui.CourseListWindow;
 import fi.helsinki.cs.tmc.ui.LoginDialog;
 import fi.helsinki.cs.tmc.ui.OrganizationListWindow;
 
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.net.MalformedURLException;
 import java.net.UnknownHostException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -69,26 +69,40 @@ public class LoginManager {
                             normalizer.selectOrganizationAndCourse();
                         } catch (Exception ex) {
                             log.log(Level.WARNING, "Error while logging in! " + ex.toString());
+                            final ConvenientDialogDisplayer displayer = ConvenientDialogDisplayer.getDefault();
+                            final TmcSettings settings = TmcSettingsHolder.get();
+                            final String serverAddress = settings.getServerAddress();
                             if (ex instanceof IOException) {
                                 connectionException = (IOException) ex;
                                 if (ex instanceof UnknownHostException) {
-                                    ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server. Please check your internet connection.");
+                                    displayer.displayError("Couldn't connect to the server. Please check your internet connection.");
                                 } else if (ex instanceof FileNotFoundException) {
-                                    if (TmcSettingsHolder.get().getServerAddress().contains("tmc.mooc.fi/mooc")) {
-                                        ConvenientDialogDisplayer.getDefault().displayError("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
+                                    if (serverAddress.contains("tmc.mooc.fi/mooc")) {
+                                        displayer.displayError("The server https://tmc.mooc.fi/mooc is no longer supported by this client.\n" +
                                                 "All the courses have been migrated to our main server https://tmc.mooc.fi.\n" +
                                                 "If you'd like to do the migrated courses, you'll need to update your server address to\n" +
-                                                "https://tmc.mooc.fi/org/mooc and create a new account there.\n\n" +
+                                                "https://tmc.mooc.fi and create a new account there.\n" +
+                                                "After that, choose the MOOC organization after logging in.\n\n" +
                                                 "For more information, check the course materials on mooc.fi.");
                                     } else {
-                                        ConvenientDialogDisplayer.getDefault().displayError("Server address is incorrect or the server is not supported.");
+                                        displayer.displayError("Server address is incorrect or the server is not supported.");
                                     }
+                                } else if (ex instanceof MalformedURLException) {
+                                    displayer.displayError("Malformed server address! Resetting to default.");
+                                    final String defaultServerUrl = SelectedTailoring.get().getDefaultServerUrl();
+                                    settings.setServerAddress(defaultServerUrl);
                                 }
                             } else if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
-                                ConvenientDialogDisplayer.getDefault().displayError("Username or password is incorrect.", ex);
+                                displayer.displayError("Username or password is incorrect.", ex);
                             } else {
-                                ConvenientDialogDisplayer.getDefault().displayError("Logging in failed! Try again.");
+                                if (serverAddress.contains("tmc.mooc.fi") && !serverAddress.contains("https://")) {
+                                    displayer.displayError("Malformed server address! Resetting to default.");
+                                    final String defaultServerUrl = SelectedTailoring.get().getDefaultServerUrl();
+                                    settings.setServerAddress(defaultServerUrl);
+                                } else {
+                                    displayer.displayError("Logging in failed! Try again.");
+                                }
                             }
                         }
                         setReady(true);
