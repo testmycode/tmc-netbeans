@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.Collections;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -45,6 +46,9 @@ public class CourseListWindow extends JPanel {
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
         CourseCard[] courseCards = new CourseCard[courses.size()];
+        Collections.sort(courses, (a, b) -> {
+            return a.getTitle().toLowerCase().compareTo(b.getTitle().toLowerCase());
+        });
         for (int i = 0; i < courses.size(); i++) {
             courseCards[i] = new CourseCard(courses.get(i));
         }
