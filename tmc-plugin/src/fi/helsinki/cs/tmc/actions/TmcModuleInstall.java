@@ -3,11 +3,9 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
-import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.events.LoginStateChangedEvent;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
 import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
 import fi.helsinki.cs.tmc.tasks.LoginTask;
@@ -58,6 +56,9 @@ public class TmcModuleInstall extends ModuleInstall {
                 // an email notification.
                 // PushEventListener.start();
                 TmcSettings settings = TmcSettingsHolder.get();
+                final CheckDiskSpace checkDiskSpace = new CheckDiskSpace((TmcCoreSettingsImpl)settings);
+                checkDiskSpace.startCheckingPeriodically();
+                checkDiskSpace.run();
                 SpywareFacade.start();
 
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
