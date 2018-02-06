@@ -3,7 +3,11 @@ package fi.helsinki.cs.tmc.utilities;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
 import fi.helsinki.cs.tmc.core.exceptions.NotLoggedInException;
+import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
+import fi.helsinki.cs.tmc.core.exceptions.ShowToUserException;
+import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
+import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import java.io.IOException;
 
 import java.util.concurrent.Callable;
@@ -141,14 +145,14 @@ public class BgTask<V> implements CancellableCallable<V> {
                 try {
                     successful = true;
                     resultTemp = callable.call();
-                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException | IOException ex) {
+                } catch (NotLoggedInException | OAuthProblemException | OAuthSystemException | AuthenticationFailedException ex) {
                     successful = false;
                     boolean authenticationSuccessful;
                     do {
                         try {
                             authenticationSuccessful = true;
                             new LoginManager().login();
-                        } catch (AuthenticationFailedException | IOException | InterruptedException exception) {
+                        } catch (AuthenticationFailedException | InterruptedException exception) {
                             authenticationSuccessful = false;
                         }
                     } while (!authenticationSuccessful);
@@ -163,6 +167,21 @@ public class BgTask<V> implements CancellableCallable<V> {
                 }
             });
             return result;
+        } catch (TmcCoreException ex) {
+            if (ex instanceof TmcCoreException && (ex.getCause() == null || !(ex.getCause() instanceof ObsoleteClientException))) {
+                SwingUtilities.invokeLater(new Runnable() {
+                @Override
+                public void run() {
+                    listener.bgTaskFailed(ex);
+                }
+            });
+            return null;
+            }
+            ConvenientDialogDisplayer.getDefault().displayError(ex.getCause().getMessage());
+            return null;
+        } catch (ObsoleteClientException | ShowToUserException ex) {
+            ConvenientDialogDisplayer.getDefault().displayError(ex.getMessage());
+            return null;
         } catch (InterruptedException e) {
             SwingUtilities.invokeLater(new Runnable() {
                 @Override

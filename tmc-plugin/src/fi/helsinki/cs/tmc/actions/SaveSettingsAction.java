@@ -15,7 +15,10 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import java.awt.event.ActionEvent;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.AbstractAction;
+import org.openide.util.Exceptions;
 
 public class SaveSettingsAction extends AbstractAction {
 
@@ -24,6 +27,8 @@ public class SaveSettingsAction extends AbstractAction {
     private final TmcCore tmcCore;
     private final FixUnoptimalSettings fixUnoptimalSettings;
     private final SendDiagnostics sendDiagnostics;
+    
+    private Logger log = Logger.getLogger(SaveSettingsAction.class.getName());
 
     public SaveSettingsAction() {
         this.courseDb = CourseDb.getInstance();
@@ -69,7 +74,11 @@ public class SaveSettingsAction extends AbstractAction {
         }
 
         if (prefUi.getSelectedCourseName() != null) {
-            courseDb.setAvailableCourses(prefUi.getAvailableCourses());
+            try {
+                courseDb.setAvailableCourses(prefUi.getAvailableCourses());
+            } catch (Exception ex) {
+                log.log(Level.SEVERE, "Communication with the server failed! Unable to fetch available courses.");
+            }
             courseDb.setCurrentCourseName(prefUi.getSelectedCourseName());
 
             RefreshCoursesAction refresh = new RefreshCoursesAction();

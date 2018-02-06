@@ -10,6 +10,7 @@ import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.exceptions.AuthenticationFailedException;
+import fi.helsinki.cs.tmc.core.exceptions.ShowToUserException;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
@@ -74,6 +75,7 @@ public class LoginManager {
                             final String serverAddress = settings.getServerAddress();
                             if (ex instanceof IOException) {
                                 connectionException = (IOException) ex;
+                                displayer.displayError("Couldn't connect to the server. Please check your internet connection.");
                                 if (ex instanceof UnknownHostException) {
                                     displayer.displayError("Couldn't connect to the server. Please check your internet connection.");
                                 } else if (ex instanceof FileNotFoundException) {
@@ -95,6 +97,8 @@ public class LoginManager {
                             } else if (ex instanceof AuthenticationFailedException) {
                                 authenticationException = (AuthenticationFailedException) ex;
                                 displayer.displayError("Username or password is incorrect.", ex);
+                            } else if (ex instanceof ShowToUserException) {
+                                displayer.displayError(ex.getMessage());
                             } else {
                                 if (serverAddress.contains("tmc.mooc.fi") && !serverAddress.contains("https://")) {
                                     displayer.displayError("Malformed server address! Resetting to default.");

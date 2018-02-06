@@ -124,8 +124,8 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                if (!beQuiet || ex instanceof ObsoleteClientException) {
-                    dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                if (!beQuiet) {
+                    dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
                 }
             }
         });

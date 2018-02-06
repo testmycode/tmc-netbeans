@@ -104,10 +104,10 @@ public class CheckForNewReviews implements ActionListener, Runnable {
 
             @Override
             public void bgTaskFailed(final Throwable ex) {
-                final String msg = "Failed to check for code reviews";
+                final String msg = "Failed to check for code reviews.\nPlease check your internet connection.";
                 log.log(Level.INFO, msg, ex);
                 if (!beQuiet) {
-                    dialogs.displayError(msg, ex);
+                    dialogs.displayError(msg);
                 }
             }
 

@@ -10,7 +10,7 @@ public interface PreferencesUI {
 
     String getProjectDir();
     
-    List<Course> getAvailableCourses();
+    List<Course> getAvailableCourses() throws Exception;
             
     boolean getCheckForUpdatesInTheBackground();
     

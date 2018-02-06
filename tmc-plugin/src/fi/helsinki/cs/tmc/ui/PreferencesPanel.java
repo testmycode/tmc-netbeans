@@ -2,6 +2,7 @@ package fi.helsinki.cs.tmc.ui;
 
 import com.google.common.base.Optional;
 import fi.helsinki.cs.tmc.core.TmcCore;
+import fi.helsinki.cs.tmc.core.configuration.TmcSettings;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Organization;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
@@ -12,11 +13,12 @@ import fi.helsinki.cs.tmc.tasks.LoginTask;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.DelayedRunner;
 import fi.helsinki.cs.tmc.utilities.LoginManager;
+import fi.helsinki.cs.tmc.utilities.ThrowingFunction;
 
 import java.awt.event.ItemEvent;
 import java.awt.event.ItemListener;
 import java.io.File;
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.List;
 import java.util.Locale;
 import javax.swing.JButton;
@@ -37,6 +39,8 @@ import javax.swing.SwingUtilities;
     private ConvenientDialogDisplayer dialogs = ConvenientDialogDisplayer.getDefault();
 
     private DelayedRunner refreshRunner = new DelayedRunner();
+    
+    private final TmcSettings settings = TmcSettingsHolder.get();
 
     /*package*/ PreferencesPanel() {
         initComponents();
@@ -45,22 +49,18 @@ import javax.swing.SwingUtilities;
     }
     
     private void updateFields() {
-        final Optional<String> usernamePresent = TmcSettingsHolder.get().getUsername();
-        String username = "";
-        if (usernamePresent.isPresent()) {
-            username = usernamePresent.get();
-        }
+        final Optional<String> username = this.settings.getUsername();
         final JLabel login = this.loginLabel;
         final JButton logout = this.logoutButton;
-        if (!username.isEmpty()) {
-            login.setText("Logged in as " + username);
+        if (username.isPresent()) {
+            login.setText("Logged in as " + username.get());
             logout.setEnabled(true);
         } else {
             login.setText("Not logged in!");
             logout.setEnabled(false);
         }
         
-        Optional<Organization> org = TmcSettingsHolder.get().getOrganization();
+        Optional<Organization> org = this.settings.getOrganization();
         final JLabel selectedOrg = this.selectedOrganizationLabel;
         if (org.isPresent()) {
             selectedOrg.setText(org.get().getName());
@@ -68,23 +68,19 @@ import javax.swing.SwingUtilities;
             selectedOrg.setText("No organization selected");
         }
         
-        Optional<Course> course = TmcSettingsHolder.get().getCurrentCourse();
+        Optional<Course> course = this.settings.getCurrentCourse();
         final JLabel selectedCourse = this.selectedCourseLabel;
         if (course.isPresent()) {
-            selectedCourse.setText(course.get().getName());
+            selectedCourse.setText(course.get().getTitle());
         } else {
             selectedCourse.setText("No course selected");
         }
     }
     
     @Override
-    public List<Course> getAvailableCourses() {
-        try {
-            List<Course> courses = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER).call();
-            return courses;
-        } catch (Exception ex) {
-        }
-        return new ArrayList<>();
+    public List<Course> getAvailableCourses() throws Exception {
+        List<Course> courses = TmcCore.get().listCourses(ProgressObserver.NULL_OBSERVER).call();
+        return courses;
     }
 
     @Override
@@ -98,13 +94,17 @@ import javax.swing.SwingUtilities;
     }
 
     public void setSelectedCourse(Course course) {
-        TmcSettingsHolder.get().setCourse(Optional.of(course));
-        this.selectedCourseLabel.setText(course.getName());
+        this.settings.setCourse(Optional.of(course));
+        this.selectedCourseLabel.setText(course.getTitle());
     }
     
     @Override
     public String getSelectedCourseName() {
-        return this.selectedCourseLabel.getText();
+        final Optional<Course> currentCourse = this.settings.getCurrentCourse();
+        if (currentCourse.isPresent()) {
+            return currentCourse.get().getName();
+        }
+        return null;
     }
 
     @Override
@@ -173,8 +173,15 @@ import javax.swing.SwingUtilities;
     }
     
     public void setOrganization(OrganizationCard organization) {
-        TmcSettingsHolder.get().setOrganization(Optional.of(organization.getOrganization()));
-        this.selectedOrganizationLabel.setText(organization.getOrganization().getName());
+        Optional<Organization> oldOrganization = this.settings.getOrganization();
+        Organization newOrganization = organization.getOrganization();
+
+        if (!oldOrganization.isPresent() || (oldOrganization.isPresent() && !oldOrganization.get().getSlug().equals(newOrganization.getSlug()))) {
+            this.settings.setOrganization(Optional.of(newOrganization));
+            this.settings.setCourse(Optional.<Course>absent());
+            this.selectedOrganizationLabel.setText(newOrganization.getName());
+            this.selectedCourseLabel.setText("No course selected");
+        }
     }
     
     private static class LocaleWrapper {
@@ -207,9 +214,9 @@ import javax.swing.SwingUtilities;
     }
 
     private void updateSettingsForRefresh() {
-        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
-        settings.setProjectRootDir(getProjectDir());
-        settings.save(); // TODO: is this wanted
+        TmcCoreSettingsImpl tmcSettings = (TmcCoreSettingsImpl)this.settings;
+        tmcSettings.setProjectRootDir(getProjectDir());
+        tmcSettings.save(); // TODO: is this wanted
     }
 
     private void setUpErrorMsgLocaleSelection() {
@@ -237,6 +244,16 @@ import javax.swing.SwingUtilities;
                 }
             }
         });
+    }
+    
+    private void wrapWithExceptionHandling(ThrowingFunction function) {
+        try {
+            function.apply();
+        } catch (IOException ex) {
+            dialogs.displayError("Couldn't connect to the server! Please check your internet connection.");
+        } catch (Exception ex) {
+            dialogs.displayError(ex.getMessage());
+        }
     }
 
     /** This method is called from within the constructor to
@@ -480,10 +497,8 @@ import javax.swing.SwingUtilities;
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void changeCourseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeCourseButtonActionPerformed
-        try {
-            CourseListWindow.display();
-        } catch (Exception ex) {
-        }
+        wrapWithExceptionHandling(CourseListWindow::display);
+
         updateSettingsForRefresh();
     }//GEN-LAST:event_changeCourseButtonActionPerformed
 
@@ -492,15 +507,20 @@ import javax.swing.SwingUtilities;
     }//GEN-LAST:event_resolveDependenciesActionPerformed
 
     private void sendDiagnosticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendDiagnosticsActionPerformed
-        TmcCoreSettingsImpl settings = (TmcCoreSettingsImpl) TmcSettingsHolder.get();
-        settings.setSendDiagnostics(getSendDiagnosticsEnabled());
+        TmcCoreSettingsImpl tmcSettings = (TmcCoreSettingsImpl) this.settings;
+        tmcSettings.setSendDiagnostics(getSendDiagnosticsEnabled());
     }//GEN-LAST:event_sendDiagnosticsActionPerformed
 
     private void changeOrganizationButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeOrganizationButtonActionPerformed
-        try {
-            OrganizationListWindow.display();
-        } catch (Exception ex) {
+        this.selectedCourseLabel.setText("No course selected");
+        
+        wrapWithExceptionHandling(OrganizationListWindow::display);
+        
+        final Optional<Course> currentCourse = this.settings.getCurrentCourse();
+        if (currentCourse.isPresent()) {
+            this.selectedCourseLabel.setText(currentCourse.get().getTitle());
         }
+        
         updateSettingsForRefresh();
     }//GEN-LAST:event_changeOrganizationButtonActionPerformed
 

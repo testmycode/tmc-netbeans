@@ -17,6 +17,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
 
@@ -167,7 +168,11 @@ public class OrganizationListWindow extends JPanel {
                 panel.setOrganization(organization);
                 CourseListWindow.display();
             } catch (Exception ex) {
-                Exceptions.printStackTrace(ex);
+                if (ex instanceof IOException) {
+                    ConvenientDialogDisplayer.getDefault().displayError("Couldn't connect to the server! Please check your internet connection.");
+                } else {
+                    Exceptions.printStackTrace(ex);
+                }
             }
         }
     }

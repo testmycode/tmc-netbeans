@@ -77,7 +77,7 @@ public final class DownloadCompletedExercises implements ActionListener {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to check for new exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
             }
         });
     }

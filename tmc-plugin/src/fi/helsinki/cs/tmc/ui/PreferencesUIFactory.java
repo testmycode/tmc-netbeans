@@ -102,7 +102,9 @@ public class PreferencesUIFactory {
         SwingUtilities.invokeLater(new Runnable() {
             @Override
             public void run() {
-                dialog.setVisible(true);
+                if (dialog != null) {
+                    dialog.setVisible(true);
+                }
             }
         });
     }
