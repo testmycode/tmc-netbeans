@@ -16,7 +16,7 @@ public class CheckProjectCount {
     
     public void checkAndNotifyIfOver() {
         if (this.getProjectCount() > DESIRED_COUNT) {
-            this.notifyer().notify("Too many projects open!", ImageUtilities.loadImageIcon("fi/helsinki/cs/tmc/ui/infobubble.png", false), "Please close some projects to make Netbeans faster.", null);
+            this.notifyer().notify("Netbeans slow? Close some projects!", ImageUtilities.loadImageIcon("fi/helsinki/cs/tmc/ui/infobubble.png", false), "Right-click completed projects from the Projects -sidebar on the left and select 'Close project'.", null);
         }
     }
     
