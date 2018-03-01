@@ -167,6 +167,9 @@ public class BgTask<V> implements CancellableCallable<V> {
                 }
             });
             return result;
+        } catch (ObsoleteClientException | ShowToUserException ex) {
+            ConvenientDialogDisplayer.getDefault().displayError(ex.getMessage());
+            return null;
         } catch (TmcCoreException ex) {
             if (ex instanceof TmcCoreException && (ex.getCause() == null || !(ex.getCause() instanceof ObsoleteClientException))) {
                 SwingUtilities.invokeLater(new Runnable() {
@@ -178,9 +181,6 @@ public class BgTask<V> implements CancellableCallable<V> {
             return null;
             }
             ConvenientDialogDisplayer.getDefault().displayError(ex.getCause().getMessage());
-            return null;
-        } catch (ObsoleteClientException | ShowToUserException ex) {
-            ConvenientDialogDisplayer.getDefault().displayError(ex.getMessage());
             return null;
         } catch (InterruptedException e) {
             SwingUtilities.invokeLater(new Runnable() {
