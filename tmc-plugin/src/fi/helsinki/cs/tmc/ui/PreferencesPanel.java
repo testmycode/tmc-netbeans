@@ -322,6 +322,11 @@ import javax.swing.SwingUtilities;
 
         spywareEnabledCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.text")); // NOI18N
         spywareEnabledCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.toolTipText")); // NOI18N
+        spywareEnabledCheckbox.addActionListener(new java.awt.event.ActionListener() {
+            public void actionPerformed(java.awt.event.ActionEvent evt) {
+                spywareEnabledCheckboxActionPerformed(evt);
+            }
+        });
 
         errorMsgLocaleLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.errorMsgLocaleLabel.text")); // NOI18N
         errorMsgLocaleLabel.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.errorMsgLocaleLabel.toolTipText")); // NOI18N
@@ -535,6 +540,10 @@ import javax.swing.SwingUtilities;
         
         BgTask.start("Logged out. Asking to log in.", new LoginTask());
     }//GEN-LAST:event_logoutButtonActionPerformed
+
+    private void spywareEnabledCheckboxActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_spywareEnabledCheckboxActionPerformed
+        // TODO add your handling code here:
+    }//GEN-LAST:event_spywareEnabledCheckboxActionPerformed
 
     // Variables declaration - do not modify//GEN-BEGIN:variables
     private javax.swing.JButton changeCourseButton;

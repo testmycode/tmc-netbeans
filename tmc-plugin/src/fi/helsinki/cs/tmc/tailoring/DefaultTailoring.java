@@ -32,12 +32,13 @@ public class DefaultTailoring implements Tailoring {
 
     @Override
     public boolean isSpywareEnabledByDefault() {
-        return true;
+        return false;
     }
         
+    // TODO: Should this be removed?
     @Override
     public boolean isDetailedSpywareEnabledByDefault() {
-        return true;
+        return false;
     }
     
     @Override

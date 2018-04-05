@@ -16,6 +16,7 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import javax.swing.BoxLayout;
@@ -30,6 +31,7 @@ import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import org.openide.util.Exceptions;
 
 public class CourseListWindow extends JPanel {
 
@@ -80,11 +82,11 @@ public class CourseListWindow extends JPanel {
 
     public static void display() throws Exception {
         PreferencesPanel prefPanel;
-                if (PreferencesUIFactory.getInstance().getCurrentUI() == null) {
-                    prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().createCurrentPreferencesUI();
-                } else {
-                    prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().getCurrentUI();
-                }
+        if (PreferencesUIFactory.getInstance().getCurrentUI() == null) {
+            prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().createCurrentPreferencesUI();
+        } else {
+            prefPanel = (PreferencesPanel) PreferencesUIFactory.getInstance().getCurrentUI();
+        }
         if (frame == null) {
             frame = new JFrame("Courses");
         }
@@ -165,7 +167,16 @@ public class CourseListWindow extends JPanel {
             prefPanel.setSelectedCourse(courses.getSelectedValue().getCourse());
             frame.setVisible(false);
             frame.dispose();
-            new ShowSettingsAction().run();
+            
+            if (prefPanel.getSpywareEnabled()) {
+                new ShowSettingsAction().run();
+            } else {
+                try {
+                    AllowSnapshotsDialog.ask();
+                } catch (InterruptedException ex) {
+                    Exceptions.printStackTrace(ex);
+                }
+            }
         }
     }
 }

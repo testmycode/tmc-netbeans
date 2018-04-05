@@ -1,15 +1,13 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
-import fi.helsinki.cs.tmc.core.utilities.TmcServerAddressNormalizer;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
+import fi.helsinki.cs.tmc.utilities.LoginListener;
 
 import com.google.common.base.Optional;
-import fi.helsinki.cs.tmc.utilities.LoginListener;
 
 import org.openide.windows.WindowManager;
 
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import javax.swing.JOptionPane;
@@ -36,7 +34,7 @@ public class LoginDialog extends javax.swing.JDialog {
     /**
      * Creates new form LoginForm
      */
-    public LoginDialog(LoginListener onLogin) {
+    private LoginDialog(LoginListener onLogin) {
         super(WindowManager.getDefault().getMainWindow(), false);
         initComponents();
 
