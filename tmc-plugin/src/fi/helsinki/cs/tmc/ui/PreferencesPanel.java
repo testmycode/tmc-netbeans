@@ -492,8 +492,17 @@ import javax.swing.SwingUtilities;
             return;
         }
         File projectDefaultFolder = folderChooser.getSelectedFile();
+        
+        final String projectDefaultFolderPath = projectDefaultFolder.getAbsolutePath();
 
-        projectFolderTextField.setText(projectDefaultFolder.getAbsolutePath());
+        final String errorMsg = "OneDrive doesn't work with Netbeans.\nPlease use another folder for your projects.";
+
+        if (projectDefaultFolderPath.toLowerCase().contains("onedrive")) {
+            dialogs.displayError(errorMsg);
+            return;
+        }
+
+        projectFolderTextField.setText(projectDefaultFolderPath);
     }//GEN-LAST:event_folderChooserBtnActionPerformed
 
     private void changeCourseButtonActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_changeCourseButtonActionPerformed

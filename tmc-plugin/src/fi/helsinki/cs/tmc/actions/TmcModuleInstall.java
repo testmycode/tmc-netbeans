@@ -46,6 +46,8 @@ public class TmcModuleInstall extends ModuleInstall {
 
                 CheckForOutdatedNetbeans.run();
 
+                CheckForOneDrive.run();
+
                 TmcCore.setInstance(new TmcCore());
 
                 CheckForNewExercisesOrUpdates.startTimer();
