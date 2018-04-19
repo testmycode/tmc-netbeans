@@ -17,7 +17,7 @@ public class CheckForOneDrive {
 
         StringBuilder htmlBuilder = new StringBuilder();
         htmlBuilder.append("<html><body>");
-        htmlBuilder.append("<h1>OneDrive does not work with Netbeans</h1>");
+        htmlBuilder.append("<h1>OneDrive does not work with the Test My Code plugin for Netbeans</h1>");
         htmlBuilder.append("<div>Many students have had a problem when they have their Netbeans project folder in OneDrive, which results in submissions failing on the server.<br>The problem can be solved by moving the project folder out of OneDrive as follows:</div>");
         htmlBuilder.append("<ol>");
         htmlBuilder.append("<li>In Netbeans, close all the exercises by right clicking them on the \"Projects\"-sidebar on the left and selecting \"Close project\".<br>You can select multiple exercises at once by pressing down the shift button on your keyboard and while pressing the button, selecting the first and the last exercise on the list.</li>");

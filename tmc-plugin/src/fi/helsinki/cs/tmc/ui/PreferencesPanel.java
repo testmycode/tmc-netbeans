@@ -495,7 +495,7 @@ import javax.swing.SwingUtilities;
         
         final String projectDefaultFolderPath = projectDefaultFolder.getAbsolutePath();
 
-        final String errorMsg = "OneDrive doesn't work with Netbeans.\nPlease use another folder for your projects.";
+        final String errorMsg = "OneDrive doesn't work with the Test My Code plugin for Netbeans.\nPlease use another folder for your projects.";
 
         if (projectDefaultFolderPath.toLowerCase().contains("onedrive")) {
             dialogs.displayError(errorMsg);
