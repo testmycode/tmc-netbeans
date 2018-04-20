@@ -3,8 +3,6 @@ package fi.helsinki.cs.tmc.ui;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import java.awt.Color;
 
-import javax.swing.text.DefaultCaret;
-
 public class CourseCard extends javax.swing.JPanel {
     
     private Course course;
@@ -16,9 +14,6 @@ public class CourseCard extends javax.swing.JPanel {
         initComponents();
         
         this.course = course;
-        
-        DefaultCaret caret = (DefaultCaret)this.informationLabel.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
         
         this.titleLabel.setText(course.getTitle());
         String information = course.getDescription();
@@ -60,6 +55,7 @@ public class CourseCard extends javax.swing.JPanel {
         informationLabel = new javax.swing.JTextArea();
 
         setBackground(new java.awt.Color(255, 255, 255));
+        setBorder(javax.swing.BorderFactory.createMatteBorder(5, 10, 5, 10, new java.awt.Color(242, 241, 240)));
         setMaximumSize(new java.awt.Dimension(332, 73));
         setMinimumSize(new java.awt.Dimension(332, 73));
         setPreferredSize(new java.awt.Dimension(346, 107));
@@ -97,7 +93,7 @@ public class CourseCard extends javax.swing.JPanel {
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(titleLabel)
-                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 161, Short.MAX_VALUE)
+                        .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, 155, Short.MAX_VALUE)
                         .addComponent(nameLabel))
                     .addComponent(infoScrollPane, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())

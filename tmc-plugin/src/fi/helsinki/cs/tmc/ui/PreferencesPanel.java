@@ -172,9 +172,9 @@ import javax.swing.SwingUtilities;
         sendDiagnostics.setSelected(value);
     }
     
-    public void setOrganization(OrganizationCard organization) {
+    public void setOrganization(Organization organization) {
         Optional<Organization> oldOrganization = this.settings.getOrganization();
-        Organization newOrganization = organization.getOrganization();
+        Organization newOrganization = organization;
 
         if (!oldOrganization.isPresent() || (oldOrganization.isPresent() && !oldOrganization.get().getSlug().equals(newOrganization.getSlug()))) {
             this.settings.setOrganization(Optional.of(newOrganization));

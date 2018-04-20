@@ -7,19 +7,19 @@ import java.awt.Color;
 import java.net.MalformedURLException;
 import java.net.URL;
 import javax.swing.ImageIcon;
-import javax.swing.text.DefaultCaret;
+import javax.swing.JList;
 
 public class OrganizationCard extends javax.swing.JPanel {
     
     private final Organization organization;
+    private ImageIcon image;
+    private JList parent;
     
-    public OrganizationCard(Organization organization) {
+    public OrganizationCard(Organization organization, JList parent) {
         initComponents();
         
         this.organization = organization;
-        
-        DefaultCaret caret = (DefaultCaret)this.organizationInformation.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.NEVER_UPDATE);
+        this.parent = parent;
         
         this.organizationName.setText(organization.getName());
         String information = organization.getInformation();
@@ -28,12 +28,25 @@ public class OrganizationCard extends javax.swing.JPanel {
         }
         this.organizationInformation.setText(information);
         this.organizationSlug.setText("/" + organization.getSlug());
-        ImageIcon image = new ImageIcon(getClass().getResource("placeholderLogo.png"));
-        if (!organization.getLogoPath().contains("missing")) {
-            image = new ImageIcon(logoUrl(organization.getLogoPath()));
+
+        setLogo();
+    }
+
+    private void setLogo() {
+        setLogo(getClass().getResource("placeholderLogo.png"));
+        final String logoPath = organization.getLogoPath();
+        if (!logoPath.contains("missing")) {
+            new Thread(() -> {
+                setLogo(logoUrl(logoPath));
+                this.parent.repaint();
+            }).start();
         }
-        image.setImage(image.getImage().getScaledInstance(49, 49, java.awt.Image.SCALE_SMOOTH));
-        this.logo.setIcon(image);
+    }
+
+    private void setLogo(URL logoUrl) {
+        this.image = new ImageIcon(logoUrl);
+        this.image.setImage(this.image.getImage().getScaledInstance(49, 49, java.awt.Image.SCALE_SMOOTH));
+        this.logo.setIcon(this.image);
     }
     
     public Organization getOrganization() {

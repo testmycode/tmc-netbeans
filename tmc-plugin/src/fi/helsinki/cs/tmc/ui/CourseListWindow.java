@@ -10,15 +10,19 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -26,16 +30,16 @@ import javax.swing.JList;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 
 public class CourseListWindow extends JPanel {
 
     private static JFrame frame;
     private final JLabel title;
-    private final JList<CourseCard> courses;
+    private final JList<Course> courses;
     private PreferencesPanel prefPanel;
     private static JButton button;
 
@@ -44,11 +48,11 @@ public class CourseListWindow extends JPanel {
         this.title = new JLabel("Select a course:");
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
-        CourseCard[] courseCards = new CourseCard[courses.size()];
-        for (int i = 0; i < courses.size(); i++) {
-            courseCards[i] = new CourseCard(courses.get(i));
-        }
-        this.courses = new JList<>(courseCards);
+        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), new Color(242, 241, 240)));
+        Course[] courseArray = courses.toArray(new Course[courses.size()]);
+        this.courses = new JList<>(courseArray);
+        this.courses.setFixedCellHeight(107);
+        this.courses.setFixedCellWidth(346);
         this.courses.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.button = new JButton("Select");
@@ -59,8 +63,11 @@ public class CourseListWindow extends JPanel {
         JScrollPane pane = new JScrollPane(this.courses);
         Dimension d = pane.getPreferredSize();
         d.width = 800;
+        d.height = (int) (d.height * 1.12);
         pane.setPreferredSize(d);
-        pane.setBorder(new EmptyBorder(5,0,5,0));
+        pane.setBorder(new EmptyBorder(5, 0, 5, 0));
+        pane.setViewportBorder(new EmptyBorder(0, 0, 0, 0));
+        pane.getVerticalScrollBar().setUnitIncrement(10);
         this.courses.setBackground(new Color(242, 241, 240));
         
         this.courses.setSelectedIndex(setDefaultSelectedIndex());
@@ -145,9 +152,9 @@ public class CourseListWindow extends JPanel {
         }
         String selectedCourseName = currentCourse.get().getName();
         
-        final ListModel<CourseCard> list = courses.getModel();
+        final ListModel<Course> list = courses.getModel();
         for (int i = 0; i < list.getSize(); i++) {
-            if (list.getElementAt(i).getCourse().getName().equals(selectedCourseName)) {
+            if (list.getElementAt(i).getName().equals(selectedCourseName)) {
                 return i;
             }
         }
@@ -162,7 +169,7 @@ public class CourseListWindow extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            prefPanel.setSelectedCourse(courses.getSelectedValue().getCourse());
+            prefPanel.setSelectedCourse(courses.getSelectedValue());
             frame.setVisible(false);
             frame.dispose();
             new ShowSettingsAction().run();
@@ -170,23 +177,30 @@ public class CourseListWindow extends JPanel {
     }
 }
 
-class CourseCellRenderer extends JLabel implements ListCellRenderer {
+class CourseCellRenderer extends DefaultListCellRenderer {
     
     private static final Color HIGHLIGHT_COLOR = new Color(240, 119, 70);
     
+    private final Map<Course, CourseCard> cachedCourses;
+
     public CourseCellRenderer() {
+        this.cachedCourses = new HashMap<>();
     }
 
     @Override
     public Component getListCellRendererComponent(final JList list,
             final Object value, final int index, final boolean isSelected,
             final boolean hasFocus) {
-        CourseCard course = (CourseCard) value;
-        if (isSelected) {
-            course.setColors(Color.white, HIGHLIGHT_COLOR);
-        } else {
-            course.setColors(new Color(76, 76, 76), Color.white);
+        final Course course = (Course)value;
+        if (!this.cachedCourses.containsKey(course)) {
+            this.cachedCourses.put(course, new CourseCard(course));
         }
-        return course;
+        CourseCard courseCard = this.cachedCourses.get(course);
+        if (isSelected) {
+            courseCard.setColors(Color.white, HIGHLIGHT_COLOR);
+        } else {
+            courseCard.setColors(new Color(76, 76, 76), Color.white);
+        }
+        return courseCard;
     }
 }

@@ -11,6 +11,7 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -19,33 +20,36 @@ import java.awt.event.ComponentEvent;
 import java.awt.event.ComponentListener;
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import javax.swing.BoxLayout;
+import javax.swing.DefaultListCellRenderer;
 import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.ListCellRenderer;
 import javax.swing.ListModel;
 import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.MatteBorder;
 import org.openide.util.Exceptions;
 
 public class OrganizationListWindow extends JPanel {
 
     private static JFrame frame;
     private final JLabel title;
-    private final JList<OrganizationCard> organizations;
+    private final JList<Organization> organizations;
     private static JButton button;
 
     public OrganizationListWindow(List<Organization> organizations) {
         this.title = new JLabel("Select an organization:");
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
-        OrganizationCard[] organizationCards = new OrganizationCard[organizations.size()];
+        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), new Color(242, 241, 240)));
         Collections.sort(organizations, (a, b) -> {
             if (a.isPinned() && b.isPinned()) {
                 return a.getName().compareTo(b.getName());
@@ -58,22 +62,25 @@ public class OrganizationListWindow extends JPanel {
             }
             return a.getName().compareTo(b.getName());
         });
-        for (int i = 0; i < organizations.size(); i++) {
-            organizationCards[i] = new OrganizationCard(organizations.get(i));
-        }
-        this.organizations = new JList<>(organizationCards);
+        Organization[] orgArray = organizations.toArray(new Organization[organizations.size()]);
+        this.organizations = new JList<>(orgArray);
+        this.organizations.setFixedCellHeight(107);
+        this.organizations.setFixedCellWidth(346);
         this.organizations.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         setLayout(new BoxLayout(this, BoxLayout.Y_AXIS));
         this.button = new JButton("Select");
         button.addActionListener(new SelectOrganizationListener(this));
 
-        this.organizations.setCellRenderer(new OrganizationCellRenderer());
+        this.organizations.setCellRenderer(new OrganizationCellRenderer(this.organizations));
         this.organizations.setVisibleRowCount(4);
         JScrollPane pane = new JScrollPane(this.organizations);
         Dimension d = pane.getPreferredSize();
         d.width = 800;
+        d.height = (int) (d.height * 1.12);
         pane.setPreferredSize(d);
         pane.setBorder(new EmptyBorder(5, 0, 5, 0));
+        pane.setViewportBorder(new EmptyBorder(0, 0, 0, 0));
+        pane.getVerticalScrollBar().setUnitIncrement(10);
         this.organizations.setBackground(new Color(242, 241, 240));
 
         this.organizations.setSelectedIndex(setDefaultSelectedIndex());
@@ -138,9 +145,9 @@ public class OrganizationListWindow extends JPanel {
         if (!selectedOrganization.isPresent()) {
             return 0;
         }
-        final ListModel<OrganizationCard> list = organizations.getModel();
+        final ListModel<Organization> list = organizations.getModel();
         for (int i = 0; i < list.getSize(); i++) {
-            if (list.getElementAt(i).getOrganization().getName().equals(selectedOrganization.get().getName())) {
+            if (list.getElementAt(i).getName().equals(selectedOrganization.get().getName())) {
                 return i;
             }
         }
@@ -154,8 +161,7 @@ public class OrganizationListWindow extends JPanel {
 
         @Override
         public void actionPerformed(ActionEvent e) {
-            final OrganizationCard organization = organizations.getSelectedValue();
-            setColors(organization, Color.white, Color.black);
+            final Organization organization = organizations.getSelectedValue();
             frame.setVisible(false);
             frame.dispose();
             try {
@@ -176,32 +182,34 @@ public class OrganizationListWindow extends JPanel {
             }
         }
     }
-
-    private void setColors(OrganizationCard organization, Color background, Color foreground) {
-        organization.setBackground(background);
-        for (Component c : organization.getComponents()) {
-            c.setForeground(foreground);
-        }
-    }
 }
 
-class OrganizationCellRenderer extends JLabel implements ListCellRenderer {
+class OrganizationCellRenderer extends DefaultListCellRenderer {
 
     private static final Color HIGHLIGHT_COLOR = new Color(240, 119, 70);
+    private final JList parent;
+    private final Map<Organization, OrganizationCard> cachedOrgs;
 
-    public OrganizationCellRenderer() {
+    public OrganizationCellRenderer(JList parent) {
+        this.parent = parent;
+        this.cachedOrgs = new HashMap<>();
     }
 
     @Override
     public Component getListCellRendererComponent(final JList list,
             final Object value, final int index, final boolean isSelected,
             final boolean hasFocus) {
-        OrganizationCard organization = (OrganizationCard) value;
-        if (isSelected) {
-            organization.setColors(Color.white, HIGHLIGHT_COLOR);
-        } else {
-            organization.setColors(new Color(76, 76, 76), Color.white);
+        final Organization org = (Organization)value;
+        if (!this.cachedOrgs.containsKey(org)) {
+            OrganizationCard organization = new OrganizationCard(org, parent);
+            this.cachedOrgs.put(org, organization);
         }
-        return organization;
+        OrganizationCard organizationCard = this.cachedOrgs.get(org);
+        if (isSelected) {
+            organizationCard.setColors(Color.white, HIGHLIGHT_COLOR);
+        } else {
+            organizationCard.setColors(new Color(76, 76, 76), Color.white);
+        }
+        return organizationCard;
     }
 }
