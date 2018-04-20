@@ -10,6 +10,7 @@ import javax.swing.JPanel;
 import org.openide.DialogDescriptor;
 import org.openide.DialogDisplayer;
 import org.openide.NotifyDescriptor;
+import org.openide.util.ImageUtilities;
 
 public class ConvenientDialogDisplayer {
     private static ConvenientDialogDisplayer defaultDisplayer;
@@ -57,7 +58,14 @@ public class ConvenientDialogDisplayer {
     public void showDialog(Component content, int notifyType) {
         showDialog(content, notifyType, "", true);
     }
-    
+
+    public void showDialog(String msg, int notifyType, String imgPath) {
+        ImageIcon img = ImageUtilities.loadImageIcon(imgPath, false);
+        JLabel content = new JLabel(msg, img, JLabel.CENTER);
+        content.setIconTextGap(50);
+        showDialog(content, notifyType, "", true);
+    }
+
     public void showDialog(Component content, int notifyType, String title, boolean modal) {
         DialogDescriptor desc = new DialogDescriptor(content,title);
         desc.setModal(modal);
