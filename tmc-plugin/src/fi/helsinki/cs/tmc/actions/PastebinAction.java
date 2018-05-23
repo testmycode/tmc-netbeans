@@ -36,7 +36,7 @@ import java.util.logging.Logger;
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.PastebinAction")
 @ActionRegistration(displayName = "#CTL_PastebinAction", lazy = false)
 @ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = -17),
+    @ActionReference(path = "Menu/TM&C", position = 30),
     @ActionReference(
             path = "Projects/Actions",
             position = 1340,
