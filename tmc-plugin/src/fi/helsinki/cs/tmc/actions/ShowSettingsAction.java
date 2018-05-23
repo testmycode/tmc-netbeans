@@ -67,7 +67,6 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setProjectDir(settings.getProjectRootDir());
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
         prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
-        prefUI.setSpywareEnabled(settings.isSpywareEnabled());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
         prefUI.setResolveProjectDependenciesEnabled(settings.getResolveDependencies());
         prefUI.setSendDiagnosticsEnabled(settings.getSendDiagnostics());

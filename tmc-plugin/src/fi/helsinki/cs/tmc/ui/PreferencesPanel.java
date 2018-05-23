@@ -139,12 +139,7 @@ import javax.swing.SwingUtilities;
 
     @Override
     public boolean getSpywareEnabled() {
-        return spywareEnabledCheckbox.isSelected();
-    }
-
-    @Override
-    public void setSpywareEnabled(boolean enabled) {
-        spywareEnabledCheckbox.setSelected(enabled);
+        return true;
     }
 
     @Override
@@ -273,7 +268,6 @@ import javax.swing.SwingUtilities;
         jSeparator1 = new javax.swing.JSeparator();
         checkForUpdatesInBackgroundCheckbox = new javax.swing.JCheckBox();
         checkForUnopenedExercisesCheckbox = new javax.swing.JCheckBox();
-        spywareEnabledCheckbox = new javax.swing.JCheckBox();
         jSeparator2 = new javax.swing.JSeparator();
         jSeparator3 = new javax.swing.JSeparator();
         errorMsgLocaleLabel = new javax.swing.JLabel();
@@ -319,9 +313,6 @@ import javax.swing.SwingUtilities;
         checkForUnopenedExercisesCheckbox.setSelected(true);
         checkForUnopenedExercisesCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.text")); // NOI18N
         checkForUnopenedExercisesCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.checkForUnopenedExercisesCheckbox.toolTipText")); // NOI18N
-
-        spywareEnabledCheckbox.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.text")); // NOI18N
-        spywareEnabledCheckbox.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.spywareEnabledCheckbox.toolTipText")); // NOI18N
 
         errorMsgLocaleLabel.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.errorMsgLocaleLabel.text")); // NOI18N
         errorMsgLocaleLabel.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.errorMsgLocaleLabel.toolTipText")); // NOI18N
@@ -423,8 +414,7 @@ import javax.swing.SwingUtilities;
                             .addGroup(layout.createSequentialGroup()
                                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                                     .addComponent(checkForUnopenedExercisesCheckbox)
-                                    .addComponent(checkForUpdatesInBackgroundCheckbox)
-                                    .addComponent(spywareEnabledCheckbox))
+                                    .addComponent(checkForUpdatesInBackgroundCheckbox))
                                 .addGap(0, 0, Short.MAX_VALUE))
                             .addComponent(jSeparator4))
                         .addContainerGap())))
@@ -465,8 +455,6 @@ import javax.swing.SwingUtilities;
                 .addComponent(resolveDependencies)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sendDiagnostics)
-                .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(spywareEnabledCheckbox)
                 .addGap(18, 18, 18)
                 .addComponent(jSeparator3, javax.swing.GroupLayout.PREFERRED_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.PREFERRED_SIZE)
                 .addGap(18, 18, 18)
@@ -568,7 +556,6 @@ import javax.swing.SwingUtilities;
     private javax.swing.JLabel selectedCourseLabel;
     private javax.swing.JLabel selectedOrganizationLabel;
     private javax.swing.JCheckBox sendDiagnostics;
-    private javax.swing.JCheckBox spywareEnabledCheckbox;
     // End of variables declaration//GEN-END:variables
 
 }

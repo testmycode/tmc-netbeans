@@ -35,8 +35,6 @@ public interface PreferencesUI {
     void setCheckForUpdatesInTheBackground(boolean shouldCheck);
     
     void setCheckForUnopenedExercisesAtStartup(boolean shouldCheck);
-    
-    void setSpywareEnabled(boolean enabled);
-    
+
     void setErrorMsgLocale(Locale locale);
 }
