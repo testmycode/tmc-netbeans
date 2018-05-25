@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.21</version>
+    <version>1.22</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
@@ -46,7 +46,7 @@
         <dependency>
             <groupId>${project.groupId}</groupId>
             <artifactId>core</artifactId>
-            <version>0.10.4-SNAPSHOT</version>
+            <version>0.10.5-SNAPSHOT</version>
         </dependency>
         <dependency>
             <groupId>${project.groupId}</groupId>
@@ -143,7 +143,7 @@
                         <publicPackage>org.apache.commons.*</publicPackage>
                         <publicPackage>org.apache.oltu.oauth2.common.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.core.*</publicPackage>
-                        <publicPackage>fi.helsinki.cs.tmc.spyware.*</publicPackage>
+                        <publicPackage>fi.helsinki.cs.tmc.snapshots.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.abstraction.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.domain.*</publicPackage>
                         <publicPackage>fi.helsinki.cs.tmc.langs.util.*</publicPackage>

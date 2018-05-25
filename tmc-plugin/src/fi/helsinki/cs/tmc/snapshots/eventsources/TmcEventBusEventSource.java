@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.spyware.eventsources;
+package fi.helsinki.cs.tmc.snapshots.eventsources;
 
 import com.google.gson.Gson;
 
@@ -16,9 +16,9 @@ import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.spyware.EventReceiver;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
+import fi.helsinki.cs.tmc.snapshots.EventReceiver;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshotsLocal.SnapshotsFacade;
 
 import java.nio.charset.Charset;
 import java.util.Collections;
@@ -43,7 +43,7 @@ public class TmcEventBusEventSource extends TmcEventListener {
         receiver.receiveEvent(event);
     }
 
-    public void receive(SpywareFacade.InvokedEvent event) {
+    public void receive(SnapshotsFacade.InvokedEvent event) {
         sendProjectActionEvent(event.message);
     }
 

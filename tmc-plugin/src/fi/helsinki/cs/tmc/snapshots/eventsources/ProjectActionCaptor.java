@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.spyware.eventsources;
+package fi.helsinki.cs.tmc.snapshots.eventsources;
 
 import java.util.ArrayList;
 import java.util.Arrays;

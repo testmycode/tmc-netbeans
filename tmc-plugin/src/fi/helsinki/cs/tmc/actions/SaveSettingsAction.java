@@ -56,7 +56,6 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setProjectRootDir(prefUi.getProjectDir());
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
-        settings.setIsSpywareEnabled(prefUi.getSpywareEnabled());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
         settings.setResolveDependencies(prefUi.getResolveProjectDependenciesEnabled());
         settings.setSendDiagnostics(prefUi.getSendDiagnosticsEnabled());

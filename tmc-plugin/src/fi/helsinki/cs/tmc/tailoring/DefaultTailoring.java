@@ -29,16 +29,6 @@ public class DefaultTailoring implements Tailoring {
         }
         return user;
     }
-
-    @Override
-    public boolean isSpywareEnabledByDefault() {
-        return true;
-    }
-        
-    @Override
-    public boolean isDetailedSpywareEnabledByDefault() {
-        return true;
-    }
     
     @Override
     public Locale[] getAvailableErrorMsgLocales() {

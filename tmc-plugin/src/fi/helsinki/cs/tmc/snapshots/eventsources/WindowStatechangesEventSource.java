@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.spyware.eventsources;
+package fi.helsinki.cs.tmc.snapshots.eventsources;
 
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
@@ -8,8 +8,8 @@ import com.google.common.base.CaseFormat;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.spyware.EventReceiver;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.EventReceiver;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
 

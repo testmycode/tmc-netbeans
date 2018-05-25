@@ -13,7 +13,7 @@ import fi.helsinki.cs.tmc.core.events.TmcEventListener;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.PushEventListener;
 import fi.helsinki.cs.tmc.model.ReviewDb;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 import fi.helsinki.cs.tmc.ui.CodeReviewDialog;
 import fi.helsinki.cs.tmc.ui.TmcNotificationDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;

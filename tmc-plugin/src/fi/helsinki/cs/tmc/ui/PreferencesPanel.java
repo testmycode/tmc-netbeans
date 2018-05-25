@@ -138,11 +138,6 @@ import javax.swing.SwingUtilities;
     }
 
     @Override
-    public boolean getSpywareEnabled() {
-        return true;
-    }
-
-    @Override
     public Locale getErrorMsgLocale() {
         Object item = errorMsgLocaleComboBox.getSelectedItem();
         if (item != null) {
@@ -377,7 +372,7 @@ import javax.swing.SwingUtilities;
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(resolveDependencies)
                             .addComponent(sendDiagnostics))
-                        .addGap(0, 299, Short.MAX_VALUE))
+                        .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                             .addComponent(jSeparator1)

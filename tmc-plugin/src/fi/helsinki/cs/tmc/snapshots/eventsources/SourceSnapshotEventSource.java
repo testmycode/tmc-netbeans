@@ -1,12 +1,11 @@
-package fi.helsinki.cs.tmc.spyware.eventsources;
+package fi.helsinki.cs.tmc.snapshots.eventsources;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.spyware.EventReceiver;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
+import fi.helsinki.cs.tmc.snapshots.EventReceiver;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 import fi.helsinki.cs.tmc.utilities.ActiveThreadSet;
 import fi.helsinki.cs.tmc.core.utilities.JsonMaker;
 import fi.helsinki.cs.tmc.utilities.TmcFileUtils;
@@ -33,13 +32,11 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
 
     private static final Logger log = Logger.getLogger(SourceSnapshotEventSource.class.getName());
 
-    private SpywareSettings settings;
     private EventReceiver receiver;
     private ActiveThreadSet snapshotterThreads;
     private boolean closed;
 
-    public SourceSnapshotEventSource(SpywareSettings settings, EventReceiver receiver) {
-        this.settings = settings;
+    public SourceSnapshotEventSource(EventReceiver receiver) {
         this.receiver = receiver;
 
         this.snapshotterThreads = new ActiveThreadSet();
@@ -141,10 +138,6 @@ public class SourceSnapshotEventSource implements FileChangeListener, Closeable 
     }
 
     private void startSnapshotThread(FileObject changedFile, JsonMaker metadata) {
-        if (!settings.isSpywareEnabled()) {
-            return;
-        }
-
         log.log(Level.FINE, "Changed file: {0}", changedFile);
 
         ProjectMediator pm = ProjectMediator.getInstance();

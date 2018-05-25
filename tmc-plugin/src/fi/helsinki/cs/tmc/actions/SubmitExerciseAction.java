@@ -3,7 +3,7 @@ package fi.helsinki.cs.tmc.actions;
 import fi.helsinki.cs.tmc.exerciseSubmitter.ExerciseSubmitter;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
-import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
+import fi.helsinki.cs.tmc.snapshotsLocal.SnapshotsFacade;
 
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
@@ -37,7 +37,7 @@ public final class SubmitExerciseAction extends AbstractExerciseSensitiveAction 
     @Override
     protected void performAction(Node[] nodes) {
         new ExerciseSubmitter().performAction(projectsFromNodes(nodes).toArray(new Project[0]));
-        SpywareFacade.sendNow();
+        SnapshotsFacade.sendNow();
     }
 
     @Override

@@ -7,7 +7,7 @@ import fi.helsinki.cs.tmc.core.holders.TmcLangsHolder;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.langs.util.TaskExecutorImpl;
-import fi.helsinki.cs.tmc.spywareLocal.SpywareFacade;
+import fi.helsinki.cs.tmc.snapshotsLocal.SnapshotsFacade;
 import fi.helsinki.cs.tmc.tasks.LoginTask;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
@@ -61,7 +61,7 @@ public class TmcModuleInstall extends ModuleInstall {
                 final CheckDiskSpace checkDiskSpace = new CheckDiskSpace((TmcCoreSettingsImpl)settings);
                 checkDiskSpace.startCheckingPeriodically();
                 checkDiskSpace.run();
-                SpywareFacade.start();
+                SnapshotsFacade.start();
 
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
 
@@ -129,9 +129,9 @@ public class TmcModuleInstall extends ModuleInstall {
     @Override
     public void close() {
         try {
-            SpywareFacade.close();
+            SnapshotsFacade.close();
         } catch (Exception e) {
-            log.log(Level.WARNING, "Failed to close SpywareFacade.", e);
+            log.log(Level.WARNING, "Failed to close SnapshotsFacade.", e);
         }
     }
 

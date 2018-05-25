@@ -1,39 +1,37 @@
-package fi.helsinki.cs.tmc.spywareLocal;
+package fi.helsinki.cs.tmc.snapshotsLocal;
 
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-import fi.helsinki.cs.tmc.spyware.eventsources.WindowStatechangesEventSource;
+import fi.helsinki.cs.tmc.snapshots.eventsources.WindowStatechangesEventSource;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
-import fi.helsinki.cs.tmc.spyware.EventDeduplicater;
-import fi.helsinki.cs.tmc.spyware.EventReceiver;
-import fi.helsinki.cs.tmc.spyware.EventSendBuffer;
-import fi.helsinki.cs.tmc.spyware.EventStore;
-import fi.helsinki.cs.tmc.spyware.HostInformationGenerator;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
-import fi.helsinki.cs.tmc.spyware.SpywareSettings;
-
-import fi.helsinki.cs.tmc.spyware.eventsources.TextInsertEventSource;
-import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionCaptor;
-import fi.helsinki.cs.tmc.spyware.eventsources.ProjectActionEventSource;
-import fi.helsinki.cs.tmc.spyware.eventsources.SourceSnapshotEventSource;
-import fi.helsinki.cs.tmc.spyware.eventsources.TmcEventBusEventSource;
+import fi.helsinki.cs.tmc.snapshots.EventDeduplicater;
+import fi.helsinki.cs.tmc.snapshots.EventReceiver;
+import fi.helsinki.cs.tmc.snapshots.EventSendBuffer;
+import fi.helsinki.cs.tmc.snapshots.EventStore;
+import fi.helsinki.cs.tmc.snapshots.HostInformationGenerator;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.eventsources.TextInsertEventSource;
+import fi.helsinki.cs.tmc.snapshots.eventsources.ProjectActionCaptor;
+import fi.helsinki.cs.tmc.snapshots.eventsources.ProjectActionEventSource;
+import fi.helsinki.cs.tmc.snapshots.eventsources.SourceSnapshotEventSource;
+import fi.helsinki.cs.tmc.snapshots.eventsources.TmcEventBusEventSource;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 
 import java.io.IOException;
 import java.util.logging.Logger;
 
-public class SpywareFacade implements SpywareSettings {
+public class SnapshotsFacade {
 
-    private static final Logger log = Logger.getLogger(SpywareFacade.class.getName());
+    private static final Logger log = Logger.getLogger(SnapshotsFacade.class.getName());
 
-    private static SpywareFacade instance;
+    private static SnapshotsFacade instance;
 
     public static void start() {
         if (instance != null) {
-            throw new IllegalStateException("SpywareFacade.start() called twice");
+            throw new IllegalStateException("SnapshotsFacade.start() called twice");
         }
-        instance = new SpywareFacade();
+        instance = new SnapshotsFacade();
         TmcEventBus.getDefault().post(new InvokedEvent("spyware_loaded"));
 
     }
@@ -98,16 +96,16 @@ public class SpywareFacade implements SpywareSettings {
     }
 
 
-    public SpywareFacade() {
+    public SnapshotsFacade() {
         settings = (TmcCoreSettingsImpl)TmcSettingsHolder.get();
 
-        sender = new EventSendBuffer(this, new EventStore());
+        sender = new EventSendBuffer(new EventStore());
         sender.sendNow();
 
         String hostId = new HostInformationGenerator().updateHostInformation(sender);
         taggingSender = new TaggingEventReceiver(sender, hostId);
         sourceSnapshotDedup = new EventDeduplicater(taggingSender);
-        sourceSnapshotSource = new SourceSnapshotEventSource(this, sourceSnapshotDedup);
+        sourceSnapshotSource = new SourceSnapshotEventSource(sourceSnapshotDedup);
         sourceSnapshotSource.startListeningToFileChanges();
 
         projectActionSource = new ProjectActionEventSource(taggingSender);
@@ -141,16 +139,6 @@ public class SpywareFacade implements SpywareSettings {
 
         sourceSnapshotDedup.close();
         sender.close();
-    }
-
-    @Override
-    public boolean isSpywareEnabled() {
-        return settings.isSpywareEnabled();
-    }
-
-    @Override
-    public boolean isDetailedSpywareEnabled() {
-        return settings.isDetailedSpywareEnabled();
     }
 
     public static class InvokedEvent implements TmcEvent {

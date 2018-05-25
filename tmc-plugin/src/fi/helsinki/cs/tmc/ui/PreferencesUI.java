@@ -18,8 +18,6 @@ public interface PreferencesUI {
     
     String getSelectedCourseName();
     
-    boolean getSpywareEnabled();
-    
     boolean getResolveProjectDependenciesEnabled();
     
     void setResolveProjectDependenciesEnabled(boolean value);

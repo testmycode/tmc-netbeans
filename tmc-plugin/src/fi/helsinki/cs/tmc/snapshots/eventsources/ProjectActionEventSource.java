@@ -1,4 +1,4 @@
-package fi.helsinki.cs.tmc.spyware.eventsources;
+package fi.helsinki.cs.tmc.snapshots.eventsources;
 
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 
@@ -7,8 +7,8 @@ import com.google.gson.Gson;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
-import fi.helsinki.cs.tmc.spyware.EventReceiver;
-import fi.helsinki.cs.tmc.spyware.LoggableEvent;
+import fi.helsinki.cs.tmc.snapshots.EventReceiver;
+import fi.helsinki.cs.tmc.snapshots.LoggableEvent;
 
 import java.nio.charset.Charset;
 import java.util.Collections;

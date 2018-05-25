@@ -12,8 +12,6 @@ public interface Tailoring {
     String getDefaultServerUrl();
     String getDefaultUsername();
     String getUsernameFieldName();
-    boolean isSpywareEnabledByDefault();
-    boolean isDetailedSpywareEnabledByDefault();
     
     Locale[] getAvailableErrorMsgLocales();
     Locale getDefaultErrorMsgLocale();
