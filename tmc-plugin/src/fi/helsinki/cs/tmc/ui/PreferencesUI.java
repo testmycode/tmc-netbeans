@@ -18,9 +18,9 @@ public interface PreferencesUI {
     
     String getSelectedCourseName();
     
-    boolean getResolveProjectDependenciesEnabled();
+    boolean getFixUnoptimalSettingsEnabled();
     
-    void setResolveProjectDependenciesEnabled(boolean value);
+    void setFixUnoptimalSettingsEnabled(boolean value);
     
     boolean getSendDiagnosticsEnabled();
 

@@ -37,7 +37,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
     private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
     private static final String PREF_CHECK_FOR_UNOPENED_AT_STARTUP = "checkForUnopenedAtStartup";
     private static final String PREF_ERROR_MSG_LOCALE = "errorMsgLocale";
-    private static final String PREF_RESOLVE_DEPENDENCIES = "resolveDependencies";
+    private static final String PREF_FIX_UNOPTIMAL_SETTINGS = "fixUnoptimalSettings";
     private static final String PREF_SEND_DIAGNOSTICS = "sendDiagnostics";
     private static final String PREF_OAUTH_TOKEN = "oauthToken";
     private static final String PREF_OAUTH_APPLICATION_ID = "oauthApplicationId";
@@ -277,12 +277,12 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         settings.put(PREF_ERROR_MSG_LOCALE, locale.toString());
     }
 
-    public void setResolveDependencies(boolean value) {
-        settings.put(PREF_RESOLVE_DEPENDENCIES, value ? "1" : "0");
+    public void setFixUnoptimalSettings(boolean value) {
+        settings.put(PREF_FIX_UNOPTIMAL_SETTINGS, value ? "1" : "0");
     }
 
-    public boolean getResolveDependencies() {
-        return settings.get(PREF_RESOLVE_DEPENDENCIES, "1").equals("1");
+    public boolean getFixUnoptimalSettings() {
+        return settings.get(PREF_FIX_UNOPTIMAL_SETTINGS, "1").equals("1");
     }
 
     public void setSendDiagnostics(boolean value) {

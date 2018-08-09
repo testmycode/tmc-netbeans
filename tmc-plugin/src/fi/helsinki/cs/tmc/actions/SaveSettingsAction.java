@@ -57,15 +57,13 @@ public class SaveSettingsAction extends AbstractAction {
         settings.setCheckingForUpdatesInTheBackground(prefUi.getCheckForUpdatesInTheBackground());
         settings.setCheckingForUnopenedAtStartup(prefUi.getCheckForUnopenedExercisesAtStartup());
         settings.setErrorMsgLocale(prefUi.getErrorMsgLocale());
-        settings.setResolveDependencies(prefUi.getResolveProjectDependenciesEnabled());
+        settings.setFixUnoptimalSettings(prefUi.getFixUnoptimalSettingsEnabled());
         settings.setSendDiagnostics(prefUi.getSendDiagnosticsEnabled());
 
         eventBus.post(new InvokedEvent());
         
-        if (settings.getResolveDependencies()) {
+        if (settings.getFixUnoptimalSettings()) {
             fixUnoptimalSettings.run();
-        } else {
-            fixUnoptimalSettings.undo();
         }
 
         if (settings.getSendDiagnostics()) {

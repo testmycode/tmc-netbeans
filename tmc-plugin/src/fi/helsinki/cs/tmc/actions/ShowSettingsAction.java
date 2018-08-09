@@ -68,7 +68,7 @@ public final class ShowSettingsAction extends AbstractAction {
         prefUI.setCheckForUpdatesInTheBackground(settings.isCheckingForUpdatesInTheBackground());
         prefUI.setCheckForUnopenedExercisesAtStartup(settings.isCheckingForUnopenedAtStartup());
         prefUI.setErrorMsgLocale(settings.getErrorMsgLocale());
-        prefUI.setResolveProjectDependenciesEnabled(settings.getResolveDependencies());
+        prefUI.setFixUnoptimalSettingsEnabled(settings.getFixUnoptimalSettings());
         prefUI.setSendDiagnosticsEnabled(settings.getSendDiagnostics());
 
         ActionListener listener = new ActionListener() {

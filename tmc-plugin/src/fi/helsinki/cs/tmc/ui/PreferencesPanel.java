@@ -128,13 +128,13 @@ import javax.swing.SwingUtilities;
     }
     
     @Override
-    public boolean getResolveProjectDependenciesEnabled() {
-        return resolveDependencies.isSelected();
+    public boolean getFixUnoptimalSettingsEnabled() {
+        return fixUnoptimalSettings.isSelected();
     }
     
     @Override
-    public void setResolveProjectDependenciesEnabled(boolean value) {
-        resolveDependencies.setSelected(value);
+    public void setFixUnoptimalSettingsEnabled(boolean value) {
+        fixUnoptimalSettings.setSelected(value);
     }
 
     @Override
@@ -268,7 +268,7 @@ import javax.swing.SwingUtilities;
         errorMsgLocaleLabel = new javax.swing.JLabel();
         errorMsgLocaleComboBox = new javax.swing.JComboBox();
         restartMessage = new javax.swing.JLabel();
-        resolveDependencies = new javax.swing.JCheckBox();
+        fixUnoptimalSettings = new javax.swing.JCheckBox();
         sendDiagnostics = new javax.swing.JCheckBox();
         organizationLabel = new javax.swing.JLabel();
         changeOrganizationButton = new javax.swing.JButton();
@@ -317,12 +317,12 @@ import javax.swing.SwingUtilities;
         restartMessage.setFont(new java.awt.Font("Ubuntu", 1, 14)); // NOI18N
         restartMessage.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.restartMessage.text")); // NOI18N
 
-        resolveDependencies.setSelected(true);
-        resolveDependencies.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.resolveDependencies.text")); // NOI18N
-        resolveDependencies.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.resolveDependencies.toolTipText")); // NOI18N
-        resolveDependencies.addActionListener(new java.awt.event.ActionListener() {
+        fixUnoptimalSettings.setSelected(true);
+        fixUnoptimalSettings.setText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.fixUnoptimalSettings.text")); // NOI18N
+        fixUnoptimalSettings.setToolTipText(org.openide.util.NbBundle.getMessage(PreferencesPanel.class, "PreferencesPanel.fixUnoptimalSettings.toolTipText")); // NOI18N
+        fixUnoptimalSettings.addActionListener(new java.awt.event.ActionListener() {
             public void actionPerformed(java.awt.event.ActionEvent evt) {
-                resolveDependenciesActionPerformed(evt);
+                fixUnoptimalSettingsActionPerformed(evt);
             }
         });
 
@@ -370,7 +370,7 @@ import javax.swing.SwingUtilities;
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addGroup(layout.createSequentialGroup()
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(resolveDependencies)
+                            .addComponent(fixUnoptimalSettings)
                             .addComponent(sendDiagnostics))
                         .addGap(0, 216, Short.MAX_VALUE))
                     .addGroup(layout.createSequentialGroup()
@@ -447,7 +447,7 @@ import javax.swing.SwingUtilities;
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(checkForUnopenedExercisesCheckbox)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
-                .addComponent(resolveDependencies)
+                .addComponent(fixUnoptimalSettings)
                 .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED)
                 .addComponent(sendDiagnostics)
                 .addGap(18, 18, 18)
@@ -494,9 +494,9 @@ import javax.swing.SwingUtilities;
         updateSettingsForRefresh();
     }//GEN-LAST:event_changeCourseButtonActionPerformed
 
-    private void resolveDependenciesActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_resolveDependenciesActionPerformed
+    private void fixUnoptimalSettingsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_fixUnoptimalSettingsActionPerformed
        
-    }//GEN-LAST:event_resolveDependenciesActionPerformed
+    }//GEN-LAST:event_fixUnoptimalSettingsActionPerformed
 
     private void sendDiagnosticsActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_sendDiagnosticsActionPerformed
         TmcCoreSettingsImpl tmcSettings = (TmcCoreSettingsImpl) this.settings;
@@ -536,6 +536,7 @@ import javax.swing.SwingUtilities;
     private javax.swing.JLabel coursesLabel;
     private javax.swing.JComboBox errorMsgLocaleComboBox;
     private javax.swing.JLabel errorMsgLocaleLabel;
+    private javax.swing.JCheckBox fixUnoptimalSettings;
     private javax.swing.JButton folderChooserBtn;
     private javax.swing.JSeparator jSeparator1;
     private javax.swing.JSeparator jSeparator2;
@@ -546,7 +547,6 @@ import javax.swing.SwingUtilities;
     private javax.swing.JLabel organizationLabel;
     private javax.swing.JLabel projectFolderLabel;
     private javax.swing.JTextField projectFolderTextField;
-    private javax.swing.JCheckBox resolveDependencies;
     private javax.swing.JLabel restartMessage;
     private javax.swing.JLabel selectedCourseLabel;
     private javax.swing.JLabel selectedOrganizationLabel;
