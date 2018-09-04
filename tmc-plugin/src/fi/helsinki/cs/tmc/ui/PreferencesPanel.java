@@ -49,11 +49,11 @@ import javax.swing.SwingUtilities;
     }
     
     private void updateFields() {
-        final Optional<String> username = this.settings.getUsername();
+        final Optional<String> email = this.settings.getEmail();
         final JLabel login = this.loginLabel;
         final JButton logout = this.logoutButton;
-        if (username.isPresent()) {
-            login.setText("Logged in as " + username.get());
+        if (email.isPresent()) {
+            login.setText("Logged in as " + email.get());
             logout.setEnabled(true);
         } else {
             login.setText("Not logged in!");

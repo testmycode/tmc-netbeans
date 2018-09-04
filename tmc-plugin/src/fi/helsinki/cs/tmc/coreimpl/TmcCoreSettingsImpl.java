@@ -21,6 +21,7 @@ import java.net.ProxySelector;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Locale;
+
 import org.apache.http.impl.conn.SystemDefaultRoutePlanner;
 import org.openide.filesystems.FileObject;
 import org.openide.filesystems.FileUtil;
@@ -31,7 +32,9 @@ public class TmcCoreSettingsImpl implements TmcSettings {
 
 
     private static final String PREF_BASE_URL = "baseUrl";
+    private static final String PREF_ID = "id";
     private static final String PREF_USERNAME = "username";
+    private static final String PREF_EMAIL = "email";
     private static final String PREF_PASSWORD = "password";
     private static final String PREF_PROJECT_ROOT_DIR = "projectRootDir";
     private static final String PREF_CHECK_FOR_UPDATES_IN_BACKGROUND = "checkForUpdatesInBackground";
@@ -182,6 +185,31 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         }
     }
 
+    @Override
+    public Optional<String> getEmail() {
+        return Optional.of(settings.get(PREF_EMAIL, ""));
+    }
+
+    @Override
+    public void setEmail(String email) {
+        settings.put(PREF_EMAIL, email);
+    }
+
+    @Override
+    public Optional<Integer> getId() {
+        String idAsString = settings.get(PREF_ID, "");
+        if (idAsString.isEmpty()) {
+            return Optional.absent();
+        }
+        int id = Integer.parseInt(idAsString);
+        return Optional.of(id);
+    }
+
+    @Override
+    public void setId(int id) {
+        settings.put(PREF_ID, "" + id);
+    }
+
     public static class SavedEvent implements TmcEvent {}
 
     public TmcCoreSettingsImpl() {
@@ -220,6 +248,7 @@ public class TmcCoreSettingsImpl implements TmcSettings {
         return Optional.of(settings.get(PREF_USERNAME, tailoring.getDefaultUsername()));
     }
 
+    @Override
     public void setUsername(String username) {
         settings.put(PREF_USERNAME, username);
     }
