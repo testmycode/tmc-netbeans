@@ -67,7 +67,11 @@ public class OpenClosedExercisesDialog extends JDialog {
             if (ex.isCompleted()) {
                 text += " (completed)";
             } else {
-                text += " (expired at " + ex.getDeadline() + ")";
+                if (ex.getSoftDeadline() != null) {
+                    text += " (expired at " + ex.getSoftDeadline() + ")";
+                } else {
+                    text += " (expired at " + ex.getDeadline() + ")";
+                }
             }
             JCheckBox cb = new JCheckBox(text, false);
             checkBoxToExercise.put(cb, ex);

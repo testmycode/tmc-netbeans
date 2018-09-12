@@ -68,7 +68,9 @@ public class DownloadOrUpdateExercisesDialog extends JDialog {
         unlockableCheckboxes = new ArrayList<JCheckBox>();
         for (Exercise ex : unlockable) {
             String desc;
-            if (ex.getDeadlineDescription() != null) {
+            if (ex.getSoftDeadlineDescription() != null) {
+                desc = "unlockable; deadline: " + ex.getSoftDeadlineDescription();
+            } else if (ex.getDeadlineDescription() != null) {
                 desc = "unlockable; deadline: " + ex.getDeadlineDescription();
             } else {
                 desc = "unlockable";

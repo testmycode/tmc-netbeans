@@ -102,6 +102,8 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
     private String annotationIconNameForExercise(Exercise exercise) {
         if (exercise.isAttempted() && exercise.isCompleted() && exercise.isAllReviewPointsGiven()) {
             return "green-project-dot.png";
+        } else if (exercise.hasSoftDeadlinePassed()) {
+            return "soft-deadline-passed-project-dot.png";
         } else if (exercise.hasDeadlinePassed()) {
             return "expired-project-dot.png";
         } else if (exercise.isAttempted() && exercise.isCompleted()) {
@@ -136,15 +138,23 @@ public class ExerciseIconAnnotator implements ProjectIconAnnotator {
             parts.add("exercise not yet submitted");
         }
 
-        final Date deadlineDate = exercise.getDeadlineDate();
-        if (!exercise.isCompleted() && deadlineDate != null) {
-            parts.add("deadline: " + deadlineDate);
+        final Date softDeadlineDate = exercise.getSoftDeadlineDate();
+        if (!exercise.isCompleted() && softDeadlineDate != null) {
+            parts.add("Soft deadline: " + softDeadlineDate);
+            if (exercise.hasSoftDeadlinePassed()) {
+                parts.add("expired");
+            }
+        }
+
+        final Date hardDeadlineDate = exercise.getDeadlineDate();
+        if (!exercise.isCompleted() && hardDeadlineDate != null) {
+            parts.add("Hard deadline: " + hardDeadlineDate);
             if (exercise.hasDeadlinePassed()) {
                 parts.add("expired");
             }
         }
 
-        return StringUtils.capitalize(StringUtils.join(parts, " - "));
+        return StringUtils.capitalize(StringUtils.join(parts, "<br>"));
     }
 
     public void updateAllIcons() {
