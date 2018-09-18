@@ -21,6 +21,7 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingWorker;
 
 import org.netbeans.api.project.Project;
 
@@ -88,11 +89,17 @@ public class ExerciseSubmitter {
                     exercise.setCompleted(true);
                 }
 
-                courseDb.save();
-
-                new CheckForNewExercisesOrUpdates(true, false).run();
                 dialog.close();
-            }
+
+                new SwingWorker<Void, Void>() {
+                    @Override
+                    protected Void doInBackground() throws Exception {
+                        courseDb.save();
+                        new CheckForNewExercisesOrUpdates(true, false).run();
+                        return null;
+                    }
+                }.run();
+             }
 
             @Override
             public void bgTaskCancelled() {
