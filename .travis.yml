@@ -4,13 +4,7 @@ dist: trusty
 language: java
 jdk:
   - oraclejdk8
-  - oraclejdk7
-  - openjdk7
 
-matrix:
-  allow_failures:
-    - jdk: oraclejdk7
-    - jdk: openjdk7
 cache:
   directories:
     - $HOME/.m2
@@ -19,15 +13,11 @@ before_script:
   - export DISPLAY=:99.0
   - sh -e /etc/init.d/xvfb start
   - sleep 10 # give xvfb some time to start
-  - wget http://download.netbeans.org/netbeans/8.1/final/zip/netbeans-8.1-201510222201.zip -O netbeans.zip
+  - wget https://download.netbeans.org/netbeans/8.2/final/zip/netbeans-8.2-201609300101-javase.zip -O netbeans.zip
   - unzip -q netbeans.zip
     #- mvn -q dependency:get -Dartifact=junit:junit:4.8.2 -DrepoUrl=http://repo1.maven.org/maven2/
   # To reduce amout of log
   - cd maven-wrapper/ && mvn -q install && cd ..
 
 script:
-  - ant -Dnbplatform.nb81.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb81.harness.dir=$PWD/netbeans/harness -Dfork=true test
-
-notifications:
-  slack:
-    secure: RAYLit1PKRmeWYeEonVh9oFlFpL6PP9t6aulpLqa3/RYOR/CYZjkDvPxhNOOyPnPfxNojA16xp4grgU8q0F5vUBQ3FpLsyBIl3JMAFtyBPbdKK8/F2ZClWZMBLE2qf13FqJtNEnLu3btBVP1sB8MOrGmiyn+2wHQdwWytAMyzdE=
+  - ant -Dnbplatform.nb82.netbeans.dest.dir=$PWD/netbeans -Dnbplatform.nb82.harness.dir=$PWD/netbeans/harness -Dfork=true test
