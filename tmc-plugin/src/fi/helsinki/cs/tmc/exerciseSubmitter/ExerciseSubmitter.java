@@ -3,12 +3,12 @@ package fi.helsinki.cs.tmc.exerciseSubmitter;
 import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
+import fi.helsinki.cs.tmc.coreimpl.ManualProgressObserver;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -68,11 +68,15 @@ public class ExerciseSubmitter {
 
         projectMediator.saveAllFiles();
 
-        Callable<SubmissionResult> callable = TmcCore.get().submit(ProgressObserver.NULL_OBSERVER, exercise);
+        ManualProgressObserver observer = new ManualProgressObserver();
 
-        final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow();
+        final SubmissionResultWaitingDialog dialog = SubmissionResultWaitingDialog.createAndShow(observer);
 
-        BgTask.start("Waiting for results from server.", callable, new BgTaskListener<SubmissionResult>() {
+        Callable<SubmissionResult> callable = TmcCore.get().submit(observer, exercise, (submissionResponse) -> {
+            dialog.showSubmissionButton(submissionResponse.showSubmissionUrl);
+        });
+
+        BgTask.start("Waiting for results from server.", callable, observer, new BgTaskListener<SubmissionResult>() {
             @Override
             public void bgTaskReady(SubmissionResult result) {
 

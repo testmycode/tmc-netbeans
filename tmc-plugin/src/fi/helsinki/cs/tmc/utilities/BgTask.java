@@ -8,7 +8,6 @@ import fi.helsinki.cs.tmc.core.exceptions.ShowToUserException;
 import fi.helsinki.cs.tmc.core.exceptions.TmcCoreException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
-import java.io.IOException;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
