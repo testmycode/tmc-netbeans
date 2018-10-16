@@ -20,6 +20,7 @@ public class LoginDialog extends javax.swing.JDialog {
     public static void display(LoginListener onOk, final Runnable onClosed) {
         LoginDialog dialog = new LoginDialog(onOk);
         dialog.setLocationRelativeTo(null);
+        dialog.pack();
         dialog.setVisible(true);
         dialog.addWindowListener(new WindowAdapter() {
             @Override
@@ -183,7 +184,7 @@ public class LoginDialog extends javax.swing.JDialog {
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING, false)
                             .addComponent(passwordField, javax.swing.GroupLayout.DEFAULT_SIZE, 235, Short.MAX_VALUE)
                             .addComponent(usernameField))))
-                .addGap(57, 57, 57))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
         layout.setVerticalGroup(
             layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
@@ -213,10 +214,11 @@ public class LoginDialog extends javax.swing.JDialog {
                 .addGap(18, 18, 18)
                 .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
                     .addComponent(loginButton)
-                    .addComponent(cancelButton)))
+                    .addComponent(cancelButton))
+                .addContainerGap(javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
         );
 
-        setSize(new java.awt.Dimension(404, 248));
+        setSize(new java.awt.Dimension(408, 261));
         setLocationRelativeTo(null);
     }// </editor-fold>//GEN-END:initComponents
 
