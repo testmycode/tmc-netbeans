@@ -50,10 +50,14 @@ import javax.swing.SwingUtilities;
     
     private void updateFields() {
         final Optional<String> email = this.settings.getEmail();
+        final Optional<String> username = this.settings.getUsername();
         final JLabel login = this.loginLabel;
         final JButton logout = this.logoutButton;
-        if (email.isPresent()) {
+        if (email.isPresent() && !email.get().isEmpty()) {
             login.setText("Logged in as " + email.get());
+            logout.setEnabled(true);
+        } else if (username.isPresent()) {
+            login.setText("Logged in as " + username.get());
             logout.setEnabled(true);
         } else {
             login.setText("Not logged in!");
