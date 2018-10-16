@@ -49,7 +49,7 @@ public class OrganizationListWindow extends JPanel {
         this.title = new JLabel("Select an organization:");
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
-        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), new Color(242, 241, 240)));
+        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), getBackground()));
         Collections.sort(organizations, (a, b) -> {
             if (a.isPinned() && b.isPinned()) {
                 return a.getName().compareTo(b.getName());
@@ -107,9 +107,7 @@ public class OrganizationListWindow extends JPanel {
         List<Organization> organizations = TmcCore.get().getOrganizations(ProgressObserver.NULL_OBSERVER).call();
         final OrganizationListWindow organizationListWindow = new OrganizationListWindow(organizations);
         frame.setContentPane(organizationListWindow);
-        frame.pack();
-        frame.setLocationRelativeTo(null);
-        frame.setVisible(true);
+
         button.setMinimumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
         button.setMaximumSize(new Dimension(organizationListWindow.getWidth(), button.getHeight()));
         organizationListWindow.addComponentListener(new ComponentListener() {
@@ -131,6 +129,10 @@ public class OrganizationListWindow extends JPanel {
             public void componentHidden(ComponentEvent e) {
             }
         });
+
+        frame.pack();
+        frame.setLocationRelativeTo(null);
+        frame.setVisible(true);
     }
     
     public static boolean isWindowVisible() {

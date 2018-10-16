@@ -48,7 +48,7 @@ public class CourseListWindow extends JPanel {
         this.title = new JLabel("Select a course:");
         Font titleFont = this.title.getFont();
         this.title.setFont(new Font(titleFont.getName(), Font.BOLD, 20));
-        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), new Color(242, 241, 240)));
+        this.title.setBorder(new MatteBorder(new Insets(10, 10, 5, 10), getBackground()));
         Course[] courseArray = courses.toArray(new Course[courses.size()]);
         this.courses = new JList<>(courseArray);
         this.courses.setFixedCellHeight(107);
@@ -100,11 +100,7 @@ public class CourseListWindow extends JPanel {
         CourseDb.getInstance().setAvailableCourses(courses);
         final CourseListWindow courseListWindow = new CourseListWindow(courses, prefPanel);
         frame.setContentPane(courseListWindow);
-        if (hasCourses(courses, prefPanel)) {
-            frame.pack();
-            frame.setLocationRelativeTo(null);
-            frame.setVisible(true);
-        }
+
         button.setMinimumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
         button.setMaximumSize(new Dimension(courseListWindow.getWidth(), button.getHeight()));
         courseListWindow.addComponentListener(new ComponentListener() {
@@ -126,6 +122,12 @@ public class CourseListWindow extends JPanel {
             public void componentHidden(ComponentEvent e) {
             }
         });
+
+        if (hasCourses(courses, prefPanel)) {
+            frame.pack();
+            frame.setLocationRelativeTo(null);
+            frame.setVisible(true);
+        }
     }
     
     public static boolean isWindowVisible() {
