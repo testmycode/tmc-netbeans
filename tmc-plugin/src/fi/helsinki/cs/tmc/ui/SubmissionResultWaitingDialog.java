@@ -71,7 +71,7 @@ public class SubmissionResultWaitingDialog extends JDialog implements Submission
         if (showSubmissionUrl == null) {
             return;
         }
-        showSubmissionButton.setAction(new AbstractAction("Show submission in browser") {
+        showSubmissionButton.setAction(new AbstractAction("View submission in browser") {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
