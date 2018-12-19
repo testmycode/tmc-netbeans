@@ -1,35 +1,36 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.core.domain.Review;
+import fi.helsinki.cs.tmc.utilities.BrowserOpener;
 
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
-import java.util.logging.Level;
+import java.io.IOException;
+import java.net.URISyntaxException;
 import java.util.logging.Logger;
+
 import org.apache.commons.lang3.StringUtils;
-import org.openide.awt.HtmlBrowser;
 
 public class CodeReviewDialog extends javax.swing.JDialog {
+
     private static final Logger log = Logger.getLogger(CodeReviewDialog.class.getName());
-    
+
     private Review review;
     private ActionListener okListener;
-    
+
     public CodeReviewDialog(Review review) {
         this.review = review;
         this.okListener = null;
-        
+
         initComponents();
-        
+
         // Set location according to screen dimensions
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
-        
-        
+
         this.setLocationByPlatform(true);
-        
+
         this.setTitle("Code review - " + review.getExerciseName());
         titleLabel.setText("Code review - " + review.getExerciseName());
         reviewedByLabel.setText("Reviewed by " + review.getReviewerName());
@@ -37,15 +38,15 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         markAsReadCheckBox.setSelected(true);
         pointsLabel.setText(getPointsAwardedText(review));
     }
-    
+
     public void setOkListener(ActionListener okListener) {
         this.okListener = okListener;
     }
-    
+
     public boolean getMarkAsRead() {
         return markAsReadCheckBox.isSelected();
     }
-    
+
     private String getPointsAwardedText(Review review) {
         StringBuilder sb = new StringBuilder();
         if (!review.getPoints().isEmpty()) {
@@ -56,12 +57,12 @@ public class CodeReviewDialog extends javax.swing.JDialog {
         }
         return sb.toString();
     }
-    
+
     private void openInBrowser() {
         try {
-            HtmlBrowser.URLDisplayer.getDefault().showURLExternal(review.getUrl().toURL());
-        } catch (MalformedURLException ex) {
-            log.log(Level.WARNING, "Malformed URL: " + ex.getMessage(), ex);
+            BrowserOpener.openUrl(review.getUrl());
+        } catch (URISyntaxException | IOException ex) {
+            ConvenientDialogDisplayer.getDefault().displayError("Failed to open browser.\n" + ex.getMessage());
         }
     }
 

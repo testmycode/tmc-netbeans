@@ -6,6 +6,7 @@ import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackQuestion;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanel;
 import fi.helsinki.cs.tmc.ui.feedback.FeedbackQuestionPanelFactory;
+import fi.helsinki.cs.tmc.utilities.BrowserOpener;
 
 import com.google.common.base.Optional;
 
@@ -13,9 +14,9 @@ import java.awt.Component;
 import java.awt.Font;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.net.MalformedURLException;
+import java.io.IOException;
 import java.net.URI;
-import java.net.URL;
+import java.net.URISyntaxException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Logger;
@@ -30,7 +31,6 @@ import javax.swing.JPanel;
 
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.openide.awt.HtmlBrowser;
 
 import static fi.helsinki.cs.tmc.ui.Boxer.hbox;
 import static fi.helsinki.cs.tmc.ui.Boxer.hglue;
@@ -135,8 +135,8 @@ public class SuccessfulSubmissionDialog extends JDialog {
                 @Override
                 public void actionPerformed(ActionEvent ev) {
                     try {
-                        HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL(solutionUrl));
-                    } catch (MalformedURLException ex) {
+                        BrowserOpener.openUrl(URI.create(solutionUrl));
+                    } catch (URISyntaxException | IOException ex) {
                         ConvenientDialogDisplayer.getDefault().displayError("Failed to open browser.\n" + ex.getMessage());
                     }
                 }
@@ -205,8 +205,8 @@ public class SuccessfulSubmissionDialog extends JDialog {
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
-                    HtmlBrowser.URLDisplayer.getDefault().showURLExternal(submissionUrl.get().toURL());
-                } catch (MalformedURLException ex) {
+                    BrowserOpener.openUrl(submissionUrl.get());
+                } catch (URISyntaxException | IOException ex) {
                     ConvenientDialogDisplayer.getDefault().displayError("Failed to open browser.\n" + ex.getMessage());
                 }
             }

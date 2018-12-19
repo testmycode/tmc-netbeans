@@ -1,19 +1,21 @@
 package fi.helsinki.cs.tmc.ui;
 
 import fi.helsinki.cs.tmc.coreimpl.ManualProgressObserver;
+import fi.helsinki.cs.tmc.utilities.BrowserOpener;
+
+import com.google.common.base.Optional;
 
 import java.awt.event.ActionEvent;
 import java.awt.Frame;
+import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.concurrent.atomic.AtomicReference;
 import javax.swing.AbstractAction;
 import javax.swing.JDialog;
 import javax.swing.SwingUtilities;
 
-import com.google.common.base.Optional;
-
-import org.openide.awt.HtmlBrowser;
 import org.openide.util.Cancellable;
 import org.openide.util.Exceptions;
 import org.openide.windows.WindowManager;
@@ -75,8 +77,8 @@ public class SubmissionResultWaitingDialog extends JDialog implements Submission
             @Override
             public void actionPerformed(ActionEvent ae) {
                 try {
-                    HtmlBrowser.URLDisplayer.getDefault().showURLExternal(showSubmissionUrl.toURL());
-                } catch (Exception ex) {
+                    BrowserOpener.openUrl(showSubmissionUrl);
+                } catch (URISyntaxException | IOException ex) {
                     ConvenientDialogDisplayer.getDefault().displayError("Failed to open browser.\n" + ex.getMessage());
                 }
             }

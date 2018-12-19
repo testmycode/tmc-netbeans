@@ -1,14 +1,16 @@
 package fi.helsinki.cs.tmc.ui;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import fi.helsinki.cs.tmc.utilities.BrowserOpener;
+
+import java.io.IOException;
+import java.net.URI;
+import java.net.URISyntaxException;
 import javax.swing.event.HyperlinkEvent;
 
-import org.openide.awt.HtmlBrowser;
 import org.openide.windows.WindowManager;
 
 public class AboutDialog extends javax.swing.JDialog {
-    
+
     public static void display() {
         AboutDialog dialog = new AboutDialog();
         dialog.setTitle("About");
@@ -19,14 +21,14 @@ public class AboutDialog extends javax.swing.JDialog {
     public AboutDialog() {
         super(WindowManager.getDefault().getMainWindow(), false);
         initComponents();
-        
+
         this.setDefaultCloseOperation(DISPOSE_ON_CLOSE);
-        
+
         this.infoTextPane.addHyperlinkListener((HyperlinkEvent e) -> {
             if (e.getEventType() == HyperlinkEvent.EventType.ACTIVATED) {
                 try {
-                    HtmlBrowser.URLDisplayer.getDefault().showURLExternal(new URL("https://mooc.fi/tmc"));
-                } catch (MalformedURLException ex) {
+                    BrowserOpener.openUrl(URI.create("https://mooc.fi/tmc"));
+                } catch (URISyntaxException | IOException ex) {
                     ConvenientDialogDisplayer.getDefault().displayError("Failed to open browser.\n" + ex.getMessage());
                 }
             }
