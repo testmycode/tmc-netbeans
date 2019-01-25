@@ -17,11 +17,14 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.TmcSwingUtilities;
 
 import com.google.common.collect.Lists;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
+
 import org.openide.util.Exceptions;
 
 /**
@@ -80,11 +83,8 @@ public class DownloadExercisesAction {
                     }
 
                     // Need to invoke courseDb in swing thread to avoid races
-                    TmcSwingUtilities.ensureEdt(new Runnable() {
-                        @Override
-                        public void run() {
-                            courseDb.exerciseDownloaded(exercise);
-                        }
+                    TmcSwingUtilities.ensureEdt(() -> {
+                        courseDb.exerciseDownloaded(exercise);
                     });
                     listener.bgTaskReady(proj);
 
@@ -109,7 +109,9 @@ public class DownloadExercisesAction {
         @Override
         public void bgTaskReady(Collection<TmcProjectInfo> projects) {
             projectMediator.openProjects(projects);
-            new CheckProjectCount().checkAndNotifyIfOver();
+            SwingUtilities.invokeLater(() -> {
+                new CheckProjectCount().checkAndNotifyIfOver();
+            });
         }
 
         @Override
@@ -119,7 +121,9 @@ public class DownloadExercisesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             logger.log(Level.INFO, "Failed to download exercise file.", ex);
-            dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+            SwingUtilities.invokeLater(() -> {
+                dialogs.displayError("Failed to download exercises.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+            });
         }
     };
 

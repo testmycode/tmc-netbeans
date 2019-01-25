@@ -11,7 +11,7 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.Future;
-import javax.swing.SwingUtilities;
+
 import org.apache.oltu.oauth2.common.exception.OAuthProblemException;
 import org.apache.oltu.oauth2.common.exception.OAuthSystemException;
 import org.netbeans.api.progress.ProgressHandle;
@@ -20,10 +20,9 @@ import org.openide.util.Cancellable;
 import org.openide.util.RequestProcessor;
 
 /**
- * A task that calls {@link BgTaskListener} when finished and
- * displays a progress indicator in NetBeans. It cancels by
- * sending a thread interrupt unless the given {@link Callable} is
- * also {@link Cancellable}.
+ * A task that calls {@link BgTaskListener} when finished and displays a
+ * progress indicator in NetBeans. It cancels by sending a thread interrupt
+ * unless the given {@link Callable} is also {@link Cancellable}.
  */
 public class BgTask<V> implements CancellableCallable<V> {
 
@@ -76,7 +75,7 @@ public class BgTask<V> implements CancellableCallable<V> {
 
                 @Override
                 public boolean cancel() {
-                    return ((Cancellable)runnable).cancel();
+                    return ((Cancellable) runnable).cancel();
                 }
             };
         } else {
@@ -115,12 +114,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     public V call() {
         synchronized (cancelLock) {
             if (cancelled) {
-                SwingUtilities.invokeLater(new Runnable() {
-                    @Override
-                    public void run() {
-                        listener.bgTaskCancelled();
-                    }
-                });
+                listener.bgTaskCancelled();
                 return null;
             } else {
                 executingThread = Thread.currentThread();
@@ -159,51 +153,26 @@ public class BgTask<V> implements CancellableCallable<V> {
             } while (!successful);
 
             final V result = resultTemp;
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskReady(result);
-                }
-            });
+            listener.bgTaskReady(result);
             return result;
         } catch (ObsoleteClientException | ShowToUserException ex) {
             ConvenientDialogDisplayer.getDefault().displayError(ex.getMessage());
             return null;
         } catch (TmcCoreException ex) {
             if (ex instanceof TmcCoreException && (ex.getCause() == null || !(ex.getCause() instanceof ObsoleteClientException))) {
-                SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskFailed(ex);
-                }
-            });
-            return null;
+                listener.bgTaskFailed(ex);
+                return null;
             }
             ConvenientDialogDisplayer.getDefault().displayError(ex.getCause().getMessage());
             return null;
         } catch (InterruptedException e) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskCancelled();
-                }
-            });
+            listener.bgTaskCancelled();
             return null;
         } catch (final Exception ex) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskFailed(ex);
-                }
-            });
+            listener.bgTaskFailed(ex);
             return null;
         } catch (final Throwable ex) {
-            SwingUtilities.invokeLater(new Runnable() {
-                @Override
-                public void run() {
-                    listener.bgTaskFailed(ex);
-                }
-            });
+            listener.bgTaskFailed(ex);
             throw new RuntimeException(ex);
         } finally {
             synchronized (cancelLock) {
@@ -218,7 +187,7 @@ public class BgTask<V> implements CancellableCallable<V> {
         synchronized (cancelLock) {
             cancelled = true;
             if (callable instanceof Cancellable) {
-                return ((Cancellable)callable).cancel();
+                return ((Cancellable) callable).cancel();
             } else {
                 if (executingThread != null) {
                     executingThread.interrupt();

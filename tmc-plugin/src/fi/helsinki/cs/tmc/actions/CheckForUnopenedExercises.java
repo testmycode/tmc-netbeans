@@ -14,6 +14,7 @@ import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
 import javax.swing.Icon;
+
 import org.openide.awt.NotificationDisplayer;
 import org.openide.util.ImageUtilities;
 

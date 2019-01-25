@@ -10,9 +10,10 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
 import fi.helsinki.cs.tmc.data.ResultCollector;
+import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import com.google.common.collect.ImmutableList;
-import fi.helsinki.cs.tmc.langs.domain.RunResult;
+
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -21,11 +22,14 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.lang3.StringEscapeUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.openide.NotifyDescriptor;
 
 public class TestResultDisplayer {
+
     private static final Logger log = Logger.getLogger(TestResultDisplayer.class.getName());
 
     private static TestResultDisplayer instance;
@@ -45,7 +49,7 @@ public class TestResultDisplayer {
 
     public void showSubmissionResult(Exercise exercise, SubmissionResult result, final ResultCollector resultCollector) {
         // Palvelimelta siis
-        
+
         switch (result.getStatus()) {
             case OK:
                 displayTestCases(magic(result), false, resultCollector);
@@ -85,7 +89,9 @@ public class TestResultDisplayer {
                             String msg = "Failed to send feedback :-(\n" + ex.getMessage();
                             String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
                             log.log(Level.INFO, msgWithBacktrace);
-                            dialogs.displayError(msg);
+                            SwingUtilities.invokeLater(() -> {
+                                dialogs.displayError(msg);
+                            });
                         }
                     });
                 }
@@ -116,7 +122,6 @@ public class TestResultDisplayer {
             msg += "There are validation errors.\n";
         }
 
-        
         switch (result.getTestResultStatus()) {
             case ALL_FAILED:
                 msg += "All tests failed on the server.\nSee below.";
@@ -139,12 +144,13 @@ public class TestResultDisplayer {
     }
 
     /**
-     * Shows local results and calls the callback if a submission should be started.
+     * Shows local results and calls the callback if a submission should be
+     * started.
      */
     public void showLocalRunResult(final RunResult runResult,
-                                   final boolean returnable,
-                                   final Runnable submissionCallback,
-                                   final ResultCollector resultCollector) {
+            final boolean returnable,
+            final Runnable submissionCallback,
+            final ResultCollector resultCollector) {
 
         resultCollector.setSubmissionCallback(submissionCallback);
         resultCollector.setReturnable(returnable);
@@ -152,10 +158,10 @@ public class TestResultDisplayer {
     }
 
     private void displayError(String error) {
-        String htmlError =
-                "<html><font face=\"monospaced\" color=\"red\">" +
-                preformattedToHtml(error) +
-                "</font></html>";
+        String htmlError
+                = "<html><font face=\"monospaced\" color=\"red\">"
+                + preformattedToHtml(error)
+                + "</font></html>";
         LongTextDisplayPanel panel = new LongTextDisplayPanel(htmlError);
         dialogs.showDialog(panel, NotifyDescriptor.ERROR_MESSAGE, "", false);
     }
@@ -180,13 +186,13 @@ public class TestResultDisplayer {
 
     private ImmutableList<TestResult> maybeAddValdrindToResults(SubmissionResult result) {
         String valdrindOutput = result.getValgrind();
-        
+
         List<TestResult> resultList = result.getTestCases();
 
         // TODO: valgrind
         if (StringUtils.isNotBlank(valdrindOutput)) {
-            
-            TestResult valgrindResult = new TestResult("Valgrind validations", false , ImmutableList.<String>of(), "Click show valgrind trace to view valgrind trace", ImmutableList.copyOf(valdrindOutput.split("\n")));
+
+            TestResult valgrindResult = new TestResult("Valgrind validations", false, ImmutableList.<String>of(), "Click show valgrind trace to view valgrind trace", ImmutableList.copyOf(valdrindOutput.split("\n")));
             resultList.set(0, valgrindResult);
         }
 
@@ -196,8 +202,8 @@ public class TestResultDisplayer {
     private ImmutableList<TestResult> magic(SubmissionResult result) {
         ImmutableList.Builder builder = ImmutableList.builder();
         for (TestResult testCase : result.getTestCases()) {
-            builder.add(new TestResult(testCase.getName(), 
-                    testCase.isSuccessful(), 
+            builder.add(new TestResult(testCase.getName(),
+                    testCase.isSuccessful(),
                     ImmutableList.copyOf(testCase.points),
                     testCase.getMessage(),
                     testCase.getException()));

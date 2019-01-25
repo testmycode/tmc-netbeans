@@ -4,13 +4,10 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
+import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
-
-import com.google.gson.Gson;
-
-import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.model.ProjectMediator;
 import fi.helsinki.cs.tmc.model.TmcProjectInfo;
@@ -20,6 +17,8 @@ import fi.helsinki.cs.tmc.ui.ConvenientDialogDisplayer;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
+import com.google.gson.Gson;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.net.URI;
@@ -28,6 +27,8 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
+
 import org.netbeans.api.project.Project;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -39,7 +40,8 @@ import org.openide.util.NbBundle;
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.RequestReviewAction")
 @ActionRegistration(displayName = "#CTL_RequestReviewAction", lazy = false)
 @ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = 40),
+    @ActionReference(path = "Menu/TM&C", position = 40)
+    ,
     @ActionReference(path = "Projects/Actions", position = 1350, separatorBefore = 1330,
             separatorAfter = 1360) // Positioning y u no work?
 })
@@ -115,13 +117,17 @@ public class RequestReviewAction extends AbstractExerciseSensitiveAction {
             public void bgTaskReady(TmcServerCommunicationTaskFactory.SubmissionResponse result) {
                 sendLoggableEvent(exercise, result.submissionUrl);
 
-                dialogs.displayMessage("Code submitted for review.\n"
-                        + "You will be notified when an instructor has reviewed your code.");
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayMessage("Code submitted for review.\n"
+                            + "You will be notified when an instructor has reviewed your code.");
+                });
             }
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to submit exercise for code review", ex);
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayError("Failed to submit exercise for code review", ex);
+                });
             }
 
             @Override

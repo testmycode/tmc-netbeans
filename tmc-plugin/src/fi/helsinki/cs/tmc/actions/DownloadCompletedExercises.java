@@ -4,7 +4,6 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
-import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
@@ -25,6 +24,7 @@ import java.awt.event.ActionListener;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.Callable;
+import javax.swing.SwingUtilities;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.DownloadCompletedExercises")
 @ActionRegistration(displayName = "#CTL_DownloadCompletedExercises")
@@ -64,9 +64,13 @@ public final class DownloadCompletedExercises implements ActionListener {
 
                     if (!status.downloadableCompleted.isEmpty()) {
                         List<Exercise> emptyList = Collections.emptyList();
-                        DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
+                        SwingUtilities.invokeLater(() -> {
+                            DownloadOrUpdateExercisesDialog.display(emptyList, status.downloadableCompleted, emptyList);
+                        });
                     } else {
-                        dialogs.displayMessage("No completed exercises to download.\nDid you only close them and not delete them?");
+                        SwingUtilities.invokeLater(() -> {
+                            dialogs.displayMessage("No completed exercises to download.\nDid you only close them and not delete them?");
+                        });
                     }
                 }
             }
@@ -77,7 +81,9 @@ public final class DownloadCompletedExercises implements ActionListener {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
+                });
             }
         });
     }

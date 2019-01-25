@@ -32,11 +32,13 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 @ActionID(category = "TMC", id = "fi.helsinki.cs.tmc.actions.PastebinAction")
 @ActionRegistration(displayName = "#CTL_PastebinAction", lazy = false)
 @ActionReferences({
-    @ActionReference(path = "Menu/TM&C", position = 30),
+    @ActionReference(path = "Menu/TM&C", position = 30)
+    ,
     @ActionReference(
             path = "Projects/Actions",
             position = 1340,
@@ -126,8 +128,10 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
                 "Sending " + exercise.getName(), pasteTask, observer, new BgTaskListener<URI>() {
             @Override
             public void bgTaskReady(URI result) {
-                new PastebinResponseDialog(result.toString())
-                        .setVisible(true);
+                SwingUtilities.invokeLater(() -> {
+                    new PastebinResponseDialog(result.toString())
+                            .setVisible(true);
+                });
             }
 
             @Override
@@ -136,8 +140,10 @@ public final class PastebinAction extends AbstractExerciseSensitiveAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError(
-                        "Failed to send exercise to pastebin", ex);
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayError(
+                            "Failed to send exercise to pastebin", ex);
+                });
             }
         });
     }

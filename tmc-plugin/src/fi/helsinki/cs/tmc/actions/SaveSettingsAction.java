@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.AbstractAction;
-import org.openide.util.Exceptions;
+import javax.swing.SwingUtilities;
 
 public class SaveSettingsAction extends AbstractAction {
 
@@ -85,7 +85,9 @@ public class SaveSettingsAction extends AbstractAction {
                 public void bgTaskReady(List<Course> result) {
                     LocalExerciseStatus status = LocalExerciseStatus.get(courseDb.getCurrentCourseExercises());
                     if (status.thereIsSomethingToDownload(false)) {
-                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                        SwingUtilities.invokeLater(() -> {
+                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                        });
                     }
                 }
 

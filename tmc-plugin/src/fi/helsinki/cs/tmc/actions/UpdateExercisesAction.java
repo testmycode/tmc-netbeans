@@ -15,6 +15,7 @@ import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import com.google.common.collect.ImmutableList;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
@@ -23,6 +24,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 public class UpdateExercisesAction implements ActionListener {
 
@@ -51,7 +53,7 @@ public class UpdateExercisesAction implements ActionListener {
         final AggregatingBgTaskListener<TmcProjectInfo> projectOpener = new AggregatingBgTaskListener<TmcProjectInfo>(exercisesToUpdate.size(), new BgTaskListener<Collection<TmcProjectInfo>>() {
             @Override
             public void bgTaskReady(Collection<TmcProjectInfo> result) {
-                result = new ArrayList<TmcProjectInfo>(result);
+                result = new ArrayList<>(result);
 
                 // result may contain nulls since some downloads might fail
                 while (result.remove(null)) {
@@ -77,7 +79,6 @@ public class UpdateExercisesAction implements ActionListener {
             final File projectDir = projectMediator.getProjectDirForExercise(exercise).toFile();
             eventBus.post(new InvokedEvent(exercise));
 
-
             Callable<List<Exercise>> downloadAndExtractExerciseTask = TmcCore.get().downloadOrUpdateExercises(ProgressObserver.NULL_OBSERVER, ImmutableList.of(exercise));
             BgTask.start("Downloading " + exercise.getName(), downloadAndExtractExerciseTask, new BgTaskListener<List<Exercise>>() {
 
@@ -97,7 +98,9 @@ public class UpdateExercisesAction implements ActionListener {
                 public void bgTaskFailed(Throwable ex) {
                     projectOpener.bgTaskReady(null);
                     String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                    dialogDisplayer.displayError("Failed to download updated exercises.\n" + msg, ex);
+                    SwingUtilities.invokeLater(() -> {
+                        dialogDisplayer.displayError("Failed to download updated exercises.\n" + msg, ex);
+                    });
                 }
             });
         }

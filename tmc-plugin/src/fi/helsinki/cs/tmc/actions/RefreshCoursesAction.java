@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 /**
  * Refreshes the course list in the background.
@@ -133,7 +134,9 @@ public final class RefreshCoursesAction {
         @Override
         public void bgTaskFailed(Throwable ex) {
             if (showDialogOnError) {
-                dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayError("Course refresh failed.\n" + ServerErrorHelper.getServerExceptionMsg(ex));
+                });
             }
         }
     }

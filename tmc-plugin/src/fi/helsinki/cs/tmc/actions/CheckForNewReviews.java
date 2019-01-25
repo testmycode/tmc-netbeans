@@ -18,6 +18,7 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
+
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
 import org.openide.awt.ActionReferences;
@@ -98,7 +99,9 @@ public class CheckForNewReviews implements ActionListener, Runnable {
             public void bgTaskReady(List<Review> result) {
                 boolean newReviews = reviewDb.setReviews(result);
                 if (!newReviews && notifyAboutNoNewReviews) {
-                    dialogs.displayMessage("You have no unread code reviews.");
+                    SwingUtilities.invokeLater(() -> {
+                        dialogs.displayMessage("You have no unread code reviews.");
+                    });
                 }
             }
 
@@ -107,7 +110,9 @@ public class CheckForNewReviews implements ActionListener, Runnable {
                 final String msg = "Failed to check for code reviews.\nPlease check your internet connection.";
                 log.log(Level.INFO, msg, ex);
                 if (!beQuiet) {
-                    dialogs.displayError(msg);
+                    SwingUtilities.invokeLater(() -> {
+                        dialogs.displayError(msg);
+                    });
                 }
             }
 

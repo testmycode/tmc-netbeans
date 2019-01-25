@@ -17,6 +17,7 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 
 import org.netbeans.api.project.Project;
 import org.openide.nodes.Node;
@@ -45,11 +46,11 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
 
     @Override
     protected void performAction(final Node[] nodes) {
-            if (nodes.length == 1) {
-                this.project = projectsFromNodes(nodes).get(0);
-                
-                WindowManager.getDefault().invokeWhenUIReady(this);
-            }
+        if (nodes.length == 1) {
+            this.project = projectsFromNodes(nodes).get(0);
+
+            WindowManager.getDefault().invokeWhenUIReady(this);
+        }
 
     }
 
@@ -83,7 +84,7 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
     @Override
     public void run() {
         final Exercise exercise = exerciseForProject(project);
-        
+
         projectMediator.saveAllFiles();
         final ResultCollector resultCollector = new ResultCollector(exercise);
 
@@ -96,12 +97,14 @@ public class RunTestsLocallyAction extends AbstractExerciseSensitiveAction imple
                     log.log(Level.INFO, "Got test results: {0}", result);
 
                     boolean canSubmitExercise = exercise.isReturnable();
-                    resultDisplayer.showLocalRunResult(result, canSubmitExercise, new Runnable() {
-                        @Override
-                        public void run() {
-                            exerciseSubmitter.performAction(project);
-                        }
-                    }, resultCollector);
+                    SwingUtilities.invokeLater(() -> {
+                        resultDisplayer.showLocalRunResult(result, canSubmitExercise, new Runnable() {
+                            @Override
+                            public void run() {
+                                exerciseSubmitter.performAction(project);
+                            }
+                        }, resultCollector);
+                    });
                 }
 
                 @Override

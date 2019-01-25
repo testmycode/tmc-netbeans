@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import javax.swing.SwingUtilities;
 
 /**
  * Waits for test and validation results and shows the result view only when
@@ -94,7 +95,9 @@ public final class ResultCollector {
         boolean ready = dontWaitForValidations || (testCaseResultsSet && validationResultsSet);
         if (ready) {
             final boolean submittable = isSubmittable();
-            TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, submittable);
+            SwingUtilities.invokeLater(() -> {
+                TestResultWindow.get().showResults(exercise, testCaseResults, validationResults, submissionCallback, submittable);
+            });
         }
     }
 

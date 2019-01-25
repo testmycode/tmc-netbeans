@@ -9,8 +9,10 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 
 import java.awt.event.ActionListener;
 import java.util.concurrent.Callable;
+import javax.swing.SwingUtilities;
 
 public class UnlockExercisesAction {
+
     private CourseDb courseDb;
     private ConvenientDialogDisplayer dialogs;
     private ActionListener successListener;
@@ -23,13 +25,13 @@ public class UnlockExercisesAction {
     public void setSuccessListener(ActionListener successListener) {
         this.successListener = successListener;
     }
-    
+
     public void run() {
         Course course = courseDb.getCurrentCourse();
         if (course == null) {
             return;
         }
-        
+
         // TODO: use core
         Callable<Void> task = new TmcServerCommunicationTaskFactory().getUnlockingTask(course);
         BgTask.start("Unlocking exercises", task, new BgTaskListener<Void>() {
@@ -46,7 +48,9 @@ public class UnlockExercisesAction {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                dialogs.displayError("Failed to unlock exercises.", ex);
+                SwingUtilities.invokeLater(() -> {
+                    dialogs.displayError("Failed to unlock exercises.", ex);
+                });
             }
         });
     }

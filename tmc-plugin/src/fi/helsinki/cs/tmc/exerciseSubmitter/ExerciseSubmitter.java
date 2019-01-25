@@ -21,6 +21,7 @@ import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 
 import org.netbeans.api.project.Project;
@@ -82,7 +83,9 @@ public class ExerciseSubmitter {
 
                 final ResultCollector resultCollector = new ResultCollector(exercise);
                 resultCollector.setValidationResult(result.getValidationResult());
-                resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+                SwingUtilities.invokeLater(() -> {
+                    resultDisplayer.showSubmissionResult(exercise, result, resultCollector);
+                });
 
                 // We change exercise state as a first approximation,
                 // then refresh from the server and potentially notify the user
@@ -103,7 +106,7 @@ public class ExerciseSubmitter {
                         return null;
                     }
                 }.run();
-             }
+            }
 
             @Override
             public void bgTaskCancelled() {
@@ -112,10 +115,12 @@ public class ExerciseSubmitter {
 
             @Override
             public void bgTaskFailed(Throwable ex) {
-                        log.log(Level.INFO, "Error waiting for results from server.", ex);
-                        String msg = ServerErrorHelper.getServerExceptionMsg(ex);
-                        dialogDisplayer.displayError("Error trying to get test results.", ex);
-                        dialog.close();
+                log.log(Level.INFO, "Error waiting for results from server.", ex);
+                String msg = ServerErrorHelper.getServerExceptionMsg(ex);
+                SwingUtilities.invokeLater(() -> {
+                    dialogDisplayer.displayError("Error trying to get test results.", ex);
+                    dialog.close();
+                });
             }
 
         });

@@ -4,10 +4,8 @@ import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Course;
 import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 import fi.helsinki.cs.tmc.core.holders.TmcSettingsHolder;
-import fi.helsinki.cs.tmc.core.utilities.ServerErrorHelper;
 import fi.helsinki.cs.tmc.coreimpl.TmcCoreSettingsImpl;
 import fi.helsinki.cs.tmc.core.events.TmcEvent;
-import fi.helsinki.cs.tmc.core.exceptions.ObsoleteClientException;
 import fi.helsinki.cs.tmc.coreimpl.BridgingProgressObserver;
 import fi.helsinki.cs.tmc.core.events.TmcEventBus;
 import fi.helsinki.cs.tmc.model.CourseDb;
@@ -26,6 +24,8 @@ import java.util.ArrayList;
 import java.util.concurrent.Callable;
 import javax.swing.AbstractAction;
 import javax.swing.Icon;
+import javax.swing.SwingUtilities;
+
 import org.apache.commons.lang3.StringUtils;
 import org.openide.awt.ActionID;
 import org.openide.awt.ActionReference;
@@ -106,11 +106,15 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
                             displayNotification(status, new ActionListener() {
                                 @Override
                                 public void actionPerformed(ActionEvent e) {
-                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                    SwingUtilities.invokeLater(() -> {
+                                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                    });
                                 }
                             });
                         } else {
-                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            SwingUtilities.invokeLater(() -> {
+                                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                            });
                         }
                     } else if (!beQuiet) {
                         dialogs.displayMessage("No new exercises or updates to download.");
@@ -125,7 +129,9 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
             @Override
             public void bgTaskFailed(Throwable ex) {
                 if (!beQuiet) {
-                    dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
+                    SwingUtilities.invokeLater(() -> {
+                        dialogs.displayError("Failed to check for new exercises.\nPlease check your internet connection.");
+                    });
                 }
             }
         });
