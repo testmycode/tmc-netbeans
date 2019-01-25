@@ -4,7 +4,7 @@
 
     <groupId>fi.helsinki.cs.tmc</groupId>
     <artifactId>maven-wrapper</artifactId>
-    <version>1.28</version>
+    <version>1.29</version>
     <packaging>nbm</packaging>
 
     <name>TMC Maven Wrapper</name>
