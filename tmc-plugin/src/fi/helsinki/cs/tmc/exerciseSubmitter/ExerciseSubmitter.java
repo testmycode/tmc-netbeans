@@ -1,6 +1,5 @@
 package fi.helsinki.cs.tmc.exerciseSubmitter;
 
-import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.core.TmcCore;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.SubmissionResult;
@@ -22,7 +21,6 @@ import java.util.concurrent.Callable;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.SwingUtilities;
-import javax.swing.SwingWorker;
 
 import org.netbeans.api.project.Project;
 
@@ -97,15 +95,6 @@ public class ExerciseSubmitter {
                 }
 
                 dialog.close();
-
-                new SwingWorker<Void, Void>() {
-                    @Override
-                    protected Void doInBackground() throws Exception {
-                        courseDb.save();
-                        new CheckForNewExercisesOrUpdates(true, false).run();
-                        return null;
-                    }
-                }.run();
             }
 
             @Override

@@ -80,7 +80,7 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
     public void run() {
         final Course currentCourseBeforeUpdate = courseDb.getCurrentCourse();
 
-        if (backgroundCheck && !((TmcCoreSettingsImpl)TmcSettingsHolder.get()).isCheckingForUpdatesInTheBackground()) {
+        if (backgroundCheck && !((TmcCoreSettingsImpl) TmcSettingsHolder.get()).isCheckingForUpdatesInTheBackground()) {
             return;
         }
 
@@ -97,29 +97,46 @@ public class CheckForNewExercisesOrUpdates extends AbstractAction {
         BgTask.start("Checking for new exercises", getFullCourseInfoTask, observer, new BgTaskListener<Course>() {
             @Override
             public void bgTaskReady(Course receivedCourse) {
-                if (receivedCourse != null) {
-                    courseDb.putDetailedCourse(receivedCourse);
+                Callable<Void> task = () -> {
+                    if (receivedCourse != null) {
+                        courseDb.putDetailedCourse(receivedCourse);
 
-                    final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
-                    if (status.thereIsSomethingToDownload(false)) {
-                        if (beQuiet) {
-                            displayNotification(status, new ActionListener() {
-                                @Override
-                                public void actionPerformed(ActionEvent e) {
-                                    SwingUtilities.invokeLater(() -> {
-                                        DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-                                    });
-                                }
-                            });
-                        } else {
-                            SwingUtilities.invokeLater(() -> {
-                                DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
-                            });
+                        final LocalExerciseStatus status = LocalExerciseStatus.get(receivedCourse.getExercises());
+                        if (status.thereIsSomethingToDownload(false)) {
+                            if (beQuiet) {
+                                displayNotification(status, new ActionListener() {
+                                    @Override
+                                    public void actionPerformed(ActionEvent e) {
+                                        SwingUtilities.invokeLater(() -> {
+                                            DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                        });
+                                    }
+                                });
+                            } else {
+                                SwingUtilities.invokeLater(() -> {
+                                    DownloadOrUpdateExercisesDialog.display(status.unlockable, status.downloadableUncompleted, status.updateable);
+                                });
+                            }
+                        } else if (!beQuiet) {
+                            dialogs.displayMessage("No new exercises or updates to download.");
                         }
-                    } else if (!beQuiet) {
-                        dialogs.displayMessage("No new exercises or updates to download.");
                     }
-                }
+                    return null;
+                };
+                BgTask.start("Calculating status of local exercises", task, ProgressObserver.NULL_OBSERVER, new BgTaskListener<Void>() {
+                    @Override
+                    public void bgTaskReady(Void result) {
+                    }
+
+                    @Override
+                    public void bgTaskCancelled() {
+                    }
+
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                    }
+
+                }, "If this takes time, your hard drive might be slow.");
             }
 
             @Override

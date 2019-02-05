@@ -32,6 +32,7 @@ public class BgTask<V> implements CancellableCallable<V> {
     private Callable<V> callable;
     private ProgressHandle progressHandle;
     private ProgressObserver proressObserver;
+    private String initialDetails;
 
     private final Object cancelLock = new Object();
     private boolean cancelled;
@@ -49,6 +50,10 @@ public class BgTask<V> implements CancellableCallable<V> {
         return new BgTask<V>(label, callable, ProgressObserver.NULL_OBSERVER, listener).start();
     }
 
+    public static <V> Future<V> start(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<V> listener, String initialDetails) {
+        return new BgTask<V>(label, callable, observer, listener, initialDetails).start();
+    }
+
     public static Future<Object> start(String label, Runnable runnable) {
         Callable<Object> callable = runnableToCallable(runnable);
         return start(label, callable);
@@ -62,6 +67,11 @@ public class BgTask<V> implements CancellableCallable<V> {
     public static Future<Object> start(String label, Runnable runnable, ProgressObserver observer, BgTaskListener<Object> listener) {
         Callable<Object> callable = runnableToCallable(runnable);
         return start(label, callable, observer, listener);
+    }
+
+    public static Future<Object> start(String label, Runnable runnable, ProgressObserver observer, BgTaskListener<Object> listener, String initialDetails) {
+        Callable<Object> callable = runnableToCallable(runnable);
+        return start(label, callable, observer, listener, initialDetails);
     }
 
     private static Callable<Object> runnableToCallable(final Runnable runnable) {
@@ -90,16 +100,21 @@ public class BgTask<V> implements CancellableCallable<V> {
     }
 
     public BgTask(String label, Callable<V> callable) {
-        this(label, callable, ProgressObserver.NULL_OBSERVER, EmptyBgTaskListener.get());
+        this(label, callable, ProgressObserver.NULL_OBSERVER, EmptyBgTaskListener.get(), "");
     }
 
     public BgTask(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener) {
+        this(label, callable, observer, listener, "");
+    }
+
+    public BgTask(String label, Callable<V> callable, ProgressObserver observer, BgTaskListener<? super V> listener, String initialDetails) {
         this.requestProcessor = TmcRequestProcessor.instance;
         this.label = label;
         this.listener = listener;
         this.callable = callable;
         this.proressObserver = observer;
         this.progressHandle = null;
+        this.initialDetails = initialDetails;
     }
 
     public Future<V> start() {
@@ -131,6 +146,8 @@ public class BgTask<V> implements CancellableCallable<V> {
         }
 
         progressHandle.start();
+        progressHandle.progress(initialDetails);
+
         try {
             V resultTemp = null;
             boolean successful;

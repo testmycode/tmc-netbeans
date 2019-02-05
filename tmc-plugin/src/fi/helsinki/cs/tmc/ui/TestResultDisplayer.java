@@ -1,10 +1,12 @@
 package fi.helsinki.cs.tmc.ui;
 
+import fi.helsinki.cs.tmc.actions.CheckForNewExercisesOrUpdates;
 import fi.helsinki.cs.tmc.core.communication.TmcServerCommunicationTaskFactory;
 import fi.helsinki.cs.tmc.core.domain.Exercise;
 import fi.helsinki.cs.tmc.core.domain.submission.FeedbackAnswer;
 import fi.helsinki.cs.tmc.langs.abstraction.Strategy;
 import fi.helsinki.cs.tmc.langs.domain.TestResult;
+import fi.helsinki.cs.tmc.model.CourseDb;
 import fi.helsinki.cs.tmc.utilities.BgTask;
 import fi.helsinki.cs.tmc.utilities.BgTaskListener;
 import fi.helsinki.cs.tmc.utilities.ExceptionUtils;
@@ -13,10 +15,13 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import com.google.common.collect.ImmutableList;
+import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.net.URI;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -98,10 +103,31 @@ public class TestResultDisplayer {
             }
         });
 
+        dialog.addWindowListener(new WindowAdapter() {
+            @Override
+            public void windowClosed(WindowEvent e) {
+                saveCourseDbAndCheckForNewExercisesOrUpdates();
+            }
+
+            @Override
+            public void windowClosing(WindowEvent e) {
+                saveCourseDbAndCheckForNewExercisesOrUpdates();
+            }
+        });
+
         dialog.setModalityType(Dialog.ModalityType.MODELESS);
         dialog.setLocationRelativeTo(null);
         dialog.setAlwaysOnTop(true);
         dialog.setVisible(true);
+    }
+
+    private void saveCourseDbAndCheckForNewExercisesOrUpdates() {
+        Callable<Void> c = () -> {
+            CourseDb.getInstance().save();
+            new CheckForNewExercisesOrUpdates(true, false).run();
+            return null;
+        };
+        BgTask.start("Saving local exercise progress", c);
     }
 
     private void displayFailedTestsMsg(Exercise exercise, SubmissionResult result) {
