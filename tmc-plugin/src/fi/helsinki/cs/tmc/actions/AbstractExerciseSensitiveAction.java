@@ -10,6 +10,9 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
+
+import javax.swing.SwingUtilities;
+
 import org.netbeans.api.project.FileOwnerQuery;
 import org.netbeans.api.project.Project;
 import org.openide.filesystems.FileObject;
@@ -25,7 +28,9 @@ public abstract class AbstractExerciseSensitiveAction extends NodeAction {
         TmcEventBus.getDefault().subscribeDependent(new TmcEventListener() {
             public void receive(CourseDb.ChangedEvent event) throws Throwable {
                 boolean enable = AbstractExerciseSensitiveAction.this.enable(getActivatedNodes());
-                setEnabled(enable);
+                SwingUtilities.invokeLater(() -> {
+                    setEnabled(enable);
+                });
             }
         }, this);
     }
