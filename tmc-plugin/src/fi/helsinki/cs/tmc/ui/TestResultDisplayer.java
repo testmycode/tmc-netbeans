@@ -15,11 +15,9 @@ import fi.helsinki.cs.tmc.data.ResultCollector;
 import fi.helsinki.cs.tmc.langs.domain.RunResult;
 
 import com.google.common.collect.ImmutableList;
-import fi.helsinki.cs.tmc.core.domain.ProgressObserver;
 
 import java.awt.Dialog;
 import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
 import java.net.URI;
@@ -68,38 +66,38 @@ public class TestResultDisplayer {
                 clearTestCaseView();
                 displayError(result.getError());
                 break;
+            case HIDDEN:
+                dialogs.displayMessage("Submission received and saved.\nResults are hidden for this exercise.");
+                break;
         }
     }
 
     private void displaySuccessfulSubmissionMsg(Exercise exercise, final SubmissionResult result) {
         final SuccessfulSubmissionDialog dialog = new SuccessfulSubmissionDialog(exercise, result);
 
-        dialog.addOkListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                List<FeedbackAnswer> answers = dialog.getFeedbackAnswers();
-                if (!answers.isEmpty()) {
-                    Callable<String> task = new TmcServerCommunicationTaskFactory().getFeedbackAnsweringJob(URI.create(result.getFeedbackAnswerUrl()), answers);
-                    BgTask.start("Sending feedback", task, new BgTaskListener<String>() {
-                        @Override
-                        public void bgTaskReady(String result) {
-                        }
+        dialog.addOkListener((ActionEvent e) -> {
+            List<FeedbackAnswer> answers = dialog.getFeedbackAnswers();
+            if (!answers.isEmpty()) {
+                Callable<String> task = new TmcServerCommunicationTaskFactory().getFeedbackAnsweringJob(URI.create(result.getFeedbackAnswerUrl()), answers);
+                BgTask.start("Sending feedback", task, new BgTaskListener<String>() {
+                    @Override
+                    public void bgTaskReady(String result) {
+                    }
 
-                        @Override
-                        public void bgTaskCancelled() {
-                        }
+                    @Override
+                    public void bgTaskCancelled() {
+                    }
 
-                        @Override
-                        public void bgTaskFailed(Throwable ex) {
-                            String msg = "Failed to send feedback :-(\n" + ex.getMessage();
-                            String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
-                            log.log(Level.INFO, msgWithBacktrace);
-                            SwingUtilities.invokeLater(() -> {
-                                dialogs.displayError(msg);
-                            });
-                        }
-                    });
-                }
+                    @Override
+                    public void bgTaskFailed(Throwable ex) {
+                        String msg = "Failed to send feedback :-(\n" + ex.getMessage();
+                        String msgWithBacktrace = msg + "\n" + ExceptionUtils.backtraceToString(ex);
+                        log.log(Level.INFO, msgWithBacktrace);
+                        SwingUtilities.invokeLater(() -> {
+                            dialogs.displayError(msg);
+                        });
+                    }
+                });
             }
         });
 

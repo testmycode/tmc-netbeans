@@ -90,7 +90,7 @@ public class ExerciseSubmitter {
                 // as we might have unlocked new exercises.
                 exercise.setAttempted(true);
 
-                if (result.getStatus() == SubmissionResult.Status.OK) {
+                if (result.getStatus() == SubmissionResult.Status.OK || result.getStatus() == SubmissionResult.Status.HIDDEN) {
                     exercise.setCompleted(true);
                 }
 
