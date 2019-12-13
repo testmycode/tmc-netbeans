@@ -1,0 +1,38 @@
+name: tmcbeans # you probably want to 'snapcraft register <name>'
+base: core18 # the base snap is the execution environment for this snap
+version: '1.3.0' # just for humans, typically '1.2+git' or '1.3.2'
+summary: IDE for students using Test My Code # 79 char long summary
+description: |
+  TMCBeans is a customized version of the NetBeans IDE intended to be used with the Test My Code -system.
+  The Test My Code -system provides automatic assignment evaluation for MOOC-courses found at mooc.fi.
+  The system and most of the courses are created by the University of Helsinki.
+
+  TMCBeans is not affiliated with the Apache Software Foundation.
+
+grade: stable # must be 'stable' to release into candidate/stable channels
+confinement: classic # use 'strict' once you have the right plugs and slots
+
+parts:
+  tmcbeans:
+    plugin: dump
+    source: dist/tmcbeans.zip
+    override-build: |
+      chmod +x tmcbeans/java/maven/bin/mvn
+      find . -type d -name '*SunOS*' | xargs rm -rf
+      find . -type d -name 'i386' | xargs rm -rf
+      find . -type d -name 'Linux-sparc_64' | xargs rm -rf
+      find . -type d -name 'Linux-x86' | xargs rm -rf
+      snapcraftctl build
+  shortcut:
+    plugin: dump
+    source: desktop/
+
+apps:
+  tmcbeans:
+    command: tmcbeans/bin/tmcbeans
+    desktop: tmcbeans.desktop
+    plugs:
+      - desktop
+      - desktop-legacy
+      - wayland
+      - unity7

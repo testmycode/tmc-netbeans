@@ -7,6 +7,7 @@
       <ResourceString bundle="fi/helsinki/cs/tmc/ui/Bundle.properties" key="PastebinDialog.title" replaceFormat="org.openide.util.NbBundle.getMessage({sourceFileName}.class, &quot;{key}&quot;)"/>
     </Property>
     <Property name="locationByPlatform" type="boolean" value="true"/>
+    <Property name="modal" type="boolean" value="true"/>
   </Properties>
   <SyntheticProperties>
     <SyntheticProperty name="formSizePolicy" type="int" value="1"/>
@@ -38,12 +39,10 @@
                       <Component id="cancelButton" min="-2" max="-2" attributes="0"/>
                   </Group>
                   <Group type="102" attributes="0">
-                      <Group type="103" groupAlignment="0" attributes="0">
-                          <Component id="leaveMessageLabel" min="-2" max="-2" attributes="0"/>
-                          <Component id="titleLabel" min="-2" max="-2" attributes="0"/>
-                      </Group>
+                      <Component id="leaveMessageLabel" min="-2" max="-2" attributes="0"/>
                       <EmptySpace min="0" pref="193" max="32767" attributes="0"/>
                   </Group>
+                  <Component id="titleLabel" max="32767" attributes="0"/>
               </Group>
               <EmptySpace max="-2" attributes="0"/>
           </Group>

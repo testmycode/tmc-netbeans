@@ -53,6 +53,6 @@ public class DefaultTailoring implements Tailoring {
 
     @Override
     public String getUpdateCenterUrl() {
-        return "http://update.testmycode.net/tmc-netbeans/updates.xml";
+        return "http://tmcbeans-update.mooc.fi/updates.xml";
     }
 }
