@@ -53,6 +53,6 @@ public class DefaultTailoring implements Tailoring {
 
     @Override
     public String getUpdateCenterUrl() {
-        return "https://tmcbeans-update.mooc.fi/updates.xml";
+        return "https://download.mooc.fi/tmcbeans/updates/updates.xml";
     }
 }
