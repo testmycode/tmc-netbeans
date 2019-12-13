@@ -1,0 +1,10 @@
+[Desktop Entry]
+Name=TMCBeans
+Comment=Integrated Development Environment
+Exec=tmcbeans/bin/tmcbeans
+Icon=tmcbeans/nb/tmcbeans.png
+Categories=Development;IDE;Java;
+Terminal=false
+Type=Application
+Keywords=development;Java;IDE;platform;javafx;javase;
+StartupWMClass=NetBeans IDE 11.1

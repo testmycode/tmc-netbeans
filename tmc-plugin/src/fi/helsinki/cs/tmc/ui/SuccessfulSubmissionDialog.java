@@ -34,6 +34,7 @@ import org.apache.commons.lang3.StringUtils;
 
 import static fi.helsinki.cs.tmc.ui.Boxer.hbox;
 import static fi.helsinki.cs.tmc.ui.Boxer.hglue;
+import java.awt.Dimension;
 
 public class SuccessfulSubmissionDialog extends JDialog {
 
@@ -164,7 +165,15 @@ public class SuccessfulSubmissionDialog extends JDialog {
                 feedbackLabel.setFont(feedbackLabel.getFont().deriveFont(Font.BOLD));
                 getContentPane().add(leftAligned(feedbackLabel));
 
+                int maximumWidth = -1;
                 for (FeedbackQuestionPanel panel : feedbackQuestionPanels) {
+                    final int feedbackQuestionPanelWidth = panel.getPreferredSize().width;
+                    if (feedbackQuestionPanelWidth > maximumWidth) {
+                        maximumWidth = feedbackQuestionPanelWidth;
+                    }
+                }
+                for (FeedbackQuestionPanel panel : feedbackQuestionPanels) {
+                    panel.setPreferredSize(new Dimension(maximumWidth, panel.getPreferredSize().height));
                     getContentPane().add(leftAligned(panel));
                 }
             } else {

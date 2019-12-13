@@ -65,7 +65,7 @@ public class TmcModuleInstall extends ModuleInstall {
                 SnapshotsFacade.start();
 
                 Preferences prefs = NbPreferences.forModule(TmcModuleInstall.class);
-
+                
                 SpecificationVersion currentVersion = getCurrentModuleVersion();
                 SpecificationVersion prevVersion = new SpecificationVersion(prefs.get(PREF_MODULE_VERSION, "0.0.0"));
                 if (!currentVersion.equals(prevVersion)) {

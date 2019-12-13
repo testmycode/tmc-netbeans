@@ -15,6 +15,7 @@ public class PastebinDialog extends javax.swing.JDialog {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
         this.setLocation(screenSize.width / 2 - (this.getWidth() / 2), screenSize.height / 2 - (this.getHeight() / 2));
         this.titleLabel.setText("Creating Pastebin item for " + exercise.getName());
+        this.pack();
     }
 
     public void setOkListener(ActionListener okListener) {
@@ -44,6 +45,7 @@ public class PastebinDialog extends javax.swing.JDialog {
         setDefaultCloseOperation(javax.swing.WindowConstants.DISPOSE_ON_CLOSE);
         setTitle(org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.title")); // NOI18N
         setLocationByPlatform(true);
+        setModal(true);
 
         titleLabel.setFont(titleLabel.getFont().deriveFont(titleLabel.getFont().getStyle() | java.awt.Font.BOLD));
         org.openide.awt.Mnemonics.setLocalizedText(titleLabel, org.openide.util.NbBundle.getMessage(PastebinDialog.class, "PastebinDialog.titleLabel.text")); // NOI18N
@@ -82,10 +84,9 @@ public class PastebinDialog extends javax.swing.JDialog {
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.UNRELATED)
                         .addComponent(cancelButton))
                     .addGroup(layout.createSequentialGroup()
-                        .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.LEADING)
-                            .addComponent(leaveMessageLabel)
-                            .addComponent(titleLabel))
-                        .addGap(0, 193, Short.MAX_VALUE)))
+                        .addComponent(leaveMessageLabel)
+                        .addGap(0, 193, Short.MAX_VALUE))
+                    .addComponent(titleLabel, javax.swing.GroupLayout.DEFAULT_SIZE, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
                 .addContainerGap())
         );
         layout.setVerticalGroup(
