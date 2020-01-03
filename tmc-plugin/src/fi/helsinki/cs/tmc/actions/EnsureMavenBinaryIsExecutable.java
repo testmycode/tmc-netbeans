@@ -10,16 +10,16 @@ import java.util.Set;
 import org.openide.modules.InstalledFileLocator;
 
 public class EnsureMavenBinaryIsExecutable {
-    
+
     private final static Path RELATIVE_MAVEN_LOCATION = Paths.get("java").resolve("maven").resolve("bin").resolve("mvn");
-    
+
     private Path mavenPath;
     private final boolean isUnix;
-    
+
     public EnsureMavenBinaryIsExecutable() {
         this.isUnix = !System.getProperty("os.name").startsWith("Windows");
     }
-    
+
     public void run() {
         if (!isUnix) {
             return;
@@ -37,6 +37,10 @@ public class EnsureMavenBinaryIsExecutable {
             return;
         }
         tryToChmod(mavenPath);
+
+        Path mavenHome = getConfigDirectory();
+        Path extractedMavenLocation = mavenHome.resolve("apache-maven-3.5.4");
+        tryToChmod(extractedMavenLocation.resolve("bin").resolve("mvn"));
     }
 
     private void tryToChmod(Path path) {
@@ -46,6 +50,21 @@ public class EnsureMavenBinaryIsExecutable {
                 permissions.add(PosixFilePermission.OWNER_EXECUTE);
                 Files.setPosixFilePermissions(path, permissions);
             }
-        } catch (IOException ex) { }
+        } catch (IOException ex) {
+        }
+    }
+
+    static Path getConfigDirectory() {
+        Path configPath;
+
+        String configEnv = System.getenv("XDG_CONFIG_HOME");
+
+        if (configEnv != null && configEnv.length() > 0) {
+            configPath = Paths.get(configEnv);
+        } else {
+            configPath = Paths.get(System.getProperty("user.home")).resolve(".config");
+        }
+
+        return configPath.resolve("tmc");
     }
 }
