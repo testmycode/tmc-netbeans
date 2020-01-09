@@ -30,12 +30,20 @@ public class FixUnoptimalSettings {
     public void run() {
         fixMavenDependencyDownloadPolicy();
         fixMavenIndexingPolicy();
+        fixMavenMultiThreadIssue();
     }
 
     private void fixMavenDependencyDownloadPolicy() {
         final String binaryDownloadValue = mavenPrefrences.get("binaryDownload", "");
         if (!binaryDownloadValue.equals("EVERY_OPEN")) {
             mavenPrefrences.put("binaryDownload", "EVERY_OPEN");
+        }
+    }
+    
+    private void fixMavenMultiThreadIssue() {
+        final String setting = mavenPrefrences.get("defaultOptions", "");
+        if (!setting.contains("-T=1 -q")) {
+            mavenPrefrences.put("defaultOptions", "-T=1 -q");
         }
     }
     
